@@ -7,7 +7,7 @@ public class XmppActivityEvent extends DefaultSourcedEvent<XmppActivityEvent.Act
         Active, Idle
     }
 
-    public XmppActivityEvent(ActivityState source) { 
+    public XmppActivityEvent(ActivityState source) {
         super(source);
     }
 }
