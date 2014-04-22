@@ -37,10 +37,9 @@ public class SharingSettings extends LimeProps {
 
     /**
      * Default directory for songs purchased from LWS.
-     */
     public static final File DEFAULT_SAVE_LWS_DIR = new File(getLimeWireRootFolder(),
             "Store Purchased");
-
+	*/
     public static final String DEFAULT_LWS_FILENAME_TEMPLATE = "<artist> - <album> - <track> - <title>";
 
     public static final String DEFAULT_LWS_FOLDER_TEMPLATE = "<artist>" + File.separatorChar + "<album>";

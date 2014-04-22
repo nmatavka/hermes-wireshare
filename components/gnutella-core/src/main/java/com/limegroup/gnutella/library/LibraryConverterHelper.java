@@ -62,8 +62,8 @@ class LibraryConverterHelper {
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
         convertDirectory(SharingSettings.getFileSettingForCategory(Category.DOCUMENT)
                 .get(), null, excludedFolders, excludedFiles, convertedDirectories, false);
-        convertDirectory(OldLibrarySettings.DIRECTORY_FOR_SAVING_LWS_FILES.get(), Collections.singletonList("mp3"),
-                excludedFolders, excludedFiles, convertedDirectories, true);
+        //convertDirectory(OldLibrarySettings.DIRECTORY_FOR_SAVING_LWS_FILES.get(), Collections.singletonList("mp3"),
+        //        excludedFolders, excludedFiles, convertedDirectories, true);
     }
 
     /**

@@ -86,7 +86,8 @@ final class OldLibrarySettings extends LimeProps {
     
     /**
      * Directory for saving songs purchased from LimeWire Store (LWS).
-     */
+     
     public static final FileSetting DIRECTORY_FOR_SAVING_LWS_FILES = FACTORY.createFileSetting(
             "DIRETORY_FOR_SAVING_LWS_FILES", SharingSettings.DEFAULT_SAVE_LWS_DIR).setAlwaysSave(true);
+    */
 }
