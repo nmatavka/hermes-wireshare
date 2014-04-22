@@ -117,6 +117,7 @@ public interface ConnectionManager extends ConnectionAcceptor,
      */
     public boolean isBehindProxy();
     
+    
     /**
      * Tells whether or not we're actively being a supernode to anyone.
      */
