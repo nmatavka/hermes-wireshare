@@ -26,7 +26,7 @@ case ${PLATFORM} in
         OPTS="${OPTS} -Djava.library.path=lib/native/osx";
         OPTS="${OPTS} -Djna.library.path=lib/native/osx";
         OPTS="${OPTS} -Djava.endorsed.dirs=\"\"";
-        OPTS="${OPTS} -Xdock:icon=LimeWire.icns";
+        OPTS="${OPTS} -Xdock:icon=WireShare.icns";
         ADDITIONAL=osx
     ;;
     CYGWIN*)
@@ -86,7 +86,7 @@ export CLASSPATH
 #exit 0
 
 # Minor hack to get proper space quoting in OS X
-# "\"LimeWire CVS\"", "LimeWire\040CVS", and "'LimeWire CVS'" all fail
+# "\"WireShare CVS\"", "WireShare\040CVS", and "'WireShare CVS'" all fail
 case ${PLATFORM} in
     Darwin)
 	export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:lib/native/osx
@@ -95,7 +95,7 @@ case ${PLATFORM} in
 		unzip "lib/native/osx/Growl.framework.zip" -d "lib/native/osx/"
 	fi
 
-        java ${OPTS} -Xdock:name="LimeWire CVS" org.limewire.ui.swing.Main $* ;;
+        java ${OPTS} -Xdock:name="WireShare CVS" org.limewire.ui.swing.Main $* ;;
     *)
         java ${OPTS} org.limewire.ui.swing.Main $* ;;
 esac
