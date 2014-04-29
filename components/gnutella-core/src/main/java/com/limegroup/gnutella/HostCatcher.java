@@ -386,6 +386,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     /**
      * Informs the host catcher that we have (re)connected to the network;
      * reads the host file and starts pinging.
+     * @throws Exception 
      */
     public void connect() {
         // Allow pings to be sent for the next PONG_RANKING_EXPIRE_TIME msecs
@@ -519,11 +520,19 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     private void read() {
         try {
             read(getHostsFile());
+        } catch (FileNotFoundException e) {
+            try {
+            	read(new File(System.getProperty("user.dir") + "/lib/bootstrap"));
+            } catch (IOException ex) {
+            	if(LOG.isInfoEnabled())
+            		LOG.info("Exception reading bootstrap file", ex);
+            }
         } catch (IOException e) {
-            if(LOG.isInfoEnabled())
-                LOG.info("Exception reading host file " + getHostsFile(), e);
+        	if(LOG.isInfoEnabled())
+        		LOG.info("Exception reading host file " + getHostsFile(), e);
         }
     }
+
 
     /**
      * Reads hosts from the specified file. Package access for testing.

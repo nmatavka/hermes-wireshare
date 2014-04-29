@@ -57,7 +57,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.connectionServices = connectionServices;
         String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
         for(String server : servers) {
-            add(URI.create("http://" + server + "/?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion()));
+            add(URI.create(server.trim() + "?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion() + "&net=gnutella"));
         }
         if(LOG.isDebugEnabled())
             LOG.debug("Loaded " + servers.length + " bootstrap servers");
@@ -66,7 +66,16 @@ class TcpBootstrapImpl implements TcpBootstrap {
     boolean add(URI uri) {
         return hosts.add(uri);
     }
-
+    
+    void addServer(String uri, String[] servers) {
+		String[] tmp = new String[servers.length+1];
+		for (int cnt=0 ;cnt<servers.length; cnt++) {
+			tmp[cnt] = servers[cnt].trim();
+		}
+		tmp[servers.length] = uri;
+		ConnectionSettings.BOOTSTRAP_SERVERS.set(tmp);
+    }
+    
     @Override
     public synchronized boolean fetchHosts(Bootstrapper.Listener listener) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
@@ -129,7 +138,17 @@ class TcpBootstrapImpl implements TcpBootstrap {
 	                            LOG.debug("Received " + host);
 	                        endpoints.add(host);
                     	} else if (words[0].equals("U")) {
-                    		// 
+                			boolean NoAdd=false;
+                			String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
+                			for(String server : servers) {
+								if (server.equals(words[1])) {
+									NoAdd=true;
+								}
+                    		}
+                    		if (!NoAdd) {
+                    			add(URI.create(words[1] + "?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion() + "&net=gnutella"));
+                    			addServer(words[1].toString(), servers);
+                    		}
                     	} else if (words[0].equals("I")) { 		
                     		// add code for "I" type information here
                     	} else {

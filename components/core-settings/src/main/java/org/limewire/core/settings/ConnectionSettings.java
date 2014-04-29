@@ -310,7 +310,7 @@ public final class ConnectionSettings extends LimeProps {
      * Setting to not send a multicast bootstrap ping.
      */
     public static final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP = FACTORY.createBooleanSetting(
-            "DO_NOT_MULTICAST_BOOTSTRAP", true);
+            "DO_NOT_MULTICAST_BOOTSTRAP", false);
 
     /**
      * How long to try hosts from gnutella.net before bootstrapping (ms).
