@@ -1,9 +1,9 @@
 #!/bin/bash
 
-LW_ROOT_FOLDER=`dirname $0`
-cd "$LW_ROOT_FOLDER"
+WS_ROOT_FOLDER=`dirname $0`
+cd "$WS_ROOT_FOLDER"
 
-### Run script for LimeWire.
+### Run script for WireShare.
 ### Builds a classpath for all jars & components.
 
 CLASSPATH=
