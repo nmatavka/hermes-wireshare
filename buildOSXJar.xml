@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- top level ant file -->
+<project name="limewire" default="build.jar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+    <echo>Java Version via Ant: ${ant.java.version}</echo> 
+
+    <property name="limewire.home" location="${basedir}"/>
+    <property name="includes" value="*/*/build.xml"/>
+    
+    <property name="aggregate.jar-jarname" value="build/osx/WireShare.jar"/>
+    <property name="aggregate.jar-includes" value="*/*/dist/main/*.jar"/>
+	
+    <import file="components/common/generic-multi-build.xml"/>
+	
+	<target name="build.jar" description="build windows WireShare.jar" depends="aggregate.jar">
+		<jar destfile="build/osx/WireShare.jar"  update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
+			<archives>
+				<zips>
+					<fileset dir="lib/jars" includes="*.jar"/>
+		       		<fileset dir="lib/jars/osx" includes="*.jar"/>
+				</zips>
+			</archives>
+			<manifest>
+		    	<attribute name="Main-Class" value="org.limewire.ui.swing.Main"/>
+				<attribute name="SplashScreen-Image" value="org/limewire/ui/swing/mainframe/resources/splash.png"/>
+		    </manifest>
+		</jar>
+	</target>
+</project>

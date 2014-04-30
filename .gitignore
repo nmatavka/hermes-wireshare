@@ -14,19 +14,7 @@ clover
 junit
 testData
 aggregate.jar
-<<<<<<< HEAD
-/Installer
-/CompileWithAnt.bat
-/MakeBuildJar.bat
-/manifest.mf
-/MoveToBuild.bat
 /WireShare.jar
-=======
-/WireShare.jar
-/Build
-/MoveToBuild.bat
-/manifest.mf
-/CompileWithAnt.bat
-/MakeBuildJar.bat
+/packWinJar.bat
 /Installer
->>>>>>> refs/remotes/WireShare-Fork/master
+
