@@ -5,7 +5,7 @@
     <property name="limewire.home" location="${basedir}"/>
     <property name="includes" value="*/*/build.xml"/>
     
-    <property name="aggregate.jar-jarname" value="LimeWire.jar"/>
+    <property name="aggregate.jar-jarname" value="WireShare.jar"/>
     <property name="aggregate.jar-includes" value="*/*/dist/main/*.jar"/>
 	
     <import file="components/common/generic-multi-build.xml"/>
