@@ -14,6 +14,7 @@
 	
 	<target name="build.jar" description="build windows WireShare.jar" depends="aggregate.jar">
 		<jar destfile="build/osx/WireShare.jar"  update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
+       		<fileset dir="lib/resources/osx"/>
 			<archives>
 				<zips>
 					<fileset dir="lib/jars" includes="*.jar"/>

@@ -14,6 +14,7 @@
 	
 	<target name="build.jar" description="build linux WireShare.jar" depends="aggregate.jar">
 		<jar destfile="build/linux/WireShare.jar" update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
+       		<fileset dir="lib/resources/linux"/>
 			<archives>
 				<zips>
 					<fileset dir="lib/jars" includes="*.jar"/>
