@@ -3,12 +3,13 @@ all
 .classpath
 .metadata
 .cvsignore
+.ivy2
+.settings
 bin
 dist
 eclipse
 target
 build
-.ivy2
 out.txt
 clover
 junit

@@ -12,7 +12,7 @@
 	
     <import file="components/common/generic-multi-build.xml"/>
 	
-	<target name="build.jar" description="build windows WireShare.jar" depends="aggregate.jar">
+	<target name="build.jar" description="build OSX WireShare.jar" depends="aggregate.jar">
 		<jar destfile="build/osx/WireShare.jar"  update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
        		<fileset dir="lib/resources/osx"/>
 			<archives>
@@ -27,4 +27,72 @@
 		    </manifest>
 		</jar>
 	</target>
+
+	<target name="macosx" description="Create an .app package for MacOSX">
+	
+	    <!-- Set this property value to the directory where you 
+	         would like to create the application package -->
+	    <property name="macosx.app" value="build/osx/dist"/>
+	
+	    <!-- Create the release directory -->
+	    <mkdir dir="${macosx.app}"/>
+	
+	    <!-- Set this property value to your application name.
+	         Do not include the .app extension -->
+	    <property name="app.name" value="WireShare"/>
+	
+	    <!-- Set this property value to your MacOSX resource 
+	         directory (where are stored your JavaApplicationStub 
+	         and icon files) -->
+	    <property name="macosx.resrc" value="build/MacOSX"/>
+	
+	    <!-- Set this property value to your application 
+	         resource directory (where are stored your 
+	         libraries, jar, etc.) -->
+	    <property name="app.resrc" value="build"/>
+	
+	    <property name="macosx.stubfile" value="${macosx.resrc}/JavaApplicationStub"/>
+	
+	    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler"/>
+	
+	    <!-- Delete the old .app if it exists -->
+	    <delete dir="${macosx.app}/${app.name}.app" quiet="yes" failonerror="false"/>
+	
+	    <!-- This creates the .app for MacOSX.
+	         The mainclass property must be set to the name of 
+	         the main class to run. Consult the JarBundler 
+	         documentation for more options and information -->
+	    <jarbundler dir="${macosx.app}"
+	                name="${app.name}"
+	    			version="5.6.3.1"
+					shortname="${app.name}"
+	                mainclass="org.limewire.ui.swing.Main"
+	                icon="${macosx.resrc}/${app.name}.icns"
+	                infostring="${app.name}"
+	                stubfile="${macosx.stubfile}"
+	                workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
+	    			jvmversion="1.6+"
+	    			vmoptions="-Djava.net.preferIPV6Addresses=false -ea -da:ca.odell.glazedlists... -Djava.net.preferIPv4stack=true -XX:MaxPermSize=256m -XX:PermSize=256m">
+	        <!-- The below Java properties can be set to get 
+	             a better MacOSX look-and-feel -->
+	        <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+	        <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
+	        <javaproperty name="apple.awt.showGrowBox" value="true"/>
+	
+	        <!-- You may need to set here other java properties 
+	             according to your application needs -->
+	
+	        <!-- Include all the needed jar, libraries and 
+	             resources file to your application package. You
+	             can add as much 'include' directive as you need. 
+	             You can also use the 'exclude' directive. Consult 
+	             the JarBundler documentation -->
+	        <jarfileset dir=".">
+	            <include name="${macosx.resrc}/${app.name}.icns" />
+	            <include name="${app.resrc}/*.jar" />
+	        	<include name="lib/native/osx"/>
+	        </jarfileset>
+	    </jarbundler>
+	</target>
 </project>
+	
