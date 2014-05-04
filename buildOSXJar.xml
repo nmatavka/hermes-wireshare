@@ -21,10 +21,10 @@
 		       		<fileset dir="lib/jars/osx" includes="*.jar"/>
 				</zips>
 			</archives>
-			<!--<manifest>
+			<manifest>
 		    	<attribute name="Main-Class" value="org.limewire.ui.swing.Main"/>
 				<attribute name="SplashScreen-Image" value="org/limewire/ui/swing/mainframe/resources/splash.png"/>
-		    </manifest> -->
+		    </manifest>
 		</jar>
 	</target>
 
@@ -65,37 +65,49 @@
 	         the main class to run. Consult the JarBundler 
 	         documentation for more options and information -->
 	    <jarbundler dir="${macosx.app}"
-					name="${app.name}"
-					version="5.6.3.1"
-					shortname="${app.name}"
-					jar="${app.resrc}/WireShare.jar"
-					mainclass="org.limewire.ui.swing.Main"
-					icon="${macosx.resrc}/${app.name}.icns"
-					infostring="${app.name}"
-					stubfile="${macosx.stubfile}"
-					workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
-					jvmversion="1.6+"
-					vmoptions="-Djava.net.preferIPV6Addresses=false -ea -da:ca.odell.glazedlists... -Djava.net.preferIPv4stack=true -XX:MaxPermSize=256m -XX:PermSize=256m">
+			name="${app.name}"
+			version="5.6.3.1"
+			shortname="${app.name}"
+			jar="${app.resrc}/WireShare.jar"
+			mainclass="org.limewire.ui.swing.Main"
+			icon="${macosx.resrc}/${app.name}.icns"
+			infostring="${app.name}"
+			stubfile="${macosx.stubfile}"
+			workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
+	    	extraclasspath="/System/Library/Java"
+	    	signature="WSHR"
+	    	jvmversion="1.6+"
+			vmoptions="-ea -da:ca.odell.glazedlists... -XX:MaxPermSize=256m -XX:PermSize=256m">
 
-	    	<!-- The below Java properties can be set to get 
-	             a better MacOSX look-and-feel -->
+	    	<!-- The below Java properties can be set to get a better MacOSX look-and-feel -->
 	        <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
 	        <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
 	        <javaproperty name="apple.awt.showGrowBox" value="true"/>
-	
-	        <!-- You may need to set here other java properties 
-	             according to your application needs -->
+	    	
+	        <!-- You may need to set here other java properties according to your application needs -->
+	    	<javaproperty name="java.net.preferIPV6Addresses" value="false"/>
+	    	<javaproperty name="java.net.preferIPv4stack" value="true"/>
+	    	<javaproperty name="org.apache.commons.logging.Log" value="org.apache.commons.logging.impl.NoOpLog"/>
+	    	<javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources/Java"/>
+	    	<javaproperty name="jna.library.path" value="$APP_PACKAGE/Contents/Resources/Java"/>
 	
 	        <!-- Include all the needed jar, libraries and 
 	             resources file to your application package. You
 	             can add as much 'include' directive as you need. 
 	             You can also use the 'exclude' directive. Consult 
 	             the JarBundler documentation -->
-	    	<resourcefileset dir="lib/native/osx"/>
-	    	<resourcefileset dir=".">
+	    	<javafilelist dir="build/osx" files="WireShare.jar"/>
+	    	<javafileset dir="lib/native/osx">
+	    		<exclude name="WireShare.icns"/>
+	    	</javafileset>
+	    	<javafileset dir=".">
 	    		<include name="lib/WSHome.xhtml"/>
+	    		<include name="lib/bootstrap"/>
 	    		<include name="lib/img/TPB.jpg"/>
 	    		<include name="lib/img/WireShare-Logo.png"/>
+	    	</javafileset>
+	    	<resourcefileset dir="lib/native/osx">
+	    		<include name="*.icns"/>
 	    	</resourcefileset>
 	    </jarbundler>
 	</target>
