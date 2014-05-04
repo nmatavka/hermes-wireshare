@@ -66,14 +66,16 @@
 	                name="${app.name}"
 	    			version="5.6.3.1"
 					shortname="${app.name}"
-	                mainclass="org.limewire.ui.swing.Main"
+	    			jar="${app.resrc}/WireShare.jar"
+					mainclass="org.limewire.ui.swing.Main"
 	                icon="${macosx.resrc}/${app.name}.icns"
 	                infostring="${app.name}"
 	                stubfile="${macosx.stubfile}"
 	                workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
 	    			jvmversion="1.6+"
 	    			vmoptions="-Djava.net.preferIPV6Addresses=false -ea -da:ca.odell.glazedlists... -Djava.net.preferIPv4stack=true -XX:MaxPermSize=256m -XX:PermSize=256m">
-	        <!-- The below Java properties can be set to get 
+
+	    	<!-- The below Java properties can be set to get 
 	             a better MacOSX look-and-feel -->
 	        <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
 	        <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
@@ -87,11 +89,7 @@
 	             can add as much 'include' directive as you need. 
 	             You can also use the 'exclude' directive. Consult 
 	             the JarBundler documentation -->
-	        <jarfileset dir=".">
-	            <include name="${macosx.resrc}/${app.name}.icns" />
-	            <include name="${app.resrc}/*.jar" />
-	        	<include name="lib/native/osx"/>
-	        </jarfileset>
+	    	<resourcefileset dir="lib/native/osx"/>
 	    </jarbundler>
 	</target>
 </project>

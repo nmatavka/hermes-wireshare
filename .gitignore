@@ -19,3 +19,4 @@ aggregate.jar
 /packWinJar.bat
 /Installer
 
+/ant.build.osx.bat
