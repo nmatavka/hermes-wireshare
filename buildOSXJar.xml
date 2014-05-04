@@ -21,10 +21,10 @@
 		       		<fileset dir="lib/jars/osx" includes="*.jar"/>
 				</zips>
 			</archives>
-			<manifest>
+			<!--<manifest>
 		    	<attribute name="Main-Class" value="org.limewire.ui.swing.Main"/>
 				<attribute name="SplashScreen-Image" value="org/limewire/ui/swing/mainframe/resources/splash.png"/>
-		    </manifest>
+		    </manifest> -->
 		</jar>
 	</target>
 
@@ -75,10 +75,7 @@
 					stubfile="${macosx.stubfile}"
 					workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
 					jvmversion="1.6+"
-					vmoptions="-Djava.net.preferIPV6Addresses=false 
-			    	-ea -da:ca.odell.glazedlists... 
-			    	-Djava.net.preferIPv4stack=true 
-			    	-XX:MaxPermSize=256m -XX:PermSize=256m">
+					vmoptions="-Djava.net.preferIPV6Addresses=false -ea -da:ca.odell.glazedlists... -Djava.net.preferIPv4stack=true -XX:MaxPermSize=256m -XX:PermSize=256m">
 
 	    	<!-- The below Java properties can be set to get 
 	             a better MacOSX look-and-feel -->
@@ -95,6 +92,11 @@
 	             You can also use the 'exclude' directive. Consult 
 	             the JarBundler documentation -->
 	    	<resourcefileset dir="lib/native/osx"/>
+	    	<resourcefileset dir=".">
+	    		<include name="lib/WSHome.xhtml"/>
+	    		<include name="lib/img/TPB.jpg"/>
+	    		<include name="lib/img/WireShare-Logo.png"/>
+	    	</resourcefileset>
 	    </jarbundler>
 	</target>
 </project>
