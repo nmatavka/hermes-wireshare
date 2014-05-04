@@ -53,7 +53,9 @@
 	
 	    <property name="macosx.stubfile" value="${macosx.resrc}/JavaApplicationStub"/>
 	
-	    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler"/>
+	    <taskdef name="jarbundler"
+				classname="net.sourceforge.jarbundler.JarBundler"
+				classpath="lib/jars/ant/jarbundler-2.3.0.jar"/>
 	
 	    <!-- Delete the old .app if it exists -->
 	    <delete dir="${macosx.app}/${app.name}.app" quiet="yes" failonerror="false"/>
@@ -63,17 +65,20 @@
 	         the main class to run. Consult the JarBundler 
 	         documentation for more options and information -->
 	    <jarbundler dir="${macosx.app}"
-	                name="${app.name}"
-	    			version="5.6.3.1"
+					name="${app.name}"
+					version="5.6.3.1"
 					shortname="${app.name}"
-	    			jar="${app.resrc}/WireShare.jar"
+					jar="${app.resrc}/WireShare.jar"
 					mainclass="org.limewire.ui.swing.Main"
-	                icon="${macosx.resrc}/${app.name}.icns"
-	                infostring="${app.name}"
-	                stubfile="${macosx.stubfile}"
-	                workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
-	    			jvmversion="1.6+"
-	    			vmoptions="-Djava.net.preferIPV6Addresses=false -ea -da:ca.odell.glazedlists... -Djava.net.preferIPv4stack=true -XX:MaxPermSize=256m -XX:PermSize=256m">
+					icon="${macosx.resrc}/${app.name}.icns"
+					infostring="${app.name}"
+					stubfile="${macosx.stubfile}"
+					workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
+					jvmversion="1.6+"
+					vmoptions="-Djava.net.preferIPV6Addresses=false 
+			    	-ea -da:ca.odell.glazedlists... 
+			    	-Djava.net.preferIPv4stack=true 
+			    	-XX:MaxPermSize=256m -XX:PermSize=256m">
 
 	    	<!-- The below Java properties can be set to get 
 	             a better MacOSX look-and-feel -->
