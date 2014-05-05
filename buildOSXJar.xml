@@ -14,7 +14,9 @@
 	
 	<target name="build.jar" description="build OSX WireShare.jar" depends="aggregate.jar">
 		<jar destfile="build/osx/WireShare.jar"  update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
-       		<fileset dir="lib/resources/osx"/>
+       		<fileset dir="lib/resources/osx">
+       			<include name="xulrunner-macosx-i386.zip"/>
+       		</fileset>
 			<archives>
 				<zips>
 					<fileset dir="lib/jars" includes="*.jar"/>
@@ -62,8 +64,7 @@
 	
 	    <!-- This creates the .app for MacOSX.
 	         The mainclass property must be set to the name of 
-	         the main class to run. Consult the JarBundler 
-	         documentation for more options and information -->
+	         the main class to run. -->
 	    <jarbundler dir="${macosx.app}"
 			name="${app.name}"
 			version="5.6.3.1"
@@ -76,6 +77,7 @@
 			workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
 	    	extraclasspath="/System/Library/Java"
 	    	signature="WSHR"
+	    	bundleid="com.limegroup.gnutella"
 	    	jvmversion="1.6+"
 			vmoptions="-ea -da:ca.odell.glazedlists... -XX:MaxPermSize=256m -XX:PermSize=256m">
 
@@ -91,24 +93,31 @@
 	    	<javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources/Java"/>
 	    	<javaproperty name="jna.library.path" value="$APP_PACKAGE/Contents/Resources/Java"/>
 	
-	        <!-- Include all the needed jar, libraries and 
-	             resources file to your application package. You
-	             can add as much 'include' directive as you need. 
-	             You can also use the 'exclude' directive. Consult 
-	             the JarBundler documentation -->
+	        <!-- Include all the needed files to your application package. -->
 	    	<javafilelist dir="build/osx" files="WireShare.jar"/>
-	    	<javafileset dir="lib/native/osx">
-	    		<exclude name="WireShare.icns"/>
-	    	</javafileset>
+	    	<javafileset dir="lib/native/osx"/>
 	    	<javafileset dir=".">
 	    		<include name="lib/WSHome.xhtml"/>
 	    		<include name="lib/bootstrap"/>
 	    		<include name="lib/img/TPB.jpg"/>
 	    		<include name="lib/img/WireShare-Logo.png"/>
 	    	</javafileset>
-	    	<resourcefileset dir="lib/native/osx">
+	    	<resourcefileset dir="lib/resources/osx">
+	    		<include name="*.lproj/*"/>
 	    		<include name="*.icns"/>
 	    	</resourcefileset>
+	    	
+	        <documenttype name="Packaged Media File"
+	                      extensions="pmf" 
+	                      iconFile="pmf.icns"
+	                      role="Viewer"/>
+	    	
+	        <documenttype extensions="torrent"
+	    	mimetypes="application/x-bittorrent"
+	    	name="BitTorrent Metainfo" 
+	    	iconFile="torrent.icns"
+	    	role="Editor"/>
+
 	    </jarbundler>
 	</target>
 </project>
