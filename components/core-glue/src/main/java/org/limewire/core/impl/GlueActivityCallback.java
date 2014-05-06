@@ -158,7 +158,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void installationCorrupted() {
-        MessageService.showError(I18nMarker.marktr("<html><b>Your LimeWire may have been corrupted by a virus or trojan!</b></html>"));
+        MessageService.showError(I18nMarker.marktr("<html><b>Your WireShare may have been corrupted by a virus or trojan!</b></html>"));
     }
 
     @Override
