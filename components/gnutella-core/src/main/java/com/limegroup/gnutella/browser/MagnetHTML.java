@@ -87,7 +87,7 @@ public class MagnetHTML {
        String ret= 
          "<html>"+
          "<head>"+
-         "<title>LimeWire Magnet Descriptions</title>"+
+         "<title>WireShare Magnet Descriptions</title>"+
          "<style type=\"text/css\">"+
          "<!--"+
          ".text {"+
@@ -121,7 +121,7 @@ public class MagnetHTML {
          "</head>"+
          "<body bgcolor=\"#666666\">"+
          "<span class=\"header\"><center>"+
-         "  LimeWire Magnet Details "+
+         "  WireShare Magnet Details "+
          "</center></span><br>"+
          "<table border=\"0\" cellpadding=\"5\" cellspacing=\"1\" bgcolor=\"#999999\" align=\"center\">";
 

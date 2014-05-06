@@ -157,12 +157,12 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
             String subText = null;
             if (isUserOffline()) {
                 if(state == BrowseState.NO_FRIENDS_SHARING){
-                subText = I18n.tr("When you sign on to LimeWire, your friends' files will appear here.");
+                subText = I18n.tr("When you sign on to WireShare, your friends' files will appear here.");
                 } else {//BrowseState.OFFLINE
-                    subText = I18n.tr("When you sign on to LimeWire, your friend's files will appear here.");
+                    subText = I18n.tr("When you sign on to WireShare, your friend's files will appear here.");
                 }
             } else {
-                subText = I18n.tr("When they sign on to LimeWire and share with you, their files will appear here.");
+                subText = I18n.tr("When they sign on to WireShare and share with you, their files will appear here.");
             }
                 
             JLabel subMessage = new JLabel(subText);
@@ -216,14 +216,14 @@ public class BrowseFailedMessagePanel extends JPanel implements Disposable{
             if (areFriendsSignedOnToLimeWire()){
                 return I18n.tr("No friends are sharing with you");
             } 
-            return I18n.tr("No friends are on LimeWire");
+            return I18n.tr("No friends are on WireShare");
         }
         
         if (state == BrowseState.OFFLINE) {
             if (isSingleBrowse()) {
-                return I18n.tr("{0} is not signed on to LimeWire.", getSingleFriendName());
+                return I18n.tr("{0} is not signed on to WireShare.", getSingleFriendName());
             } else {
-                return I18n.tr("These people are not signed on to LimeWire.");
+                return I18n.tr("These people are not signed on to WireShare.");
             }
         }
 

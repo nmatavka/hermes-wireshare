@@ -29,7 +29,7 @@ class GrowlNotifier implements TrayNotifier {
 
     @Override
 	public void showMessage(Notification notification) {
-        String title = notification.getTitle() != null ? notification.getTitle() : I18n.tr("LimeWire 5"); 
+        String title = notification.getTitle() != null ? notification.getTitle() : I18n.tr("WireShare 5"); 
         wrapper.notify(NOTIFY_USER, title, notification.getMessage());
     }
     

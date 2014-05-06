@@ -39,7 +39,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 /**
- * LimeMessageDispatcher re-routes DHTMessage(s) through the LimeWire core so
+ * LimeMessageDispatcher re-routes DHTMessage(s) through the WireShare core so
  * that all communcation can be done over a single network port.
  */
 public class LimeMessageDispatcherImpl extends MessageDispatcher implements

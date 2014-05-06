@@ -45,7 +45,7 @@ public class LocalAcceptor implements Service {
      */
     public void start() {
         if (!bind(FIRST_PORT)) {
-            MessageService.showError(I18nMarker.marktr("LimeWire was unable to set up a port to listen for incoming connections. Some features of LimeWire may not work as expected."));
+            MessageService.showError(I18nMarker.marktr("WireShare was unable to set up a port to listen for incoming connections. Some features of WireShare may not work as expected."));
         }
     }
     

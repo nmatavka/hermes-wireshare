@@ -176,15 +176,15 @@ public class AVInfoPanel extends JPanel {
         switch(reason) {
         case NO_DEFINITIONS:
             heading = I18n.tr("Can't Scan Yet");
-            message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            message = I18n.tr("{0} could not be inspected because the virus scanner is still downloading its first set of virus definitions.  WireShare Anti-Virus protection is powered by AVG.", item.getFileName());
             break;            
         case NOT_SUPPORTED:
             heading = I18n.tr("Unable to Scan");
-            message = I18n.tr("{0} could not be inspected because the virus scanner cannot be loaded.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            message = I18n.tr("{0} could not be inspected because the virus scanner cannot be loaded.  WireShare Anti-Virus protection is powered by AVG.", item.getFileName());
             break;            
         default:
             heading = I18n.tr("Unable to Scan");
-            message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  LimeWire Anti-Virus protection is powered by AVG.", item.getFileName());
+            message = I18n.tr("{0} could not be inspected due to a problem with the virus scanner.  WireShare Anti-Virus protection is powered by AVG.", item.getFileName());
             break;            
         }        
 

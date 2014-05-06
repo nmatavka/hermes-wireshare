@@ -46,7 +46,7 @@ import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * The controller for the LimeWire DHT. A node should connect to the DHT only 
+ * The controller for the WireShare DHT. A node should connect to the DHT only 
  * if it has previously been designated as capable by the <tt>NodeAssigner</tt> 
  * or if it is forced to. Once the node is a DHT node 
  * (if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true) 

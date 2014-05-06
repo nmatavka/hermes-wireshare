@@ -11,7 +11,7 @@ import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Stores all the LimeAssociationOptions that LimeWire is set to use.
+ * Stores all the LimeAssociationOptions that WireShare is set to use.
  */
 public class ShellAssociationManager {
 
@@ -44,7 +44,7 @@ public class ShellAssociationManager {
             String message = getMessage(torrentsStolen, magnetsStolen);
 
             final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message, I18n
-                    .tr("Warn me when other programs take LimeWire associations"),
+                    .tr("Warn me when other programs take WireShare associations"),
                     SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
             yesNoCheckBoxDialog.setLocationRelativeTo(frame);
             yesNoCheckBoxDialog.addActionListener(new ActionListener() {
@@ -74,14 +74,14 @@ public class ShellAssociationManager {
     private String getMessage(boolean torrentsStolen, boolean magnetsStolen) {
         if (torrentsStolen && magnetsStolen) {
             return I18n
-                    .tr("Torrent files and magnet links are no longer associated with LimeWire. Would you like LimeWire to re-associate them?");
+                    .tr("Torrent files and magnet links are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
         } else if (torrentsStolen) {
             return I18n
-                    .tr("Torrent files are no longer associated with LimeWire. Would you like LimeWire to re-associate them?");
+                    .tr("Torrent files are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
 
         } else {
             return I18n
-                    .tr("Magnet links are no longer associated with LimeWire. Would you like LimeWire to re-associate them?");
+                    .tr("Magnet links are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
         }
     }
 

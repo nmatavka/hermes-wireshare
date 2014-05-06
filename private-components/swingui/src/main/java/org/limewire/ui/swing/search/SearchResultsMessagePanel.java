@@ -30,8 +30,8 @@ import org.limewire.ui.swing.util.SwingUtils;
  * A message panel that appears (sometimes) above the search results.
  * If the user tries to start a search before the application
  * has finished loading or before it has fully connected, the messages
- * "LimeWire will start your search right after it finishes loading." and
- * "You might not receive many results until LimeWire is fully connected."
+ * "WireShare will start your search right after it finishes loading." and
+ * "You might not receive many results until WireShare is fully connected."
  * will be shown here.  It also may show a hint to the user regarding how to 
  * switch to the classic search results view.
  */
@@ -40,7 +40,7 @@ class SearchResultsMessagePanel extends JXPanel implements SettingListener {
     /**
      * This enumeration indicates which type of message should be shown.
      * NONE shows no message at all.
-     * CONNECTING_TO_ULTRAPEERS shows the message "You might not receive many results until LimeWire is fully connected"
+     * CONNECTING_TO_ULTRAPEERS shows the message "You might not receive many results until WireShare is fully connected"
      * CLASSIC_SEARCH_RESULTS_HINT shows an arrow pointing to the button that switches to the classic table view of search results.
      */
     public enum MessageType {
@@ -86,7 +86,7 @@ class SearchResultsMessagePanel extends JXPanel implements SettingListener {
     public void setMessageType(MessageType messageType) {
         switch (messageType) {
         case CONNECTING_TO_ULTRAPEERS:
-            getMessagePanel().setMessage(I18n.tr("You might not receive many results until LimeWire is fully connected"));
+            getMessagePanel().setMessage(I18n.tr("You might not receive many results until WireShare is fully connected"));
             installPanel(getMessagePanel());
             break;
             

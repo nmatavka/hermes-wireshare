@@ -279,9 +279,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         downloadsReadFromDisk = true;
         
         if(failedAll) {
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+            MessageService.showError(I18nMarker.marktr("Sorry, WireShare couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When WireShare finds a source for the file, the download will pick up where it left off."));
         } else if(failedSome) {
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+            MessageService.showError(I18nMarker.marktr("Sorry, WireShare couldn't read some of your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When WireShare finds a source for the file, the download will pick up where it left off."));
         }
     }
     

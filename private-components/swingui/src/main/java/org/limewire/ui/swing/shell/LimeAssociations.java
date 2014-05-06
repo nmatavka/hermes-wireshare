@@ -80,7 +80,7 @@ public class LimeAssociations {
                     // if we have a string that opens a file, register torrents
                     if (fileOpener != null) {
                         ShellAssociation file = new FileTypeAssociation("torrent",
-                                "application/x-bittorrent", fileOpener, "open", "LimeWire Torrent",
+                                "application/x-bittorrent", fileOpener, "open", "WireShare Torrent",
                                 fileIcon);
                         LimeAssociationOption torrent = new LimeAssociationOption(file, ".torrent",
                                 I18n.tr("\".torrent\" files"));

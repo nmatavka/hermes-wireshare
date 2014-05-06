@@ -118,7 +118,7 @@ public class GuiCallbackImpl implements GuiCallback {
     public boolean promptAboutTorrentWithBannedExtensions(Torrent torrent,
             Set<String> bannedExtensions) {
         String extensions = StringUtils.explode(bannedExtensions, ", ");
-        String warning = I18n.tr("This torrent contains files with the following extensions, which LimeWire is configured not to download: {0}.", extensions);
+        String warning = I18n.tr("This torrent contains files with the following extensions, which WireShare is configured not to download: {0}.", extensions);
         String prompt = I18n.tr("Downloading this torrent could damage your computer. Are you sure you want to continue?");
         final MultiLineLabel label = new MultiLineLabel(warning + "\n\n" + prompt, 400);
         final String title = I18n.tr("Warning: {0}", torrent.getName());

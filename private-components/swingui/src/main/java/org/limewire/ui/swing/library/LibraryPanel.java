@@ -287,7 +287,7 @@ public class LibraryPanel extends JPanel {
                             
                             // gives feedback to Windows 7 users when headphone/speaker jack is not plugged in.
                             if(state == PlayerState.NO_SOUND_DEVICE && OSUtils.isWindows7()) {
-                                FocusJOptionPane.showConfirmDialog(null, I18n.tr("LimeWire could not play this file. There may not be a sound device installed on your computer or your speakers may not be plugged in."), I18n.tr("Problem Playing File"), JOptionPane.OK_CANCEL_OPTION); 
+                                FocusJOptionPane.showConfirmDialog(null, I18n.tr("WireShare could not play this file. There may not be a sound device installed on your computer or your speakers may not be plugged in."), I18n.tr("Problem Playing File"), JOptionPane.OK_CANCEL_OPTION); 
                             }
                         }
                     });

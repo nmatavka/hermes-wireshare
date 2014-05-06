@@ -124,7 +124,7 @@ class Line {
      *         loaded properties. This is useful only to handle the case where
      *         translators forget to remove the "#? " leading mark in front of
      *         their contributed translations, and avoids manual editing of
-     *         these incoming files by the LimeWire developers team.
+     *         these incoming files by the WireShare developers team.
      */
     boolean hadExtraComment() {
         return this.extraComment;

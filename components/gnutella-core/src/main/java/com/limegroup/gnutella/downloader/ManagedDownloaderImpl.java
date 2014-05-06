@@ -180,7 +180,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     *
     * The download can finish in one of the following states: - COMPLETE
     * (download completed just fine) - ABORTED (user pressed stopped at some
-    * point) - DISK_PROBLEM (LimeWire couldn't manipulate the file) -
+    * point) - DISK_PROBLEM (WireShare couldn't manipulate the file) -
     * CORRUPT_FILE (the file was corrupt) - INVALID (content authority didn't
     * allow the transfer)
     *
@@ -672,7 +672,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Verifies the integrity of the RemoteFileDesc set.
      * <p/>
-     * At one point in time, LimeWire somehow allowed files with different
+     * At one point in time, WireShare somehow allowed files with different
      * SHA1s to be placed in the same ManagedDownloader.  This breaks
      * the invariants of the current ManagedDownloader, so we must
      * remove the extraneous RFDs.

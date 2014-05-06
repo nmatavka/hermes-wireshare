@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.shell;
 
 /**
- * Links a ShellAssociation with LimeWire settings, name & description, in order
+ * Links a ShellAssociation with WireShare settings, name & description, in order
  * to have a single object that can display the association and determine if it
  * should be registered or not.
  */

@@ -6,7 +6,7 @@ package org.limewire.core.api.xmpp;
  */
 public interface XMPPResourceFactory {
     /**
-     * Returns a string that uniquely identifies the LimeWire instance.
+     * Returns a string that uniquely identifies the WireShare instance.
      */
     public String getResource();
 }

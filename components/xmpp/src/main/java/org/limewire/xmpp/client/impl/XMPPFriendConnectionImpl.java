@@ -209,7 +209,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 org.jivesoftware.smack.packet.Presence.Type.available);
         presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
         if (jabberSettings.advertiseLimeWireStatus()) {
-            presence.setStatus("on LimeWire");
+            presence.setStatus("on WireShare");
         }
         return presence;
     }

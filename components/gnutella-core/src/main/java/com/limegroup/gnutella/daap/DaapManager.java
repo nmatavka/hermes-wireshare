@@ -63,7 +63,7 @@ import de.kapsi.net.daap.Transaction;
 
 /**
  * This class handles the mDNS registration and acts as an
- * interface between LimeWire and DAAP.
+ * interface between WireShare and DAAP.
  */
 @EagerSingleton
 public class DaapManager {
@@ -124,7 +124,7 @@ public class DaapManager {
                         DaapManager.this.start();
                     } catch (IOException err) {
                         LOG.debug("error starting DAAP", err);
-                        MessageService.showError(I18nMarker.marktr("LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under Advanced -> Files -> iTunes."));
+                        MessageService.showError(I18nMarker.marktr("WireShare was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under Advanced -> Files -> iTunes."));
                         DaapSettings.DAAP_ENABLED.setValue(false);
                     }
                 }
@@ -937,7 +937,7 @@ public class DaapManager {
     }
 
     /**
-     * A LimeWire specific implementation of DaapConfig.
+     * A WireShare specific implementation of DaapConfig.
      */
     private final static class LimeConfig extends DaapConfig {
 

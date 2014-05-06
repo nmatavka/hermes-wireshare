@@ -954,7 +954,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // For the most part clients send 416 when they have other
                 // ranges
                 // that may match the clients need. From LimeWire 4.0.6 onwards
-                // LimeWire will treat 503s to mean either busy or queued BUT
+                // WireShare will treat 503s to mean either busy or queued BUT
                 // NOT partial range available.
 
                 // if( _rfd.isPartialSource() )
