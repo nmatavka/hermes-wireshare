@@ -33,7 +33,7 @@ JNIEXPORT void JNICALL OS_NATIVE(SetLoginStatusNative)
     NSMutableArray *loginItems;
     NSDictionary *appDict;
     NSEnumerator *appEnum;
-    NSString *agentAppPath = @"/Applications/LimeWire.app";
+    NSString *agentAppPath = @"/Applications/WireShare.app";
     
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
