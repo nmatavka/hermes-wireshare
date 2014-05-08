@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: WireShare Client\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-07-26 11:30-0400\n"
-"PO-Revision-Date: 2010-07-15 21:23+0000\n"
-"Last-Translator: Yiğit Ateş <yigitates52@gmail.com>\n"
+"PO-Revision-Date: 2014-05-07 19:17+0100\n"
+"Last-Translator: \n"
 "Language-Team: TR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Launchpad-Export-Date: 2010-07-27 03:32+0000\n"
-"X-Generator: Launchpad (build Unknown)\n"
+"X-Generator: Poedit 1.5.4\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:101
@@ -114,22 +114,21 @@ msgstr "Kişilere bağlanma sorunu"
 
 #. *
 #. * The DownloadItem is not in an error state.
-#. 
+#.
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:46
 msgid "No problems."
 msgstr "Sorun yok."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
-"<html><b>Your WireShare may have been corrupted by a virus or "
-"trojan!</b><br><br>Please visit <a "
-"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
-"the newest official version of LimeWire.</html>"
+"<html><b>Your WireShare may have been corrupted by a virus or trojan!</"
+"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
+"limewire.com</a> and download the newest official version of LimeWire.</html>"
 msgstr ""
-"<html><b>WireShare bir virüs ya da truva atı tarafıdan zarar görmüş "
-"olabilir!</b><br><br>Son çıkan resmi WireShare sürümünü indirmek için lütfen  "
-"<a href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini "
-"ziyaret edin.</html>"
+"<html><b>WireShare bir virüs ya da truva atı tarafıdan zarar görmüş olabilir!"
+"</b><br><br>Son çıkan resmi WireShare sürümünü indirmek için lütfen  <a href="
+"\"http://www.limewire.com/corrupted\">www.limewire.com</a> adresini ziyaret "
+"edin.</html>"
 
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
@@ -174,8 +173,8 @@ msgid ""
 "WireShare was unable to set up a port to listen for incoming connections. "
 "Some features of WireShare may not work as expected."
 msgstr ""
-"WireShare gelen bağlantıları dinlemek için bir bağlantı noktası oluşturamadı. "
-"Bazı WireShare özellikleri beklendiği gibi çalışmayabilir."
+"WireShare gelen bağlantıları dinlemek için bir bağlantı noktası "
+"oluşturamadı. Bazı WireShare özellikleri beklendiği gibi çalışmayabilir."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:407
 msgid "Connection Listener"
@@ -216,22 +215,24 @@ msgstr "İndirme Yönetimi"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:291
 msgid ""
 "Sorry, WireShare couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When WireShare finds a source for the "
-"file, the download will pick up where it left off."
+"clicking 'Try Again' on the downloads.  When WireShare finds a source for "
+"the file, the download will pick up where it left off."
 msgstr ""
-"Üzgünüz, WireShare önceki indirmelerinizi okuyamadı. İndirilenler bölümündeki "
-"'Tekrar Dene' düğmesine tıklayarak yeniden başlatabilirsiniz. LimeWire, "
-"dosya için kaynak bulduğunda kaldığı yerden indirmeye devam edecektir."
+"Üzgünüz, WireShare önceki indirmelerinizi okuyamadı. İndirilenler "
+"bölümündeki 'Tekrar Dene' düğmesine tıklayarak yeniden başlatabilirsiniz. "
+"LimeWire, dosya için kaynak bulduğunda kaldığı yerden indirmeye devam "
+"edecektir."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:293
 msgid ""
 "Sorry, WireShare couldn't read some of your old downloads.  You can restart "
-"them by clicking 'Try Again' on the downloads.  When WireShare finds a source "
-"for the file, the download will pick up where it left off."
+"them by clicking 'Try Again' on the downloads.  When WireShare finds a "
+"source for the file, the download will pick up where it left off."
 msgstr ""
-"Üzgünüz, WireShare önceki indirmelerinizi okuyamadı. İndirilenler bölümündeki "
-"'Tekrar Dene' düğmesine tıklayarak yeniden başlatabilirsiniz. LimeWire, "
-"dosya için kaynak bulduğunda kaldığı yerden indirmeye devam edecektir."
+"Üzgünüz, WireShare önceki indirmelerinizi okuyamadı. İndirilenler "
+"bölümündeki 'Tekrar Dene' düğmesine tıklayarak yeniden başlatabilirsiniz. "
+"LimeWire, dosya için kaynak bulduğunda kaldığı yerden indirmeye devam "
+"edecektir."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -372,7 +373,7 @@ msgstr "Başlık"
 #. *
 #. * Variables for displaying substitutable values, visual form
 #. * is converted to the selected language
-#. 
+#.
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:50
@@ -660,17 +661,17 @@ msgstr ""
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
-"WireShare was unable to download the selected file because another program is "
-"using the file. Please close the other program and retry the download."
+"WireShare was unable to download the selected file because another program "
+"is using the file. Please close the other program and retry the download."
 msgstr ""
 "Dosya başka bir program tarafından kullanıldığı için, WireShare seçili "
 "dosyayı indiremedi. Lütfen diğer programı kapatıp indirmeyi yeniden deneyin."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
-"WireShare was unable to create or continue writing an incomplete file for the "
-"selected download because you do not have permission to write files to the "
-"incomplete folder. To continue using LimeWire, please choose a different "
+"WireShare was unable to create or continue writing an incomplete file for "
+"the selected download because you do not have permission to write files to "
+"the incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
 "Tamamlanmamış klasöre dosya yazma izniniz bulunmadığından, WireShare seçili "
@@ -778,12 +779,13 @@ msgstr "Dahili Hata"
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:601
 msgid ""
 "WireShare was unable to connect to the bug server in order to send the below "
-"bug report. For further help and to aid with debugging, please visit "
-"www.limewire.com and click 'Support'. Thank you."
+"bug report. For further help and to aid with debugging, please visit www."
+"limewire.com and click 'Support'. Thank you."
 msgstr ""
-"WireShare aşağıdaki hata raporunu göndermek için hata sunucusuna bağlanamadı. "
-"Daha fazla yardım ve hata ayıklamaya destek için lütfen www.limewire.com "
-"adresini ziyaret edip 'Destek' bağlantısını tıklatın. Teşekkürler."
+"WireShare aşağıdaki hata raporunu göndermek için hata sunucusuna "
+"bağlanamadı. Daha fazla yardım ve hata ayıklamaya destek için lütfen www."
+"limewire.com adresini ziyaret edip 'Destek' bağlantısını tıklatın. "
+"Teşekkürler."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:630
 msgid "Copy Report"
@@ -803,7 +805,7 @@ msgstr "TAMAM"
 #. Load up the HTML engine.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:547
 msgid "Muddling Mint..."
-msgstr ""
+msgstr "Nane yaprakları eziliyor..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:564
 msgid "Scouring NYC for Limes..."
@@ -820,8 +822,7 @@ msgstr "Mojitolar Hazırlanıyor..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:671
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
-"Bu Alfa sürümünün süresi doldu. Lütfen çıkmak için Tamam'ı tıklatın. "
+msgstr "Bu Alfa sürümünün süresi doldu. Lütfen çıkmak için Tamam'ı tıklatın. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:677
 msgid ""
@@ -840,18 +841,18 @@ msgid ""
 "WireShare could not create a temporary preferences folder.\n"
 "\n"
 "This is generally caused by a lack of permissions.  Please make sure that "
-"WireShare (and you) have access to create files/folders on your computer.  If "
-"the problem persists, please visit www.limewire.com and click the 'Support' "
-"link.\n"
+"WireShare (and you) have access to create files/folders on your computer.  "
+"If the problem persists, please visit www.limewire.com and click the "
+"'Support' link.\n"
 "\n"
 "WireShare will now exit.  Thank You."
 msgstr ""
 "WireShare geçici tercihler klasörü oluşturamadı.\n"
 "\n"
-"Bu genellikle izin yetersizliğinden kaynaklanır. Lütfen WireShare programının "
-"(ve sizin), bilgisayarınızda dosya/klasör oluşturma izni olduğundan emin "
-"olun. Sorun devam ederse, www.limewire.com adresini ziyaret edip 'Destek' "
-"bağlantısını tıklatın.\n"
+"Bu genellikle izin yetersizliğinden kaynaklanır. Lütfen WireShare "
+"programının (ve sizin), bilgisayarınızda dosya/klasör oluşturma izni "
+"olduğundan emin olun. Sorun devam ederse, www.limewire.com adresini ziyaret "
+"edip 'Destek' bağlantısını tıklatın.\n"
 "\n"
 "WireShare şimdi kapatılacak. Teşekkür ederiz."
 
@@ -913,7 +914,7 @@ msgstr "Bitzi'de bak"
 
 #. *
 #. * The copy action.
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CopyAction.java:11
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:59
 msgid "Copy"
@@ -925,7 +926,7 @@ msgstr "Tümünü Kopyala"
 
 #. *
 #. * The cut action
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/CutAction.java:11
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:50
 msgid "Cut"
@@ -933,7 +934,7 @@ msgstr "Kes"
 
 #. *
 #. * The delete action.
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/DeleteAction.java:12
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:77
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/DeleteListAction.java:24
@@ -942,7 +943,7 @@ msgstr "Sil"
 
 #. *
 #. * The paste action.
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/PasteAction.java:10
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:68
 msgid "Paste"
@@ -950,7 +951,7 @@ msgstr "Yapıştır"
 
 #. *
 #. * The select all action.
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/SelectAllAction.java:10
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:623
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:86
@@ -1297,8 +1298,7 @@ msgstr "LimeWire, herhangi bir gelen UDP iletisi almadı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:264
 msgid ""
 "WireShare was not able to support firewall transfers in a previous session"
-msgstr ""
-"LimeWire, önceki oturumda güvenlik duvarı aktarımlarını destekleyemedi"
+msgstr "LimeWire, önceki oturumda güvenlik duvarı aktarımlarını destekleyemedi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:266
 msgid ""
@@ -1474,8 +1474,7 @@ msgid "QRP Empty"
 msgstr "QRP Boş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/IncomingSearchPanel.java:64
-msgid ""
-"Incoming Searches - people on the P2P Network are now searching for..."
+msgid "Incoming Searches - people on the P2P Network are now searching for..."
 msgstr "Gelen Aramalar - P2P Ağındaki kişiler şunları arıyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/browser/Browser.java:138
@@ -1493,9 +1492,11 @@ msgstr "Uyarı"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:121
 #, java-format
 msgid ""
-"This torrent contains files with the following extensions, which WireShare is "
-"configured not to download: {0}."
+"This torrent contains files with the following extensions, which WireShare "
+"is configured not to download: {0}."
 msgstr ""
+"Bu torrent WireSharein indirmemek için ayarlandığı şu eklentili dosyalar "
+"içermektedir: {0}."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:122
 msgid ""
@@ -1650,7 +1651,7 @@ msgstr "WireShare Yükleniyor..."
 
 #. *
 #. * The undo action.
-#. 
+#.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/TextFieldClipboardControl.java:34
 msgid "Undo"
 msgstr "Geri Al"
@@ -1775,8 +1776,8 @@ msgstr "Anti-Virüs Koruması"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:113
 msgid ""
 "LimeWire's Anti-Virus protection is powered by AVG.  AVG scans, detects and "
-"deletes files that are suspected to contain viruses or spyware.  <a "
-"href=\"{0}\">Learn more</a>"
+"deletes files that are suspected to contain viruses or spyware.  <a href="
+"\"{0}\">Learn more</a>"
 msgstr ""
 "LimeWire'ın Anti-Virüs koruması AVG tarafından sağlanmaktadır. AVG virüs "
 "veya casus yazılım içerdiğinden şüphelenilen dosyaları tarar, bulur ve "
@@ -2533,8 +2534,8 @@ msgstr "Filtrele"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:286
 msgid ""
-"WireShare could not play this file. There may not be a sound device installed "
-"on your computer or your speakers may not be plugged in."
+"WireShare could not play this file. There may not be a sound device "
+"installed on your computer or your speakers may not be plugged in."
 msgstr ""
 "WireShare bu dosyayı oynatamaz. Bilgisayarınızda yüklü bir ses cihazı "
 "olmayabilir ya da hoparlörleriniz bağlı olmayabilir."
@@ -2563,8 +2564,7 @@ msgstr "Dosyaları Temizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/ClearAction.java:39
 #, java-format
-msgid ""
-"Remove all files from {0}?  This will stop sharing all of these files."
+msgid "Remove all files from {0}?  This will stop sharing all of these files."
 msgstr ""
 "{0}'daki tüm dosyalar kaldırılsın mı? Bu, tüm dosyaların paylaşımını "
 "durduracak."
@@ -2723,8 +2723,8 @@ msgstr "Oturum açılıyor..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharingLoginPanel.java:81
 #, java-format
 msgid ""
-"<a href={0}>Sign in</a> to share this list or edit sharing, or <a "
-"href={1}>stop sharing</a> it now."
+"<a href={0}>Sign in</a> to share this list or edit sharing, or <a href={1}"
+">stop sharing</a> it now."
 msgstr ""
 "Bu listeyi paylaşmak ya da paylaşımı düzenlemek için <a href={0}>giriş "
 "yapın</a> ya da şimdi <a href={1}>paylaşımı durdurun</a>."
@@ -2978,8 +2978,7 @@ msgstr[0] "Dosyayı/Dosyaları kaldır"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:66
 #, java-format
-msgid ""
-"Remove \"{0}\" from Library? This will unshare this file with everyone."
+msgid "Remove \"{0}\" from Library? This will unshare this file with everyone."
 msgstr ""
 "\"{0}\" dosyası Kitaplıktan kaldırılsın mı? Bunu yapmak, dosyayı herkesle "
 "paylaşıma kapatır."
@@ -3121,8 +3120,9 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "WireShare web site."
 msgstr ""
-"WireShare aynı zamanda hem uygulamanın kendisinde, hem WireShare web sitesinde "
-"uluslararasılaştırma projesine katkıda bulunanlara da teşekkür eder."
+"WireShare aynı zamanda hem uygulamanın kendisinde, hem WireShare web "
+"sitesinde uluslararasılaştırma projesine katkıda bulunanlara da teşekkür "
+"eder."
 
 #. community VIPs
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:357
@@ -3153,9 +3153,9 @@ msgid ""
 "XMPP Standards Foundation nor LiveJournal.com are sponsors or partners of "
 "Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the "
 "WireShare software. Use of these trademarks is merely to refer to the "
-"technology or service of the respective owner and not to confuse "
-"Lime&nbsp;Wire as the source of the respective Gmail, Jabber, and/or "
-"LiveJournal service or technology"
+"technology or service of the respective owner and not to confuse Lime&nbsp;"
+"Wire as the source of the respective Gmail, Jabber, and/or LiveJournal "
+"service or technology"
 msgstr ""
 "BitTorrent, BitTorrent Logosu ve Torrent BitTorrent, Inc.'in ticari "
 "markalarıdır. Gmail, Google&nbsp;Inc.'in ticari markasıdır, Jabber ve "
@@ -3563,13 +3563,13 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:117
 msgid ""
-"File types that WireShare doesn't know about are classified as \"Other\". Add "
-"these files to a List by dragging them, or when adding a folder, click "
+"File types that WireShare doesn't know about are classified as \"Other\". "
+"Add these files to a List by dragging them, or when adding a folder, click "
 "\"Advanced\" and choose specific file extensions"
 msgstr ""
 "LimeWire'ın tanımadığı dosya türleri \"Diğer\" olarak sınıflandırılır. Bu "
-"dosyaları sürükleyerek bir Liste'ye ekleyin ya da klasör eklerken "
-"\"Gelişmiş\" öğesini tıklatıp özel dosya uzantısını seçin"
+"dosyaları sürükleyerek bir Liste'ye ekleyin ya da klasör eklerken \"Gelişmiş"
+"\" öğesini tıklatıp özel dosya uzantısını seçin"
 
 #. Icon
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:149
@@ -3763,8 +3763,7 @@ msgstr "Paylaşım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:199
 msgid "Add files I download from P2P Users to my Public Shared List"
-msgstr ""
-"P2P kullanıcılarından indirdiğim dosyaları Genel Paylaşım Listeme ekle"
+msgstr "P2P kullanıcılarından indirdiğim dosyaları Genel Paylaşım Listeme ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:203
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:272
@@ -4523,7 +4522,7 @@ msgstr "Torrent dosyası karıştı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:196
 msgid "payload hash:"
-msgstr ""
+msgstr "yük hash değeri:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:201
 msgid "Hashes"
@@ -4726,7 +4725,7 @@ msgstr "Bu torrenti sonsuza kadar yükle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:212
 msgid "Upload this torrent until either of the following:"
-msgstr ""
+msgstr "Şunlardan biri meydana gelene dek bu torrent'ı yükle:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:237
 msgid "Limit this torrent's download bandwidth"
@@ -4782,8 +4781,7 @@ msgstr ""
 #. BrowseState.OFFLINE
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:162
 msgid "When you sign on to LimeWire, your friend's files will appear here."
-msgstr ""
-"LimeWire'a giriş yaptığınızda arkadaşınızın dosyaları burada görünür."
+msgstr "LimeWire'a giriş yaptığınızda arkadaşınızın dosyaları burada görünür."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:165
 msgid ""
@@ -4801,8 +4799,8 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:186
 msgid "<HTML><A href=\"\">Chat</A> and tell them to sign on.</HTML>"
 msgstr ""
-"<HTML><A href=\"\">Sohbet edin</A> ve onlardan giriş yapmalarını "
-"isteyin.</HTML>"
+"<HTML><A href=\"\">Sohbet edin</A> ve onlardan giriş yapmalarını isteyin.</"
+"HTML>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:217
 msgid "No friends are sharing with you"
@@ -4895,8 +4893,9 @@ msgid ""
 "We recommend you don't download programs using LimeWire. However, you can "
 "enable downloading programs via Preferences > Search > Configure..."
 msgstr ""
-"WireShare kullanarak program indirmemenizi öneririz. Ancak, Tercihler > Arama "
-"> Yapılandır menüsü aracılığıyla program indirmeyi etkinleştirebilirsiniz..."
+"WireShare kullanarak program indirmemenizi öneririz. Ancak, Tercihler > "
+"Arama > Yapılandır menüsü aracılığıyla program indirmeyi "
+"etkinleştirebilirsiniz..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
@@ -5112,7 +5111,7 @@ msgstr "{0} için torrent sonuçları - {2} tanenin {1} tanesi gösteriliyor"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:61
 #, java-format
 msgid "{0} is \"{1}\""
-msgstr ""
+msgstr "{0} şudur: \"{1}\""
 
 #. {0}: property key, {1}: property value, {2}: property key, {3}: property value
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SmartQuery.java:69
@@ -5167,8 +5166,8 @@ msgstr "Bağlantıyı Kopyala"
 msgid ""
 "WireShare is unable to find a license for this file. Download it anyway?\n"
 "\n"
-"WireShare cannot monitor or control the content of the P2P Network, so please "
-"respect your local copyright laws."
+"WireShare cannot monitor or control the content of the P2P Network, so "
+"please respect your local copyright laws."
 msgstr ""
 "WireShare bu dosya için bir lisans bulamadı. Yine de indirilsin mi?\n"
 "\n"
@@ -5241,8 +5240,7 @@ msgstr "İndirilmiş"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:314
 #, java-format
 msgid "Not showing {0} results.  Narrow results to see more."
-msgstr ""
-"{0} sonuç gösterilmiyor. Daha fazlasını görmek için aramayı daraltın."
+msgstr "{0} sonuç gösterilmiyor. Daha fazlasını görmek için aramayı daraltın."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:58
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:38
@@ -5272,7 +5270,8 @@ msgstr "Açık ağları destekleyin. WireShare PRO'yu edinin."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
 msgid "Support open source and open protocols. Get WireShare PRO."
 msgstr ""
-"Açık kaynak ve açık iletişim kurallarını destekleyin. WireShare PRO'yu edinin."
+"Açık kaynak ve açık iletişim kurallarını destekleyin. WireShare PRO'yu "
+"edinin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:79
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:62
@@ -5318,8 +5317,8 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
 msgid ""
-"Magnet links are no longer associated with LimeWire. Would you like WireShare "
-"to re-associate them?"
+"Magnet links are no longer associated with LimeWire. Would you like "
+"WireShare to re-associate them?"
 msgstr ""
 "Magnet bağlantıları artık LimeWire'la ilişkili değil. LimeWire'ın bunları "
 "yeniden ilişkilendirmesini ister misiniz?"
@@ -5840,8 +5839,8 @@ msgstr "Klasör Uyarısı"
 #, java-format
 msgid ""
 "<html><body>Warning: You are sharing Documents with the world. These "
-"Documents may contain personal information. <a href=\"{0}\">learn "
-"more</a></body></html>"
+"Documents may contain personal information. <a href=\"{0}\">learn more</a></"
+"body></html>"
 msgstr ""
 "<html><body>Uyarı: Belgeleri herkesle paylaşıyorsunuz. Bu Belgeler kişisel "
 "bilgi içeriyor olabilir. <a href=\"{0}\">daha fazla bilgi</a></body></html>"
@@ -5953,8 +5952,8 @@ msgstr ""
 "<html><body>WireShare Basic ve WireShare PRO, yalnızca izinli dosyaların "
 "paylaşımına yönelik eşler arası programlardır. Telif Hakkı yasaları, bazı "
 "telif haklı içeriklerin elde edilmesini veya dağıtılmasını yasaklayabilir. "
-"<a href=\"{0}\">Telif Hakkı</a> konusunda daha fazla bilgi "
-"edinin.</body></html>"
+"<a href=\"{0}\">Telif Hakkı</a> konusunda daha fazla bilgi edinin.</body></"
+"html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:290
 msgid "Copyright Infringement"
@@ -5987,13 +5986,14 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
 msgid ""
 "By clicking \"I Agree\", you agree that you have read, understand and assent "
-"to the terms of the WireShare License Agreement and WireShare Privacy Policy. "
-"You also agree that you will not use WireShare for copyright infringement."
+"to the terms of the WireShare License Agreement and WireShare Privacy "
+"Policy. You also agree that you will not use WireShare for copyright "
+"infringement."
 msgstr ""
 "\"Kabul Ediyorum\" 'a tıkladamadan önce lütfen WireShare ve  WireShare Özel "
-"Sözleşmesini okuyun. Kabul ettiğiniz anda bu programın \"Her Hakkı "
-"Saklıdır\" 'da belirtilen koşullar dışında kullanmayacağınızıda kabul "
-"ettiniz demektir."
+"Sözleşmesini okuyun. Kabul ettiğiniz anda bu programın \"Her Hakkı Saklıdır"
+"\" 'da belirtilen koşullar dışında kullanmayacağınızıda kabul ettiniz "
+"demektir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:295
 msgid "Choose your language"
@@ -6010,7 +6010,7 @@ msgstr "Kabul Ediyorum"
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
 msgid "Did you purchase WireShare PRO?"
-msgstr ""
+msgstr "WireShare PRO'yu satın aldınız mı?"
 
 #. wrap
 #. wrap
@@ -6021,18 +6021,22 @@ msgid ""
 "always do it later by clicking on the \"File\" tab in WireShare and then "
 "clicking \"Licenses.\""
 msgstr ""
+"Eğer aldıysanız, lütfen lisans anahtarınızı giriniz - kaydolduğunuzda "
+"çevrimiçinde ve e-posta vasıtasıyla onu iletmiştik. PRO işlevlerini şimdi "
+"etkinleştirmek istemiyorsanız, daha sonra WireShare'de \"Dosya\" sekmesine "
+"ve ardından \"Lisanslar.\" bağlantısınıa tıklayarak etkinleştirebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:88
 msgid "Your License Key:"
-msgstr ""
+msgstr "Lisans Anahtarınız:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
 msgid "Activate WireShare PRO"
-msgstr ""
+msgstr "WireShare PRO'yu etkinleştir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
 msgid "I don't know my activation key"
-msgstr ""
+msgstr "Etkinleştirme anahtarımı bilmiyorum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:128
 #, java-format
@@ -6074,14 +6078,12 @@ msgstr "Lisans anahtarınız başarılı bir şekilde aktifleştirilmiştir."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:56
 msgid "Thank you! You have successfully activated your license."
-msgstr ""
-"Teşekkürler! Lisans anahtarınızı başarılı bir şekilde aktive ettiniz."
+msgstr "Teşekkürler! Lisans anahtarınızı başarılı bir şekilde aktive ettiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:85
 #, java-format
 msgid "You can renew your features at your {0}user account{1} page."
-msgstr ""
-"Özelliklerinizi {0}Kullanıcı Hesabı{1} sayfasından yenileyebilirsiniz."
+msgstr "Özelliklerinizi {0}Kullanıcı Hesabı{1} sayfasından yenileyebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:95
 msgid "* One or more of your features is currently not supported."
@@ -6195,7 +6197,7 @@ msgstr "WireShare PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
 msgid "I didn't purchase WireShare PRO"
-msgstr ""
+msgstr "WireShare PRO'yu satın almadım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
 msgid "You can edit your licenses from File > License"
@@ -6265,7 +6267,8 @@ msgstr "Kur"
 #~ "upload some more. Are you sure you want to stop it?"
 #~ msgstr ""
 #~ "Bu yükleme bir torrent ve yeterli sayıda kaynak içermiyor. Bir süre daha "
-#~ "yükleme yapılmasına izin vermelisiniz. Durdurmak istediğinizden emin misiniz?"
+#~ "yükleme yapılmasına izin vermelisiniz. Durdurmak istediğinizden emin "
+#~ "misiniz?"
 
 #~ msgid "DHT Peer Locator"
 #~ msgstr "DHT Eş Bulucu"
@@ -6349,25 +6352,25 @@ msgstr "Kur"
 #~ msgstr "Kitaplıktan kaldır"
 
 #~ msgid ""
-#~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
-#~ "Inc. Gmail is a trademark of Google Inc. Jabber and LiveJournal are the "
-#~ "registered trademarks of the XMPP Standards Foundation and LiveJournal, "
-#~ "Inc., d/b/a LiveJournal.com, respectively. Neither Google Inc., the XMPP "
-#~ "Standards Foundation or LiveJournal.com are sponsors or partners of "
-#~ "Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the "
-#~ "WireShare software. Use of these trademarks is merely to refer to the "
-#~ "technology or service of the respective owner and not to confuse "
-#~ "Lime&nbsp;Wire as the source of the respective Gmail, Jabber and/or "
-#~ "LiveJournal service or technology."
+#~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of "
+#~ "BitTorrent, Inc. Gmail is a trademark of Google Inc. Jabber and "
+#~ "LiveJournal are the registered trademarks of the XMPP Standards "
+#~ "Foundation and LiveJournal, Inc., d/b/a LiveJournal.com, respectively. "
+#~ "Neither Google Inc., the XMPP Standards Foundation or LiveJournal.com are "
+#~ "sponsors or partners of Lime&nbsp;Wire&nbsp;LLC nor do they endorse "
+#~ "Lime&nbsp;Wire&nbsp;LLC or the WireShare software. Use of these "
+#~ "trademarks is merely to refer to the technology or service of the "
+#~ "respective owner and not to confuse Lime&nbsp;Wire as the source of the "
+#~ "respective Gmail, Jabber and/or LiveJournal service or technology."
 #~ msgstr ""
 #~ "BitTorrent, the BitTorrent Logosu ve Torrent; BitTorrent, Inc'ın ticari "
 #~ "markalarıdır. Gmail, Google Inc.'ın ticari markasıdır. Jabber ve "
-#~ "LiveJournal, sırasıyla XMPP Standards Foundation ve LiveJournal, Inc., d/b/a "
-#~ "LiveJournal.com'un tescilli markalarıdır. Google Inc., XMPP Standards "
-#~ "Foundation ya da LiveJournal.com; Lime&nbsp;Wire&nbsp;LLC'nin sponsoru veya "
-#~ "ortağı değildir ve Lime&nbsp;Wire&nbsp;LLC ya da WireShare yazılımını "
-#~ "doğrudan önermezler. Bu ticari markaların kullanımı yalnızca ilgili "
-#~ "sahiplerinin teknolojisi veya hizmetine hitap etmek içindir ve "
+#~ "LiveJournal, sırasıyla XMPP Standards Foundation ve LiveJournal, Inc., d/"
+#~ "b/a LiveJournal.com'un tescilli markalarıdır. Google Inc., XMPP Standards "
+#~ "Foundation ya da LiveJournal.com; Lime&nbsp;Wire&nbsp;LLC'nin sponsoru "
+#~ "veya ortağı değildir ve Lime&nbsp;Wire&nbsp;LLC ya da WireShare "
+#~ "yazılımını doğrudan önermezler. Bu ticari markaların kullanımı yalnızca "
+#~ "ilgili sahiplerinin teknolojisi veya hizmetine hitap etmek içindir ve "
 #~ "Lime&nbsp;Wire; Gmail, Jabber ve/veya LiveJournal hizmetinin ya da "
 #~ "teknolojisinin kaynağı olarak görülmemelidir."
 
@@ -6484,8 +6487,8 @@ msgstr "Kur"
 
 #~ msgid "Choose which warning messages you want to see when using LimeWire"
 #~ msgstr ""
-#~ "WireShare programını kullanırken hangi uyarı mesajlarını görmek istediğinizi "
-#~ "seçin"
+#~ "WireShare programını kullanırken hangi uyarı mesajlarını görmek "
+#~ "istediğinizi seçin"
 
 #~ msgid "Unsafe Categories"
 #~ msgstr "Güvensiz Kategoriler"
@@ -6506,7 +6509,8 @@ msgstr "Kur"
 #~ msgstr "Arama sonuçlarında..."
 
 #~ msgid ""
-#~ "Allow me to search for and share programs with the P2P Network and my friends"
+#~ "Allow me to search for and share programs with the P2P Network and my "
+#~ "friends"
 #~ msgstr ""
 #~ "P2P Ağı ile ve arkadaşlarımla programları paylaşmama ve programlarını "
 #~ "aramama izin ver"
@@ -6521,10 +6525,11 @@ msgstr "Kur"
 #~ "Bu ayarları etkinleştirdiğinizde, virüslere ve yanlışlıkla özel belge "
 #~ "paylaşımına daha açık olursunuz."
 
-#~ msgid "By default, WireShare allows you to share documents with your friends"
+#~ msgid ""
+#~ "By default, WireShare allows you to share documents with your friends"
 #~ msgstr ""
-#~ "Varsayılan ayar olarak, WireShare arkadaşlarınızla belge paylaşmanıza izin "
-#~ "verir"
+#~ "Varsayılan ayar olarak, WireShare arkadaşlarınızla belge paylaşmanıza "
+#~ "izin verir"
 
 #~ msgid "Warn me when downloading a file without a license"
 #~ msgstr "Lisanssız bir belge indirirken beni uyar"
@@ -6553,8 +6558,8 @@ msgstr "Kur"
 #~ msgid ""
 #~ "WireShare is unable to find a license for this file. Download it anyway?\n"
 #~ "\n"
-#~ "WireShare cannot monitor or control the content of the P2P network, so please "
-#~ "respect your local copyright laws."
+#~ "WireShare cannot monitor or control the content of the P2P network, so "
+#~ "please respect your local copyright laws."
 #~ msgstr ""
 #~ "WireShare bu dosya için bir lisans bulamıyor. Yine de yüklensin mi?\n"
 #~ "\n"
