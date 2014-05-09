@@ -146,7 +146,7 @@ class HTMLOutput {
     private void buildStartOfPage(StringBuffer newpage) {
         newpage
                 .append("  <div id=\"bod1\">\n"
-                        + "   <h1>Help Internationalize LimeWire!</h1>\n"
+                        + "   <h1>Help Internationalize WireShare!</h1>\n"
                         + "   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n"
                         + "   <tr>\n"
                         + /* Three columns */
@@ -154,14 +154,14 @@ class HTMLOutput {
                         +
                         /* Start column 1 (main content) */
                         "     The WireShare Open Source Project has embarked on an effort to\n"
-                        + "     internationalize LimeWire.&nbsp; If you are an avid English-speaking user\n"
+                        + "     internationalize WireShare.&nbsp; If you are an avid English-speaking user\n"
                         + "     fluent in another language, we need your help!&nbsp; Helping requires no\n"
                         + "     programming knowledge and little computer savviness beyond using a word\n"
                         + "     processor.<br />\n"
                         + "     <br />\n"
                         + "      <!--#include virtual=\"/translationbounties.shtml\" -->\n"
                         + "     <br />\n"
-                        + "     <b>HOW LIMEWIRE SUPPORTS MULTIPLE LANGUAGES</b><br />\n"
+                        + "     <b>HOW WIRESHARE SUPPORTS MULTIPLE LANGUAGES</b><br />\n"
                         + "     <br />\n"
                         + "     First, view this <a\n"
                         + "     href=\"http://www.limewire.com/img/screenshots/search.jpg\"\n"
@@ -180,7 +180,7 @@ class HTMLOutput {
                         + "     is &quot;Download&quot;, whereas in French the text is &quot;Charger&quot;\n"
                         + "     (which is French for &quot;download&quot;).<br />\n"
                         + "     <br />\n"
-                        + "     When you start LimeWire, the program loads the appropriate message bundle\n"
+                        + "     When you start WireShare, the program loads the appropriate message bundle\n"
                         + "     and uses its contents for any interface element that has text on it.&nbsp;\n"
                         + "     For instance, this is the <a\n"
                         + "href=\""
@@ -214,7 +214,7 @@ class HTMLOutput {
                         + "      </table>\n"
                         + "     </blockquote>\n"
                         + "     Note that the line starting with a &quot;#&quot; is a comment line,\n"
-                        + "     meaning it is not used by LimeWire.&nbsp; The English translation will\n"
+                        + "     meaning it is not used by WireShare.&nbsp; The English translation will\n"
                         + "     always be present as a reference.&nbsp; A label that is not yet\n"
                         + "     translated in a bundle will look like the following:<br />\n"
                         + "     <blockquote>\n"
@@ -271,7 +271,7 @@ class HTMLOutput {
         buildStatus(
                 newpage,
                 langsStarted,
-                "       are partly translated but still unfinished, and their use in LimeWire\n"
+                "       are partly translated but still unfinished, and their use in WireShare\n"
                         + "       may be difficult for native language users.&nbsp; Providing a more\n"
                         + "       complete translation would be very much appreciated.");
         buildStatus(newpage, langsEmbryonic,
@@ -308,7 +308,7 @@ class HTMLOutput {
                 .append("     <b>GENERAL CONSIDERATIONS FOR TRANSLATORS</b><br />\n"
                         + "     <br />\n"
                         + "     Do not start with the existing message bundle installed with your current\n"
-                        + "     version of LimeWire.&nbsp; Make sure you <b>work on the latest version of\n"
+                        + "     version of WireShare.&nbsp; Make sure you <b>work on the latest version of\n"
                         + "     a message bundle</b>.&nbsp; You can get the latest bundle by clicking on\n"
                         + "     a language in the list on the right side of this page.<br />\n"
                         + "     <br />\n"
@@ -440,7 +440,7 @@ class HTMLOutput {
                         + "     <b>HOW TO TEST A NEW TRANSLATION</b><br />\n"
                         + "     <br />\n"
                         + "     Only Windows and Unix simple text editors can create a plain-text file\n"
-                        + "     which will work in LimeWire, and only for languages using the Western\n"
+                        + "     which will work in WireShare, and only for languages using the Western\n"
                         + "     European Latin character set.&nbsp; Do not use &quot;SimpleText&quot; on\n"
                         + "     Mac OS to edit properties files as SimpleText does not create plain-text\n"
                         + "     files.&nbsp; Other translations need to be converted into regular\n"
@@ -452,13 +452,13 @@ class HTMLOutput {
                         + "     co-exist with the English version.&nbsp; WireShare will load the\n"
                         + "     appropriate resource file according to the\n"
                         + "     &quot;<code>LANGUAGE=</code>&quot;, and &quot;<code>COUNTRY=</code>&quot;\n"
-                        + "     settings stored in your &quot;<code>limewire.props</code>&quot;\n"
+                        + "     settings stored in your &quot;<code>wireshare.props</code>&quot;\n"
                         + "     preferences file.&nbsp; The list on the right can help you to find the\n"
                         + "     correct language code to use.<br />\n"
                         + "     <br />\n"
                         + "     Bundles are stored in a single compressed archive named\n"
                         + "     &quot;<code>MessagesBundles.jar</code>&quot; installed with\n"
-                        + "     LimeWire.&nbsp; All bundles are named\n"
+                        + "     WireShare.&nbsp; All bundles are named\n"
                         + "     &quot;MessagesBundle_xx.properties&quot;, where &quot;xx&quot; is\n"
                         + "     replaced by the language code.&nbsp; Note that bundles for languages\n"
                         + "     using non-Western European Latin characters will be converted from UTF-8\n"
