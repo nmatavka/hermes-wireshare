@@ -519,17 +519,21 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      */
     private void read() {
         try {
-            read(getHostsFile());
+        	File bootstrap = new File(System.getProperty("user.dir") + "/lib/bootstrap");
+        	read(bootstrap);
+        	if(LOG.isInfoEnabled())
+        		LOG.info("Deleting bootstrap file");
+        	bootstrap.delete();
         } catch (FileNotFoundException e) {
             try {
-            	read(new File(System.getProperty("user.dir") + "/lib/bootstrap"));
+            	read(getHostsFile());
             } catch (IOException ex) {
             	if(LOG.isInfoEnabled())
-            		LOG.info("Exception reading bootstrap file", ex);
+            		LOG.info("Exception reading host file " + getHostsFile(), ex);
             }
         } catch (IOException e) {
         	if(LOG.isInfoEnabled())
-        		LOG.info("Exception reading host file " + getHostsFile(), e);
+        		LOG.info("Exception reading bootstrap file", e);
         }
     }
 

@@ -57,11 +57,17 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.connectionServices = connectionServices;
         String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
         for(String server : servers) {
+            add(URI.create(server.trim() ));
+        }
+        String[] GWCservers = ConnectionSettings.GWEBCACHE_SERVERS.get();
+        for(String server : GWCservers) {
             add(URI.create(server.trim() + "?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion() + "&net=gnutella"));
         }
-        if(LOG.isDebugEnabled())
+        if(LOG.isDebugEnabled()) {
             LOG.debug("Loaded " + servers.length + " bootstrap servers");
-    }
+        	LOG.debug("Loaded " + GWCservers.length + " GWebCache servers");
+        }
+   }
 
     boolean add(URI uri) {
         return hosts.add(uri);
@@ -73,7 +79,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
 			tmp[cnt] = servers[cnt].trim();
 		}
 		tmp[servers.length] = uri;
-		ConnectionSettings.BOOTSTRAP_SERVERS.set(tmp);
+		ConnectionSettings.GWEBCACHE_SERVERS.set(tmp);
     }
     
     @Override
@@ -129,7 +135,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
             BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in, charset));
             while((line = reader.readLine()) != null && line.length() > 0) {
-                String[] words = line.trim().split("\\|");
+            	String[] words = line.trim().split(line.contains("\\|") ? "\\|" : ",");
                 if(words != null && words.length > 0) {
                     try {
                         if (words[0].equals("H")) {
@@ -139,7 +145,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
 	                        endpoints.add(host);
                     	} else if (words[0].equals("U")) {
                 			boolean NoAdd=false;
-                			String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
+                			String[] servers = ConnectionSettings.GWEBCACHE_SERVERS.get();
                 			for(String server : servers) {
 								if (server.equals(words[1])) {
 									NoAdd=true;
@@ -152,7 +158,10 @@ class TcpBootstrapImpl implements TcpBootstrap {
                     	} else if (words[0].equals("I")) { 		
                     		// add code for "I" type information here
                     	} else {
-                    		LOG.debug("Unsupported phrase: " + words);
+	                    	Endpoint host = new Endpoint(words[0], true);
+	                        if(LOG.isDebugEnabled())
+	                            LOG.debug("Received " + host);
+	                        endpoints.add(host);
                         };
                     } catch(IllegalArgumentException e) {
                         LOG.error("Malformed line: " + line);

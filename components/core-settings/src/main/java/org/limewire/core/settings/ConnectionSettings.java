@@ -380,5 +380,10 @@ public final class ConnectionSettings extends LimeProps {
     /** Bootstrap servers. */
     public static final StringArraySetting BOOTSTRAP_SERVERS =
         FACTORY.createStringArraySetting("BOOTSTRAP_SERVERS",
-                new String[0]);  // ADD BOOTSTRAP SERVERS HERE
+                new String[] {"http://wiresharelpe.sourceforge.net/bootstrap"});  // ADD BOOTSTRAP SERVERS HERE
+    
+    /** GWebCache servers. */
+    public static final StringArraySetting GWEBCACHE_SERVERS = 
+    		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
+    				new String[0]);  // ADD GWEBCACHE SERVERS HERE
 }
