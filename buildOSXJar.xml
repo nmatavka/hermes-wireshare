@@ -46,12 +46,12 @@
 	    <!-- Set this property value to your MacOSX resource 
 	         directory (where are stored your JavaApplicationStub 
 	         and icon files) -->
-	    <property name="macosx.resrc" value="build/MacOSX"/>
+	    <property name="macosx.resrc" value="build/osx/MacOSX"/>
 	
 	    <!-- Set this property value to your application 
 	         resource directory (where are stored your 
 	         libraries, jar, etc.) -->
-	    <property name="app.resrc" value="build"/>
+	    <property name="app.resrc" value="build/osx"/>
 	
 	    <property name="macosx.stubfile" value="${macosx.resrc}/JavaApplicationStub"/>
 	
@@ -100,7 +100,6 @@
 	    	<LSMinimumSystemVersionByArchitecture arch="i386" version="10.6.0"/>
 	    	
 	    	<!-- Include all the needed files to your application package. -->
-	    	<javafilelist dir="build/osx" files="WireShare.jar"/>
 	    	<javafileset dir="lib/native/osx"/>
 	    	<javafileset dir=".">
 	    		<include name="lib/WSHome.xhtml"/>
