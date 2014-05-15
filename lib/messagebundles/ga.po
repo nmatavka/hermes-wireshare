@@ -5950,7 +5950,7 @@ msgid "Your license has been activated, but..."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:53
-msgid "Yay! Your license has been successfully activated."
+msgid "Yay! Your  license has been successfully activated."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationThankYouPanel.java:56
