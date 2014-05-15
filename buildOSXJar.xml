@@ -2,9 +2,9 @@
 
 <!-- top level ant file -->
 <project name="limewire" default="build.jar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
-    <echo>Java Version via Ant: ${ant.java.version}</echo> 
-
-    <property name="limewire.home" location="${basedir}"/>
+    <echo>Java Version via Ant: ${ant.java.version}</echo>
+	
+	<property name="limewire.home" location="${basedir}"/>
     <property name="includes" value="*/*/build.xml"/>
     
     <property name="aggregate.jar-jarname" value="build/osx/WireShare.jar"/>

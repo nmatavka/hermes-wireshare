@@ -111,7 +111,7 @@ class CategoryManagerImpl implements CategoryManager {
                 "vob", "mpv2", "mp2v", "m2p", "m2v", "m4v", "mpgv", "vcd", "mp4", "dv", "dvd", "div",
                 "divx", "dvx", "smi", "smil", "rv", "rmm", "rmvb", "avi", "asf", "asx", "wmv",
                 "qt", "mov", "fli", "flc", "flx", "flv", "wml", "vrml", "swf", "dcr", "jve", "nsv",
-                "mkv", "ogm", "cdg", "srt", "sub", "flv").build());
+                "mkv", "ogm", "cdg", "srt", "sub", "flv", "ogv", "webm").build());
 
         builtInExtensionMap.put(InternalCategory.IMAGE, ImmutableSortedSet.orderedBy(
                 String.CASE_INSENSITIVE_ORDER).add("gif", "png", "bmp", "jpg", "jpeg", "jpe",
