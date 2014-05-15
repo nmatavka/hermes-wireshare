@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: LimeWire Client\n"
+"Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-07-26 11:30-0400\n"
 "PO-Revision-Date: 2010-03-01 17:59+0000\n"
@@ -123,15 +123,15 @@ msgstr "Inga problem."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
-"<html><b>Your LimeWire may have been corrupted by a virus or "
+"<html><b>Your WireShare may have been corrupted by a virus or "
 "trojan!</b><br><br>Please visit <a "
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
-"the newest official version of LimeWire.</html>"
+"the newest official version of WireShare.</html>"
 msgstr ""
-"<html><b> Ditt LimeWire har kanske blivit skadat av ett virus eller en "
+"<html><b> Ditt WireShare har kanske blivit skadat av ett virus eller en "
 "trojan!</b><br><br>Besök <a "
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> och ladda "
-"ner den nyaste officiella versionen av LimeWire.</html>"
+"ner den nyaste officiella versionen av WireShare.</html>"
 
 #. FIXME: replace this with a proper warning message
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
@@ -173,11 +173,11 @@ msgstr "Stör inte"
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:307
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
-"LimeWire was unable to set up a port to listen for incoming connections. "
-"Some features of LimeWire may not work as expected."
+"WireShare was unable to set up a port to listen for incoming connections. "
+"Some features of WireShare may not work as expected."
 msgstr ""
-"LimeWire kunde inte sätta upp en port för att söka efter inkommande "
-"anslutningar. Vissa funktioner i LimeWire kanske inte fungerar som förväntat."
+"WireShare kunde inte sätta upp en port för att söka efter inkommande "
+"anslutningar. Vissa funktioner i WireShare kanske inte fungerar som förväntat."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:407
 msgid "Connection Listener"
@@ -217,22 +217,22 @@ msgstr "Nedladdningshantering"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:291
 msgid ""
-"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
+"Sorry, WireShare couldn't read your old downloads.  You can restart them by "
+"clicking 'Try Again' on the downloads.  When WireShare finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"LimeWire kunde inte läsa in dina gamla nedladdningar. Du kan starta om dem "
-"genom att klicka på 'Försök igen' på nedladdningarna. När LimeWire hittar en "
+"WireShare kunde inte läsa in dina gamla nedladdningar. Du kan starta om dem "
+"genom att klicka på 'Försök igen' på nedladdningarna. När WireShare hittar en "
 "källa för filen kommer nedladdningen att fortsätta där den avslutades."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:293
 msgid ""
-"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
-"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
+"Sorry, WireShare couldn't read some of your old downloads.  You can restart "
+"them by clicking 'Try Again' on the downloads.  When WireShare finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"LimeWire kunde inte läsa in några av dina gamla nedladdningar. Du kan starta "
-"om dem genom att klicka på 'Försök igen' på nedladdningarna. När LimeWire "
+"WireShare kunde inte läsa in några av dina gamla nedladdningar. Du kan starta "
+"om dem genom att klicka på 'Försök igen' på nedladdningarna. När WireShare "
 "hittar en källa för filen kommer nedladdningen att fortsätta där den "
 "avslutades."
 
@@ -290,11 +290,11 @@ msgstr "Magnetprocessor"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:127
 msgid ""
-"LimeWire was unable to start the Digital Audio Access Protocol Service (for "
+"WireShare was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under Advanced -> Files -> iTunes."
 msgstr ""
-"LimeWire kunde inte starta Digital Audio Access Protokollservice (för att "
+"WireShare kunde inte starta Digital Audio Access Protokollservice (för att "
 "dela filer i iTunes). Funktionen kommer att vara avstängd. Du kan slå på den "
 "igen i Inställningar -> Avancerat -> Filer -> iTunes."
 
@@ -311,8 +311,8 @@ msgid "Mojito DHT"
 msgstr "Mojito DHT"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:184
-msgid "LimeWire Store Integration"
-msgstr "LimeWire Store integration"
+msgid "WireShare Store Integration"
+msgstr "WireShare Store integration"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:23
 msgid "Download Upgrade Task"
@@ -617,75 +617,75 @@ msgstr "Metadataladdare"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
-"LimeWire was unable to write a necessary file because your hard drive is "
-"full. To continue using LimeWire you must free up space on your hard drive."
+"WireShare was unable to write a necessary file because your hard drive is "
+"full. To continue using WireShare you must free up space on your hard drive."
 msgstr ""
-"LimeWire kan inte skriva en nödvändig fil för att din hårddisk är full. Du "
-"måste frigöra utrymme på hårddisken för att fortsätta använda LimeWire."
+"WireShare kan inte skriva en nödvändig fil för att din hårddisk är full. Du "
+"måste frigöra utrymme på hårddisken för att fortsätta använda WireShare."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
-"LimeWire was unable to open a necessary file because another program has "
-"locked the file. LimeWire may act unexpectedly until this file is released."
+"WireShare was unable to open a necessary file because another program has "
+"locked the file. WireShare may act unexpectedly until this file is released."
 msgstr ""
-"LimeWire kan inte öppna en nödvändig fil på grund av att ett annat program "
-"har låst filen. LimeWire kan agera oväntat tills filen är släppt."
+"WireShare kan inte öppna en nödvändig fil på grund av att ett annat program "
+"har låst filen. WireShare kan agera oväntat tills filen är släppt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
-"LimeWire was unable to write a necessary file because you do not have the "
+"WireShare was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
-"you start LimeWire, or LimeWire may behave in unexpected ways."
+"you start WireShare, or WireShare may behave in unexpected ways."
 msgstr ""
-"LimeWire kunde inte skriva till filen eftersom du inte har nödvändiga "
-"rättigheter på denna dator. Dina inställningar har inte sparats och LimeWire "
+"WireShare kunde inte skriva till filen eftersom du inte har nödvändiga "
+"rättigheter på denna dator. Dina inställningar har inte sparats och WireShare "
 "kan bete sig på ett oväntat sätt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
-"LimeWire cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. LimeWire may "
+"WireShare cannot open a necessary file because the filename contains "
+"characters which are not supported by your operating system. WireShare may "
 "behave in unexpected ways."
 msgstr ""
-"LimeWire kunde inte öppna filen eftersom filnamnet innehåller tecken som "
-"inte stöds av ditt operativsystem. LimeWire kan bete sig på ett oväntat sätt."
+"WireShare kunde inte öppna filen eftersom filnamnet innehåller tecken som "
+"inte stöds av ditt operativsystem. WireShare kan bete sig på ett oväntat sätt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
-"LimeWire cannot download the selected file because your hard drive is full. "
+"WireShare cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"LimeWire kan inte ladda ner den valda filen på grund av att hårddisken är "
+"WireShare kan inte ladda ner den valda filen på grund av att hårddisken är "
 "full. Du måste frigöra utrymme på hårddisken för att kunna ladda ner fler "
 "filer."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
-"LimeWire was unable to download the selected file because another program is "
+"WireShare was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"LimeWire kunde inte ladda ner den valda filen för att den används av ett "
+"WireShare kunde inte ladda ner den valda filen för att den används av ett "
 "annat program. Stäng det andra programmet och försök ladda ner på nytt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
-"LimeWire was unable to create or continue writing an incomplete file for the "
+"WireShare was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
-"incomplete folder. To continue using LimeWire, please choose a different "
+"incomplete folder. To continue using WireShare, please choose a different "
 "Save Folder."
 msgstr ""
-"LimeWire kunde inte skapa eller fortsätta skriva en ofullständig fil för den "
+"WireShare kunde inte skapa eller fortsätta skriva en ofullständig fil för den "
 "markerade nedladdningen eftersom du har inte rättigheterna att skapa filer i "
 "mappen ofullständiga filer. Välj en annan mapp att spara i för att kunna "
-"fortsätta använda LimeWire."
+"fortsätta använda WireShare."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
-"LimeWire was unable to open the incomplete file for the selected download "
+"WireShare was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
-"LimeWire kunde inte öppna den ofullständiga filen för den valda "
+"WireShare kunde inte öppna den ofullständiga filen för den valda "
 "nedladdningen eftersom filnamnet innehåller tecken som ditt operativsystem "
 "inte stöder."
 
@@ -708,50 +708,50 @@ msgstr "Ett problem uppstod..."
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
-"LimeWire's still going to run just fine, but please click 'Send Bug' to "
+"WireShare's still going to run just fine, but please click 'Send Bug' to "
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
 "Hoppsan! Du gjorde något som vi inte har skrivit än. Ledsen för det. Det går "
-"lika bra att köra LimeWire ändå, men klicka på 'Skicka felrapport' för att "
+"lika bra att köra WireShare ändå, men klicka på 'Skicka felrapport' för att "
 "påminna oss om att skriva detta. Om du vill, kan du klicka på 'Visa "
 "felrapport' för att titta på informationen som ska skickas. Tack!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
-"LimeWire's still going to run just fine, so don't worry.  If you want, you "
+"WireShare's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
 "Hoppsan! Du gjorde något som vi inte har skrivit än. Ledsen för det. Det går "
-"lika bra att köra LimeWire ändå, så oroa dig inte. Om du vill, kan du klicka "
+"lika bra att köra WireShare ändå, så oroa dig inte. Om du vill, kan du klicka "
 "på 'Visa felrapporrt' för att titta på information om felet."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
-"Sorry, LimeWire ran into a problem.  LimeWire's still going to run just "
+"Sorry, WireShare ran into a problem.  WireShare's still going to run just "
 "fine, but you should send us the bug so we can fix it."
 msgstr ""
-"Ledsen, LimeWire stötte på ett problem. Det går fortfarande lika bra att "
-"köra LimeWire, men du borde skicka felrapporten till oss så att vi kan "
+"Ledsen, WireShare stötte på ett problem. Det går fortfarande lika bra att "
+"köra WireShare, men du borde skicka felrapporten till oss så att vi kan "
 "åtgärda det."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:408
 msgid ""
-"LimeWire has encountered an internal error. It is possible for LimeWire to "
-"recover and continue running normally. To continue using LimeWire, close "
+"WireShare has encountered an internal error. It is possible for WireShare to "
+"recover and continue running normally. To continue using WireShare, close "
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"LimeWire har stött på ett internt fel. Det är möjligt för LimeWire återhämta "
+"WireShare har stött på ett internt fel. Det är möjligt för WireShare återhämta "
 "sig och fortsätta att köra som vanligt. Stäng det här fönstret för att "
-"fortsätta använda LimeWire. Om du vill kan du klicka på 'Visa felrapport' "
+"fortsätta använda WireShare. Om du vill kan du klicka på 'Visa felrapport' "
 "för att titta på information om felet."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
-msgid "Tell us what you were doing before LimeWire ran into this problem."
+msgid "Tell us what you were doing before WireShare ran into this problem."
 msgstr ""
-"Berätta för oss vad du gjorde innan LimeWire stötte på detta problem."
+"Berätta för oss vad du gjorde innan WireShare stötte på detta problem."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
@@ -781,11 +781,11 @@ msgstr "Internt fel"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:601
 msgid ""
-"LimeWire was unable to connect to the bug server in order to send the below "
+"WireShare was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
-"LimeWire kunde inte ansluta till servern för att skicka nedanstående "
+"WireShare kunde inte ansluta till servern för att skicka nedanstående "
 "felrapport. För ytterligare hjälp och stöd med felsökning, besök "
 "www.limewire.com och klicka på 'Support'. Tack."
 
@@ -828,30 +828,30 @@ msgstr "Den här alpha versionen har upphört.  Klicka på OK för att avsluta. 
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:677
 msgid ""
-"LimeWire was unable to initialize and start. This is usually due to a "
-"security program blocking LimeWire's access to the internet or loopback "
-"connections on the local machine. Please add LimeWire as an exception to "
-"your security software and restart LimeWire."
+"WireShare was unable to initialize and start. This is usually due to a "
+"security program blocking WireShare's access to the internet or loopback "
+"connections on the local machine. Please add WireShare as an exception to "
+"your security software and restart WireShare."
 msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:682
 msgid ""
-"LimeWire could not create a temporary preferences folder.\n"
+"WireShare could not create a temporary preferences folder.\n"
 "\n"
 "This is generally caused by a lack of permissions.  Please make sure that "
-"LimeWire (and you) have access to create files/folders on your computer.  If "
+"WireShare (and you) have access to create files/folders on your computer.  If "
 "the problem persists, please visit www.limewire.com and click the 'Support' "
 "link.\n"
 "\n"
-"LimeWire will now exit.  Thank You."
+"WireShare will now exit.  Thank You."
 msgstr ""
-"LimeWire kunde inte skapa en tillfällig mapp för inställningar.\n"
+"WireShare kunde inte skapa en tillfällig mapp för inställningar.\n"
 "\n"
-"Orsaken är vanligtvis för låg behörighet. Se till att LimeWire (och du) har "
+"Orsaken är vanligtvis för låg behörighet. Se till att WireShare (och du) har "
 "tillåtelse att skapa filer/mappar på datorn.  Om problemet kvarstår, gå in "
 "på www.limewire.com och klicka på 'Support' länken.\n"
 "\n"
-"LimeWire kommer nu att avslutas. Tack."
+"WireShare kommer nu att avslutas. Tack."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:692
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:34
@@ -864,16 +864,16 @@ msgstr "Fel"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:708
 msgid ""
-"Another instance of LimeWire appears to be running. Please completely shut "
-"down all other instances of LimeWire before continuing. If this problem "
+"Another instance of WireShare appears to be running. Please completely shut "
+"down all other instances of WireShare before continuing. If this problem "
 "persists, please restart your computer."
 msgstr ""
-"En annan programdel av LimeWire verkar vara igång. Stäng alla andra delar av "
-"LimeWire innan du fortsätter. Om problemet kvarstår, starta om din dator."
+"En annan programdel av WireShare verkar vara igång. Stäng alla andra delar av "
+"WireShare innan du fortsätter. Om problemet kvarstår, starta om din dator."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:717
-msgid "LimeWire is already running"
-msgstr "LimeWire körs redan"
+msgid "WireShare is already running"
+msgstr "WireShare körs redan"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:56
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:66
@@ -890,19 +890,19 @@ msgstr "Visa inte detta meddelande igen"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
-"LimeWire was unable to create your settings folder and is using a temporary "
-"folder.  Your settings may be deleted when you close LimeWire. "
+"WireShare was unable to create your settings folder and is using a temporary "
+"folder.  Your settings may be deleted when you close WireShare. "
 msgstr ""
 "Limewire kunde inte skapa en mapp för dina inställningar och använder "
 "istället en tillfällig mapp. Dina inställningar kan bli borttagna när du "
-"avslutar LimeWire. "
+"avslutar WireShare. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:32
 msgid ""
-"LimeWire has encountered problems in managing your settings.  Your settings "
+"WireShare has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
-"LimeWire har stött på problem vid hanteringen av dina inställningar. Dina "
+"WireShare har stött på problem vid hanteringen av dina inställningar. Dina "
 "ändringar kan inte sparas vid avstängning."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
@@ -958,14 +958,14 @@ msgstr "Markera allt"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:63
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:24
 #, java-format
-msgid "{0} is no longer supported by LimeWire."
-msgstr "{0} stöds inte längre av LimeWire."
+msgid "{0} is no longer supported by WireShare."
+msgstr "{0} stöds inte längre av WireShare."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:67
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:30
 #, java-format
-msgid "{0} is not supported by LimeWire {1}. "
-msgstr "{0} stöds inte längre av LimeWire {1}. "
+msgid "{0} is not supported by WireShare {1}. "
+msgstr "{0} stöds inte längre av WireShare {1}. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationInfoAction.java:68
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/activation/ActivationUtilities.java:31
@@ -1278,29 +1278,29 @@ msgstr "Gnutella är frånkopplat men en Internetanslutning har upptäckts."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:260
 msgid ""
-"LimeWire has not been able to determine the external IP address of your NAT "
+"WireShare has not been able to determine the external IP address of your NAT "
 "or firewall"
 msgstr ""
-"LimeWire har inte kunnat fastställa den utgående IP adressen från din NAT "
+"WireShare har inte kunnat fastställa den utgående IP adressen från din NAT "
 "eller brandvägg"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:262
-msgid "LimeWire has not received any incoming UDP messages"
-msgstr "LimeWire har inte mottagit några inkommande UDP meddelanden"
+msgid "WireShare has not received any incoming UDP messages"
+msgstr "WireShare har inte mottagit några inkommande UDP meddelanden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:264
 msgid ""
-"LimeWire was not able to support firewall transfers in a previous session"
+"WireShare was not able to support firewall transfers in a previous session"
 msgstr ""
-"LimeWire kunde inte skicka eller ta emot filer genom brandväggen i en "
+"WireShare kunde inte skicka eller ta emot filer genom brandväggen i en "
 "föregående session"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:266
 msgid ""
-"LimeWire is behind a NAT or firewall that assigns a different external port "
+"WireShare is behind a NAT or firewall that assigns a different external port "
 "to each connection"
 msgstr ""
-"LimeWire är bakom en NAT eller en brandvägg som tilldelar olika utgående "
+"WireShare är bakom en NAT eller en brandvägg som tilldelar olika utgående "
 "portar för varje anslutning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:404
@@ -1488,7 +1488,7 @@ msgstr "Varning"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:121
 #, java-format
 msgid ""
-"This torrent contains files with the following extensions, which LimeWire is "
+"This torrent contains files with the following extensions, which WireShare is "
 "configured not to download: {0}."
 msgstr ""
 
@@ -1642,8 +1642,8 @@ msgid "Locate"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:116
-msgid "Loading LimeWire..."
-msgstr "Laddar LimeWire..."
+msgid "Loading WireShare..."
+msgstr "Laddar WireShare..."
 
 #. *
 #. * The undo action.
@@ -1772,11 +1772,11 @@ msgstr "Anti-virus skydd"
 #. message and dialog width.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:113
 msgid ""
-"LimeWire's Anti-Virus protection is powered by AVG.  AVG scans, detects and "
+"WireShare's Anti-Virus protection is powered by AVG.  AVG scans, detects and "
 "deletes files that are suspected to contain viruses or spyware.  <a "
 "href=\"{0}\">Learn more</a>"
 msgstr ""
-"LimeWire's Anti-virus skydd från AVG. AVG skannar, upptäcker och tar bort "
+"WireShare's Anti-virus skydd från AVG. AVG skannar, upptäcker och tar bort "
 "filer som misstänks innehålla virus eller spionprogram. <a href=\"{0}\"> Läs "
 "mer </ a>"
 
@@ -1804,11 +1804,11 @@ msgstr "Hot upptäckt"
 #, java-format
 msgid ""
 "{0} is suspected to contain a virus or spyware and has automatically been "
-"deleted for your protection.  LimeWire's Anti-Virus protection is powered by "
+"deleted for your protection.  WireShare's Anti-Virus protection is powered by "
 "AVG."
 msgstr ""
 "{0} misstänks innehålla virus eller spionprogram och har automatiskt "
-"raderats. LimeWire's Anti-virus skydd från AVG."
+"raderats. WireShare's Anti-virus skydd från AVG."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:182
 msgid "Can't Scan Yet"
@@ -1818,11 +1818,11 @@ msgstr "Går inte att skanna än"
 #, java-format
 msgid ""
 "{0} could not be inspected because the virus scanner is still downloading "
-"its first set of virus definitions.  LimeWire Anti-Virus protection is "
+"its first set of virus definitions.  WireShare Anti-Virus protection is "
 "powered by AVG."
 msgstr ""
 "{0} kunde inte kontrolleras eftersom virusscannern fortfarande hämtar första "
-"uppsättningen av virusdefinitioner. LimeWire Anti-virus skydd från AVG."
+"uppsättningen av virusdefinitioner. WireShare Anti-virus skydd från AVG."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:186
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:190
@@ -1833,18 +1833,18 @@ msgstr "Det går inte att scanna"
 #, java-format
 msgid ""
 "{0} could not be inspected because the virus scanner cannot be loaded.  "
-"LimeWire Anti-Virus protection is powered by AVG."
+"WireShare Anti-Virus protection is powered by AVG."
 msgstr ""
-"{0} kunde inte kontrolleras eftersom virusskydd inte kan laddas. LimeWire "
+"{0} kunde inte kontrolleras eftersom virusskydd inte kan laddas. WireShare "
 "Anti-virus skydd från AVG."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:191
 #, java-format
 msgid ""
 "{0} could not be inspected due to a problem with the virus scanner.  "
-"LimeWire Anti-Virus protection is powered by AVG."
+"WireShare Anti-Virus protection is powered by AVG."
 msgstr ""
-"{0} kunde inte kontrolleras på grund av problem med virusscannern. LimeWire "
+"{0} kunde inte kontrolleras på grund av problem med virusscannern. WireShare "
 "Anti-virus skydd från AVG."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:242
@@ -2357,15 +2357,15 @@ msgid "Share List"
 msgstr "Dela ut lista"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:9
-msgid "Facebook chat is not supported in this version of LimeWire."
-msgstr "Facebook chat stöds inte i den här versionen av LimeWire."
+msgid "Facebook chat is not supported in this version of WireShare."
+msgstr "Facebook chat stöds inte i den här versionen av WireShare."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:10
 msgid ""
-"We at Lime Wire are actively looking into remedies.  In the meantime, you "
+"We at Wire Share are actively looking into remedies.  In the meantime, you "
 "will still be able to browse friends."
 msgstr ""
-"Här på LimeWire letar vi alltid efter nya åtgärder. Under tiden kan du "
+"Här på WireShare letar vi alltid efter nya åtgärder. Under tiden kan du "
 "fortfarande bläddra vänner."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:11
@@ -2456,8 +2456,8 @@ msgid "Share"
 msgstr "Dela"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/ServiceSelectionLoginPanel.java:93
-msgid "Share with friends on LimeWire with the following:"
-msgstr "Dela följande med vänner på LimeWire:"
+msgid "Share with friends on WireShare with the following:"
+msgstr "Dela följande med vänner på WireShare:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:87
 msgid "Sign In"
@@ -2499,8 +2499,8 @@ msgid "Password"
 msgstr "Lösenord"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:227
-msgid "Sign in when I start LimeWire"
-msgstr "Logga in när jag startar LimeWire"
+msgid "Sign in when I start WireShare"
+msgstr "Logga in när jag startar WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:276
 msgid "Choose another account"
@@ -2531,10 +2531,10 @@ msgstr "Filter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:286
 msgid ""
-"LimeWire could not play this file. There may not be a sound device installed "
+"WireShare could not play this file. There may not be a sound device installed "
 "on your computer or your speakers may not be plugged in."
 msgstr ""
-"LimeWire kunde inte spela den här filen. Ljudenheten är kanske inte "
+"WireShare kunde inte spela den här filen. Ljudenheten är kanske inte "
 "installerad eller är högtalarna inte inkopplade."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryPanel.java:286
@@ -3057,22 +3057,22 @@ msgid "Resolution"
 msgstr "Upplösning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutAction.java:20
-msgid "&About LimeWire..."
-msgstr "&Om LimeWire..."
+msgid "&About WireShare..."
+msgstr "&Om WireShare..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:38
 msgid "Automatically Scroll"
 msgstr "Scrolla automatiskt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:52
-msgid "About LimeWire"
-msgstr "Om LimeWire"
+msgid "About WireShare"
+msgstr "Om WireShare"
 
 #. set up limewire version label
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:12
-msgid "LimeWire"
-msgstr "LimeWire"
+msgid "WireShare"
+msgstr "WireShare"
 
 #. set up close button
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:100
@@ -3086,15 +3086,15 @@ msgstr "Stäng informationsfönstret"
 #. introduction
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:129
 msgid ""
-"Inspired by LimeWire's owner, Mark Gorton, the LimeWire project is a "
+"Inspired by LimeWire's owner, Mark Gorton, the WireShare project is a "
 "collaborative <a href=\"http://www.limewire.org/\">open source effort</a> "
-"involving programmers and researchers from all over the world.  LimeWire is "
+"involving programmers and researchers from all over the world.  WireShare is "
 "also, of course, the result of the countless hours of work by LimeWire's "
 "developers:"
 msgstr ""
-"LimeWire-projektet är ett  <a href=\"http://www.limewire.org/\">open source "
+"WireShare-projektet är ett  <a href=\"http://www.limewire.org/\">open source "
 "effort</a> samarbete inspirerat av LimeWires ägare, Mark Gorton och "
-"involverar programmerare och forskare från hela världen.  LimeWire är också "
+"involverar programmerare och forskare från hela världen.  WireShare är också "
 "ett resultat av många timmars arbete av LimeWires utvecklare:"
 
 #. business developers
@@ -3118,12 +3118,12 @@ msgstr ""
 #. open source contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:280
 msgid ""
-"LimeWire open source contributors have provided significant code and many "
+"WireShare open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
-"LimeWires open source-medarbetare har bidragit med betydelsefull kod och "
+"WireShares open source-medarbetare har bidragit med betydelsefull kod och "
 "många buggfixar, idéer, efterforskning etc. till projektet. Nedanstående "
 "personer har antingen skrivit kod som distribueras med alla versioner av "
 "LimeWire, identifierat allvarliga kodbuggar eller både och:"
@@ -3131,12 +3131,12 @@ msgstr ""
 #. internationalization contributors
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:353
 msgid ""
-"LimeWire would also like to thank the many contributors to the "
+"WireShare would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
-"LimeWire web site."
+"WireShare web site."
 msgstr ""
-"LimeWire vill även passa på att tacka alla de som bidragit till "
-"översättningsprojektet, både vad gäller själva programmet och  LimeWires "
+"WireShare vill även passa på att tacka alla de som bidragit till "
+"översättningsprojektet, både vad gäller själva programmet och  WireShares "
 "webbplats."
 
 #. community VIPs
@@ -3150,12 +3150,12 @@ msgstr ""
 #. conclusion
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:379
 msgid ""
-"Finally, LimeWire would like to extend its sincere thanks to those "
+"Finally, WireShare would like to extend its sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
-"project. Without LimeWire users, the P2P Network would not exist."
+"project. Without WireShare users, the P2P Network would not exist."
 msgstr ""
-"Slutligen vill LimeWire rikta ett varmt tack till alla utvecklare, användare "
-"och alla andra som bidragit med sina idéer till projektet. Utan LimeWire "
+"Slutligen vill WireShare rikta ett varmt tack till alla utvecklare, användare "
+"och alla andra som bidragit med sina idéer till projektet. Utan WireShare "
 "användarna skulle inte P2P nätverket finnas."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:384
@@ -3166,7 +3166,7 @@ msgid ""
 "Inc., d/b/a LiveJournal.com, respectively. Neither Google&nbsp;Inc., the "
 "XMPP Standards Foundation nor LiveJournal.com are sponsors or partners of "
 "Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the "
-"LimeWire software. Use of these trademarks is merely to refer to the "
+"WireShare software. Use of these trademarks is merely to refer to the "
 "technology or service of the respective owner and not to confuse "
 "Lime&nbsp;Wire as the source of the respective Gmail, Jabber, and/or "
 "LiveJournal service or technology"
@@ -3176,7 +3176,7 @@ msgstr ""
 "varumärken som tillhör XMPP Standards Foundation och LiveJournal, Inc., d / "
 "b / a LiveJournal. com, respektive. Varken Google Inc., XMPP Standards "
 "Foundation eller LiveJournal.com är sponsorer eller partners till Lime Wire "
-"LLC och stöder ej heller Lime Wire LLC eller LimeWire programvara. "
+"LLC och stöder ej heller Lime Wire LLC eller WireShare programvara. "
 "Användning av dessa varumärken hänvisar enbart till den teknik eller tjänst "
 "av respektive ägare och ska inte blandas ihop med Lime Wire som källa för "
 "respektive Gmail, Jabber och / eller LiveJournal tjänst eller metod"
@@ -3217,7 +3217,7 @@ msgstr "Uppladdningar ({0})"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/LimeWireSwingUI.java:345
 msgid "New Version Available!"
-msgstr "Uppdatera LimeWire"
+msgstr "Uppdatera WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/OptionsAction.java:16
 msgid "&Options..."
@@ -3313,8 +3313,8 @@ msgid "&Tech Support"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
-msgid "&Using LimeWire"
-msgstr "&Använda LimeWire"
+msgid "&Using WireShare"
+msgstr "&Använda WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:55
 msgid "&FAQ"
@@ -3461,8 +3461,8 @@ msgstr "&World"
 
 #. add(new StoreUrlAction(I18n.tr("&Free Songs"), "http://www.store.limewire.com/free"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:80
-msgid "LimeWire Store Hel&p"
-msgstr "LimeWire Store Hjäl&p"
+msgid "WireShare Store Hel&p"
+msgstr "WireShare Store Hjäl&p"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/StoreMenu.java:84
 msgid "His&tory"
@@ -3568,19 +3568,19 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:83
 msgid ""
-"Below are the file extensions LimeWire knows about and how they are "
+"Below are the file extensions WireShare knows about and how they are "
 "classified throughout the program"
 msgstr ""
-"Nedanstående filändelser känner LimeWire till och vet hur de klassificeras i "
+"Nedanstående filändelser känner WireShare till och vet hur de klassificeras i "
 "programmet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:117
 msgid ""
-"File types that LimeWire doesn't know about are classified as \"Other\". Add "
+"File types that WireShare doesn't know about are classified as \"Other\". Add "
 "these files to a List by dragging them, or when adding a folder, click "
 "\"Advanced\" and choose specific file extensions"
 msgstr ""
-"Filtyper som är okända för LimeWire klassificeras som \"Övriga \". Lägg till "
+"Filtyper som är okända för WireShare klassificeras som \"Övriga \". Lägg till "
 "dessa filer till en lista genom att ”klicka och dra” eller när du skapar en "
 "ny mapp, klicka på \"Avancerat \" och välj att lägga till dessa specifika "
 "filändelser."
@@ -3616,7 +3616,7 @@ msgstr "Filändelse klassificering"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExternalAccessOptionPanel.java:45
 msgid ""
-"LimeWire can allow other processes to make use of its services, like search "
+"WireShare can allow other processes to make use of its services, like search "
 "and download, via a REST interface."
 msgstr ""
 
@@ -3630,10 +3630,10 @@ msgstr "Lägg till filändelse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:131
 msgid ""
-"LimeWire will not show files with the following extensions in your search "
+"WireShare will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"LimeWire kommer inte att visa filer med följande filändelser i dina "
+"WireShare kommer inte att visa filer med följande filändelser i dina "
 "sökresultat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:202
@@ -3655,14 +3655,14 @@ msgstr "Nyckelord"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:64
 msgid ""
-"LimeWire will not show files with the following keywords in your search "
+"WireShare will not show files with the following keywords in your search "
 "results"
 msgstr ""
-"LimeWire kommer inte att visa filer med följande nyckelord i dina sökresultat"
+"WireShare kommer inte att visa filer med följande nyckelord i dina sökresultat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:116
-msgid "Use LimeWire's blacklist to protect you from harmful people"
-msgstr "Använd LimeWires svarta lista för att blockera oönskade kontakter"
+msgid "Use WireShare's blacklist to protect you from harmful people"
+msgstr "Använd WireShares svarta lista för att blockera oönskade kontakter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilteringOptionPanel.java:119
 msgid "Block Hosts"
@@ -3690,8 +3690,8 @@ msgid "Allow Hosts"
 msgstr "Tillåt värdar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:37
-msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr "Lägg till ljudfiler som jag hämtat från LimeWire till iTunes"
+msgid "Add audio files I downloaded from WireShare to iTunes"
+msgstr "Lägg till ljudfiler som jag hämtat från WireShare till iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:91
 msgid ""
@@ -3722,8 +3722,8 @@ msgid "Daap Error"
 msgstr "Daap fel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:64
-msgid "Choose how to organize files you purchased from the LimeWire Store"
-msgstr "Välj hur du vill ordna filer du köpt från LimeWire Store"
+msgid "Choose how to organize files you purchased from the WireShare Store"
+msgstr "Välj hur du vill ordna filer du köpt från WireShare Store"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LWSFileNamingOptionPanel.java:66
 msgid "Subfolder"
@@ -3759,12 +3759,12 @@ msgid "Configure iTunes"
 msgstr "Konfigurera iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:108
-msgid "Configure how files in your LimeWire interact with iTunes"
-msgstr "Konfigurera hur filer i LimeWire påverkar iTunes"
+msgid "Configure how files in your WireShare interact with iTunes"
+msgstr "Konfigurera hur filer i WireShare påverkar iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:140
-msgid "Use the LimeWire player when I play Audio and Video files"
-msgstr "Använd LimeWires spelare när jag spelar upp ljud- och videofiler"
+msgid "Use the WireShare player when I play Audio and Video files"
+msgstr "Använd WireShares spelare när jag spelar upp ljud- och videofiler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:195
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:39
@@ -3857,14 +3857,14 @@ msgid "Language:"
 msgstr "Språk:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:80
-msgid "Help translate LimeWire!"
-msgstr "Hjälp till att översätt LimeWire!"
+msgid "Help translate WireShare!"
+msgstr "Hjälp till att översätt WireShare!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:89
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:77
-msgid "Help improve LimeWire by sending us anonymous usage data"
+msgid "Help improve WireShare by sending us anonymous usage data"
 msgstr ""
-"Hjälp till att förbättra LimeWire genom att skicka anonym användardata"
+"Hjälp till att förbättra WireShare genom att skicka anonym användardata"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:171
 msgid "Notifications and Warnings"
@@ -3888,8 +3888,8 @@ msgid "Friends and Chat"
 msgstr "Vänner och chatt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:218
-msgid "Sign into Friends when LimeWire starts"
-msgstr "Logga in på vänner när LimeWire startas upp"
+msgid "Sign into Friends when WireShare starts"
+msgstr "Logga in på vänner när WireShare startas upp"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:242
 msgid "Jabber Server:"
@@ -3921,8 +3921,8 @@ msgid "Service"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:82
-msgid "Let LimeWire choose my network interface (Recommended)"
-msgstr "Låt LimeWire välja mitt nätverksgränssnitt (rekommenderas)"
+msgid "Let WireShare choose my network interface (Recommended)"
+msgstr "Låt WireShare välja mitt nätverksgränssnitt (rekommenderas)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:83
 msgid "Let me choose a specific network interface"
@@ -3960,26 +3960,26 @@ msgstr "Inställningar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:141
 msgid ""
-"One or more options will take effect the next time LimeWire is restarted."
+"One or more options will take effect the next time WireShare is restarted."
 msgstr ""
-"Ett eller flera alternativ kommer att börja gälla nästa gång LimeWire startas"
+"Ett eller flera alternativ kommer att börja gälla nästa gång WireShare startas"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:27
 msgid ""
-"If your computer has a fast internet connection, LimeWire may act as an "
+"If your computer has a fast internet connection, WireShare may act as an "
 "\"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you "
 "notice performance issues."
 msgstr ""
-"Om datorn har en snabb internetanslutning kan LimeWire agera \"Ultrapeer\" "
+"Om datorn har en snabb internetanslutning kan WireShare agera \"Ultrapeer\" "
 "eller ansluta till Mojito DHT. Du kan inaktivera dessa om du upplever "
 "försämrad prestanda."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:28
 msgid ""
-"LimeWire uses a secure communications mode called TLS, which may use more "
+"WireShare uses a secure communications mode called TLS, which may use more "
 "CPU resources."
 msgstr ""
-"LimeWire använder sig av ett säkert kommunikationsläge kallat TLS som "
+"WireShare använder sig av ett säkert kommunikationsläge kallat TLS som "
 "använder mer processorresurser."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:29
@@ -4152,8 +4152,8 @@ msgid "Startup and Shutdown"
 msgstr "Start och avslutning"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:242
-msgid "Run LimeWire on System Startup"
-msgstr "Kör LimeWire vid systemstart"
+msgid "Run WireShare on System Startup"
+msgstr "Kör WireShare vid systemstart"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:244
 msgid "Minimize to system tray"
@@ -4192,12 +4192,12 @@ msgid "Let me know about bugs before sending them"
 msgstr "Låt mig få veta om felrapporter innan de skickas"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:358
-msgid "Always send bugs to Lime Wire"
-msgstr "Skicka alltid felrapporter till LimeWire"
+msgid "Always send bugs to Wire Share"
+msgstr "Skicka alltid felrapporter till WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:360
-msgid "Never send bugs to Lime Wire"
-msgstr "Skicka aldrig felrapporter till LimeWire"
+msgid "Never send bugs to Wire Share"
+msgstr "Skicka aldrig felrapporter till WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferLimitsOptionPanel.java:135
 msgid "Limit your download bandwidth"
@@ -4252,17 +4252,17 @@ msgid "Configure where different categories are downloaded"
 msgstr "Konfigurera var olika kategorier är nedladdade"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:252
-msgid "Configure how LimeWire Store downloads are organized"
-msgstr "Konfigurera hur nedladdningar från LimeWire Store är organiserade"
+msgid "Configure how WireShare Store downloads are organized"
+msgstr "Konfigurera hur nedladdningar från WireShare Store är organiserade"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:253
 msgid "Store File Organization"
 msgstr "Store filorganisering"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:253
-msgid "Configure how files downloaded from the LimeWire Store are organized"
+msgid "Configure how files downloaded from the WireShare Store are organized"
 msgstr ""
-"Konfigurera hur filerna som laddas ner från LimeWire Store är organiserade"
+"Konfigurera hur filerna som laddas ner från WireShare Store är organiserade"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:293
 msgid "Could not save download directory, reverted to old directory"
@@ -4445,8 +4445,8 @@ msgid "Free tech support and upgrades"
 msgstr "Gratis teknisk support och uppgradering"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:294
-msgid "Upgrade to LimeWire PRO?"
-msgstr "Uppgradera till LimeWire PRO?"
+msgid "Upgrade to WireShare PRO?"
+msgstr "Uppgradera till WireShare PRO?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:297
 msgid "Why"
@@ -4470,12 +4470,12 @@ msgid "Edit License Key"
 msgstr "Redigera licensnyckel"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:352
-msgid "Time to Renew Your LimeWire"
-msgstr "Dags att förnya ditt LimeWire"
+msgid "Time to Renew Your WireShare"
+msgstr "Dags att förnya ditt WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:358
-msgid "Your LimeWire subscription will be expiring shortly."
-msgstr "Ditt LimeWire abonnemang löper ut inom kort."
+msgid "Your WireShare subscription will be expiring shortly."
+msgstr "Ditt WireShare abonnemang löper ut inom kort."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/pro/ProNag.java:363
 msgid "Don't miss a thing - act now for special renewal pricing!"
@@ -4747,8 +4747,8 @@ msgid "Always ask before starting torrent"
 msgstr "Fråga alltid innan en torrent påbörjas"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/AwaitingConnectionsPanel.java:52
-msgid "LimeWire is connecting..."
-msgstr "LimeWire ansluter..."
+msgid "WireShare is connecting..."
+msgstr "WireShare ansluter..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:81
 msgid "All P2P Users"
@@ -4777,21 +4777,21 @@ msgid "Retry"
 msgstr "Försök igen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:160
-msgid "When you sign on to LimeWire, your friends' files will appear here."
+msgid "When you sign on to WireShare, your friends' files will appear here."
 msgstr ""
-"När du loggar in på LimeWire kommer dina vänners filer att finnas här."
+"När du loggar in på WireShare kommer dina vänners filer att finnas här."
 
 #. BrowseState.OFFLINE
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:162
-msgid "When you sign on to LimeWire, your friend's files will appear here."
-msgstr "När du loggar in på LimeWire visas dina vänners filer här."
+msgid "When you sign on to WireShare, your friend's files will appear here."
+msgstr "När du loggar in på WireShare visas dina vänners filer här."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:165
 msgid ""
-"When they sign on to LimeWire and share with you, their files will appear "
+"When they sign on to WireShare and share with you, their files will appear "
 "here."
 msgstr ""
-"När de loggar in på LimeWire och delar med dig visas deras filer här."
+"När de loggar in på WireShare och delar med dig visas deras filer här."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:184
 msgid "<HTML><A href=\"\">Chat</A> and tell them to share.</HTML>"
@@ -4806,17 +4806,17 @@ msgid "No friends are sharing with you"
 msgstr "Inga vänner delar med dig"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:219
-msgid "No friends are on LimeWire"
-msgstr "Inga vänner på LimeWire"
+msgid "No friends are on WireShare"
+msgstr "Inga vänner på WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:224
 #, java-format
-msgid "{0} is not signed on to LimeWire."
-msgstr "{0} är inte inloggad på LimeWire."
+msgid "{0} is not signed on to WireShare."
+msgstr "{0} är inte inloggad på WireShare."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:226
-msgid "These people are not signed on to LimeWire."
-msgstr "Dessa personer är inte inloggade på LimeWire."
+msgid "These people are not signed on to WireShare."
+msgstr "Dessa personer är inte inloggade på WireShare."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:231
 #, java-format
@@ -4889,18 +4889,18 @@ msgstr "Att ladda ner program kan leda till virus"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
 msgid ""
-"We recommend you don't download programs using LimeWire. However, you can "
+"We recommend you don't download programs using WireShare. However, you can "
 "enable downloading programs via Preferences > Search > Configure..."
 msgstr ""
-"Vi rekommenderar att du inte laddar ner program med LimeWire. Däremot kan du "
+"Vi rekommenderar att du inte laddar ner program med WireShare. Däremot kan du "
 "aktivera nedladdning av program via Inställningar> Sök> Konfigurera ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
 msgid ""
-"We recommend you don't download programs using LimeWire. However, you can "
+"We recommend you don't download programs using WireShare. However, you can "
 "enable downloading programs via Tools > Options > Search > Configure..."
 msgstr ""
-"Vi rekommenderar att du inte laddar ner program med LimeWire. Däremot kan du "
+"Vi rekommenderar att du inte laddar ner program med WireShare. Däremot kan du "
 "aktivera nedladdning av program via Verktyg> Alternativ> Sök> Konfigurera ..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:131
@@ -4983,8 +4983,8 @@ msgid "Only torrents"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsMessagePanel.java:89
-msgid "You might not receive many results until LimeWire is fully connected"
-msgstr "Du kanske inte får många resultat förrän LimeWire är helt ansluten"
+msgid "You might not receive many results until WireShare is fully connected"
+msgstr "Du kanske inte får många resultat förrän WireShare är helt ansluten"
 
 #. button to close the classic search results hint
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsMessagePanel.java:165
@@ -5160,15 +5160,15 @@ msgstr "Kopiera länk"
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
 msgid ""
-"LimeWire is unable to find a license for this file. Download it anyway?\n"
+"WireShare is unable to find a license for this file. Download it anyway?\n"
 "\n"
-"LimeWire cannot monitor or control the content of the P2P Network, so please "
+"WireShare cannot monitor or control the content of the P2P Network, so please "
 "respect your local copyright laws."
 msgstr ""
 "LimeWire kan inte hitta en licens för den här filen. Ladda ner filen i alla "
 "fall?\n"
 "\n"
-"LimeWire kan inte övervaka eller kontrollera innehållet i P2P nätverk, följ "
+"WireShare kan inte övervaka eller kontrollera innehållet i P2P nätverk, följ "
 "dina lokala upphovsrättslagar."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:45
@@ -5241,45 +5241,45 @@ msgstr "Visar inte {0} resultat. Begränsa resultat för att se mer."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:58
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:38
-msgid "For Turbo-Charged searches get LimeWire PRO."
+msgid "For Turbo-Charged searches get WireShare PRO."
 msgstr "För turboladdade sökningar skaffa Limewire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:62
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Stöd LimeWires utvecklingsarbete. Köp PRO."
+msgid "Support WireShare's peer-to-peer development. Get PRO."
+msgstr "Stöd WireShares utvecklingsarbete. Köp PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:46
-msgid "Purchase LimeWire PRO to help us make downloads faster."
+msgid "Purchase WireShare PRO to help us make downloads faster."
 msgstr ""
-"Köp LimeWire PRO för att hjälpa oss att göra nedladdningarna snabbare ."
+"Köp WireShare PRO för att hjälpa oss att göra nedladdningarna snabbare ."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:50
-msgid "For Turbo-Charged downloads get LimeWire PRO."
+msgid "For Turbo-Charged downloads get WireShare PRO."
 msgstr "För snabbare nedladdningar köp Limewire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:72
-msgid "Support open networks. Get LimeWire PRO."
+msgid "Support open networks. Get WireShare PRO."
 msgstr "Stöd öppna nätverk. Skaffa Limewire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:76
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Stöd öppna nätverk och öppna protokoll. Skaffa LimeWire PRO."
+msgid "Support open source and open protocols. Get WireShare PRO."
+msgstr "Stöd öppna nätverk och öppna protokoll. Skaffa WireShare PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:79
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:62
-msgid "For Turbo-Charged performance get LimeWire PRO."
+msgid "For Turbo-Charged performance get WireShare PRO."
 msgstr "För snabbare prestanda skaffa Limewire PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:82
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:66
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Håll Internet öppet. Skaffa LimeWire PRO."
+msgid "Keep the Internet open. Get WireShare PRO."
+msgstr "Håll Internet öppet. Skaffa WireShare PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/settings/SwingUiSettings.java:85
-msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Utvecklandet av LimeWire kostar stora pengar. Köp PRO."
+msgid "Developing WireShare costs real money. Get PRO."
+msgstr "Utvecklandet av WireShare kostar stora pengar. Köp PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:95
 msgid "\"magnet:\" links"
@@ -5290,31 +5290,31 @@ msgid "\".magnet:\" links"
 msgstr "\".magnet:\" länkar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
-msgid "Warn me when other programs take LimeWire associations"
-msgstr "Varna mig när andra program tar LimeWires associationer"
+msgid "Warn me when other programs take WireShare associations"
+msgstr "Varna mig när andra program tar WireShares associationer"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 msgid ""
-"Torrent files and magnet links are no longer associated with LimeWire. Would "
-"you like LimeWire to re-associate them?"
+"Torrent files and magnet links are no longer associated with WireShare. Would "
+"you like WireShare to re-associate them?"
 msgstr ""
-"Torrentfiler och magnetlänkar associeras inte längre med LimeWire. Vill du "
-"att LimeWire omassocierar dem?"
+"Torrentfiler och magnetlänkar associeras inte längre med WireShare. Vill du "
+"att WireShare omassocierar dem?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:80
 msgid ""
-"Torrent files are no longer associated with LimeWire. Would you like "
-"LimeWire to re-associate them?"
+"Torrent files are no longer associated with WireShare. Would you like "
+"WireShare to re-associate them?"
 msgstr ""
-"Torrentfiler associeras inte längre med LimeWire. Vill du att LimeWire "
+"Torrentfiler associeras inte längre med WireShare. Vill du att WireShare "
 "omassocierar dem?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:84
 msgid ""
-"Magnet links are no longer associated with LimeWire. Would you like LimeWire "
+"Magnet links are no longer associated with WireShare. Would you like WireShare "
 "to re-associate them?"
 msgstr ""
-"Magnetlänkar associeras inte längre med LimeWire. Vill du att LimeWire "
+"Magnetlänkar associeras inte längre med WireShare. Vill du att WireShare "
 "omassocierar dem?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:105
@@ -5330,8 +5330,8 @@ msgid "Couldn't connect"
 msgstr "Kunde inte ansluta"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:111
-msgid "You couldn't connect to LimeWire"
-msgstr "Du kan inte ansluta till LimeWire"
+msgid "You couldn't connect to WireShare"
+msgstr "Du kan inte ansluta till WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:122
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:127
@@ -5391,20 +5391,20 @@ msgid "All Completed"
 msgstr "Alla slutförda"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:42
-msgid "Want faster downloads?  Get LimeWire PRO."
-msgstr "Vill du ha en snabbare nedladdning? Skaffa LimeWire PRO."
+msgid "Want faster downloads?  Get WireShare PRO."
+msgstr "Vill du ha en snabbare nedladdning? Skaffa WireShare PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:54
-msgid "For the best BitTorrent downloads, get LimeWire PRO."
-msgstr "För den bästa BitTorrent nedladdningen, skaffa LimeWire PRO."
+msgid "For the best BitTorrent downloads, get WireShare PRO."
+msgstr "För den bästa BitTorrent nedladdningen, skaffa WireShare PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:58
-msgid "LimeWire PRO comes with FREE tech support. "
-msgstr "LimeWire PRO inkluderar GRATIS support. "
+msgid "WireShare PRO comes with FREE tech support. "
+msgstr "WireShare PRO inkluderar GRATIS support. "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ProStatusPanel.java:70
-msgid "FREE updates and support - LimeWire PRO."
-msgstr "GRATIS uppdateringar och support - LimeWire PRO."
+msgid "FREE updates and support - WireShare PRO."
+msgstr "GRATIS uppdateringar och support - WireShare PRO."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:32
 #, java-format
@@ -5442,8 +5442,8 @@ msgid "Spam"
 msgstr "Spam"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
-msgid "LimeWire 5"
-msgstr "LimeWire 5"
+msgid "WireShare 5"
+msgstr "WireShare 5"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/Notification.java:57
 msgctxt "Launch Action Text (Notification)"
@@ -5452,8 +5452,8 @@ msgstr "Kör"
 
 #. restore
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:102
-msgid "Show LimeWire"
-msgstr "Visa LimeWire"
+msgid "Show WireShare"
+msgstr "Visa WireShare"
 
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:115
@@ -5477,12 +5477,12 @@ msgstr "Besök http://www.limewire.com för att uppdatera!"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:176
 msgid ""
-"LimeWire needs to be restarted to install the update. If you choose not to "
-"update now, LimeWire will update automatically when you close. Would you "
+"WireShare needs to be restarted to install the update. If you choose not to "
+"update now, WireShare will update automatically when you close. Would you "
 "like to update now?"
 msgstr ""
-"LimeWire behöver startas om för att installera uppdateringen. Om du väljer "
-"att inte uppdatera nu, kommer LimeWire automatiskt uppdatera när du stänger. "
+"WireShare behöver startas om för att installera uppdateringen. Om du väljer "
+"att inte uppdatera nu, kommer WireShare automatiskt uppdatera när du stänger. "
 "Vill du uppdatera nu?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:177
@@ -5608,10 +5608,10 @@ msgstr "Du kan inte ladda ner filer till denna plats."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:166
 msgid ""
 "Sorry, there is a problem with torrents.\n"
-"Please try reinstalling LimeWire to solve this problem."
+"Please try reinstalling WireShare to solve this problem."
 msgstr ""
 "Det finns tyvärr ett problem med torrents.\n"
-"Försök att ominstallera LimeWire för att åtgärda problemet."
+"Försök att ominstallera WireShare för att åtgärda problemet."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:169
 msgid "You can also ask for help on the forums."
@@ -5947,12 +5947,12 @@ msgstr "Något om det lagliga"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:289
 #, java-format
 msgid ""
-"<html><body>LimeWire Basic and LimeWire PRO are peer-to-peer programs for "
+"<html><body>WireShare Basic and WireShare PRO are peer-to-peer programs for "
 "sharing authorized files only. Copyright laws may forbid obtaining or "
 "distributing certain copyrighted content. Learn more information about <a "
 "href=\"{0}\">Copyright</a></body></html>."
 msgstr ""
-"<html><body>LimeWire Basic och LimeWire PRO är P2P program för delning av "
+"<html><body>WireShare Basic och WireShare PRO är P2P program för delning av "
 "enbart auktoriserade filer. Upphovsrättslagar kan förbjuda att ta emot eller "
 "distribuera upphovsrättsskyddat innehåll. Hitta mer information om<a "
 "href=\"{0}\">upphovsrätt</a></body></html>."
@@ -5962,12 +5962,12 @@ msgid "Copyright Infringement"
 msgstr "Upphovrättsintrång"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:291
-msgid "LimeWire Privacy Policy"
-msgstr "LimeWire Sekretesspolicy"
+msgid "WireShare Privacy Policy"
+msgstr "WireShare Sekretesspolicy"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:292
-msgid "LimeWire License Agreement"
-msgstr "LimeWire Licensavtal"
+msgid "WireShare License Agreement"
+msgstr "WireShare Licensavtal"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:293
 msgid "AVG Anti-Virus License Agreement"
@@ -5976,24 +5976,24 @@ msgstr "AVG Anti-virus Licensavtal"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
 msgid ""
 "By clicking \"I Agree\", you agree that you have read, understand and assent "
-"to the terms of the LimeWire and AVG Anti-Virus License Agreements and "
-"LimeWire Privacy Policy. You also agree that you will not use LimeWire for "
+"to the terms of the WireShare and AVG Anti-Virus License Agreements and "
+"WireShare Privacy Policy. You also agree that you will not use WireShare for "
 "copyright infringement."
 msgstr ""
 "Genom att klicka på \"Jag godkänner\" bekräftar du att du har läst, förstått "
-"och samtycker till villkoren i LimeWire och AVG Antiv-virus licensavtal och "
-"LimeWire Sekretesspolicy. Du accepterar även att du inte kommer att använda "
-"LimeWire för upphovsrättsbrott."
+"och samtycker till villkoren i WireShare och AVG Antiv-virus licensavtal och "
+"WireShare Sekretesspolicy. Du accepterar även att du inte kommer att använda "
+"WireShare för upphovsrättsbrott."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
 msgid ""
 "By clicking \"I Agree\", you agree that you have read, understand and assent "
-"to the terms of the LimeWire License Agreement and LimeWire Privacy Policy. "
-"You also agree that you will not use LimeWire for copyright infringement."
+"to the terms of the WireShare License Agreement and WireShare Privacy Policy. "
+"You also agree that you will not use WireShare for copyright infringement."
 msgstr ""
 "Genom att klicka på \"Jag godkänner\" bekräftar du att du har läst, förstått "
-"och samtycker till villkoren i LimeWire licensavtalet och LimeWire "
-"Sekretesspolicy. Du accepterar även att du inte kommer att använda LimeWire "
+"och samtycker till villkoren i WireShare licensavtalet och WireShare "
+"Sekretesspolicy. Du accepterar även att du inte kommer att använda WireShare "
 "för upphovsrättsbrott."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:295
@@ -6010,7 +6010,7 @@ msgstr "Jag godkänner"
 
 #. wrap
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:66
-msgid "Did you purchase LimeWire PRO?"
+msgid "Did you purchase WireShare PRO?"
 msgstr ""
 
 #. wrap
@@ -6019,7 +6019,7 @@ msgstr ""
 msgid ""
 "If you did, please enter your license key - we provided it online and via "
 "email when you signed up. If you don't want to activate PRO now, you can "
-"always do it later by clicking on the \"File\" tab in LimeWire and then "
+"always do it later by clicking on the \"File\" tab in WireShare and then "
 "clicking \"Licenses.\""
 msgstr ""
 
@@ -6028,7 +6028,7 @@ msgid "Your License Key:"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:96
-msgid "Activate LimeWire PRO"
+msgid "Activate WireShare PRO"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupActivationPanel.java:119
@@ -6102,16 +6102,16 @@ msgid "File Associations and Startup"
 msgstr "Filkopplingar och uppstart"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
-msgid "Associate magnet links and torrent files with LimeWire"
+msgid "Associate magnet links and torrent files with WireShare"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:66
-msgid "Launch LimeWire at system startup"
-msgstr "Starta LimeWire vid systemstart"
+msgid "Launch WireShare at system startup"
+msgstr "Starta WireShare vid systemstart"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:75
-msgid "Improve LimeWire"
-msgstr "Förbättra LimeWire"
+msgid "Improve WireShare"
+msgstr "Förbättra WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:85
 msgid "Content Filters"
@@ -6131,8 +6131,8 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:104
-msgid "All settings can be changed later from LimeWire > Preferences"
-msgstr "Alla inställningar kan ändras senare från LimeWire > Inställningar"
+msgid "All settings can be changed later from WireShare > Preferences"
+msgstr "Alla inställningar kan ändras senare från WireShare > Inställningar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:111
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:105
@@ -6155,10 +6155,10 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:136
 msgid ""
-"LimeWire will add files you download from P2P Users into your Public Shared "
+"WireShare will add files you download from P2P Users into your Public Shared "
 "list."
 msgstr ""
-"LimeWire lägger till filer som du laddar ner från P2P användare i din "
+"WireShare lägger till filer som du laddar ner från P2P användare i din "
 "offentligt delade lista."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:150
@@ -6181,11 +6181,11 @@ msgstr ""
 "världen."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:104
-msgid "LimeWire PRO"
-msgstr "LimeWire PRO"
+msgid "WireShare PRO"
+msgstr "WireShare PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:114
-msgid "I didn't purchase LimeWire PRO"
+msgid "I didn't purchase WireShare PRO"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:123
@@ -6258,8 +6258,8 @@ msgstr "Installation"
 #~ msgid "Firewall"
 #~ msgstr "Brandvägg"
 
-#~ msgid "LimeWire Store"
-#~ msgstr "LimeWire Store"
+#~ msgid "WireShare Store"
+#~ msgstr "WireShare Store"
 
 #~ msgid "Router Configuration"
 #~ msgstr "Routerkonfiguration"
@@ -6268,14 +6268,14 @@ msgstr "Installation"
 #~ msgstr "Meddelanden"
 
 #~ msgid ""
-#~ "LimeWire was unable to initialize and start. This is usually due to a "
-#~ "firewall program blocking LimeWire's access to the internet or loopback "
-#~ "connections on the local machine. Please allow LimeWire access to the "
-#~ "internet and restart LimeWire."
+#~ "WireShare was unable to initialize and start. This is usually due to a "
+#~ "firewall program blocking WireShare's access to the internet or loopback "
+#~ "connections on the local machine. Please allow WireShare access to the "
+#~ "internet and restart WireShare."
 #~ msgstr ""
-#~ "LimeWire kunde inte startas. Det beror vanligtvis på att en brandvägg "
-#~ "blockerar LimeWires åtkomst till internet eller loopback- anslutningar på "
-#~ "den lokala datorn. Låt LimeWire komma åtinternet och starta om LimeWire."
+#~ "WireShare kunde inte startas. Det beror vanligtvis på att en brandvägg "
+#~ "blockerar WireShares åtkomst till internet eller loopback- anslutningar på "
+#~ "den lokala datorn. Låt WireShare komma åtinternet och starta om WireShare."
 
 #~ msgid "Finishing download..."
 #~ msgstr "Slutför hämtning..."
@@ -6319,8 +6319,8 @@ msgstr "Installation"
 #~ msgstr "Kom i håg mig"
 
 #, java-format
-#~ msgid "{0} isn't on LimeWire"
-#~ msgstr "{0} är inte på LimeWire"
+#~ msgid "{0} isn't on WireShare"
+#~ msgstr "{0} är inte på WireShare"
 
 #~ msgid "My Library"
 #~ msgstr "Mitt bibliotek"
@@ -6329,8 +6329,8 @@ msgstr "Installation"
 #~ msgid "Sharing entire {0} Collection with {1}"
 #~ msgstr "Delar hela {0} samlignen med {1}"
 
-#~ msgid "On LimeWire"
-#~ msgstr "På LimeWire"
+#~ msgid "On WireShare"
+#~ msgstr "På WireShare"
 
 #~ msgid "Online"
 #~ msgstr "Online"
@@ -6365,11 +6365,11 @@ msgstr "Installation"
 #~ msgid "Super Really Advanced"
 #~ msgstr "Superjätteavancerat"
 
-#~ msgid "Let LimeWire manage my BitTorrent settings (Recommended)"
-#~ msgstr "Låt LimeWire hantera mina BitTorrent-inställningar (rekommenderas)"
+#~ msgid "Let WireShare manage my BitTorrent settings (Recommended)"
+#~ msgstr "Låt WireShare hantera mina BitTorrent-inställningar (rekommenderas)"
 
 #~ msgid "Let me manage my BitTorrent settings"
-#~ msgstr "Låt LimeWire hantera mina BitTorrent-inställningar"
+#~ msgstr "Låt WireShare hantera mina BitTorrent-inställningar"
 
 #~ msgid "Safe chunk verification"
 #~ msgstr "Säker bitverifiering"
@@ -6441,14 +6441,14 @@ msgstr "Installation"
 #~ msgstr "Avlyssna port:"
 
 #~ msgid ""
-#~ "Using Universal Plug n' Play, LimeWire can automatically configure your "
+#~ "Using Universal Plug n' Play, WireShare can automatically configure your "
 #~ "router or firewall for optimal performance. If your router does not support "
-#~ "Universal Plug n' Play, LimeWire can be set to advertise an external port "
+#~ "Universal Plug n' Play, WireShare can be set to advertise an external port "
 #~ "manually."
 #~ msgstr ""
-#~ "Med hjälp av Universal Plug n' Play kan LimeWire automatiskt konfigurera din "
+#~ "Med hjälp av Universal Plug n' Play kan WireShare automatiskt konfigurera din "
 #~ "router eller brandvägg för bästa prestanda. Om din router inte har stöd för "
-#~ "Universal Plug n' Play, kan LimeWire ställas in för att utannonsera mot en "
+#~ "Universal Plug n' Play, kan WireShare ställas in för att utannonsera mot en "
 #~ "extern port manuellt."
 
 #~ msgid "Play notification sounds"
@@ -6463,8 +6463,8 @@ msgstr "Installation"
 #~ msgid "Choose which warning messags to display"
 #~ msgstr "Välj vilka varningsmeddelanden som ska visas"
 
-#~ msgid "Choose which warning messages you want to see when using LimeWire"
-#~ msgstr "Välj vilka varningsmeddelanden du vill se när du använder LimeWire"
+#~ msgid "Choose which warning messages you want to see when using WireShare"
+#~ msgstr "Välj vilka varningsmeddelanden du vill se när du använder WireShare"
 
 #~ msgid "Unsafe Categories"
 #~ msgstr "Osäkra kategorier"
@@ -6472,14 +6472,14 @@ msgstr "Installation"
 #~ msgid "Configure unsafe categories"
 #~ msgstr "Konfigurera osäkra kategorier"
 
-#~ msgid "For your safety, LimeWire disables you from:"
-#~ msgstr "För din säkerhet gör LimeWire att du inte kan:"
+#~ msgid "For your safety, WireShare disables you from:"
+#~ msgstr "För din säkerhet gör WireShare att du inte kan:"
 
 #~ msgid "In search results..."
 #~ msgstr "I sökresultat..."
 
-#~ msgid "By default, LimeWire allows you to share documents with your friends"
-#~ msgstr "Som standard låter LimeWire dig dela dokument med dina vänner"
+#~ msgid "By default, WireShare allows you to share documents with your friends"
+#~ msgstr "Som standard låter WireShare dig dela dokument med dina vänner"
 
 #~ msgid "Warn me when downloading a file without a license"
 #~ msgstr "Varna mig när jag laddar ner en fil utan licens"
@@ -6507,14 +6507,14 @@ msgstr "Installation"
 #~ msgstr "Programresultat"
 
 #~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download it anyway?\n"
+#~ "WireShare is unable to find a license for this file. Download it anyway?\n"
 #~ "\n"
-#~ "LimeWire cannot monitor or control the content of the P2P network, so please "
+#~ "WireShare cannot monitor or control the content of the P2P network, so please "
 #~ "respect your local copyright laws."
 #~ msgstr ""
-#~ "LimeWire hittade ingen licens för den här filen. Ladda ner den ändå?\n"
+#~ "WireShare hittade ingen licens för den här filen. Ladda ner den ändå?\n"
 #~ "\n"
-#~ "LimeWire kan inte övervaka eller kontrollera materialet på P2P-nätverket så "
+#~ "WireShare kan inte övervaka eller kontrollera materialet på P2P-nätverket så "
 #~ "vi ber dig respektera upphovsrätten som gäller där du bor."
 
 #~ msgid "Unmark as spam"
@@ -6543,11 +6543,11 @@ msgstr "Installation"
 #~ msgid "KB"
 #~ msgstr "kB"
 
-#~ msgid "Associate .magnet and .torrent files with LimeWire"
-#~ msgstr "Koppla .magnet och .torrent-filer till LimeWire"
+#~ msgid "Associate .magnet and .torrent files with WireShare"
+#~ msgstr "Koppla .magnet och .torrent-filer till WireShare"
 
-#~ msgid "Launch LimeWire at Startup"
-#~ msgstr "Starta LimeWire vid uppstart"
+#~ msgid "Launch WireShare at Startup"
+#~ msgstr "Starta WireShare vid uppstart"
 
 #~ msgid "Finish"
 #~ msgstr "Slutför"
