@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.BorderFactory;
@@ -181,17 +182,22 @@ public class HomePanel extends JXPanel {
         if(MozillaInitialization.isInitialized()) {            
             browser.load(url);
         } else {
-            URL bgImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/body_bg.png");
-            URL topImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/header_logo.png");                    
-            String offlinePage = "<html><head><style type=\"text/css\">* {margin: 0;  padding: 0;} body {background: #EAEAEA url(\""+ bgImage.toExternalForm() + "\") repeat-x left top; font-family: Arial, sans-serif;}table#layout tr td#header {  background: url(\"" + topImage.toExternalForm() + "\") no-repeat center top;}table#layout tr td h2 {  font-size: 16px;  margin: 0 0 8px 0;  color: #807E7E;}table#layout tr td p {  font-size: 11px;  color: #931F22;}</style></head><body><center>  <table id=\"layout\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"400\" style=\"margin: 46px 0 0 0\">    <tr valign=\"top\">      <td id=\"header\" height=\"127\" align=\"center\"></td>    </tr>    <tr valign=\"top\">      <td align=\"center\">        <h2>You are disconnected from XMPP</h2>        <p>Please check your Jabber settings.</p>      </td>    </tr>  </table></center></body></html>";
-            
-            fallbackBrowser.setPageAsynchronous(url, offlinePage).addFutureListener(new EventListener<FutureEvent<LoadResult>>() {
-                @Override
-				@SwingEDTEvent
-                public void handleEvent(FutureEvent<LoadResult> event) {
-                    pageLoadFinished(event.getResult() == LoadResult.SERVER_PAGE);
-                }
-            });
+    		try {
+				fallbackBrowser.setPage(url);
+			} catch (IOException e) {
+
+	        	URL bgImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/body_bg.png");
+	            URL topImage = HomePanel.class.getResource("/org/limewire/ui/swing/mainframe/resources/icons/static_pages/header_logo.png");                    
+	            String offlinePage = "<html><head><style type=\"text/css\">* {margin: 0;  padding: 0;} body {background: #EAEAEA url(\""+ bgImage.toExternalForm() + "\") repeat-x left top; font-family: Arial, sans-serif;}table#layout tr td#header {  background: url(\"" + topImage.toExternalForm() + "\") no-repeat center top;}table#layout tr td h2 {  font-size: 16px;  margin: 0 0 8px 0;  color: #807E7E;}table#layout tr td p {  font-size: 11px;  color: #931F22;}</style></head><body><center>  <table id=\"layout\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"400\" style=\"margin: 46px 0 0 0\">    <tr valign=\"top\">      <td id=\"header\" height=\"127\" align=\"center\"></td>    </tr>    <tr valign=\"top\">      <td align=\"center\">        <h2></h2>        <p></p>      </td>    </tr>  </table></center></body></html>";
+	            
+	            fallbackBrowser.setPageAsynchronous(url, offlinePage).addFutureListener(new EventListener<FutureEvent<LoadResult>>() {
+	                @Override
+					@SwingEDTEvent
+	                public void handleEvent(FutureEvent<LoadResult> event) {
+	                    pageLoadFinished(event.getResult() == LoadResult.SERVER_PAGE);
+	                }
+	            });
+            }
         }
     } 
     
