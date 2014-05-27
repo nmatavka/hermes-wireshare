@@ -266,7 +266,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
     private final ConnectionCheckerManager connectionCheckerManager;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
-    private final Provider<Acceptor> acceptor;
     
     @Inject
     public ConnectionManagerImpl(NetworkManager networkManager,
@@ -281,8 +280,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
              Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory, 
-            NetworkInstanceUtils networkInstanceUtils,
-            Provider<Acceptor> acceptor){
+            NetworkInstanceUtils networkInstanceUtils){
         this.networkManager = networkManager;
         this.hostCatcher = hostCatcher;
         this.connectionDispatcher = connectionDispatcher;
@@ -296,7 +294,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         this.connectionCheckerManager = connectionCheckerManager;
         this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
-        this.acceptor = acceptor;
         
         Version v = null;
         try {
@@ -433,7 +430,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
-        if(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() && acceptor.get().acceptedIncoming())
+        if(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue())
             return true;
         if(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue())
             return false;
