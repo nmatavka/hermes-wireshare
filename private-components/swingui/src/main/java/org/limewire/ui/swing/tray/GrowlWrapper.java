@@ -96,8 +96,8 @@ class GrowlWrapper
                     "included in the allNotifications array too");
         }
         
-        state=GROWL_OK;
-        
+        //state=GROWL_OK;
+        state=GROWL_UNAVAILABLE; //Disable Growl
         // Test for Mac
         // Code from http://developer.apple.com/technotes/tn2002/tn2110.html
         String lcOSName = System.getProperty("os.name").toLowerCase();

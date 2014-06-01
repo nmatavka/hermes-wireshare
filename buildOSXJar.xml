@@ -30,7 +30,7 @@
 		</jar>
 	</target>
 
-	<target name="Apple Java6" description="Create an .app package for MacOSX">
+	<target name="MacOSX" description="Create an .app package for MacOSX">
 	
 	    <!-- Set this property value to the directory where you 
 	         would like to create the application package -->
@@ -46,14 +46,12 @@
 	    <!-- Set this property value to your MacOSX resource 
 	         directory (where are stored your JavaApplicationStub 
 	         and icon files) -->
-	    <property name="macosx.resrc" value="build/osx/MacOSX"/>
+	    <property name="macosx.resrc" value="lib/resources/osx"/>
 	
 	    <!-- Set this property value to your application 
 	         resource directory (where are stored your 
 	         libraries, jar, etc.) -->
 	    <property name="app.resrc" value="build/osx"/>
-	
-	    <property name="macosx.stubfile" value="${macosx.resrc}/JavaApplicationStub"/>
 	
 	    <taskdef name="jarbundler"
 				classname="net.sourceforge.jarbundler.JarBundler"
@@ -68,13 +66,13 @@
 	    <jarbundler dir="${macosx.app}"
 			verbose="true"
 	    	name="${app.name}"
-			version="5.6.3.1"
+			version="5.6.4"
 			shortname="${app.name}"
 			jar="${app.resrc}/WireShare.jar"
 			mainclass="org.limewire.ui.swing.Main"
 			icon="${macosx.resrc}/${app.name}.icns"
 			infostring="${app.name}"
-			stubfile="${macosx.stubfile}"
+			ExecName="${app.name}"
 			workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
 	    	extraclasspath="/System/Library/Java"
 	    	signature="WSHR"
@@ -105,7 +103,7 @@
 	    		<include name="lib/WSHome.xhtml"/>
 	    		<include name="lib/bootstrap"/>
 	    		<include name="lib/img/TPB.jpg"/>
-	    		<include name="lib/img/WireShare-Logo.png"/>
+	    		<include name="lib/img/*.png"/>
 	    	</javafileset>
 	    	<resourcefileset dir="lib/resources/osx">
 	    		<include name="*.lproj/*"/>
@@ -114,7 +112,7 @@
 
 	    	<urltype name="Magnet"
 		    	iconFile="LimeWire.icns" 
-	        	role="None" 
+	        	role="Editor" 
 	        	schemes="magnet"/>
 	    	
 	        <documenttype name="Packaged Media File"
@@ -128,51 +126,6 @@
 	        	role="Editor"
 	        	mimetypes="application/x-bittorrent"/>
 	    </jarbundler>
-	</target>
-	
-	<target name="Oracle Java7" description="Create an .app package for MacOSX">
-	    <taskdef name="bundleapp"
-             classname="com.oracle.appbundler.AppBundlerTask"   
-             classpath="lib/jars/ant/appbundler-1.0ea.jar" />
-
-        <bundleapp outputdirectory="build/osx"
-            name="WireShare"
-            displayname="WireShare"
-            identifier="com.limegroup.gnutella"
-        	icon="lib/resources/osx/WireShare.icns"
-        	signature="WSHR"
-            WorkingDirectory="$APP_ROOT/Contents/Java"
-		mainclassname="org.limewire.ui.swing.Main">
-            <classpath file="build/osx/WireShare.jar" />
-	    	<classpath dir="lib/native/osx"/>
-	    	<classpath dir=".">
-	    		<include name="lib/WSHome.xhtml"/>
-	    		<include name="lib/bootstrap"/>
-	    		<include name="lib/img/TPB.jpg"/>
-	    		<include name="lib/img/WireShare-Logo.png"/>
-	    	</classpath>
-        	<option value="-Xdock:icon=Contents/Resources/WireShare.icns}"/>
-
-	        <!-- OSX specific options, optional -->
-	        <option value="-Dapple.laf.useScreenMenuBar=true"/>
-        	<option value="-Dapple.awt.brushMetalRounded=true"/>
-        	<option value="-Dapple.awt.showGrowBox=true"/>
-        	        	        	
-        	<!-- You may need to set here other java properties according to your application needs -->
-        	<option value="-Djava.net.preferIPV6Addresses=false"/>
-	    	<option value="-Djava.net.preferIPv4stack=true"/>
-	    	<option value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog"/>
-	    	<option value="-Djava.library.path=$APP_ROOT/Contents/Java"/>
-	    	<option value="-Djna.library.path=$APP_ROOT/Contents/Java"/>
-        	        	
-	        <option value="-ea:com.limegroup..."/>
-        	<option value="-ea:org.limewire..."/>
-        	<option value="-Xms128m"/>
-        	<option value="-Xmx512m"/>
-        	<option value="-XX:MaxPermSize=256m"/>
-        	<option value="-XX:PermSize=256m"/>
-
-        </bundleapp>
 	</target>
 </project>
 	
