@@ -79,7 +79,7 @@
 	    	bundleid="com.limegroup.gnutella"
 	    	jvmversion="1.6+"
 	    	LSArchitecturePriority="i386 x86_64"
-	    	vmoptions="-ea:com.limegroup... -ea:org.limewire... -Xms128m -Xmx512m -XX:MaxPermSize=256m -XX:PermSize=256m">
+	    	vmoptions="-ea:com.limegroup... -ea:org.limewire... -Xms128m -Xmx512m -XX:MaxPermSize=256m -XX:PermSize=256m -d32">
 
 	    	<!-- The below Java properties can be set to get a better MacOSX look-and-feel -->
 	    	<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
