@@ -29,7 +29,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     private final String thirdMultiLineLabel = I18n.tr("Out-of-band Searching helps deliver faster search results to you, but some internet connections may not work well with this feature.");
     
     private JCheckBox disableUltraPeerCheckBox;
-    private JCheckBox forceUltraPeerCheckBox;
+    //private JCheckBox forceUltraPeerCheckBox;
     private JCheckBox disableMojitoCheckBox;
     private JCheckBox disableTLS;
     private JCheckBox disableOutOfBandSearchCheckBox;
@@ -52,13 +52,13 @@ public class PerformanceOptionPanel extends OptionPanel {
         p.setOpaque(false);
         
         disableUltraPeerCheckBox = new JCheckBox(I18n.tr("Disable Ultrapeer capabilities"));
-        forceUltraPeerCheckBox = new JCheckBox(I18n.tr("Force Ultrapeer Mode"));
+        //forceUltraPeerCheckBox = new JCheckBox(I18n.tr("Force Ultrapeer Mode"));
         disableMojitoCheckBox = new JCheckBox(I18n.tr("Disable connecting to the Mojito DHT"));
         disableTLS = new JCheckBox(I18n.tr("Disable TLS capabilities"));
         disableOutOfBandSearchCheckBox = new JCheckBox(I18n.tr("Disable Out-of-band searching"));
 
         disableUltraPeerCheckBox.setOpaque(false);
-        forceUltraPeerCheckBox.setOpaque(false);
+        //forceUltraPeerCheckBox.setOpaque(false);
         disableMojitoCheckBox.setOpaque(false);
         disableTLS.setOpaque(false);
         disableOutOfBandSearchCheckBox.setOpaque(false);
@@ -67,7 +67,7 @@ public class PerformanceOptionPanel extends OptionPanel {
         
         p.add(disableUltraPeerCheckBox, "gapleft 25, split, wrap");
         
-        p.add(forceUltraPeerCheckBox, "gapleft 25, split, wrap");
+        //p.add(forceUltraPeerCheckBox, "gapleft 25, split, wrap");
         
         p.add(disableMojitoCheckBox, "gapleft 25, split, wrap");
         
@@ -86,12 +86,12 @@ public class PerformanceOptionPanel extends OptionPanel {
     ApplyOptionResult applyOptions() {
         
         boolean upChanged = UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() != disableUltraPeerCheckBox.isSelected();
-        boolean forceChanged = UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() != forceUltraPeerCheckBox.isSelected();
+        //boolean forceChanged = UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() != forceUltraPeerCheckBox.isSelected();
         boolean tlsServerChanged = disableTLS.isSelected() != !networkManager.isIncomingTLSEnabled();
         boolean isSupernode = connectionManager.isUltrapeer();
         
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(disableUltraPeerCheckBox.isSelected());
-        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(forceUltraPeerCheckBox.isSelected());
+        //UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(forceUltraPeerCheckBox.isSelected());
         DHTSettings.DISABLE_DHT_USER.setValue(disableMojitoCheckBox.isSelected());
         
         networkManager.setIncomingTLSEnabled(!disableTLS.isSelected());
@@ -116,7 +116,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() != disableUltraPeerCheckBox.isSelected() 
-        || UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() != forceUltraPeerCheckBox.isSelected() 
+        //|| UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() != forceUltraPeerCheckBox.isSelected() 
         || DHTSettings.DISABLE_DHT_USER.getValue() != disableMojitoCheckBox.isSelected()
         || (!networkManager.isIncomingTLSEnabled() && !networkManager.isOutgoingTLSEnabled()) != disableTLS.isSelected()
         || SearchSettings.OOB_ENABLED.getValue() == disableOutOfBandSearchCheckBox.isSelected();
@@ -125,7 +125,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     @Override
     public void initOptions() {
         disableUltraPeerCheckBox.setSelected(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue());
-        forceUltraPeerCheckBox.setSelected(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue());
+        //forceUltraPeerCheckBox.setSelected(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue());
         disableMojitoCheckBox.setSelected(DHTSettings.DISABLE_DHT_USER.getValue());
         disableTLS.setSelected(!networkManager.isIncomingTLSEnabled() || !networkManager.isOutgoingTLSEnabled());
         disableOutOfBandSearchCheckBox.setSelected(!SearchSettings.OOB_ENABLED.getValue());
