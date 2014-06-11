@@ -74,7 +74,6 @@
 			infostring="${app.name}"
 			ExecName="${app.name}"
 			workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
-	    	extraclasspath="/System/Library/Java"
 	    	signature="WSHR"
 	    	bundleid="com.limegroup.gnutella"
 	    	jvmversion="1.6+"
