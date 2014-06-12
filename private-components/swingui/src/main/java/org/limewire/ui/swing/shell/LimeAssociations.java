@@ -21,7 +21,7 @@ public class LimeAssociations {
 
     static {
         if (OSUtils.isWindows())
-            PROGRAM = "LimeWire";
+            PROGRAM = "WireShare";
         else if (OSUtils.isUnix())
             PROGRAM = System.getProperty("unix.executable", UNSUPPORTED_PLATFORM);
         else

@@ -15,10 +15,10 @@ import com.google.inject.Inject;
 @EagerSingleton
 public class FirewallServiceImpl implements FirewallService, Service {
     
-    public static final File LIMEWIRE_EXE_FILE = new File("LimeWire.exe").getAbsoluteFile();
+    public static final File LIMEWIRE_EXE_FILE = new File("WireShare.exe").getAbsoluteFile();
     
-    /** The name of this program, "LimeWire". */
-	private static String name = "LimeWire";
+    /** The name of this program, "WireShare". */
+	private static String name = "WireShare";
     
     private AtomicBoolean needsCleanup = new AtomicBoolean(false);
     

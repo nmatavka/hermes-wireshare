@@ -9,7 +9,7 @@ class GrowlNotifier implements TrayNotifier {
     private GrowlWrapper wrapper;
     
     public GrowlNotifier() {
-        wrapper = new GrowlWrapper(I18n.tr("LimeWire"), null, new String[] {NOTIFY_USER}, new String[] {NOTIFY_USER});
+        wrapper = new GrowlWrapper(I18n.tr("WireShare"), null, new String[] {NOTIFY_USER}, new String[] {NOTIFY_USER});
     }
     
     @Override

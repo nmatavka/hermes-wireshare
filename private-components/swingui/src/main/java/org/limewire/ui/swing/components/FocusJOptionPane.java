@@ -40,7 +40,7 @@ public class FocusJOptionPane {
     private static final List<String> visibleDialogs = new ArrayList<String>();
     
     public static Component createFocusComponent() {
-        JFrame frame = new LimeJFrame("LimeWire");
+        JFrame frame = new LimeJFrame("WireShare");
         frame.setUndecorated(true);
         frame.setSize(0, 0);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

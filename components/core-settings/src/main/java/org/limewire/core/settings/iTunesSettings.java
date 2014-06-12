@@ -23,7 +23,7 @@ public class iTunesSettings extends LimeProps {
      * The name of the Playlist where songs shall be imported.
      */
     public static StringSetting ITUNES_PLAYLIST = 
-        FACTORY.createStringSetting("ITUNES_PLAYLIST", "LimeWire");
+        FACTORY.createStringSetting("ITUNES_PLAYLIST", "WireShare");
     
     /**
      * Supported file types.
