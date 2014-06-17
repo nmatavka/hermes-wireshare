@@ -40,7 +40,7 @@ public final class LimeWireUtils {
     private static String testVersion = null;
     
     /** True if this is a beta. */
-    private static final boolean betaVersion = true;
+    private static final boolean betaVersion = false;
     
     /** True if this is an alpha */
     private static final boolean alphaVersion = false;

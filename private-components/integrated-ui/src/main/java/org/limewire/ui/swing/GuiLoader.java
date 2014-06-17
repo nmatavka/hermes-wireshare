@@ -7,8 +7,8 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -16,6 +16,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -41,6 +42,17 @@ final class GuiLoader {
             //sanityCheck();
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
+            String currversion;   
+			if (( currversion = getHTML("http://wireshare.sourceforge.net/version")) != null ) {
+            	if (!LimeWireUtils.getLimeWireVersion().equals(currversion) && !LimeWireUtils.isBetaRelease()) {
+            		int reply = JOptionPane.showConfirmDialog (null,  
+            			"A new version of WireShare is availible. Would you like to open the download page?", 
+            			"Updated version availible",
+            			JOptionPane.YES_NO_OPTION,
+            			JOptionPane.INFORMATION_MESSAGE );
+            		if (reply == JOptionPane.YES_OPTION) openUrl("http://sourceforge.net/projects/wireshare/files/");
+            	}
+            }
         } 
 //        catch(StartupFailedException sfe) {
 //            GuiUtils.hideAndDisposeAllWindows();
@@ -195,6 +207,40 @@ final class GuiLoader {
                            (screenSize.height - dialogSize.height)/2);
         DIALOG.setVisible(true);
     }   
+    
+    public String getHTML(String urlToRead) {
+        URL url;
+        HttpURLConnection conn;
+        BufferedReader rd;
+        String line;
+        String result = "";
+        try {
+           url = new URL(urlToRead);
+           conn = (HttpURLConnection) url.openConnection();
+           conn.setRequestMethod("GET");
+           rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+           while ((line = rd.readLine()) != null) {
+              result += line;
+           }
+           rd.close();
+        } catch (IOException e) {
+           e.printStackTrace();
+        } catch (Exception e) {
+           e.printStackTrace();
+        }
+        return result;
+     }
+    
+     public void openUrl(String url) throws IOException, URISyntaxException {
+    	  if(java.awt.Desktop.isDesktopSupported() ) {
+    	        java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
+
+    	        if(desktop.isSupported(java.awt.Desktop.Action.BROWSE) ) {
+    	          java.net.URI uri = new java.net.URI(url);
+    	              desktop.browse(uri);
+    	        }
+    	  } 
+     }
     
     /**
      * Determines whether or not specific files exist and are the correct size.
