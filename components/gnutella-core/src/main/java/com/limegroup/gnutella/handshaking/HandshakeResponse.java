@@ -271,13 +271,13 @@ public class HandshakeResponse {
         NO_REQUERYING = isFalseValue(HEADERS, HeaderNames.X_REQUERIES);
 
         IS_LIMEWIRE = extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
-                Locale.US).startsWith("limewire") || extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
-                Locale.US).startsWith("wireshare");
+                Locale.US).startsWith("limewire/") || extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
+                Locale.US).startsWith("wireshare/");
 
         GOOD_ULTRAPEER = isHighDegreeConnection() && isUltrapeerQueryRoutingConnection()
                 && (getMaxTTL() < 5) && isDynamicQueryConnection();
 
-        GOOD_LEAF = GOOD_ULTRAPEER && (IS_LIMEWIRE);// || NO_REQUERYING);
+        GOOD_LEAF = GOOD_ULTRAPEER && (IS_LIMEWIRE && NO_REQUERYING);
 
         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);

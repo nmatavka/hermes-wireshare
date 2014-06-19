@@ -65,7 +65,7 @@ public interface ConnectionManager extends ConnectionAcceptor,
      * The number of leaf connections reserved for non LimeWire clients.
      * This is done to ensure that the network is not solely LimeWire centric.
      */
-    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
+    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 5;
     
    
 
