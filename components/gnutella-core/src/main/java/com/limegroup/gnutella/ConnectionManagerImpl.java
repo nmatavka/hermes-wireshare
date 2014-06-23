@@ -430,10 +430,10 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
+    	if(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue())
+            return false;
         if(UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue())
             return true;
-        if(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue())
-            return false;
         return !networkInstanceUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
@@ -1772,8 +1772,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         // 1 times the amount of connections.
         else {
             multiple = 1;
-            neededConnections -= 5 + 
-                ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
+            neededConnections -= 5; 
+                //+ ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
         int need = Math.min(10, multiple*neededConnections)
