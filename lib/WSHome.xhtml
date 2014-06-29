@@ -10,13 +10,19 @@
 body {
  background: #FFFFFF url("img/blue_body_bg.png") repeat-x left top;
 }
+#footer {
+ position:absolute;
+ left:4px;
+ bottom:6px;
+ width:99%;
+ height:45px; /* Height of the footer */
+}
 table#layout tr td#header {  
   background: url("img/WireShare-Logo.png") no-repeat center top;
 }
 table#layout tr td h2 {  
   font-family: Arial, sans-serif;
   font-size: 16px;
-  margin: 0 0 8px 0;  
   color: #004E8F;
 }
 table#layout tr td p {
@@ -26,9 +32,10 @@ table#layout tr td p {
 </style>
 </head>
 <body>
+<div id="container">
 <center>
-  <table id="layout" cellpadding="0" cellspacing="0" border="0" width="400" style="margin: 76px 0 0 0">
-    <tr valign="top">
+  <table id="layout" cellpadding="0" cellspacing="0" border="0" width="400" style="margin: 80px 0 0 0">
+    <tr valign="bottom">
       <td id="header" height="160" align="center"></td>
     </tr>
     <tr valign="top">
@@ -39,6 +46,10 @@ table#layout tr td p {
     </tr>
   </table>
 </center>
+<div id="footer">
+  <a href="https://thepiratebay.se/" title="The Pirate Bay" class="image"><img alt="The Pirate Bay" src="img/TPB.jpg" width="40" height="42"/></a>
+</div>
+</div>
 </body>
 </html>
 	            
