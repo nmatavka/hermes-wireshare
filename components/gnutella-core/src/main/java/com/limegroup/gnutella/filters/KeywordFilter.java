@@ -22,12 +22,27 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
 
     static final String[] ADULT_WORDS = {
-        "adult", "anal", "anul", "ass", "boob", "blow", "bondage", "centerfold",
-        "cock", "cum", "cunt", "dick", "dildo", "facial", "fuck", "gangbang",
-        "hentai", "horny", "incest", "jenna", "masturbat", "milf", "nipple",
-        "orgasm", "pedo", "penis", "playboy", "porn", "pussy", "rape", "sex",
-        "slut", "squirt", "stripper", "suck", "tits", "tittie", "titty", "twat",
-        "underage", "vagina", "whore", "xxx"
+        "adult", "amateur nude", "amatrice new", "anal", "anul", "ass", "bangbros",
+        "bdsm", "beach-nude", "bibcam", "blow", "bondage", "boob", "boy + boy", "boy boy",
+        "brazzers", "celebrity nude", "centerfold", "cinemakid", "clitoris", "cock",
+        "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme", "facial",
+        "fantasia model", "fantasia-model", "femjoy", "fm teen", "fuck", "galitsin-news",
+        "gangbang", "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny",
+        "incest", "incezt", "jenna", "kate's playground next", "kdv", "kiddy porn",
+        "kinder", "ls model","ls-magazine", "ls-model", "lsg model", "lsm",
+        "magazine lsm", "masturbat", "mbla", "met art", "met-art", "metart", "milf",
+        "molested", "msn not stickam", "mummy edit", "naakt nackt", "naked gymnast",
+        "naked sport", "naked women", "naked-gymnast", "nipple", "nubile",
+        "nude foto", "nude photo", "online naked", "orgasm", "pedo", "penis",
+        "pjk", "playboy", "porn", "posing naked", "pr0nstars", "premature",
+        "preteen", "profileasian", "profileblond", "pthc", "ptsc", "public nudity",
+        "pussy", "qsh", "qwerty", "r@ygold", "rape", "reallola", "scroops", "sex",
+        "sf-model", "slut", "squirt", "stickam", "strapon", "strappon", "stripper",
+        "suck", "teen nacked", "teen nackt", "teen naked", "teen nude", "teenfuns",
+        "teeniepalace", "teenmodel", "teens nackt", "teentraps", "tits", "tittie",
+        "titty", "top black model", "topless teen", "ttl model", "twat",
+        "uncensored naturist", "underage", "vagina", "whore", "xpuss", "xxx",
+        "young male nudist", "young video model", "youngvideomodel", "yovo"
     };
 
     /** INVARIANT: strings in ban contain only lowercase */
