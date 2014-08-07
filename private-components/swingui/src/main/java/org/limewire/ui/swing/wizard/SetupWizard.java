@@ -4,6 +4,7 @@ import java.awt.Frame;
 
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -23,7 +24,13 @@ public class SetupWizard {
     }
 
     public static boolean shouldShowWizard() {
-        return shouldShowPage1();
+        if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
+            return true;
+        }
+        if (!InstallSettings.START_STARTUP.getValue()) {
+            return GuiUtils.shouldShowStartOnStartupWindow();
+        }
+        return false;
     }
 
     public void showDialog(Frame owner) {           
@@ -51,7 +58,9 @@ public class SetupWizard {
         if (!InstallSettings.START_STARTUP.getValue()) {
             return GuiUtils.shouldShowStartOnStartupWindow();
         }
-
+        if (!FilterSettings.FILTER_ADULT.getValue()) {
+            return true;
+        }
         return false;
     }
 

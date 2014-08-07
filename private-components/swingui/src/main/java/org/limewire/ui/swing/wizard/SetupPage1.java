@@ -4,6 +4,7 @@ import javax.swing.JCheckBox;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -19,6 +20,7 @@ public class SetupPage1 extends WizardPage {
 
     private final JCheckBox associationFileTypeCheckBox;
     private final JCheckBox launchAtStartupCheckBox;
+    private final JCheckBox filterAdultContentCheckBox;
     
     public SetupPage1(SetupComponentDecorator decorator){
         super(decorator);
@@ -28,6 +30,7 @@ public class SetupPage1 extends WizardPage {
    
         associationFileTypeCheckBox = createAndDecorateCheckBox(true);
         launchAtStartupCheckBox = createAndDecorateCheckBox(true);
+        filterAdultContentCheckBox = createAndDecorateCheckBox(true);
 
         //File Associations
         addFileAssociations();        
@@ -54,11 +57,16 @@ public class SetupPage1 extends WizardPage {
                  add(createAndDecorateMultiLine(I18n.tr("Launch WireShare at system startup"), launchAtStartupCheckBox), "gaptop 5, gapleft 5, wrap");
              }
         }
+        add(createAndDecorateHeader(I18n.tr("Search Filter Settings")), "gaptop 20, span, wrap");
+        add(filterAdultContentCheckBox, "gaptop 5, gapleft 26");
+        add(createAndDecorateMultiLine(I18n.tr("Filter adult content from my search results."), filterAdultContentCheckBox), "gaptop 5, gapleft 5, wrap");
+
     }
     
     private void initSettings() {
         associationFileTypeCheckBox.setSelected(SwingUiSettings.HANDLE_MAGNETS.getValue());
         launchAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
+        filterAdultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
     }
 
     @Override
@@ -110,7 +118,10 @@ public class SetupPage1 extends WizardPage {
         } else
             StartupSettings.RUN_ON_STARTUP.setValue(false);
         InstallSettings.START_STARTUP.setValue(true);
-    }
+        
+        // Adult Filter Setting
+        FilterSettings.FILTER_ADULT.setValue(filterAdultContentCheckBox.isSelected());
+ }
     
     /**
      * Determines if the Start On Startup option is available.

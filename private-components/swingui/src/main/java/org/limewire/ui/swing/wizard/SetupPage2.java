@@ -45,7 +45,7 @@ public class SetupPage2 extends WizardPage {
         setLayout(new SegmentLayout());
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
-
+        
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
         boolean fourUpgrade = isFourUpgrade();
         
@@ -97,7 +97,7 @@ public class SetupPage2 extends WizardPage {
         SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareDownloadedFilesCheckBox.isSelected());
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareDownloadedFilesCheckBox.isSelected());
         InstallSettings.AUTO_SHARING_OPTION.setValue(true);
-    }
+   }
 
     @Override
     public String getFooter() {
@@ -130,12 +130,12 @@ public class SetupPage2 extends WizardPage {
             autoSharingPanel.add(shareDownloadedFilesCheckBox);
             autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."),
                     shareDownloadedFilesCheckBox));
-            autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
+             autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
                     "wrap");
         } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
             autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will add files you download from P2P Users into your Public Shared list.")),
                             "alignx center");
-            autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
+           autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
                     "wrap");
         }
 
