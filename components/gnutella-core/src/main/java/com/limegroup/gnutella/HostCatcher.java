@@ -249,6 +249,11 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      * is initialized.
      */
     private static final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
+    
+    /**
+     * How long (in minutes) to wait between the saving of the hostsfile.
+     */
+    private static final long SAVE_HOSTSFILE_TIME = 30;
 
     /**
      * The time at which we should stop sending pings.
@@ -272,7 +277,8 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     private ScheduledFuture probationFuture;
     private ScheduledFuture bootstrapperFuture;
     private ScheduledFuture clearPingedHostsFuture;
-
+    private ScheduledFuture SaveHostsFuture;
+    
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
     private final Provider<ConnectionManager> connectionManager;
@@ -346,6 +352,16 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             backgroundExecutor.scheduleWithFixedDelay(probationRestorer, 
                     PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME,
                     TimeUnit.MILLISECONDS);
+        // Save hosts to the HostsFile every 30 minutes while connected
+        Runnable SaveHosts = new Runnable() {
+            public void run() {
+                if (connectionServices.isConnected() && !needsHosts())
+                	write();
+            }
+        };
+        SaveHostsFuture = 
+        	backgroundExecutor.scheduleWithFixedDelay(SaveHosts, SAVE_HOSTSFILE_TIME, SAVE_HOSTSFILE_TIME, 
+        			TimeUnit.MINUTES);
         // Try to fetch hosts whenever we need them.
         // Start it immediately, so that if we have no hosts
         // (because of a fresh installation) we will connect.
@@ -375,6 +391,8 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             bootstrapperFuture.cancel(true);
         if(clearPingedHostsFuture != null)
             clearPingedHostsFuture.cancel(true);
+        if(SaveHostsFuture != null)
+            SaveHostsFuture.cancel(true);
         write();
     }
     
