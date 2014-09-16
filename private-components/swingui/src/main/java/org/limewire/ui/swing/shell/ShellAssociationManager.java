@@ -74,14 +74,14 @@ public class ShellAssociationManager {
     private String getMessage(boolean torrentsStolen, boolean magnetsStolen) {
         if (torrentsStolen && magnetsStolen) {
             return I18n
-                    .tr("Torrent files and magnet links are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
+                    .tr("Torrent files and magnet links are no longer associated with WireShare. Would you like WireShare to re-associate them?");
         } else if (torrentsStolen) {
             return I18n
-                    .tr("Torrent files are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
+                    .tr("Torrent files are no longer associated with WireShare. Would you like WireShare to re-associate them?");
 
         } else {
             return I18n
-                    .tr("Magnet links are no longer associated with LimeWire. Would you like WireShare to re-associate them?");
+                    .tr("Magnet links are no longer associated with WireShare. Would you like WireShare to re-associate them?");
         }
     }
 

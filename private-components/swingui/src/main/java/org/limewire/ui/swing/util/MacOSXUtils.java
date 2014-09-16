@@ -47,7 +47,7 @@ public class MacOSXUtils {
     /**
      * The name of the app that launches.
      */
-    private static final String APP_NAME = "LimeWire.app";
+    private static final String APP_NAME = "WireShare.app";
 
     private static boolean nativeLibraryLoadedCorrectly = false;
     
@@ -162,12 +162,12 @@ public class MacOSXUtils {
     /**
      * Retrieves the app directory & name.
      * If the user is not running from the bundled app as we named it,
-     * defaults to /Applications/LimeWire/ as the directory of the app.
+     * defaults to /Applications/WireShare/ as the directory of the app.
      */
     public static String getAppDir() {
-        String appDir = "/Applications/LimeWire/";
+        String appDir = "/Applications/WireShare/";
         String path = CommonUtils.getCurrentDirectory().getPath();
-        int app = path.indexOf("LimeWire.app");
+        int app = path.indexOf("WireShare.app");
         if(app != -1)
             appDir = path.substring(0, app);
         return appDir + APP_NAME;

@@ -6,7 +6,7 @@ import org.limewire.ui.swing.util.I18n;
 
 public class ChatSettings extends LimeProps {
     
-    private static String titleText = "<H1>" + I18n.tr("Facebook chat is not supported in this version of LimeWire.") + "</H1>";
+    private static String titleText = "<H1>" + I18n.tr("Facebook chat is not supported in this version of WireShare.") + "</H1>";
     private static String paragraph1 = "<p>" + I18n.tr("We at Lime Wire are actively looking into remedies.  In the meantime, you will still be able to browse friends.") + "</p>";
     private static String paragraph2 = "<p>" + I18n.tr("Thank you for your patience.") + "</p>";
     

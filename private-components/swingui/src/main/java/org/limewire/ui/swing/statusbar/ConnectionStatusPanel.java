@@ -108,7 +108,7 @@ class ConnectionStatusPanel extends JXPanel {
             break;
         case DISCONNECTED:
             tooltipText = I18n.tr("Couldn't connect");
-            statusMessage = I18n.tr("You couldn't connect to LimeWire");
+            statusMessage = I18n.tr("You couldn't connect to WireShare");
             strengthIcon = disconnected;
             showTryAgain = true;
             break;

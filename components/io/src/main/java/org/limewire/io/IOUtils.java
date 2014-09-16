@@ -52,7 +52,7 @@ public class IOUtils {
         errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.FILE_LOCKED,
             I18nMarker.marktr("WireShare was unable to open a necessary file because another program has locked the file. WireShare may act unexpectedly until this file is released."));
         errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.NO_PRIVS,
-            I18nMarker.marktr("WireShare was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire, or WireShare may behave in unexpected ways."));
+            I18nMarker.marktr("WireShare was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start WireShare, or WireShare may behave in unexpected ways."));
         errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.BAD_CHARS,
             I18nMarker.marktr("WireShare cannot open a necessary file because the filename contains characters which are not supported by your operating system. WireShare may behave in unexpected ways."));        
 
@@ -62,7 +62,7 @@ public class IOUtils {
         errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.FILE_LOCKED,
             I18nMarker.marktr("WireShare was unable to download the selected file because another program is using the file. Please close the other program and retry the download."));
         errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.NO_PRIVS,
-            I18nMarker.marktr("WireShare was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder."));
+            I18nMarker.marktr("WireShare was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using WireShare, please choose a different Save Folder."));
         errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.BAD_CHARS,
             I18nMarker.marktr("WireShare was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system."));
         

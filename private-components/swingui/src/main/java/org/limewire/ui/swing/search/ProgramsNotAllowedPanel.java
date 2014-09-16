@@ -23,12 +23,12 @@ public class ProgramsNotAllowedPanel extends JPanel {
             
         if (OSUtils.isMacOSX()) {
             message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
-                    " using LimeWire. However, you can enable downloading programs via Preferences > " +
+                    " using WireShare. However, you can enable downloading programs via Preferences > " +
                     "Search > Configure...")+"</html>");
         }
         else {
             message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
-        		" using LimeWire. However, you can enable downloading programs via Tools > Options > " +
+        		" using WireShare. However, you can enable downloading programs via Tools > Options > " +
         		"Search > Configure...")+"</html>");
         }
         
