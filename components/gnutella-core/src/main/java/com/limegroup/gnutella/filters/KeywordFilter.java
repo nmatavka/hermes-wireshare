@@ -22,10 +22,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
 
     static final String[] ADULT_WORDS = {
-        "adult", "amateur nude", "amatrice new", "anal", "anul", "ass", "bangbros",
-        "bdsm", "beach-nude", "bibcam", "blow", "bondage", "boob", "boy + boy", "boy boy",
-        "brazzers", "celebrity nude", "centerfold", "cinemakid", "clitoris", "cock",
-        "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme", "facial",
+        "1st Studio Siberian Mouse", "adult", "amateur nude", "amatrice new", "anal", "anul",
+        "ass", "bangbros", "bdsm", "beach-nude", "bibcam", "blow", "bondage", "boob",
+        "boy + boy", "boy boy", "brazzers", "celebrity nude", "centerfold", "cinemakid",
+        "clitoris", "cock", "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme", "facial",
         "fantasia model", "fantasia-model", "femjoy", "fm teen", "fuck", "galitsin-news",
         "gangbang", "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny",
         "incest", "incezt", "jenna", "kate's playground next", "kdv", "kiddy porn",
