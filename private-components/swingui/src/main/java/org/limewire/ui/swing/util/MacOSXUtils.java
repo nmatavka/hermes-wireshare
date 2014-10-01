@@ -42,7 +42,7 @@ public class MacOSXUtils {
     /**
      * The application bundle identifier for the LimeWire application that is packed into its Info.plist config file.
      */
-    public static final String LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER = "com.limegroup.gnutella";
+    public static final String LIMEWIRE_APPLICATION_BUNDLE_IDENTIFIER = "com.wireshare.gnutella";
     
     /**
      * The name of the app that launches.
