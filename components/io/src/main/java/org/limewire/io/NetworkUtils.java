@@ -74,7 +74,7 @@ public final class NetworkUtils {
      *            the port number to check
      */
     public static boolean isValidPort(int port) {
-        return (port > 0 && port <= 0xFFFF && port != 0x6988 && port != 0x1B59);
+        return (port > 0 && port <= 0xFFFF);
     }
 	
     /**

@@ -846,6 +846,11 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      * @return true if a connection of the given type is allowed
      */
     public HandshakeStatus allowConnection(HandshakeResponse hr, boolean leaf) {
+        if(hr.getListeningPort() == 7001 || hr.getListeningPort() == 27016)
+            return HandshakeStatus.BLOCKED;
+        if(hr.getUserAgent().toLowerCase(Locale.US).equals("limewire/4.21.1 (rc)"))
+            return HandshakeStatus.BLOCKED;
+        
         // preferencing may not be active for testing purposes --
         // just return if it's not
         if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue())
