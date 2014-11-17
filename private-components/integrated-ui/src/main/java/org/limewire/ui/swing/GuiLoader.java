@@ -26,6 +26,9 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
+
 final class GuiLoader {
 
     /** 
@@ -42,9 +45,12 @@ final class GuiLoader {
             //sanityCheck();
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
-            String currversion;   
-			if (( currversion = getHTML("http://wireshare.sourceforge.net/version")) != null ) {
-            	if (!LimeWireUtils.getLimeWireVersion().equals(currversion) && !LimeWireUtils.isBetaRelease()) {
+            Version currversion = null;
+            try {
+            	currversion = new Version(getHTML("http://wireshare.sourceforge.net/version"));
+            } catch (VersionFormatException impossible){};
+            if ( currversion != null ) {
+            	if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
             		int reply = JOptionPane.showConfirmDialog (null,  
             			"A new version of WireShare is availible. Would you like to open the download page?", 
             			"Updated version availible",

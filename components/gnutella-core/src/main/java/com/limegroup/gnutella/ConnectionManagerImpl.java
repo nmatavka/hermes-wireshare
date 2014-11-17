@@ -846,6 +846,14 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
      * @return true if a connection of the given type is allowed
      */
     public HandshakeStatus allowConnection(HandshakeResponse hr, boolean leaf) {
+        String UserAgent = hr.getUserAgent();
+        if(hr.getListeningPort() == 7001 || hr.getListeningPort() == 27016)
+            return HandshakeStatus.BLOCKED;
+        if(UserAgent.toLowerCase(Locale.US).contains("(rc)") || 
+        	UserAgent.toLowerCase(Locale.US).startsWith("phex 3.2") || 
+        	(UserAgent.toLowerCase(Locale.US).startsWith("gtk") && UserAgent.toLowerCase(Locale.US).contains("2007")))
+            return HandshakeStatus.BLOCKED;
+        
         // preferencing may not be active for testing purposes --
         // just return if it's not
         if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue())

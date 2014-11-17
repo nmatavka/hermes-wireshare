@@ -22,6 +22,7 @@ public enum HandshakeStatus {
     NON_LIME_RATIO("Non-WireShare Slots Full"),
     NO_LIME_SLOTS("No WireShare Slots"),
     NO_HEADERS("No Headers Received"),
+    BLOCKED("Service Blocked"),
     UNKNOWN("Unknown Handshake Failure");
     
     /** The message the handshake should use. */

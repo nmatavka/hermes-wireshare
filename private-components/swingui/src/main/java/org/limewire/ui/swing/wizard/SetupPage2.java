@@ -26,6 +26,7 @@ import org.limewire.util.VersionFormatException;
 
 public class SetupPage2 extends WizardPage {
     private final JCheckBox shareDownloadedFilesCheckBox;
+    private final JCheckBox sharePartialFilesCheckBox;
     private final LibraryData libraryData;
 
     @Resource private Icon p2pSharedListIcon;
@@ -45,6 +46,7 @@ public class SetupPage2 extends WizardPage {
         setLayout(new SegmentLayout());
 
         shareDownloadedFilesCheckBox = createAndDecorateCheckBox(true);
+        sharePartialFilesCheckBox = createAndDecorateCheckBox(true);
         
         boolean newInstall = InstallSettings.PREVIOUS_RAN_VERSIONS.get().size() == 0;
         boolean fourUpgrade = isFourUpgrade();
@@ -89,13 +91,14 @@ public class SetupPage2 extends WizardPage {
 
     private void initSettings() {
         shareDownloadedFilesCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
+        sharePartialFilesCheckBox.setSelected(SharingSettings.ALLOW_PARTIAL_SHARING.getValue());
     }
 
     @Override
     public void applySettings() {
         // Auto-Sharing downloaded files Setting
         SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareDownloadedFilesCheckBox.isSelected());
-        SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareDownloadedFilesCheckBox.isSelected());
+        SharingSettings.ALLOW_PARTIAL_SHARING.setValue(sharePartialFilesCheckBox.isSelected());
         InstallSettings.AUTO_SHARING_OPTION.setValue(true);
    }
 
@@ -128,15 +131,20 @@ public class SetupPage2 extends WizardPage {
 
         if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox);
-            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."),
-                    shareDownloadedFilesCheckBox));
-             autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
-                    "wrap");
-        } else if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-            autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will add files you download from P2P Users into your Public Shared list.")),
-                            "alignx center");
-           autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"),
-                    "wrap");
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."), shareDownloadedFilesCheckBox));
+            autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
+            autoSharingPanel.add(sharePartialFilesCheckBox);
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Share partially download files from P2P Users."), sharePartialFilesCheckBox));
+            autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
+        } else {
+        	if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
+               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will add files you download from P2P Users into your Public Shared list.")), "alignx center");
+               autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
+        	}
+            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
+               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will will share partially downloaded files from P2P Users.")), "alignx center");
+               autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
+            }
         }
 
         outerPanel.add(autoSharingPanel, new GridBagConstraints());
