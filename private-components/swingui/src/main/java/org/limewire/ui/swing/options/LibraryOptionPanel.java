@@ -185,6 +185,7 @@ public class LibraryOptionPanel extends OptionPanel {
         
         private final JButton configureButton; 
         private final JCheckBox shareP2PdownloadedFilesCheckBox;
+        private final JCheckBox sharePartialFilesCheckBox;
         private final UnsafeTypeOptionPanel unsafeTypeOptionPanel;
         private JLabel unsafeMessageLabel;
         
@@ -195,6 +196,8 @@ public class LibraryOptionPanel extends OptionPanel {
             
             shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Public Shared List")+"</html>");
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
+            sharePartialFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Share partial files downloaded from P2P Users")+"</html>");
+            sharePartialFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
                     unsafeTypeOptionPanel, I18n.tr("Unsafe File Sharing"),
@@ -205,6 +208,8 @@ public class LibraryOptionPanel extends OptionPanel {
             addModifyInfo();                        
             
             add(shareP2PdownloadedFilesCheckBox);
+            add(new LearnMoreButton("http://www.gnutellaforums.com/"), "gapleft 15, wrap");
+            add(sharePartialFilesCheckBox);
             add(new LearnMoreButton("http://www.gnutellaforums.com/"), "gapleft 15, wrap");
             
             unsafeMessageLabel = new JLabel(I18n.tr("Configure unsafe sharing settings"));
@@ -236,14 +241,14 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         ApplyOptionResult applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
-            SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareP2PdownloadedFilesCheckBox.isSelected());
+            SharingSettings.ALLOW_PARTIAL_SHARING.setValue(sharePartialFilesCheckBox.isSelected());
             return unsafeTypeOptionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
             return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
-                || SharingSettings.ALLOW_PARTIAL_SHARING.getValue() != shareP2PdownloadedFilesCheckBox.isSelected()
+                || SharingSettings.ALLOW_PARTIAL_SHARING.getValue() != sharePartialFilesCheckBox.isSelected()
                 || unsafeTypeOptionPanel.hasChanged();
         }
 
@@ -253,6 +258,8 @@ public class LibraryOptionPanel extends OptionPanel {
             
             shareP2PdownloadedFilesCheckBox.setSelected(
                     SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
+            sharePartialFilesCheckBox.setSelected(
+                    SharingSettings.ALLOW_PARTIAL_SHARING.getValue());
         }
     }
 
