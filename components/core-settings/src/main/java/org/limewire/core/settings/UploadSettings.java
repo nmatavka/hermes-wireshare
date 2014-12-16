@@ -17,7 +17,7 @@ public final class UploadSettings extends LimeProps {
      * within a 30 second span.
      */
     public static final IntSetting MAX_PUSHES_PER_HOST =
-        FACTORY.createIntSetting("MAX_PUSHES_PER_HOST", 5);
+        FACTORY.createIntSetting("MAX_PUSHES_PER_HOST", 6);
 
     /**
      * Boolean setting indicating whether the max upload speed should be limited using the MAX_UPLOAD_SPEED setting.
@@ -36,7 +36,7 @@ public final class UploadSettings extends LimeProps {
      * Setting for the size of the upload queue.
      */
     public static final IntSetting UPLOAD_QUEUE_SIZE =
-        FACTORY.createIntSetting("UPLOAD_QUEUE_SIZE", 10);
+        FACTORY.createIntSetting("UPLOAD_QUEUE_SIZE", 14);
         
     /**
      * Setting for the number of uploads per person.
