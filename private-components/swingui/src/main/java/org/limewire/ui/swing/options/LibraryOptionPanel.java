@@ -196,7 +196,7 @@ public class LibraryOptionPanel extends OptionPanel {
             
             shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Public Shared List")+"</html>");
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
-            sharePartialFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Share partial files downloaded from P2P Users")+"</html>");
+            sharePartialFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Enable partial file sharing.")+"</html>");
             sharePartialFilesCheckBox.setOpaque(false);
             
             configureButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
