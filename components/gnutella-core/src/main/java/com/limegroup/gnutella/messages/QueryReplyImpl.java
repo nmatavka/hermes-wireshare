@@ -41,6 +41,7 @@ import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A query reply. Contains information about the responding host in addition to
@@ -200,15 +201,12 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             }
             // Write QHD if desired
             if (includeQHD || securityToken != null) {
-                // a) vendor code. This is hard coded here for simplicity,
-                // efficiency, and to prevent character decoding problems. If
-                // you
-                // change this, be sure to change CommonUtils.QHD_VENDOR_NAME as
-                // well.
-                baos.write(76); // 'L'
-                baos.write(73); // 'I'
-                baos.write(77); // 'M'
-                baos.write(69); // 'E'
+                // a) vendor code. 
+            	byte[] bytes = LimeWireUtils.QHD_VENDOR_NAME.getBytes("US-ASCII");
+            	baos.write(bytes[0]); // 'L'
+                baos.write(bytes[1]); // 'I'
+                baos.write(bytes[2]); // 'M'
+                baos.write(bytes[3]); // 'E'
 
                 // b) payload length
                 baos.write(COMMON_PAYLOAD_LEN);
@@ -906,7 +904,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             // whose LSB is 0x1 if we support chat, or 0x0 if we do.
             // Shareaza also supports our chat, don't disclude them...
             int privateLength = _payload.length - i;
-            if (privateLength > 0 && (vendorT.equals("LIME") || vendorT.equals("RAZA"))) {
+            if (privateLength > 0 && (vendorT.equals("WSHR") || vendorT.equals("LIME") || vendorT.equals("RAZA"))) {
                 byte privateFlags = _payload[i];
                 supportsChatT = (privateFlags & CHAT_MASK) != 0;
             }

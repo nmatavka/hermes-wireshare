@@ -24,7 +24,7 @@ public final class LimeWireUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static String LIMEWIRE_VERSION = "5.6.4.1";
+	private static String LIMEWIRE_VERSION = "5.6.4.2";
     
     /**
      * The current revision of the BitTorrent protocol implementation.
@@ -84,11 +84,9 @@ public final class LimeWireUtils {
     private static final int _upMinorVersionNumber = 1;
     
     /**
-     * The vendor code for QHD.  WARNING: to avoid character
-     * encoding problems, this is hard-coded in QueryReply as well.  So if you
-     * change this, you must change QueryReply.
+     * The vendor code for QHD.  
      */
-    public static final String QHD_VENDOR_NAME = "LIME";
+    public static final String QHD_VENDOR_NAME = "WSHR";
      
 	/**
 	 * Cached constant for the HTTP Server: header value.

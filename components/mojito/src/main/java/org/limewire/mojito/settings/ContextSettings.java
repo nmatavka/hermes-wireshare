@@ -110,7 +110,7 @@ public class ContextSettings extends MojitoProps {
      * This Node's Vendor code.
      */
     public static final IntSetting VENDOR
-        = FACTORY.createIntSetting("VENDOR", ArrayUtils.toInteger("LIME"));
+        = FACTORY.createIntSetting("VENDOR", ArrayUtils.toInteger("WSHR"));
     
     /**
      * This Node's Version.

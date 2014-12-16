@@ -177,7 +177,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager,
                 alternateLocationFactory));
         processor.addInterceptor(new FWNodeInfoInterceptor(uploader, pushEndpointFactory));
-        if (!uploader.getFileName().toUpperCase(Locale.US).startsWith("LIMEWIRE")) {
+        if (!uploader.getFileName().toUpperCase(Locale.US).startsWith("WIRESHARE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
         try {
