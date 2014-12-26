@@ -653,7 +653,7 @@ public class MagnetOptions implements Serializable {
             }
             fileSize = size >= 0 ? size : -1;
         }
-        return fileSize;
+        return -1; //fileSize;
     }
 
     /**
