@@ -152,8 +152,8 @@ class FileInfoOverviewPanel implements FileInfoPanel {
                 copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction((VisualSearchResult)propertiableFile));
             }
         } 
-        HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
-        moreFileInfo.setFont(smallFont);
+        //HyperlinkButton moreFileInfo = new HyperlinkButton(new BitziLookupAction(propertiableFile));
+        //moreFileInfo.setFont(smallFont);
       
         if(type == FileInfoType.LOCAL_FILE && propertiableFile instanceof LocalFileItem) {
             renameButton = new HyperlinkButton(renameAction);
@@ -161,9 +161,9 @@ class FileInfoOverviewPanel implements FileInfoPanel {
             component.add(renameButton, "cell 1 1, alignx right");
             
         }
-        component.add(moreFileInfo, "cell 1 2, alignx right");
+        //component.add(moreFileInfo, "cell 1 2, alignx right");
         if(copyToClipboard != null)
-            component.add(copyToClipboard, "cell 1 3, alignx right");
+            component.add(copyToClipboard, "cell 1 2, alignx right");
     }
     
 
