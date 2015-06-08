@@ -134,7 +134,7 @@ public final class ConnectionSettings extends LimeProps {
      * primarily for testing.
      */
     public static final BooleanSetting PREFERENCING_ACTIVE = FACTORY.createBooleanSetting(
-            "PREFERENCING_ACTIVE", true);
+            "PREFERENCING_ACTIVE", false);
 
     /**
      * Setting for whether or not connections should be allowed to be made while
@@ -265,7 +265,7 @@ public final class ConnectionSettings extends LimeProps {
      * Setting for locale preferencing.
      */
     public static final BooleanSetting USE_LOCALE_PREF = FACTORY.createBooleanSetting(
-            "USE_LOCALE_PREF", true);
+            "USE_LOCALE_PREF", false);
 
     /**
      * Number of slots to reserve for those connections that match the local

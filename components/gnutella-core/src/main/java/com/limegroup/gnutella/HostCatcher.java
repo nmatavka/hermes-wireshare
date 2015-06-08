@@ -536,23 +536,14 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      * Reads the host file from the default location.
      */
     private void read() {
-        try {
-        	File bootstrap = new File(System.getProperty("user.dir") + "/lib/bootstrap");
-        	read(bootstrap);
-        	if(LOG.isInfoEnabled())
-        		LOG.info("Deleting bootstrap file");
-        	bootstrap.delete();
-        } catch (FileNotFoundException e) {
+        
             try {
             	read(getHostsFile());
             } catch (IOException ex) {
             	if(LOG.isInfoEnabled())
             		LOG.info("Exception reading host file " + getHostsFile(), ex);
             }
-        } catch (IOException e) {
-        	if(LOG.isInfoEnabled())
-        		LOG.info("Exception reading bootstrap file", e);
-        }
+
     }
 
 
@@ -561,17 +552,17 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      */
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
-    /** The Following code deletes the Gnutella.net if more than 30 dys old
-     *   long now = System.currentTimeMillis();
-     *   long lastModified = hostFile.lastModified(); // 0 if file does not exist
-     *   if(now - lastModified > STALE_HOST_FILE) {
-     *       if(lastModified > 0) {
-     *           LOG.info("Deleting stale host file");
-     *           hostFile.delete();
-     *       }
-     *       return; // Hit the bootstrap hosts instead
-     *   }
-     */
+    // The Following code deletes the Gnutella.net if more than 30 days old
+        long now = System.currentTimeMillis();
+        long lastModified = hostFile.lastModified(); // 0 if file does not exist
+        if(now - lastModified > STALE_HOST_FILE) {
+            if(lastModified > 0) {
+                LOG.info("Deleting stale host file");
+                hostFile.delete();
+            }
+            return; // Hit the bootstrap hosts instead
+        }
+     //
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(hostFile));

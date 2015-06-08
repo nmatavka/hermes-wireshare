@@ -564,15 +564,15 @@ public class ExtendedEndpoint extends Endpoint {
 
     static class PriorityComparator implements Comparator<ExtendedEndpoint> {
         public int compare(ExtendedEndpoint a, ExtendedEndpoint b) {
-            int ret=a.connectScore()-b.connectScore();
+            int ret = a.connectScore() - b.connectScore();
             if(ret != 0) 
                 return ret;
      
-            ret = a.localeScore() - b.localeScore();
+            ret = a.getDailyUptime() - b.getDailyUptime();
             if(ret != 0)
                 return ret;
                 
-            return a.getDailyUptime() - b.getDailyUptime();
+            return a.localeScore() - b.localeScore();
         }
     }
     

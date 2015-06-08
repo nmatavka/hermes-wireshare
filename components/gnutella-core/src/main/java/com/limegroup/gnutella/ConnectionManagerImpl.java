@@ -317,7 +317,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         addConnectionAcceptor(this,
                 false,
                 ConnectionSettings.CONNECT_STRING_FIRST_WORD,
-                "WIRESHARE");
+                "LIMEWIRE");
         
         // schedule the Runnable that will allow us to change
         // the number of connections we're shooting for if
@@ -372,7 +372,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
 
     public void acceptConnection(String word, Socket socket) {
         if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)
-                || (ConnectionSettings.CONNECT_STRING.isDefault() && word.equals("WIRESHARE"))) {
+                || (ConnectionSettings.CONNECT_STRING.isDefault() && word.equals("LIMEWIRE"))) {
             acceptConnection(socket);
         }
     }
