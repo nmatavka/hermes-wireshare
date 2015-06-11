@@ -134,7 +134,7 @@ public final class ConnectionSettings extends LimeProps {
      * primarily for testing.
      */
     public static final BooleanSetting PREFERENCING_ACTIVE = FACTORY.createBooleanSetting(
-            "PREFERENCING_ACTIVE", false);
+            "PREFERENCING_ACTIVE", true);
 
     /**
      * Setting for whether or not connections should be allowed to be made while
