@@ -552,7 +552,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      */
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
-    // The Following code deletes the Gnutella.net if more than 30 days old
+    /* The Following code deletes the Gnutella.net if more than 28 days old
         long now = System.currentTimeMillis();
         long lastModified = hostFile.lastModified(); // 0 if file does not exist
         if(now - lastModified > STALE_HOST_FILE) {
@@ -562,7 +562,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             }
             return; // Hit the bootstrap hosts instead
         }
-     //
+     */
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(hostFile));
