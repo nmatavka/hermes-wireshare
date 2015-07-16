@@ -6,6 +6,7 @@ import java.io.Writer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -13,6 +14,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.MulticastService;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 
@@ -38,6 +40,16 @@ class BootstrapperImpl implements Bootstrapper {
 
     /** Milliseconds to wait before trying TCP if gnutella.net doesn't exist. */
     static int ONE_SHOT_TCP_DELAY = 10 * 1000;
+    
+    /** Milliseconds to wait before updating the GWebCache. */
+    static int GWC_UPDATE_INTERVAL = 5 * 60 * 1000;
+
+
+    /**
+     * The next allowed GWebCache update time.
+     * Incremented after each attempted update.
+     */
+    private long nextAllowedGWCUpdateTime = 0; 
 
     /** The time at which we started to think about bootstrapping. */
     private long firstBootstrapCheck = 0;
@@ -62,6 +74,7 @@ class BootstrapperImpl implements Bootstrapper {
 
     private final ConnectionServices connectionServices;
     private final Provider<MulticastService> multicastService;
+    private final Provider<NetworkManager> networkManager;
     private final PingRequestFactory pingRequestFactory;
     private final Bootstrapper.Listener listener;
     private final TcpBootstrap tcpBootstrap;
@@ -72,12 +85,14 @@ class BootstrapperImpl implements Bootstrapper {
     @Inject
     public BootstrapperImpl(ConnectionServices connectionServices,
             Provider<MulticastService> multicastService,
-            PingRequestFactory pingRequestFactory,
+            Provider<NetworkManager> networkManager,
+    		PingRequestFactory pingRequestFactory,
             Bootstrapper.Listener listener,
             TcpBootstrap tcpBootstrap,
             UDPHostCache udpHostCache) {
         this.connectionServices = connectionServices;
         this.multicastService = multicastService;
+        this.networkManager = networkManager;
         this.pingRequestFactory = pingRequestFactory;
         this.listener = listener;
         this.tcpBootstrap = tcpBootstrap;
@@ -90,15 +105,23 @@ class BootstrapperImpl implements Bootstrapper {
      */
     @Override
     public synchronized void run() {            
-        if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
+    	if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
             LOG.trace("Not bootstrapping");
             return;
         }
 
         long now = System.currentTimeMillis();
-        if(firstBootstrapCheck == 0)
+        if(firstBootstrapCheck == 0) {
             firstBootstrapCheck = now;
-
+            
+        }
+        if(nextAllowedGWCUpdateTime < now) {
+            if (connectionServices.isActiveSuperNode() && networkManager.get().canReceiveUnsolicited()) {
+        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + ":" + networkManager.get().getPort();
+        		tcpBootstrap.UpdateGWC(addr, listener);
+            }
+            nextAllowedGWCUpdateTime = now + GWC_UPDATE_INTERVAL;
+        }
         // If we need endpoints, try any bootstrapping methods that
         // haven't been tried too recently
         if(needsHosts(now)) {
@@ -208,8 +231,8 @@ class BootstrapperImpl implements Bootstrapper {
     private boolean tcpHostCacheFetch(long now) {
         if(nextAllowedTcpTime < now || oneShotTcpAllowed) {
             LOG.trace("Fetching via TCP");
-            tcpBootstrap.fetchHosts(listener);
-            nextAllowedTcpTime = now + TCP_INTERVAL;
+            tcpBootstrap.fetchHosts(listener,oneShotTcpAllowed);
+            nextAllowedTcpTime = now + (oneShotTcpAllowed ? 5 * 60 * 1000 : TCP_INTERVAL);
             oneShotTcpAllowed = false;
             oneShotTcpTried = true;
             return true;

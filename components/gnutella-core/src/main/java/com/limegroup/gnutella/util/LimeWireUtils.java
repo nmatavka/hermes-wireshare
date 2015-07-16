@@ -24,7 +24,7 @@ public final class LimeWireUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static String LIMEWIRE_VERSION = "5.6.4.2";
+	private static String LIMEWIRE_VERSION = "5.6.4.3";
     
     /**
      * The current revision of the BitTorrent protocol implementation.

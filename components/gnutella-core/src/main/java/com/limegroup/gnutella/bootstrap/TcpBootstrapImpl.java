@@ -46,7 +46,8 @@ class TcpBootstrapImpl implements TcpBootstrap {
     private final HttpExecutor httpExecutor;
     private final Provider<HttpParams> defaultParams;
     private final ConnectionServices connectionServices;
-    private final List<URI> hosts = new ArrayList<URI>();
+    private final List<String> hosts = new ArrayList<String>();
+    private final List<String> GWChosts = new ArrayList<String>();
 
     @Inject
     TcpBootstrapImpl(HttpExecutor httpExecutor,
@@ -57,20 +58,20 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.connectionServices = connectionServices;
         String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
         for(String server : servers) {
-            add(URI.create(server.trim() ));
+            add(server.trim(),hosts);
         }
         String[] GWCservers = ConnectionSettings.GWEBCACHE_SERVERS.get();
         for(String server : GWCservers) {
-            add(URI.create(server.trim() + "?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion() + "&net=gnutella"));
+            add(server.trim(),GWChosts);
         }
         if(LOG.isDebugEnabled()) {
             LOG.debug("Loaded " + servers.length + " bootstrap servers");
-        	LOG.debug("Loaded " + GWCservers.length + " GWebCache servers");
+            LOG.debug("Loaded " + GWCservers.length + " GWebCache servers");
         }
    }
 
-    boolean add(URI uri) {
-        return hosts.add(uri);
+    boolean add(String Addr, List<String> arr) {
+        return arr.add(Addr);
     }
     
     void addServer(String uri, String[] servers) {
@@ -83,13 +84,19 @@ class TcpBootstrapImpl implements TcpBootstrap {
     }
     
     @Override
-    public synchronized boolean fetchHosts(Bootstrapper.Listener listener) {
+    public synchronized boolean fetchHosts(Bootstrapper.Listener listener, Boolean Bootstrap) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        for(URI host : hosts) {
-            HttpUriRequest request = newRequest(host);
+        List<String> strHosts = (Bootstrap) ? hosts : GWChosts;
+        for(String host : strHosts) {
+            if (!Bootstrap) {
+            	host+="?net=gnutella&get=1" + 
+            			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+            			"&version=" + LimeWireUtils.getLimeWireVersion();
+            }
+        	HttpUriRequest request = newRequest(URI.create(host)); //
             requests.add(request);
-            requestToHost.put(request, host);
+            requestToHost.put(request,URI.create(host));
         }
 
         if(requests.isEmpty()) {
@@ -112,10 +119,46 @@ class TcpBootstrapImpl implements TcpBootstrap {
         });
         return true;
     }
+    
+    @Override
+    public boolean UpdateGWC(String addr, Bootstrapper.Listener listener) {
+        List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
+        Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
+        for(String host : GWChosts) {
+        	host+="?net=gnutella&update=1&ip=" + addr + 
+        			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+        			"&version=" + LimeWireUtils.getLimeWireVersion();
+            HttpUriRequest request = newRequest(URI.create(host));
+            requests.add(request);
+            requestToHost.put(request, URI.create(host));
+        }
 
+        if(requests.isEmpty()) {
+            LOG.debug("No TCP host caches to try");
+            return false;
+        }
+
+        HttpParams params = new BasicHttpParams();
+        params = new DefaultedHttpParams(params, defaultParams.get());
+
+        if(LOG.isDebugEnabled())
+            LOG.debug("Updating 1 of " + requests.size() + " Gnutella Web Caches");
+
+        httpExecutor.executeAny(new Listener(requestToHost, listener),
+                bootstrapQueue, requests, params, 
+                new Cancellable() {
+            public boolean isCancelled() {
+                return false;
+            }
+        });
+        return true;
+	}
+    
     private HttpUriRequest newRequest(URI host) {
         HttpGet get = new HttpGet(host);
         get.addHeader("Cache-Control", "no-cache");
+        get.addHeader("User-Agent", LimeWireUtils.getVendor());
+        get.addHeader("Connection", "close");
         return get;
     }
 
@@ -135,7 +178,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
             BufferedReader reader =
                 new BufferedReader(new InputStreamReader(in, charset));
             while((line = reader.readLine()) != null && line.length() > 0) {
-            	String[] words = line.trim().split(line.contains("\\|") ? "\\|" : ",");
+            	String[] words = line.trim().split( line.contains(",") ? "," : "\\|" );
                 if(words != null && words.length > 0) {
                     try {
                         if (words[0].equals("H")) {
@@ -152,11 +195,16 @@ class TcpBootstrapImpl implements TcpBootstrap {
 								}
                     		}
                     		if (!NoAdd) {
-                    			add(URI.create(words[1] + "?get=1&client=WSHR&version=" + LimeWireUtils.getLimeWireVersion() + "&net=gnutella"));
+                    			add(words[1],GWChosts);
                     			addServer(words[1].toString(), servers);
                     		}
                     	} else if (words[0].equals("I")) { 		
-                    		// add code for "I" type information here
+                    		if (words[1].equals("update") ) {
+                    				if (words[2].equals("OK")) 
+                    					LOG.debug("GWebcache Updated.");
+                    		}else if (words[1].equals("access") ) {
+                    			
+                    		}
                     	} else {
 	                    	Endpoint host = new Endpoint(words[0], true);
 	                        if(LOG.isDebugEnabled())
