@@ -117,7 +117,7 @@ class BootstrapperImpl implements Bootstrapper {
         }
         if(nextAllowedGWCUpdateTime < now) {
             if (connectionServices.isActiveSuperNode() && networkManager.get().canReceiveUnsolicited()) {
-        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + "%3a" + networkManager.get().getPort();
+        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + ":" + networkManager.get().getPort();
         		tcpBootstrap.UpdateGWC(addr, listener);
             }
             nextAllowedGWCUpdateTime = now + GWC_UPDATE_INTERVAL;
