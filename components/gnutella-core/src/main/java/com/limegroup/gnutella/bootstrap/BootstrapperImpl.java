@@ -42,8 +42,7 @@ class BootstrapperImpl implements Bootstrapper {
     static int ONE_SHOT_TCP_DELAY = 10 * 1000;
     
     /** Milliseconds to wait before updating the GWebCache. */
-    static int GWC_UPDATE_INTERVAL = 5 * 60 * 1000;
-
+    static int GWC_UPDATE_INTERVAL = 60 * 60 * 1000;
 
     /**
      * The next allowed GWebCache update time.
@@ -58,7 +57,7 @@ class BootstrapperImpl implements Bootstrapper {
      * The next allowed multicast time.
      * Incremented after each attempted multicast fetch.
      */
-    private long nextAllowedMulticastTime = 0; // Immediately
+    private long nextAllowedMulticastTime = 0; 
 
     /**
      * The next allowed UDP fetch time.
@@ -86,7 +85,7 @@ class BootstrapperImpl implements Bootstrapper {
     public BootstrapperImpl(ConnectionServices connectionServices,
             Provider<MulticastService> multicastService,
             Provider<NetworkManager> networkManager,
-    		PingRequestFactory pingRequestFactory,
+            PingRequestFactory pingRequestFactory,
             Bootstrapper.Listener listener,
             TcpBootstrap tcpBootstrap,
             UDPHostCache udpHostCache) {
@@ -97,6 +96,7 @@ class BootstrapperImpl implements Bootstrapper {
         this.listener = listener;
         this.tcpBootstrap = tcpBootstrap;
         this.udpHostCache = udpHostCache;
+        nextAllowedGWCUpdateTime = GWC_UPDATE_INTERVAL + ConnectionSettings.LAST_GWCUPDATE_TIME.get();
     }
 
     /**
@@ -117,10 +117,11 @@ class BootstrapperImpl implements Bootstrapper {
         }
         if(nextAllowedGWCUpdateTime < now) {
             if (connectionServices.isActiveSuperNode() && networkManager.get().canReceiveUnsolicited()) {
-        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + ":" + networkManager.get().getPort();
+        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + "%3a" + networkManager.get().getPort();
         		tcpBootstrap.UpdateGWC(addr, listener);
             }
             nextAllowedGWCUpdateTime = now + GWC_UPDATE_INTERVAL;
+            ConnectionSettings.LAST_GWCUPDATE_TIME.set(System.currentTimeMillis());
         }
         // If we need endpoints, try any bootstrapping methods that
         // haven't been tried too recently
@@ -139,6 +140,11 @@ class BootstrapperImpl implements Bootstrapper {
         nextAllowedTcpTime = Long.MAX_VALUE;
     }
 
+    @Override
+    public void getGnet() {
+    	tcpBootstrap.fetchHosts(listener,true);
+    }
+    
     @Override
     public boolean addUDPHostCache(ExtendedEndpoint ee) {
         return udpHostCache.add(ee);
@@ -231,8 +237,8 @@ class BootstrapperImpl implements Bootstrapper {
     private boolean tcpHostCacheFetch(long now) {
         if(nextAllowedTcpTime < now || oneShotTcpAllowed) {
             LOG.trace("Fetching via TCP");
-            tcpBootstrap.fetchHosts(listener,oneShotTcpAllowed);
-            nextAllowedTcpTime = now + (oneShotTcpAllowed ? 5 * 60 * 1000 : TCP_INTERVAL);
+            tcpBootstrap.fetchHosts(listener,false);
+            nextAllowedTcpTime = now +  TCP_INTERVAL;
             oneShotTcpAllowed = false;
             oneShotTcpTried = true;
             return true;

@@ -539,9 +539,13 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         
             try {
             	read(getHostsFile());
-            } catch (IOException ex) {
+            } catch (FileNotFoundException ex) {
             	if(LOG.isInfoEnabled())
-            		LOG.info("Exception reading host file " + getHostsFile(), ex);
+            	LOG.info("Hostfile " + getHostsFile() + " was not found. Getting one from bootstrap server.",ex);
+            	bootstrapper.getGnet();
+            } catch (IOException iox) {
+            	if(LOG.isInfoEnabled())
+            	LOG.info("Exception reading host file " + getHostsFile(), iox);
             }
 
     }

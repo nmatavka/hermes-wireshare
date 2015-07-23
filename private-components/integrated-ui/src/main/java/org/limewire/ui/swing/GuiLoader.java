@@ -52,7 +52,7 @@ final class GuiLoader {
             if ( currversion != null ) {
             	if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
             		int reply = JOptionPane.showConfirmDialog (null,  
-            			"A new version of WireShare is availible. Would you like to open the download page?", 
+            			"WireShare version " + currversion.toString() + " is now availible. Would you like to open the download page?", 
             			"Updated version availible",
             			JOptionPane.YES_NO_OPTION,
             			JOptionPane.INFORMATION_MESSAGE );
@@ -230,7 +230,7 @@ final class GuiLoader {
            }
            rd.close();
         } catch (IOException e) {
-           e.printStackTrace();
+           //e.printStackTrace();
         } catch (Exception e) {
            e.printStackTrace();
         }

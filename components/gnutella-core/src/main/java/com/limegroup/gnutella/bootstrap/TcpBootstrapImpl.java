@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,14 +24,17 @@ import org.apache.http.util.EntityUtils;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -46,23 +51,31 @@ class TcpBootstrapImpl implements TcpBootstrap {
     private final HttpExecutor httpExecutor;
     private final Provider<HttpParams> defaultParams;
     private final ConnectionServices connectionServices;
-    private final List<String> hosts = new ArrayList<String>();
-    private final List<String> GWChosts = new ArrayList<String>();
-
+    private final ConnectionManager connectionManager;
+    private final Statistics statistics;
+    private final List<URI> hosts = new ArrayList<URI>();
+    private final List<URI> GWChosts = new ArrayList<URI>();
+    
     @Inject
     TcpBootstrapImpl(HttpExecutor httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            ConnectionManager connectionManager,
+            Statistics statistics
+            ) {
         this.httpExecutor = httpExecutor;
         this.defaultParams = defaultParams;
         this.connectionServices = connectionServices;
+        this.connectionManager = connectionManager;
+        this.statistics = statistics;
+        
         String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
         for(String server : servers) {
-            add(server.trim(),hosts);
+            add(URI.create(server.trim()),hosts);
         }
         String[] GWCservers = ConnectionSettings.GWEBCACHE_SERVERS.get();
         for(String server : GWCservers) {
-            add(server.trim(),GWChosts);
+            add(URI.create(server.trim()),GWChosts);
         }
         if(LOG.isDebugEnabled()) {
             LOG.debug("Loaded " + servers.length + " bootstrap servers");
@@ -70,7 +83,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
         }
    }
 
-    boolean add(String Addr, List<String> arr) {
+    boolean add(URI Addr, List<URI> arr) {
         return arr.add(Addr);
     }
     
@@ -87,16 +100,17 @@ class TcpBootstrapImpl implements TcpBootstrap {
     public synchronized boolean fetchHosts(Bootstrapper.Listener listener, Boolean Bootstrap) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        List<String> strHosts = (Bootstrap) ? hosts : GWChosts;
-        for(String host : strHosts) {
+        List<URI> Hosts = (Bootstrap) ? hosts : GWChosts;
+        for(URI host : Hosts) {
             if (!Bootstrap) {
-            	host+="?net=gnutella&get=1" + 
+            	host = URI.create(host.toString() + "?get=1&net=gnutella&" + 
             			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
-            			"&version=" + LimeWireUtils.getLimeWireVersion();
+            			"&version=" + LimeWireUtils.getLimeWireVersion() 
+            			);
             }
-        	HttpUriRequest request = newRequest(URI.create(host)); //
+        	HttpUriRequest request = newRequest(host); //
             requests.add(request);
-            requestToHost.put(request,URI.create(host));
+            requestToHost.put(request,host);
         }
 
         if(requests.isEmpty()) {
@@ -114,7 +128,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
                 bootstrapQueue, requests, params,
                 new Cancellable() {
             public boolean isCancelled() {
-                return connectionServices.isConnected();
+                return (connectionServices.getNumInitializedConnections() > 0);
             }
         });
         return true;
@@ -124,13 +138,19 @@ class TcpBootstrapImpl implements TcpBootstrap {
     public boolean UpdateGWC(String addr, Bootstrapper.Listener listener) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        for(String host : GWChosts) {
-        	host+="?net=gnutella&update=1&ip=" + addr + 
-        			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
-        			"&version=" + LimeWireUtils.getLimeWireVersion();
-            HttpUriRequest request = newRequest(URI.create(host));
+        String IP = ((String[]) addr.split(":"))[0];
+		for(URI host : GWChosts) {
+        	host = URI.create(host.toString() + "?update=1&ip=" + URLEncode(addr) + 
+        			"&net=gnutella&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+        			"&version=" + LimeWireUtils.getLimeWireVersion() +
+        			"&uptime=" + statistics.calculateDailyUptime() + 
+        			"&x_leaves=" + connectionManager.getNumInitializedClientConnections() +
+        			"&x_max=" + UltrapeerSettings.MAX_LEAVES.getValue()
+        			);
+            HttpUriRequest request = newRequest(host);
+            request.addHeader("Client-IP", IP);
             requests.add(request);
-            requestToHost.put(request, URI.create(host));
+            requestToHost.put(request, host);
         }
 
         if(requests.isEmpty()) {
@@ -154,10 +174,17 @@ class TcpBootstrapImpl implements TcpBootstrap {
         return true;
 	}
     
+    private String URLEncode(String str) {
+    	try {
+    		return URLEncoder.encode(str, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return "" ;
+		}
+    }
     private HttpUriRequest newRequest(URI host) {
         HttpGet get = new HttpGet(host);
         get.addHeader("Cache-Control", "no-cache");
-        get.addHeader("User-Agent", LimeWireUtils.getVendor());
+        get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader("Connection", "close");
         return get;
     }
@@ -195,16 +222,22 @@ class TcpBootstrapImpl implements TcpBootstrap {
 								}
                     		}
                     		if (!NoAdd) {
-                    			add(words[1],GWChosts);
-                    			addServer(words[1].toString(), servers);
+                    			add(URI.create(words[1]),GWChosts);
+                    			//addServer(words[1].toString(), servers);
                     		}
                     	} else if (words[0].equals("I")) { 		
                     		if (words[1].equals("update") ) {
                     				if (words[2].equals("OK")) 
-                    					LOG.debug("GWebcache Updated.");
+                    					LOG.debug(line);
                     		}else if (words[1].equals("access") ) {
                     			
                     		}
+                    	} else if (words[0].equals("OK")) { 	
+                    		LOG.debug(line);
+                    	} else if (words[0].startsWith("ERROR")) { 
+                    		LOG.debug(line);
+                    	} else if (words[0].startsWith("WARNING")) { 
+                    		LOG.debug(line);
                     	} else {
 	                    	Endpoint host = new Endpoint(words[0], true);
 	                        if(LOG.isDebugEnabled())
@@ -212,7 +245,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
 	                        endpoints.add(host);
                         };
                     } catch(IllegalArgumentException e) {
-                        LOG.error("Malformed line: " + line);
+                        LOG.error("Malformed line: " + line + " (" + e.getCause() + ")");
                     }
                 }
             }

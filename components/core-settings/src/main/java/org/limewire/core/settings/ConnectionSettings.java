@@ -377,6 +377,12 @@ public final class ConnectionSettings extends LimeProps {
     public static final IntSetting MIN_BYTES_SENT = FACTORY.createRemoteIntSetting(
             "MIN_BYTES_SENT", 1024);
 
+    /**
+     * Time in milliseconds of last GWC Update attemp.
+     */
+    public static final LongSetting LAST_GWCUPDATE_TIME = FACTORY.createLongSetting(
+            "LAST_GWCUPDATE_TIME", 0);
+    
     /** Bootstrap servers. */
     public static final StringArraySetting BOOTSTRAP_SERVERS =
         FACTORY.createStringArraySetting("BOOTSTRAP_SERVERS",
@@ -385,5 +391,5 @@ public final class ConnectionSettings extends LimeProps {
     /** GWebCache servers. */
     public static final StringArraySetting GWEBCACHE_SERVERS = 
     		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
-    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php"});  // ADD GWEBCACHE SERVERS HERE
+    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php","http://tenafly5k.com/gwc/skulls.php","http://uswest.gnutella.dyslexicfish.net:3558/","http://useast.gnutella.dyslexicfish.net:3558/","http://uk.gnutella.dyslexicfish.net:3558/"});  // ADD GWEBCACHE SERVERS HERE
 }
