@@ -148,7 +148,6 @@ class TcpBootstrapImpl implements TcpBootstrap {
         			"&x_max=" + UltrapeerSettings.MAX_LEAVES.getValue()
         			);
             HttpUriRequest request = newRequest(host);
-            request.addHeader("Client-IP", IP);
             requests.add(request);
             requestToHost.put(request, host);
         }
