@@ -22,21 +22,23 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
 
     static final String[] ADULT_WORDS = {
-        "adult", "amateur nude", "amatrice new", "anal", "anul",
+        "abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
         "ass", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", "bibcam",
         "blow", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
-        "brazzers", "bukkake", "candygirl", "casting couch teen", "celebrity nude",
-        "centerfold", "cinemakid", "clitoris", "club seventeen", "cock",
-        "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme",
+        "brazzers", "breached ip camera", "bukkake", "candygirl", "casting couch teen",
+        "celebrity nude", "centerfold", "cinemakid", "clitoris", "club seventeen",
+        "cock", "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme",
         "exploited black teen", "facial","fantasia model", "fantasia-model",
         "femjoy", "fm teen", "fuck", "galitsin-news", "gangbang", "handjob",
         "headjob", "hegre art", "hegre-art", "hentai", "horny", "hussyfan", "incest",
         "incezt", "jenna", "karinaworld", "kate's playground next", "kdv",
-        "kiddy porn", "kinder", "ls model","ls-magazine", "ls-model", "lsg model",
-        "lsm", "magazine lsm", "masturbat", "mbla", "met art", "met-art", "metart",
-        "milf", "molested", "msn not stickam", "mummy edit", "naakt nackt", "nackt",
-        "naked gymnast", "naked sport", "naked women", "naked-gymnast", "newstar",
-        "nipple","nubile", "nude bellydance", "nude foto", "nude photo", "nude yoga",
+        "kiddy porn", "kinder", "lolitabeach", "ls model","ls-magazine", "ls-model",
+        "lsg model", "lsm", "magazine lsm", "masturbat", "mbla", "met art", "met-art",
+        "metart", "milf", "molested", "msn not stickam", "mummy edit", "naakt nackt",
+        "nackt", "naked gymnast", "naked news", "naked on stage", "naked sport",
+        "naked women", "naked-gymnast", "newstar", "nipple", "nubile", "nude beach",
+        "nude bellydance", "nude exhib", "nude foto", "nude in public", "nude photo",
+        "nude scene", "nude sports", "nude yoga", "nude-in-public", "nudebeach",
         "online naked", "orgasm", "paraphili", "pedo", "penis", "pink teen", "pjk",
         "playboy", "porn", "posing naked", "pr0nstars", "premature", "preteen",
         "profileasian", "profileblond", "pthc", "ptsc", "public nudity", "pussy",
@@ -47,8 +49,8 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
         "teens like it big", "teenburg", "teenfuns", "teeniepalace", "teenmodel",
         "teens nackt", "teentraps", "tits", "tittie", "titty", "top black model",
         "topless teen", "ttl model", "twat", "uncensored naturist", "underage",
-        "vagina", "video angel", "vladmodel", "whore", "xpuss", "xxx",
-        "young male nudist", "young video model", "youngvideomodel", 
+        "vagina", "video angel", "vladmodel", "voyeurweb", "whore", "xpuss",
+        "xxx", "young male nudist", "young video model", "youngvideomodel", 
         "yovo", "zoophilia"
     };
 
