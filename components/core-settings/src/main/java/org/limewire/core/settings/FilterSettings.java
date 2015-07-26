@@ -152,7 +152,7 @@ public class FilterSettings extends LimeProps {
                 "torrenthound", "torrentmatrix", "torrentpond", "torrentportal",
                 "torrentpump", "torrentsource", "torrentzap", "touslesfilmsx", "Verified ",
                 "Victor.torrent", "VersaTel", "", "whentoaskforhelp", "wonderfultracks",
-                "ZAPSHARES", "zerotracker", "zibbik", "zipam.", "[cracked by ",
+                "ZAPSHARES", "zerotracker", "zibbik", "zip.avi", "zipam.", "[cracked by ",
                 "[downloader]", "[FLV].zip", "[fixed].zip", "[instrumentals].zip",
                 "[iso.hunt]  ", "[jute]", "[keygen]", "[nova]  ", "[rarbg][",
                 "[torrents.to]", "[UPLOAD BY ", "[uploaded", "[uploaded by Mike]  ",
