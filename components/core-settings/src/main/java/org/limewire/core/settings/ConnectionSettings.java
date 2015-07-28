@@ -310,13 +310,13 @@ public final class ConnectionSettings extends LimeProps {
      * Setting to not send a multicast bootstrap ping.
      */
     public static final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP = FACTORY.createBooleanSetting(
-            "DO_NOT_MULTICAST_BOOTSTRAP", false);
+            "DO_NOT_MULTICAST_BOOTSTRAP", true);
 
     /**
      * How long to try hosts from gnutella.net before bootstrapping (ms).
      */
     public static final IntSetting BOOTSTRAP_DELAY = FACTORY.createRemoteIntSetting(
-            "BOOTSTRAP_DELAY", 20000);
+            "BOOTSTRAP_DELAY", 10000);
 
     /**
      * Time in milliseconds to delay prior to flushing data on peer -> peer.
@@ -391,5 +391,5 @@ public final class ConnectionSettings extends LimeProps {
     /** GWebCache servers. */
     public static final StringArraySetting GWEBCACHE_SERVERS = 
     		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
-    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php","http://tenafly5k.com/gwc/skulls.php","http://uswest.gnutella.dyslexicfish.net:3558/","http://useast.gnutella.dyslexicfish.net:3558/","http://uk.gnutella.dyslexicfish.net:3558/"});  // ADD GWEBCACHE SERVERS HERE
+    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php","http://wireshare.byethost15.com/gwc/gwc.php"});  // ADD GWEBCACHE SERVERS HERE
 }
