@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
-import org.limewire.core.settings.ActivationSettings;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.net.FirewallService;
 import org.limewire.nio.NIODispatcher;
@@ -138,18 +137,14 @@ final class Initializer {
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
         URL imageURL = null;
-        if (ActivationSettings.LAST_START_WAS_PRO.getValue()) {
-            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splashpro.png");
-        } else {
-            imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
-        }
+        imageURL = ClassLoader.getSystemResource("org/limewire/ui/swing/mainframe/resources/splash.png");
+
         
         if (imageURL != null) {
             splashImage = Toolkit.getDefaultToolkit().createImage(imageURL);
         }
         
-        switchSplashes(awtSplash, splashImage, 
-                       ActivationSettings.LAST_START_WAS_PRO.getValue());
+        switchSplashes(awtSplash, splashImage);
         
         startEarlyCore();
         
@@ -404,11 +399,11 @@ final class Initializer {
     }
     
     /** Switches from the AWT splash to the Swing splash. */
-    private void switchSplashes(final Frame awtSplash, final Image splashImage, final boolean isPro) {
+    private void switchSplashes(final Frame awtSplash, final Image splashImage) {
         SwingUtils.invokeNowOrWait(new Runnable() {
             @Override
             public void run() {
-                splashRef.set(new SplashWindow(splashImage, isPro, LocaleUtils.getCurrentLocale(), 4));
+                splashRef.set(new SplashWindow(splashImage, LocaleUtils.getCurrentLocale(), 4));
                 if(!LimeWireUtils.isAutoStartupLaunch()) {
                     splashRef.get().begin();
                     stopwatch.resetAndLog("begin splash window");

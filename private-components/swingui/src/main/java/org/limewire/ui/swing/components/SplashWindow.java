@@ -45,7 +45,7 @@ public class SplashWindow {
     /** The JWindow the splash uses. */
     private final JWindow splashWindow;
     
-    public SplashWindow(Image splashImage, boolean isPro, Locale locale, int steps) {
+    public SplashWindow(Image splashImage, Locale locale, int steps) {
         this.splashWindow = new JWindow();
         this.splashLabel = new JLabel();
         this.textAndProgressPanel = new JPanel();
@@ -60,12 +60,7 @@ public class SplashWindow {
         textLabel.setForeground(Color.BLACK);
         
         progressBar = new LimeProgressBar();
-        
-        if (isPro) {
-            ProgressBarDecorator.decorateStaticPro(progressBar);
-        } else {
-            ProgressBarDecorator.decorateStaticBasic(progressBar);
-        }
+        ProgressBarDecorator.decorateStaticBasic(progressBar);
         
         int width = progressBar.getPreferredSize().width;
         progressBar.setPreferredSize(new Dimension(width, 8));

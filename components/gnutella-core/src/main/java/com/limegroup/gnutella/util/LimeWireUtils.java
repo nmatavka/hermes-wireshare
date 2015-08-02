@@ -95,12 +95,6 @@ public final class LimeWireUtils {
 
     private static final String LIMEWIRE_PREFS_DIR_NAME = ".WireShare";
 
-    /**
-     * Variable for whether or not this is a PRO version of LimeWire. 
-     */
-    @SuppressWarnings("unused")
-    private static boolean _isPro = false;
-
     /** Whether or not a temporary directory is in use. */
     private static boolean temporaryDirectoryInUse;
     
@@ -112,24 +106,6 @@ public final class LimeWireUtils {
 	 */
 	private LimeWireUtils() {}
     
-	/**
-     * Updates various settings when Pro is activated or 
-     * deactivated. 
-	 */
-	public static void setIsPro(boolean isPro) {
-	    if(!isTestingVersion()) {
-	        if(isPro) {
-	             if(!LIMEWIRE_VERSION.endsWith("Pro"))
-	                 LIMEWIRE_VERSION += " Pro";
-	        } else {
-                if(LIMEWIRE_VERSION.endsWith("Pro"))
-                    LIMEWIRE_VERSION = LIMEWIRE_VERSION.substring(0, LIMEWIRE_VERSION.length()-4);
-	        }
-	        setHTTPVersion();
-	        _isPro = isPro;
-	    }
-	}
-	
 	public static void setHTTPVersion() {
 		if(!LIMEWIRE_VERSION.endsWith("Pro")) {
 			HTTP_SERVER = "WireShare/" + LIMEWIRE_VERSION;
