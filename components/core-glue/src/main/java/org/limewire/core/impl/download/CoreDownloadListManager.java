@@ -57,7 +57,6 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
 
 @EagerSingleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -297,9 +296,6 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadAdded(Downloader downloader) {
-            // don't show currentDefinitionAVGCheck
-            if(isVirusScannerCurrentInfoDownload(downloader))
-                return;
             //Save the starting time if it hasn't been set
             if(downloader.getAttribute(DownloadItem.DOWNLOAD_START_DATE)== null){
                 downloader.setAttribute(DownloadItem.DOWNLOAD_START_DATE, new Date(), true);
@@ -324,22 +320,12 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(Downloader downloader) {
-            // don't show currentDefinitionAVGCheck
-            if(isVirusScannerCurrentInfoDownload(downloader))
-                return;
             DownloadItem item = getDownloadItem(downloader);            
             DownloadState state = item.getState();            
             if (state.isFinished()) {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
             }
-            
-            // Always remove anti-virus update item.  For all others, remove
-            // from list UNLESS (a) download is in error state, (b) download
-            // is removed for protection, or (c) download is finished and 
-            // auto-clear is not set.
-            if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
-                remove(item);
-            } else if (state != DownloadState.ERROR && 
+            else if (state != DownloadState.ERROR && 
                     state != DownloadState.DANGEROUS &&
                     state != DownloadState.THREAT_FOUND &&
                     (SharingSettings.CLEAR_DOWNLOAD.getValue() || !state.isFinished())) {
@@ -357,20 +343,6 @@ public class CoreDownloadListManager implements DownloadListManager {
             return item;
         }
                 
-        /**
-         * Returns true if this is a VirusDefinitionCheck download, false otherwise. 
-         * This download checks if Virus Definitions are up to date. No need 
-         * to show this to the user as this will usually return true. If this download
-         * returns false, the user will see an AVG update download.
-         */
-        private boolean isVirusScannerCurrentInfoDownload(Downloader downloader) {
-            if(downloader instanceof VirusDefinitionDownloader) {
-                VirusDefinitionDownloader virusDownload = (VirusDefinitionDownloader) downloader;
-                if(virusDownload.getFile().getName().equals("current.nfo"))
-                    return true;
-            }
-            return false;
-        }
     }
 
     @Override

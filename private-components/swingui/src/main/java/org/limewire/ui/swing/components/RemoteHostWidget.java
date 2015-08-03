@@ -206,9 +206,9 @@ public class RemoteHostWidget extends JPanel {
                 if (isTorrentWebSearch(people)) {
                     return tr("Web Search");
                 } else if(type == RemoteWidgetType.TABLE) {
-                    return trn("{0} P2P User", "{0} P2P Users", people.size());
+                    return trn("{0} Peer-to-Peer User", "{0} Peer-to-Peer Users", people.size());
                 } else {
-                    return trn("P2P User", "P2P Users", people.size());
+                    return trn("Peer-to-Peer User", "Peer-to-Peer Users", people.size());
                 }
             }
         }

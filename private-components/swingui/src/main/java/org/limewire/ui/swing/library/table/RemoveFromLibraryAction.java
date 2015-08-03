@@ -63,14 +63,14 @@ class RemoveFromLibraryAction extends AbstractAction {
     private String getMessage(List<LocalFileItem> list) {
         if(list.size() == 1) {
             if(containsSharedFile(list))
-                return I18n.tr("Remove \"{0}\" from Library? This will unshare this file with everyone.", list.get(0).getFileName());
+                return I18n.tr("Are you sure you want to remove \"{0}\" from the Library and stop sharing it?", list.get(0).getFileName());
             else 
-                return I18n.tr("Remove \"{0}\" from Library?", list.get(0).getFileName());
+                return I18n.tr("Are you sure you want to remove \"{0}\" from the Library?", list.get(0).getFileName());
         } else {
             if(containsSharedFile(list))
-                return I18n.tr("Remove {0} files from Library? This will unshare these files with everyone.", list.size());
+                return I18n.tr("Are you sure you want to remove {0} files from Library and stop sharing them?", list.size());
             else
-                return I18n.tr("Remove {0} files from Library?", list.size());
+                return I18n.tr("Are you sure you want to remove {0} files from Library?", list.size());
         }
     }
     

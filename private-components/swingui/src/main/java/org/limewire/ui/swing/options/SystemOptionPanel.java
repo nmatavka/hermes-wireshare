@@ -113,7 +113,7 @@ public class SystemOptionPanel extends OptionPanel {
                     updateView();
                 }
             });
-            warnCheckBox = new JCheckBox("<html>" + I18n.tr("Warn me when other programs want to automatically open these types") + "</html>");
+            warnCheckBox = new JCheckBox("<html>" + I18n.tr("Warn me when other programs want to open these types automatically") + "</html>");
             warnCheckBox.setContentAreaFilled(false);
 
             add(magnetCheckBox, "gapleft 5, gapbottom 5, wrap");
@@ -215,9 +215,9 @@ public class SystemOptionPanel extends OptionPanel {
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
 
-            runAtStartupCheckBox = new JCheckBox(I18n.tr("Run WireShare on System Startup"));
+            runAtStartupCheckBox = new JCheckBox(I18n.tr("Start WireShare every time I log in"));
             runAtStartupCheckBox.setContentAreaFilled(false);
-            minimizeButton = new JRadioButton(I18n.tr("Minimize to system tray"));
+            minimizeButton = new JRadioButton(I18n.tr("Minimize to notifications area"));
             minimizeButton.setContentAreaFilled(false);
             exitButton = new JRadioButton(I18n.tr("Exit program"));
             exitButton.setContentAreaFilled(false);
@@ -230,7 +230,7 @@ public class SystemOptionPanel extends OptionPanel {
                 add(runAtStartupCheckBox, "wrap");
             }
             if (trayNotifier.supportsSystemTray()) {
-                add(new JLabel(I18n.tr("When I press X:")), "wrap");
+                add(new JLabel(I18n.tr("When I press the close button:")), "wrap");
                 add(minimizeButton, "gapleft 10");
                 add(exitButton);
             }

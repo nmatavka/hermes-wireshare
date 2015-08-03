@@ -86,7 +86,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
     
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign In");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in...");
-    private static final String AUTHENTICATION_ERROR = tr("Incorrect username or password.");
+    private static final String AUTHENTICATION_ERROR = tr("The user name or password you have entered is incorrect.");
     private static final String NETWORK_ERROR = tr("Network error.");
     
     private PromptTextField serviceField;
@@ -224,7 +224,7 @@ public class XMPPUserEntryLoginPanel extends JPanel implements Disposable {
         ResizeUtils.forceSize(usernameField, new Dimension(224, 26));
         ResizeUtils.forceSize(passwordField, new Dimension(224, 26));
 
-        autoLoginCheckBox = new JCheckBox(tr("Sign in when I start WireShare"), true);
+        autoLoginCheckBox = new JCheckBox(tr("Sign in automatically"), true);
         autoLoginCheckBox.setFont(autoLoginCheckBoxFont);
         autoLoginCheckBox.setIcon(autoLoginCheckBoxIcon);
         autoLoginCheckBox.setSelectedIcon(autoLoginCheckBoxSelectedIcon);

@@ -28,7 +28,6 @@ import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
-import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
@@ -81,7 +80,6 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             SocketsManager socketsManager, 
             @Named("downloadStateProcessingQueue") ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
-            VirusScanner virusScanner,
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
@@ -95,7 +93,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
                 backgroundExecutor, messageRouter, tigerTreeCache,
                 applicationServices, remoteFileDescFactory, pushListProvider,
                 socketsManager, downloadStateProcessingQueue,
-                dangerousFileChecker, virusScanner, spamManager, library,
+                dangerousFileChecker, spamManager, library,
                 categoryManager, bandwidthCollector);
     }
     

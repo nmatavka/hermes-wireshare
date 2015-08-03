@@ -106,7 +106,7 @@ public interface FriendPresence {
     enum Mode {
         // lower case enum values to allow direct mapping from to the Mode enum
         // defined in smack
-        chat(I18nMarker.marktr("Free to chat"), 0),
+        chat(I18nMarker.marktr("Online"), 0),
         available(I18nMarker.marktr("Available"), 1),
         away(I18nMarker.marktr("Away"), 2),//away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
         xa(I18nMarker.marktr("Away for a while"), 2),

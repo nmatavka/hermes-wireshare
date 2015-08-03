@@ -155,7 +155,7 @@ public class FileInfoSharingPanel implements FileInfoPanel {
                         component.add(createHeaderLabel(I18n.tr("This file is not shared")), "span, wrap");
                     }
                 } else {
-                    component.add(createHeaderLabel(I18n.tr("This file cannot be shared")), "span, wrap");
+                    component.add(createHeaderLabel(I18n.tr("This file can not be shared")), "span, wrap");
                 }
             }
             break;
@@ -194,7 +194,7 @@ public class FileInfoSharingPanel implements FileInfoPanel {
         }
 
         final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(I18n.tr("Remove File"), message, I18n
-                .tr("Don't ask me again"), !QuestionsHandler.CONFIRM_REMOVE_FILE_INFO_SHARING.getValue(),
+                .tr("Do not ask me again"), !QuestionsHandler.CONFIRM_REMOVE_FILE_INFO_SHARING.getValue(),
                 I18n.tr("Yes"), I18n.tr("No"));
         yesNoCheckBoxDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         yesNoCheckBoxDialog.setVisible(true);

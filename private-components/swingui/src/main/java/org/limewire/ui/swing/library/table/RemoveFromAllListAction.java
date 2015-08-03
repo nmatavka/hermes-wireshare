@@ -65,9 +65,9 @@ class RemoveFromAllListAction extends AbstractAction {
     
     private String getMessage(int selectedCount) {
         if(selectedCount == 1) {
-            return I18n.tr("Remove this file from All Lists?");
+            return I18n.tr("Remove file from all lists?");
         } else {
-            return I18n.tr("Remove {0} files from All Lists?", selectedCount);            
+            return I18n.tr("Remove {0} files from all lists?", selectedCount);            
         }
     }
 }

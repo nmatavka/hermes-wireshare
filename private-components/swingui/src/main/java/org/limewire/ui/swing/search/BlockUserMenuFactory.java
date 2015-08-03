@@ -78,7 +78,7 @@ public class BlockUserMenuFactory {
         JMenu blockMenu = new JMenu(I18n.tr("Block User"));
 
         if (p2pUsers.size() > 1) {
-            blockMenu.add(new AbstractAction(I18n.tr("All P2P Users")) {
+            blockMenu.add(new AbstractAction(I18n.tr("All Peer-to-Peer Users")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (blockHandler.confirmBlockAll(p2pUsers.size())) {
@@ -129,13 +129,13 @@ public class BlockUserMenuFactory {
         @Override
         public boolean confirmBlock(String name) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block P2P User {0}?", name));
+            return confirm(I18n.tr("Block Peer-to-Peer User {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block P2P uUers?"));
+            return confirm(I18n.tr("Block Peer-to-Peer users?"));
         }
         
         @Override
@@ -165,13 +165,13 @@ public class BlockUserMenuFactory {
         @Override
         public boolean confirmBlock(String name) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block P2P User {0}?", name));
+            return confirm(I18n.tr("Block Peer-to-Peer User {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block {0} P2P Users?", hostCount));
+            return confirm(I18n.tr("Block {0} Peer-to-Peer Users?", hostCount));
         }
 
         @Override
@@ -188,7 +188,7 @@ public class BlockUserMenuFactory {
         }
 
         final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message, I18n
-                .tr("Don't ask me again"), !QuestionsHandler.CONFIRM_BLOCK_HOST.getValue());
+                .tr("Do not ask me again"), !QuestionsHandler.CONFIRM_BLOCK_HOST.getValue());
         yesNoCheckBoxDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         yesNoCheckBoxDialog.setVisible(true);
 

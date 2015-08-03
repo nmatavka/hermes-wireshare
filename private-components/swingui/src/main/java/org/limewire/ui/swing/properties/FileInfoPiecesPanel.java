@@ -188,7 +188,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                     
                     if (download.getState() == DownloadState.CANCELLED) {
                         grid.setAlpha(.5f);
-                        statusLabel.setText(I18n.tr("Download Cancelled!"));
+                        statusLabel.setText(I18n.tr("Download cancelled"));
                         statusLabel.setVisible(true);
                         grid.repaint();
                     } else {
@@ -198,7 +198,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                                 grid.setCellFillPaint(i, downloadedForeground);
                             }
                         } else {
-                            statusLabel.setText(I18n.tr("Download Already Finished!"));
+                            statusLabel.setText(I18n.tr("Download already finished"));
                         }
                     }
                 } 

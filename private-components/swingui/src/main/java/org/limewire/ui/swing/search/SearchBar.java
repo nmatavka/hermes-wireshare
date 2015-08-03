@@ -143,7 +143,7 @@ public class SearchBar extends JXPanel {
         searchButton.removeActionHandListener();
         searchButton.setName("SearchBar.searchButton");
         searchButton.setFocusPainted(false);
-        searchButton.setToolTipText(I18n.tr("Search P2P Network"));
+        searchButton.setToolTipText(I18n.tr("Search Peer-to-Peer Network"));
         
         final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, autoCompleter);
         autoCompleteControl.setAutoComplete(true);
@@ -196,10 +196,10 @@ public class SearchBar extends JXPanel {
             public void handleEvent(FriendConnectionEvent event) {
                 switch (event.getType()) {
                 case CONNECTED:
-                    searchButton.setToolTipText(I18n.tr("Search P2P Network and Friends"));
+                    searchButton.setToolTipText(I18n.tr("Search Peer-to-Peer Network and Friends"));
                     break;
                 default:
-                    searchButton.setToolTipText(I18n.tr("Search P2P Network"));
+                    searchButton.setToolTipText(I18n.tr("Search Peer-to-Peer Network"));
                     break;
                 }
             }

@@ -136,29 +136,4 @@ public class DownloadSettings extends LimeProps {
     public static final BooleanSetting DELETE_CANCELED_DOWNLOADS = FACTORY.createBooleanSetting(
             "DELETE_CANCELED_DOWNLOADS", true);
 
-    public static final StringSetting VIRUS_UPDATES_SERVER =
-        FACTORY.createStringSetting("DownloadSettings.virusUpdatesServer",
-        "http://af.avg.com/softw/90free/sdklmw/");
-
-    public static final StringSetting VIRUS_NFO_SERVER =
-        FACTORY.createStringSetting("DownloadSettings.virusNfoServer",
-        "http://update.avg.com/softw/90free/sdklmw/");
-
-    public static final IntSetting NUM_SCANNED_CLEAN = FACTORY.createIntSetting("NUM_SCANNED_CLEAN", 0);
-    
-    public static final IntSetting NUM_SCANNED_INFECTED = FACTORY.createIntSetting("NUM_SCANNED_INFECTED", 0);
-
-    public static final PropertiesSetting INFECTED_EXTENSIONS = FACTORY.createPropertiesSetting("INFECTED_EXTENSIONS", new Properties());
-
-    public static final IntSetting NUM_SCANS_FAILED = FACTORY.createIntSetting("NUM_SCANS_FAILED", 0);
-    
-    public static final IntSetting NUM_AV_INCREMENTAL_UPDATES_FAILED = FACTORY.createIntSetting("NUM_AV_INCREMENTAL_UPDATES_FAILED", 0);
-    
-    public static final IntSetting NUM_AV_INCREMENTAL_UPDATES_SUCCEEDED = FACTORY.createIntSetting("NUM_AV_INCREMENTAL_UPDATES_SUCCEEDED", 0);
-    
-    public static final IntSetting NUM_AV_FULL_UPDATES_FAILED = FACTORY.createIntSetting("NUM_AV_FULL_UPDATES_FAILED", 0);
-    
-    public static final IntSetting NUM_AV_FULL_UPDATES_SUCCEEDED = FACTORY.createIntSetting("NUM_AV_FULL_UPDATES_SUCCEEDED", 0);
-    
-    public static final IntSetting NUM_AV_MEMENTOS_RESUMED = FACTORY.createIntSetting("NUM_AV_MEMENTOS_RESUMED", 0);
 }

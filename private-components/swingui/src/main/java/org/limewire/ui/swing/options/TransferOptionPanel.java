@@ -153,8 +153,8 @@ public class TransferOptionPanel extends OptionPanel {
             super(I18n.tr("Downloads"));
 
             ButtonGroup downloadOptions = new ButtonGroup();
-            singleLocationButton = new JRadioButton(I18n.tr("Save all downloads to one folder:"));
-            multiLocationButton = new JRadioButton(I18n.tr("Save different categories to different folders"));
+            singleLocationButton = new JRadioButton(I18n.tr("Save all downloads to one directory:"));
+            multiLocationButton = new JRadioButton(I18n.tr("Save different categories to different directories"));
             singleLocationButton.setOpaque(false);
             multiLocationButton.setOpaque(false);
             downloadOptions.add(singleLocationButton);
@@ -168,9 +168,6 @@ public class TransferOptionPanel extends OptionPanel {
             browseSaveLocationButton = new JButton(directoryAction);
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setOpaque(false);
-
-            useAntivirusCheckBox = new JCheckBox(I18n.tr("Scan files I download for viruses"));
-            useAntivirusCheckBox.setOpaque(false);
 
             add(singleLocationButton);
             add(downloadSaveTextField, "span, growx");
@@ -216,19 +213,7 @@ public class TransferOptionPanel extends OptionPanel {
 
             SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(autoRenameDuplicateFilesCheckBox
                     .isSelected());
-            
-            if(virusEngine.isSupported()){
-                boolean isReEnable = useAntivirusCheckBox.isSelected()
-                        && MalwareSettings.VIRUS_SCANNER_ENABLED.getValue() == false;
-                
-                MalwareSettings.VIRUS_SCANNER_ENABLED.setValue(useAntivirusCheckBox.isSelected());
-                
-                if (isReEnable){
-                    //check for av updates if the user re-enabled the scanner.
-                    virusEngine.checkForUpdates();
-                }
-            }
-            
+                        
             final String save = downloadSaveTextField.getText();
             if (!save.equals(currentSaveDirectory)) {
                 try {
@@ -285,24 +270,14 @@ public class TransferOptionPanel extends OptionPanel {
                     || saveFolderPanel.hasChanged()
                     || singleLocationButton.isSelected()
                     && saveFolderPanel.isConfigCustom()
-                    || MalwareSettings.VIRUS_SCANNER_ENABLED.getValue() != useAntivirusCheckBox.isSelected()
                     || SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
         }
         
-        public void setAVGCheckBoxVisible() {
-            boolean supported = virusEngine.isSupported();
-            useAntivirusCheckBox.setVisible(supported);
-        }
-
         @Override
         public void initOptions() {
             autoRenameDuplicateFilesCheckBox
                     .setSelected(SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
-            
-            useAntivirusCheckBox.setSelected(MalwareSettings.VIRUS_SCANNER_ENABLED.getValue());
-
-            setAVGCheckBoxVisible();
-            
+                        
             saveFolderPanel.initOptions();
             
             if (saveFolderPanel.isConfigCustom()) {
@@ -343,17 +318,17 @@ public class TransferOptionPanel extends OptionPanel {
 
         public TrayPanel() {
             super(I18n.tr("Tray"));
-            closeTrayCheckBox = new JCheckBox(I18n.tr("Close tray when there are no transfers"));
+            closeTrayCheckBox = new JCheckBox(I18n.tr("Close tray when there are no transfers."));
             closeTrayCheckBox.setOpaque(false);
 
-            showBandwidthCheckBox = new JCheckBox(I18n.tr("Show total bandwidth"));
+            showBandwidthCheckBox = new JCheckBox(I18n.tr("Show total bandwidth."));
             showBandwidthCheckBox.setOpaque(false);
 
             clearDownloadsCheckBox = new JCheckBox(I18n
                     .tr("Clear downloads from list when finished"));
             clearDownloadsCheckBox.setOpaque(false);
 
-            clearUploadCheckBox = new JCheckBox(I18n.tr("Clear uploads from list when finished"));
+            clearUploadCheckBox = new JCheckBox(I18n.tr("Clear uploads from list when finished."));
             clearUploadCheckBox.setOpaque(false);
 
             // we aren't using deleteFileOnCancelCheckBox yet

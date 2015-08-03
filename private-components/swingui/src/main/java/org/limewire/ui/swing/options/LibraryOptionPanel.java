@@ -102,7 +102,7 @@ public class LibraryOptionPanel extends OptionPanel {
                     iTunesOptionPanel, I18n.tr("iTunes Configuration"),
                     I18n.tr("Configure..."), I18n.tr("Configure iTunes")));
             
-            add(new JLabel(I18n.tr("Configure how files in your WireShare interact with iTunes")));
+            add(new JLabel(I18n.tr("Configure Public Shared file interactions with iTunes")));
             add(configureButton, "gapleft push");
         }
 
@@ -134,7 +134,7 @@ public class LibraryOptionPanel extends OptionPanel {
             setLayout(new MigLayout("ins 0 0 0 0, gap 0"));
 
             useLimeWirePlayer = new JCheckBox(I18n
-                    .tr("Use the WireShare player when I play Audio and Video files"));
+                    .tr("Open audio and video files in WireShare Player."));
             useLimeWirePlayer.setOpaque(false);
 
             add(useLimeWirePlayer);
@@ -194,7 +194,7 @@ public class LibraryOptionPanel extends OptionPanel {
             
             unsafeTypeOptionPanel = unsafeOptionPanelProvider.get();
             
-            shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Add files I download from P2P Users to my Public Shared List")+"</html>");
+            shareP2PdownloadedFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Share downloaded files.")+"</html>");
             shareP2PdownloadedFilesCheckBox.setOpaque(false);
             sharePartialFilesCheckBox = new JCheckBox("<html>"+I18n.tr("Enable partial file sharing.")+"</html>");
             sharePartialFilesCheckBox.setOpaque(false);

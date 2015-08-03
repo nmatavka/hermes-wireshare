@@ -51,9 +51,9 @@ import com.google.inject.Provider;
 public class AdvancedToolsPanel extends JPanel implements Disposable {
     /** Defines the tab identifiers for the window. */
     public enum TabId {
-        CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other P2P clients")), 
+        CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other peer-to-peer clients")), 
         CONSOLE(I18n.tr("Console"), I18n.tr("View console messages")),
-        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing DHT messages")),
+        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing Distributed Hash Table messages")),
         INSPECTIONS("Inspections", "Inspections debug panel");
         
         private final String name;

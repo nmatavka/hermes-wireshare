@@ -61,7 +61,7 @@ public class IncomingSearchPanel extends JPanel implements Disposable {
         setOpaque(false);
 
         incomingLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 3, 0));
-        incomingLabel.setText(I18n.tr("Incoming Searches - people on the P2P Network are now searching for..."));
+        incomingLabel.setText(I18n.tr("Incoming Gnutella searches:"));
 
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         

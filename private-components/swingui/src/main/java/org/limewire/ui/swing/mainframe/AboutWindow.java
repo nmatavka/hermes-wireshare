@@ -35,7 +35,7 @@ class AboutWindow {
 	private final JDialog dialog;
 	private final ScrollingTextPane textPane;
 	private final JButton button;
-	private final JCheckBox scrollBox = new JCheckBox(I18n.tr("Automatically Scroll"));
+	private final JCheckBox scrollBox = new JCheckBox(I18n.tr("Scroll automatically"));
 
 	/**
 	 * Constructs the elements of the about window.
@@ -100,7 +100,7 @@ class AboutWindow {
         //  set up close button
         button = new JButton(I18n.tr("Close"));
         dialog.getRootPane().setDefaultButton(button);
-        button.setToolTipText(I18n.tr("Close This Window"));
+        button.setToolTipText(I18n.tr("Close this window."));
         button.addActionListener(GuiUtils.getDisposeAction());
 
         //  layout window
@@ -127,13 +127,18 @@ class AboutWindow {
         sb.append("<body text='#" + hex + "'>");
 
         //  introduction
-        sb.append(I18n.tr("WireShare is a lightweight open-source fork of the original LimeWire open source project. " +
-				"We give full credit to the creators, and have no intention of changing this section, or by any " + 
-                      "means diminishing the contributions of all the people involved in Limewire.   Our sole intention is " +
-				"to create and maintain a bona fide continuation of the project. All work is undertaken on a pro bono " +
-				"basis; we do not control any part of the Gnutella network, nor do we hold any substantial monetary " +
-                      "assets. We are not a company; we have no leaders and no structure to speak of. " +
-				"WireShare is also, of course, the result of the countless hours of work by LimeWire's developers:"));
+        //345678901234567890123456789012345678901234567890123456789012345678901234567890
+        sb.append(I18n.tr("Here at the WireShare project, we believe in the value of " +
+	"hard work.  Because we are in no way a formally-organised or structured " +
+	"enterprise, because we hold no assets to speak of, because we do not control " +
+        "or intend to control the Gnutella network, and because we subscribe to the pro " +
+        "bono ethos, authorship credit is the major benefit that our contributors " +
+        "derive from their activity.  Since our primary mission is to maintain bona " +
+	"fide continuity and fidelity with the final version of the LimeWire Gnutella " +
+        "servent software, and in our role as the final fork and continuation of that " +
+	"project, we have no intention of diminishing the credit due to their " +
+	"contributors.  On the contrary, this page serves to memorialise the " +
+        "developers, testers, technical writers, and designers of Lime Wire LLC:"));
 
         sb.append("<br>");
 
@@ -180,7 +185,7 @@ class AboutWindow {
                 " </table>");
         
         //  previous developers
-        sb.append(I18n.tr("In addition, the following individuals had worked on the LimeWire team but had transitioned to other projects prior to LimeWire's discontinuation:"));
+        sb.append(I18n.tr("In addition, the following individuals had worked on the LimeWire team but had transitioned to other projects prior to its discontinuation:"));
 
         sb.append("<table border=\"0\" cellspacing=\"5\">" +                 
                 " <tr>" +
@@ -372,12 +377,12 @@ class AboutWindow {
                 "</table>" );
         
         //  conclusion
-        sb.append(I18n.tr("The makers of WireShare would like to extend their sincere thanks to those developers, users, and all others who have contributed their ideas to the project. Without our valued users, the P2P Network would not exist."));
+        sb.append(I18n.tr("The makers of WireShare would like to extend their sincere thanks to those developers, users, and all others who have contributed their ideas to the project. Without our valued users, the Gnutella Peer-to-Peer Network would not exist."));
         
         // bt notice
         sb.append("<small>");
         sb.append("<br><br>");
-        sb.append(I18n.tr("Finally, WireShare is a continuation of LimeWire Pirate Edition which, contrary to popular belief, is fully in accordance with relevant national and international laws and statutes."));
+        sb.append(I18n.tr("Finally, WireShare is a continuation of LimeWire Pirate Edition which, contrary to popular belief, is fully in accordance with relevant national and international laws and statutes.  Therefore, thanks also go out to Meta Pirate for making this possible."));
         sb.append("</small>");
         
         sb.append("</body></html>");

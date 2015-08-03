@@ -80,7 +80,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         p.setOpaque(false);
         
         limewireChooseRadioButton = new JRadioButton(I18n.tr("Let WireShare choose my network interface (Recommended)"));
-        meChooseRadioButton = new JRadioButton(I18n.tr("Let me choose a specific network interface"));
+        meChooseRadioButton = new JRadioButton(I18n.tr("Use a specific network interface"));
         
         limewireChooseRadioButton.setOpaque(false);
         meChooseRadioButton.setOpaque(false);

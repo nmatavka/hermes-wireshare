@@ -79,7 +79,7 @@ public class AdvancedOptionPanel extends OptionPanel {
         add(
                 new JLabel(
                         I18n
-                                .tr("We recommend you don't touch these unless you really know what you're doing.")),
+                                .tr("If you do not know what these options do, it is recommended that you leave them as they are.")),
                 "span 2, wrap");
         add(list, "growy");
         add(cardPanel, "grow");

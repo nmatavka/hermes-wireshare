@@ -35,10 +35,10 @@ public interface DownloadItem extends PropertiableFile {
      *  into a general error applicable to any type of download and user under understandable.
      */
 	public static enum ErrorState {
-	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem")),
-	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted")),
-	    INVALID(I18nMarker.marktr("The copyright holder has not authorized this for sharing")),
-	    UNABLE_TO_CONNECT(I18nMarker.marktr("Trouble connecting to people")),
+	    DISK_PROBLEM(I18nMarker.marktr("There is a problem with your disk.")),
+	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted.")),
+	    INVALID(I18nMarker.marktr("The copyright holder has not authorized this for sharing.")),
+	    UNABLE_TO_CONNECT(I18nMarker.marktr("Can not connect to servers.")),
 	    
 	    /**
          * The DownloadItem is not in an error state.

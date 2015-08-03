@@ -19,16 +19,6 @@ public enum DownloadState {
 	RESUMING(false, false, false),
 	/** Threat detected by dangerous file checker. */
 	DANGEROUS(false, false, true),
-    /** Anti-virus scan in progress for finished download. */
-    SCANNING(false, false, false),
-    /** Anti-virus scan in progress for file fragment. */
-    SCANNING_FRAGMENT(false, false, false),
-    /** Threat detected by anti-virus scan. */
-    THREAT_FOUND(false, false, true),
-	/** Anti-virus scan failed. */
-	SCAN_FAILED(false, false, true),
-	/**Applying the downloaded anti-virus update*/
-	APPLYING_DEFINITION_UPDATE(false, false, false);
 
 	private final boolean pausable;
 	private final boolean resumable;

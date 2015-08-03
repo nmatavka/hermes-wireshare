@@ -427,7 +427,7 @@ final class Initializer {
      */
     private void initializeEarlyUI() {
         // Load up the HTML engine.
-        splashRef.get().setStatusText(I18n.tr("Loading the HTML engine..."));        //html engine
+        splashRef.get().setStatusText(I18n.tr("Loading HTML engine..."));        //html engine
         stopwatch.resetAndLog("update splash for HTML engine");
 
         SwingUtils.invokeNowOrWait(new Runnable() {
@@ -445,7 +445,7 @@ final class Initializer {
         });
         stopwatch.resetAndLog("return from evt queue");
         
-        splashRef.get().setStatusText(I18n.tr("Loading the browser..."));           //loading browser
+        splashRef.get().setStatusText(I18n.tr("Loading browser..."));           //loading browser
         // Not pretty but Mozilla initialization errors should not crash the
         // program
         if (LimeMozillaInitializer.shouldInitialize()) {
@@ -480,7 +480,7 @@ final class Initializer {
     
     /** Loads the UI. */
     private void loadUI() {
-        splashRef.get().setStatusText(I18n.tr("Loading the user interface..."));        //loading user interface
+        splashRef.get().setStatusText(I18n.tr("Loading user interface..."));        //loading user interface
         stopwatch.resetAndLog("update splash for UI");
         
         DefaultErrorCatcher.storeCaughtBugs();
@@ -521,7 +521,7 @@ final class Initializer {
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */
     private void loadLateTasksForUI() {
         // Touch the I18N stuff to ensure it loads properly.
-        splashRef.get().setStatusText(I18n.tr("Starting the user interface..."));  //other languages?
+        splashRef.get().setStatusText(I18n.tr("Starting user interface..."));  //other languages?
         I18NConvert.instance();
         stopwatch.resetAndLog("I18nConvert instance");
     }
@@ -553,18 +553,18 @@ final class Initializer {
     
     /** Fails because alpha expired. */
     private void failExpired() {
-        fail(I18n.tr("This Alpha version has expired.  Press Ok to exit. "));
+        fail(I18n.tr("The test period for this alpha version is over.  Click OK to exit."));
     }
     
     /** Fails because internet is blocked. */
     private void failInternetBlocked() {
         fail(I18n
-                .tr("WireShare was unable to initialize and start. This is usually due to a security program blocking WireShare\'s access to the internet or loopback connections on the local machine. Please add WireShare as an exception to your security software and restart WireShare."));
+                .tr("Fatal error: a firewall has prevented WireShare from connecting to itself (loopback).   Verify that your whitelist is set up correctly and try again."));
     }
     
     /** Fails because preferences can't be set. */
     private void failPreferencesPermissions() {
-        fail(I18n.tr("WireShare could not create a temporary preferences folder.\n\nThis is generally caused by a lack of permissions.  Please make sure that WireShare (and you) have access to create files/folders on your computer.  If the problem persists, please visit http://www.gnutellaforums.com/ for support.\n\nWireShare will now exit.  Thank You."));
+        fail(I18n.tr("Fatal error: insufficient permissions to create preferences directory.  Please contact your system administrator or visit http://www.gnutellaforums.com/ for support.  WireShare will now exit."));
     }
    
     /** Shows a msg & fails. */

@@ -44,6 +44,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
 
+// 00000 This seems useful, but it seems like it's been unlinked.  What gives?
+
 import com.google.inject.Inject;
 
 /**
@@ -81,7 +83,7 @@ public class ExtensionClassificationPanel extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         setOpaque(false);
         
-        add(new JLabel("<html>"+I18n.tr("Below are the file extensions WireShare knows about and how they are classified throughout the program")+"</html>"),
+        add(new JLabel("<html>"+I18n.tr("WireShare knows about these extensions and classifies them as follows:")+"</html>"),
             BorderLayout.NORTH);
         
         
@@ -115,10 +117,11 @@ public class ExtensionClassificationPanel extends JPanel {
         JPanel otherPanel = new JPanel(new GridBagLayout());
         otherPanel.setOpaque(false);
         
-        JLabel otherLabel = new MultiLineLabel(I18n.tr("File types that WireShare doesn't know about are " +
-                "classified as \"Other\". Add these files to a List by dragging them, or " +
-                "when adding a folder, click \"Advanced\" and choose specific file " +
-                "extensions"), 450);
+	//3456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+        JLabel otherLabel = new MultiLineLabel(I18n.tr("Unknown file types are classified " +
+	"as \"Other\"; to categorize them, simply drag and drop them onto the relevant " +
+	"category.  If adding several file types, drag and drop the folder they are in, click " +
+	"\"Advanced\", and then choose the specific file extensions to associate."), 450);
         otherLabel.setOpaque(false);
         
         otherPanel.add(otherLabel);
@@ -319,7 +322,7 @@ public class ExtensionClassificationPanel extends JPanel {
 
     public void showDialogue() {
         init();
-        JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("File extension Classification"), null, this);
+        JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("File Extension Classification"), null, this);
         
         JPanel buttonPanel = new JPanel(new MigLayout("insets 0 0 10 10, gap 4, fill"));
         buttonPanel.setOpaque(false);

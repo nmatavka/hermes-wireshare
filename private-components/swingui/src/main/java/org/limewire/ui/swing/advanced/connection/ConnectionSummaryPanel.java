@@ -60,13 +60,13 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
     private static final String DISCONNECTED_PANEL_KEY = "DISCONNECTED_KEY";
     private static final String CONNECTED_PANEL_KEY = "CONNECTED_KEY";
     
-    private final String IS_ULTRAPEER = I18n.tr("You are an Ultrapeer node");
-    private final String IS_LEAF = I18n.tr("You are a Leaf node");
-    private final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall");
-    private final String IS_FIREWALLED_TRANSFERS = I18n.tr("You are behind a firewall and support firewall transfers");
-    private final String IS_FIREWALLED_NO_TRANSFERS = I18n.tr("You are behind a firewall and do not support firewall transfers");
+    private final String IS_ULTRAPEER = I18n.tr("You are an Ultrapeer node.");
+    private final String IS_LEAF = I18n.tr("You are a Leaf node.");
+    private final String IS_NOT_FIREWALLED = I18n.tr("You are not behind a firewall.");
+    private final String IS_FIREWALLED_TRANSFERS = I18n.tr("You are behind a firewall and support firewall transfers.");
+    private final String IS_FIREWALLED_NO_TRANSFERS = I18n.tr("You are behind a firewall and do not support firewall transfers.");
     private final String CONNECTED_TO = I18n.tr("Connected to:");
-    private final String RESOLVE = I18n.tr("Show hostnames of connected peers");
+    private final String RESOLVE = I18n.tr("Resolve IP addresses of connected peers");
     
     @Resource
     private Icon questionMarkIcon;
@@ -242,10 +242,10 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
             switcher.show(this, DISCONNECTED_PANEL_KEY);
             switch (gnutellaConnectionManager.getConnectionStrength()) {
                 case NO_INTERNET :
-                    disconnectedMessageLabel.setText(I18n.tr("No internet connection!"));
-                    break;
+                    disconnectedMessageLabel.setText(I18n.tr("You are not connected to the Internet."));
+                    break; 
                 case DISCONNECTED :
-                    disconnectedMessageLabel.setText("<html>" + I18n.tr("Gnutella is disconnected however internet connection detected!")+"</html>");
+                    disconnectedMessageLabel.setText("<html>" + I18n.tr("You are connected to the Internet, but not connected to the Gnutella network.")+"</html>");
                     break;
             }
         }
@@ -258,13 +258,13 @@ public class ConnectionSummaryPanel extends JPanel implements Disposable {
     private String getReasonText(FWTStatusReason reason) {
         switch (reason) {
         case INVALID_EXTERNAL_ADDRESS:
-            return I18n.tr("WireShare has not been able to determine the external IP address of your NAT or firewall");
+            return I18n.tr("Unable to determine the external IP address of your NAT or firewall.");
         case NO_SOLICITED_INCOMING_MESSAGES:
-            return I18n.tr("WireShare has not received any incoming UDP messages");
+            return I18n.tr("No incoming UDP messages received.");
         case REUSING_STATUS_FROM_PREVIOUS_SESSION:
             return I18n.tr("WireShare was not able to support firewall transfers in a previous session");
         case PORT_UNSTABLE:
-            return I18n.tr("WireShare is behind a NAT or firewall that assigns a different external port to each connection");
+            return I18n.tr("Your NAT or firewall assigns a different external port to each connection.");
         case UNKNOWN:
         default:
             return "";

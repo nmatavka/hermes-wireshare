@@ -17,19 +17,21 @@ public class ProgramsNotAllowedPanel extends JPanel {
         
         MessageComponent messageComponent = new MessageComponent(12, 22, 10, 14);
         
-        JLabel title = new JLabel(I18n.tr("Downloading programs can result in viruses"));
+        JLabel title = new JLabel(I18n.tr("Warning"));
         
         JLabel message;
             
         if (OSUtils.isMacOSX()) {
-            message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
-                    " using WireShare. However, you can enable downloading programs via Preferences > " +
-                    "Search > Configure...")+"</html>");
+            message = new JLabel("<html>" + I18n.tr("Program files may contain viruses.  " +
+	    "WireShare does not include a virus scanner.  For your protection, program " +
+	    "downloading has been disabled.  To enable it, click Preferences -> Options " +
+	    "-> Search -> Configure...")+"</html>");
         }
         else {
-            message = new JLabel("<html>" + I18n.tr("We recommend you don't download programs" +
-        		" using WireShare. However, you can enable downloading programs via Tools > Options > " +
-        		"Search > Configure...")+"</html>");
+            message = new JLabel("<html>" + I18n.tr("Program files may contain viruses.  " +
+	    "WireShare does not include a virus scanner.  For your protection, program " +
+	    "downloading has been disabled.  To enable it, click Tools -> Options " +
+	    "-> Search -> Configure...")+"</html>");
         }
         
         messageComponent.decorateHeaderLabel(title);

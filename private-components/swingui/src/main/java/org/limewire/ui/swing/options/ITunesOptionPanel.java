@@ -34,7 +34,7 @@ public class ITunesOptionPanel extends OptionPanel {
         
         setLayout(new MigLayout("gapy 10"));
         
-        addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from WireShare to iTunes"));
+        addToITunesCheckBox = new JCheckBox(I18n.tr("Automatically add downloaded audio files to iTunes Library"));
         addToITunesCheckBox.setContentAreaFilled(false);
              
         add(addToITunesCheckBox, "wrap");
@@ -88,7 +88,7 @@ public class ITunesOptionPanel extends OptionPanel {
             
             setOpaque(false);
             
-            shareWithITunesCheckBox = new JCheckBox(I18n.tr("Share audio and video files in Public Shared list on my local network with iTunes"));
+            shareWithITunesCheckBox = new JCheckBox(I18n.tr("Enable Digital Audio Access Protocol and share audio across LAN with iTunes"));
             shareWithITunesCheckBox.setContentAreaFilled(false);
             shareWithITunesCheckBox.addItemListener(new ItemListener(){
                 @Override
@@ -128,7 +128,7 @@ public class ITunesOptionPanel extends OptionPanel {
                 
                 if (password.equals("") && requiresPassword) { 
                     FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
-                            I18n.tr("Daap Password cannot be null, iTunes settings not saved"),
+                            I18n.tr("DAAP password can not be empty.  iTunes settings were not saved."),
                             I18n.tr("iTunes Error"),
                             JOptionPane.ERROR_MESSAGE);
                     
@@ -176,7 +176,7 @@ public class ITunesOptionPanel extends OptionPanel {
                     initOptions();
     
                     FocusJOptionPane.showMessageDialog(ITunesOptionPanel.this, 
-                            I18n.tr("Could not restart the Daap connection"),
+                            I18n.tr("Error restarting the DAAP connection."),
                             I18n.tr("Daap Error"),
                             JOptionPane.ERROR_MESSAGE);
                 }

@@ -1,4 +1,4 @@
-# English (United Kingdom) translation for limewire
+﻿# English (United Kingdom) translation for limewire
 # Copyright (c) 2007 Rosetta Contributors and Canonical Ltd 2007
 # This file is distributed under the same license as the limewire package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
@@ -98,20 +98,20 @@ msgid "Torrents"
 msgstr "Torrents"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:38
-msgid "There is a disk problem"
-msgstr "There is a disk problem"
+msgid "There is a problem with your disk."
+msgstr "There is a problem with your disk."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:39
-msgid "The file is corrupted"
-msgstr "The file is corrupted"
+msgid "The file is corrupted."
+msgstr "The file is corrupted."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this for sharing"
-msgstr ""
+msgid "The copyright holder has not authorized this for sharing."
+msgid "The copyright holder has not authorised this for sharing."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
-msgid "Trouble connecting to people"
-msgstr "Trouble connecting to people"
+msgid "Can not connect to sources."
+msgstr "Can not connect to sources."
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -122,7 +122,7 @@ msgstr "No problems."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
-"<html><b>Your WireShare may have been corrupted by a virus or trojan!</b></"
+"<html><b>WireShare may have been corrupted by a virus or trojan.</b></"
 "html>"
 msgstr ""
 
@@ -142,8 +142,8 @@ msgstr "REST Service"
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
-msgid "Free to chat"
-msgstr "Free to  chat"
+msgid "Online"
+msgstr "Online"
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:131
@@ -189,8 +189,8 @@ msgid "Connection Management"
 msgstr "Connexion Management"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:67
-msgid "Stale Connection Management"
-msgstr "Stale Connexion Management"
+msgid "Stale connection management"
+msgstr "Stale connexion management"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:86
 msgid "Various Core Services"
@@ -3644,16 +3644,17 @@ msgid "Disable Out-of-band searching"
 msgstr "Disable Out-of-band searching"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:75
-msgid "No Proxy"
-msgstr "No Proxy"
+
+msgid "No proxy"
+msgstr "No proxy"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:77
-msgid "Socks v4"
-msgstr "Socks v4"
+msgid "SOCKS 4"
+msgstr "SOCKS 4"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:79
-msgid "Socks v5"
-msgstr "Socks v5"
+msgid "SOCKS 5"
+msgstr "SOCKS 5"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:81
 msgid "HTTP"

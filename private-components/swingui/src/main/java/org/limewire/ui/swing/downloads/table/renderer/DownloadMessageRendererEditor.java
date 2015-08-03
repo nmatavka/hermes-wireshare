@@ -237,13 +237,13 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
             if(downloadSourceCount < 1) {
                 return I18n.tr("nobody");
             } else {
-                return I18n.trn("{0} P2P User", "{0} P2P Users", downloadSourceCount);
+                return I18n.trn("{0} Peer-to-Peer User", "{0} Peer-to-Peer Users", downloadSourceCount);
             }
         } else if (hosts.size() == 1) {
 
             Friend friend = hosts.iterator().next().getFriendPresence().getFriend();
             if (friend.isAnonymous()) {
-                return I18n.tr("1 P2P User");
+                return I18n.tr("1 Peer-to-Peer User");
             } else {
                 return friend.getRenderName();
             }
@@ -267,7 +267,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
             if (hasP2P && hasFriend ) {
                 return I18n.trn("{0} Person", "{0} People", hosts.size());
             } else if (hasP2P) {
-                return I18n.trn("{0} P2P User", "{0} P2P Users", hosts.size());
+                return I18n.trn("{0} Peer-to-Peer User", "{0} Peer-to-Peer Users", hosts.size());
             } else {
                 //just friends
                 return I18n.trn("{0} Friend", "{0} Friends", hosts.size());

@@ -84,7 +84,6 @@ public class DownloadButtonPanel extends JPanel {
 
 
     public void updateButtons(DownloadItem item) {
-        if (item.getDownloadItemType() != DownloadItemType.ANTIVIRUS) {
             DownloadState state = item.getState();
             boolean canTryAgain = item.isTryAgainEnabled();
 
@@ -92,13 +91,5 @@ public class DownloadButtonPanel extends JPanel {
             resumeButton.setVisible(state.isResumable());
             tryAgainButton.setVisible(state == DownloadState.STALLED && canTryAgain);
             searchAgainButton.setVisible(state == DownloadState.STALLED && !canTryAgain);
-            
-        } else {
-            // Hide all buttons for anti-virus updates.
-            pauseButton.setVisible(false);
-            resumeButton.setVisible(false);
-            tryAgainButton.setVisible(false);
-            searchAgainButton.setVisible(false);
-        }
     }
 }

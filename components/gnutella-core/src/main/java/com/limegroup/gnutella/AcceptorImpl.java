@@ -301,7 +301,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                MessageService.showError(I18nMarker.marktr("WireShare was unable to set up a port to listen for incoming connections. Some features of WireShare may not work as expected."));
+                MessageService.showError(I18nMarker.marktr("WireShare was unable to set up a port to listen for incoming connections. Some features may not work as expected."));
             }
         }
         if(LOG.isInfoEnabled())

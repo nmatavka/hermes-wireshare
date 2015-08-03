@@ -55,7 +55,7 @@ final class StatisticsAccumulatorImpl implements StatisticAccumulator, Service {
 	}
 	
 	public String getServiceName() {
-	    return I18nMarker.marktr("Statistic Management");
+	    return I18nMarker.marktr("Statistics Management");
 	}
 
 	/* (non-Javadoc)

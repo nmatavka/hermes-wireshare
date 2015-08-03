@@ -1,4 +1,4 @@
-# Czech translations for PACKAGE package.
+﻿# Czech translations for PACKAGE package.
 # Copyright (C) 2007 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Automatically generated, 2007.
@@ -107,7 +107,7 @@ msgstr "Soubor je porušený"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
 msgid "The copyright holder has not authorized this for sharing"
-msgstr "Držitel licenních práv nepovolil toto sdílení."
+msgstr "Držitel licenčních práv nepovolil toto sdílení."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
 msgid "Trouble connecting to people"
@@ -135,11 +135,11 @@ msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
-msgstr "XMPP Servis"
+msgstr "Servis XMPP"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/rest/CoreGlueRestService.java:66
 msgid "REST Service"
-msgstr "REST Servis"
+msgstr "Servis REST"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -192,7 +192,7 @@ msgstr "Správa spojení"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/ConnectionWatchdog.java:67
 msgid "Stale Connection Management"
-msgstr "Ovládání Stabilního Připojení"
+msgstr "Ovládání starých připojení"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/CoreRandomGlue.java:86
 msgid "Various Core Services"
@@ -232,7 +232,7 @@ msgstr ""
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
-msgstr "HTTP Vyhledávání požadavků"
+msgstr "Vyhledávání požadavků HTTP"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPUploadManager.java:222
 msgid "Upload Management"
@@ -671,7 +671,7 @@ msgstr "Statistika"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:268
 msgid "Oops!"
-msgstr "sakra"
+msgstr "Kurva!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:268
 msgid "A problem occurred..."
@@ -683,7 +683,7 @@ msgid ""
 "WireShare's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
-"Oops! Omlouvám se. WireShare ještě bude běžet v pohodě, takže se nemusíte "
+"Do piči! Omlouvám se. WireShare ještě bude běžet v pohodě, takže se nemusíte "
 "starat. Pokud chcete, můžete kliknout na 'Zobrazit Bug' podívat se na "
 "informace o chybě."
 
@@ -694,24 +694,23 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"V WireShare došlo k vnitřní chybě. Je možné,že stačí WireSharerestartovat. "
+"V WireShare došlo k vnitřní chybě. Je možné,že stačí WireShare restartovat. "
 "Chcete-li i nadále používat WireShare, zavřete toto okno. Pokud chcete, "
 "můžete kliknout na 'Zobrazit Bug' podívat se na informace o chybě."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:327
 msgid "Tell us what you were doing before WireShare ran into this problem."
 msgstr ""
-"Řekněte nám, co jste dělali před spuštěním WireShare, než narazili na tento "
-"problém."
+"Řekněte nám, co jste dělali před spuštěním WireShare, než se to všechno dokurvilo."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:346
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:354
 msgid "Show Bug"
-msgstr "Zobrazit Bug"
+msgstr "Zobrazit chybu"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:358
 msgid "Hide Bug"
-msgstr "skrýt Bug"
+msgstr "Skrýt chybu"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:366
 msgid "Ask for help on the forums"
@@ -1062,7 +1061,7 @@ msgstr "Copy text   \t Ultrapeers"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:54
 msgid "Revert To Default"
-msgstr "Vráátit původní hodnoty"
+msgstr "Vrátit původní hodnoty"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:55
 msgid "Sort Automatically"
@@ -1077,7 +1076,7 @@ msgstr "Rozšířené Tooltips"
 #. we check both the mousePressed and mouseReleased events.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:73
 msgid "Right-click to select columns to display"
-msgstr "Pravým kliknutím to vyberete sloupce pro zobrazení"
+msgstr "Pravým kliknutím vyberete sloupce pro zobrazení"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTable.java:298
 msgid "More Options"
@@ -1103,7 +1102,7 @@ msgstr "Příchozí"
 #. * String for 'Connected on' tooltip
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:36
 msgid "Connected on"
-msgstr "Připojuji k"
+msgstr "Připojeno k"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:38
 msgid "Leaf"
@@ -1125,39 +1124,39 @@ msgstr "Stav"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:72
 msgid "Messages (I/O)"
-msgstr "Zpráva (odchozí/příchozí)"
+msgstr "Zprávy (odchozí/příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:74
 msgid "Messages In"
-msgstr ""
+msgstr "Zprávy (příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:76
 msgid "Messages Out"
-msgstr "Zprávy z"
+msgstr "Zprávy (odchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:78
 msgid "Bandwidth (I/O)"
-msgstr ""
+msgstr "Rychlost přenosu dat (tam a zpátky)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:80
 msgid "Bandwidth In"
-msgstr ""
+msgstr "Rychlost přenosu dat (zpátky)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:82
 msgid "Bandwidth Out"
-msgstr ""
+msgstr "Rychlost přenosu dat (tam)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:84
 msgid "Dropped (I/O)"
-msgstr ""
+msgstr "Ztracené pakety (odchozí/příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:86
 msgid "Dropped In"
-msgstr ""
+msgstr "Ztracené pakety (příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:88
 msgid "Dropped Out"
-msgstr ""
+msgstr "Ztracené pakety (odchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:90
 msgid "Protocol"
@@ -1173,15 +1172,15 @@ msgstr "Čas"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:96
 msgid "Compressed (I/O)"
-msgstr ""
+msgstr "Komprimované pakety (odchozí/příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:98
 msgid "Compressed In"
-msgstr ""
+msgstr "Komprimované pakety (příchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:100
 msgid "Compressed Out"
-msgstr ""
+msgstr "Komprimované pakety (odchozí)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:102
 msgid "SSL Overhead (I/O)"
@@ -1257,7 +1256,7 @@ msgstr "Označít všechny položky jako vybrané"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:648
 msgid "Deselect All"
-msgstr "Zrušit  vše vybrané"
+msgstr "Zrušit vše vybrané"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/CheckBoxList.java:650
 msgid "Deselects all Items in the List"
@@ -3530,20 +3529,20 @@ msgid "Disable Out-of-band searching"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:75
-msgid "No Proxy"
-msgstr ""
+msgid "No proxy"
+msgstr "Žádná proxy"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:77
-msgid "Socks v4"
-msgstr ""
+msgid "SOCKS 4"
+msgstr "SOCKS 4"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:79
-msgid "Socks v5"
-msgstr ""
+msgid "SOCKS 5"
+msgstr "SOCKS 5"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:81
 msgid "HTTP"
-msgstr ""
+msgstr "HTTP"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:106
 msgid "Proxy:"

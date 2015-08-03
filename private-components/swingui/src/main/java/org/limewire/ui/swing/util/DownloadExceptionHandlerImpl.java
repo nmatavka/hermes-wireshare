@@ -148,22 +148,22 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
         switch (e.getErrorCode()) {
         case FILE_ALREADY_UPLOADING:
             transferTrayNavigator.selectUploads();
-            message = I18n.tr("Sorry, this file is already being uploaded.");
+            message = I18n.tr("This file is already uploading.");
             break;
         case FILE_ALREADY_DOWNLOADING:
             transferTrayNavigator.selectDownloads();
-            message = I18n.tr("Sorry, this file is already being downloaded.");
+            message = I18n.tr("This file is already downloading.");
             break;
         case DIRECTORY_NOT_WRITEABLE:
         case DIRECTORY_DOES_NOT_EXIST:
         case NOT_A_DIRECTORY:
         case PATH_NAME_TOO_LONG:
-            message = I18n.tr("Sorry, you can't download files to this location.");
+            message = I18n.tr("Unable to download files to this location.");
             break;
         case NO_TORRENT_MANAGER:
             MultiLineLabel label =
                 new MultiLineLabel(I18n.tr(
-                        "Sorry, there is a problem with torrents.\nPlease try reinstalling WireShare to solve this problem."));
+                        "The torrent manager is missing.\nPlease try reinstalling WireShare to solve this problem."));
             HyperlinkButton help =
                 new HyperlinkButton(I18n.tr(
                         "You can also ask for help on the forums."));
@@ -178,10 +178,10 @@ public class DownloadExceptionHandlerImpl implements DownloadExceptionHandler {
             message = panel;
             break;
         case FILES_STILL_RESUMING:
-            message = I18n.tr("Sorry, we are still loading your old downloads.\nPlease wait to add a new download until we are done.");
+            message = I18n.tr("Your old downloads are still resuming.\nPlease wait to add a new download until the process is finished.");
             break;
         default:
-            message = I18n.tr("Sorry, there was a problem downloading your file.");
+            message = I18n.tr("Error downloading file.");
             break;
         }
 

@@ -28,7 +28,6 @@ import org.limewire.bittorrent.util.TorrentUtil;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -67,8 +66,6 @@ import com.limegroup.gnutella.library.FileCollection;
 import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
-import com.limegroup.gnutella.malware.VirusScanException;
-import com.limegroup.gnutella.malware.VirusScanner;
 
 /**
  * Wraps the Torrent class in the Downloader interface to enable the gui to
@@ -97,14 +94,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
     private final Provider<TorrentManager> torrentManager;
     private final Provider<TorrentUploadManager> torrentUploadManager;
     private final Provider<DangerousFileChecker> dangerousFileChecker;
-    private final Provider<VirusScanner> virusScanner;
     private final Provider<DownloadCallback> downloadCallback;
-
-    /**
-     * Whether a preview that could not be scanned for viruses should be
-     * deleted.
-     */
-    private volatile boolean discardUnscannedPreview;
 
     /**
      * Torrent info hash based URN used as a cache for getSha1Urn().
@@ -119,7 +109,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             Provider<TorrentManager> torrentManager,
             Provider<TorrentUploadManager> torrentUploadManager,
             Provider<DangerousFileChecker> dangerousFileChecker,
-            Provider<VirusScanner> virusScanner,
             Provider<DownloadCallback> downloadCallback,
             CategoryManager categoryManager) {
         super(saveLocationManager, categoryManager);
@@ -131,7 +120,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.torrentManager = torrentManager;
         this.torrentUploadManager = torrentUploadManager;
         this.dangerousFileChecker = dangerousFileChecker;
-        this.virusScanner = virusScanner;
         this.downloadCallback = downloadCallback;
         discardUnscannedPreview = true;
     }
@@ -226,79 +214,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             // non-fatal, upload will just not be loaded on application
             // restart
         }
-    }
-
-    /**
-     * Returns true if there are any infected or dangerous files in this
-     * torrent, after stopping the download.
-     */
-    private boolean isInfectedOrDangerous() {
-        if(virusScanner.get().isEnabled()) {
-            lastState.set(DownloadState.SCANNING);
-            listeners.broadcast(new DownloadStateEvent(this, DownloadState.SCANNING));
-            try {
-                if(isInfected(getIncompleteFile()))
-                    return true;
-            } catch(VirusScanException e) {
-                LOG.error("Error scanning file", e);
-                setAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT, e.getDetail(), false);
-                lastState.set(DownloadState.SCAN_FAILED);
-                listeners.broadcast(new DownloadStateEvent(this, lastState.get()));
-            }
-        }
-        for(File f : getIncompleteFiles()) {
-            if(isDangerous(f))
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether a file fragment is infected or dangerous. If the virus
-     * scan fails, the user will be asked whether to preview the file anyway.
-     * @param fragment the file to check
-     * @param listener a listener to be informed of virus scan progress
-     * @return true if the file cannot be previewed.
-     */
-    private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
-        if(virusScanner.get().isEnabled()) {
-            LOG.debug("Starting preview scan");
-            listener.scanStarted();
-            try {
-                boolean infected = isInfected(fragment);
-                listener.scanStopped();
-                if(infected)
-                    return true;                
-            } catch(VirusScanException e) {
-                LOG.error("Error scanning file", e);
-                listener.scanStopped();
-                if(promptAboutUnscannedPreview()) {
-                    // The user chose to cancel the preview
-                    LOG.debug("User chose to cancel preview");
-                    return true;
-                }
-                LOG.debug("User chose to continue with preview");
-            }
-        }
-        return isDangerous(fragment);
-    }
-
-    /**
-     * Returns true if the given file is infected, after stopping the download.
-     */
-    private boolean isInfected(File file) throws VirusScanException {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Scanning " + file);
-        if(virusScanner.get().isInfected(file)) {
-            if(LOG.isDebugEnabled())
-                LOG.debug(file + " is infected");
-            lastState.set(DownloadState.THREAT_FOUND);
-            listeners.broadcast(new DownloadStateEvent(this, DownloadState.THREAT_FOUND));
-            // This will cause TorrentEvent.STOPPED
-            torrent.stop();
-            return true;
-        }
-        return false;
     }
 
     /**

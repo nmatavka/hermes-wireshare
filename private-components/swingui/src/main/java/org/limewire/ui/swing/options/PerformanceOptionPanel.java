@@ -24,9 +24,9 @@ public class PerformanceOptionPanel extends OptionPanel {
 
     private final NetworkManager networkManager;
     private final GnutellaConnectionManager connectionManager;
-    private final String firstMultiLineLabel = I18n.tr("If your computer has a fast internet connection, WireShare may act as an \"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you notice performance issues.");
-    private final String secondMultiLineLabel = I18n.tr("WireShare uses a secure communications mode called TLS, which may use more CPU resources.");
-    private final String thirdMultiLineLabel = I18n.tr("Out-of-band Searching helps deliver faster search results to you, but some internet connections may not work well with this feature.");
+    private final String firstMultiLineLabel = I18n.tr("In order to abate network fragmentation, WireShare may operate in Ultrapeer mode or launch the Mojito Distributed Hash Table, subject to connection quality.  If quality degradation occurs, these features may be disabled by checking one or both of the boxes below.");
+    private final String secondMultiLineLabel = I18n.tr("WireShare uses a secure communications mode called Transport Layer Security.  If it becomes resource intensive, it can be disabled by checking the box below.");
+    private final String thirdMultiLineLabel = I18n.tr("In order to optimise search query turnaround times, servers may send replies along the shortest path, rather than that of the original request.  This is called out-of-band searching.  Some connections may not handle this feature well, however; in this case, it may be disabled by checking the box below.");
     
     private JCheckBox disableUltraPeerCheckBox;
     //private JCheckBox forceUltraPeerCheckBox;
@@ -55,7 +55,7 @@ public class PerformanceOptionPanel extends OptionPanel {
         //forceUltraPeerCheckBox = new JCheckBox(I18n.tr("Force Ultrapeer Mode"));
         disableMojitoCheckBox = new JCheckBox(I18n.tr("Disable connecting to the Mojito DHT"));
         disableTLS = new JCheckBox(I18n.tr("Disable TLS capabilities"));
-        disableOutOfBandSearchCheckBox = new JCheckBox(I18n.tr("Disable Out-of-band searching"));
+        disableOutOfBandSearchCheckBox = new JCheckBox(I18n.tr("Disable out-of-band searching"));
 
         disableUltraPeerCheckBox.setOpaque(false);
         //forceUltraPeerCheckBox.setOpaque(false);

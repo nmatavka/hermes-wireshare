@@ -107,7 +107,7 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
         refreshPanel.setBackgroundPainter(createRefreshBackgroundPainter());
         refreshPanel.setVisible(false);
         
-        updatesLabel = new JLabel(I18n.tr("There are updates!"));
+        updatesLabel = new JLabel(I18n.tr("Update Available"));
         updatesLabel.setFont(font);
         updatesLabel.setForeground(foreground);
         
@@ -160,7 +160,7 @@ public class BrowseStatusPanel extends JXPanel implements Disposable{
         }
         
         if(p2pUsers.size() > 0){
-            centerPanel.add(createHeaderLabel(I18n.tr("P2P Users")), "gaptop 5, wrap");
+            centerPanel.add(createHeaderLabel(I18n.tr("Peer-to-Peer Users")), "gaptop 5, wrap");
         }
         for (String name : p2pUsers){
             centerPanel.add(createItemLabel(name), "wrap");

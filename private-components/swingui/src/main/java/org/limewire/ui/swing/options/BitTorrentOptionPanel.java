@@ -55,14 +55,14 @@ public class BitTorrentOptionPanel extends OptionPanel {
         
         setLayout(new MigLayout("fill"));
         setOpaque(false);
-        uploadTorrentsForeverButton = new JRadioButton(I18n.tr("Upload torrents forever"));
+        uploadTorrentsForeverButton = new JRadioButton(I18n.tr("Seed forever"));
         uploadTorrentsForeverButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 updateState(uploadTorrentsForeverButton.isSelected());
             }
         });
-        uploadTorrentsControlButton = new JRadioButton(I18n.tr("Upload torrents until either of the following:"));
+        uploadTorrentsControlButton = new JRadioButton(I18n.tr("Seed until one of the following is met:"));
         uploadTorrentsControlButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -111,21 +111,20 @@ public class BitTorrentOptionPanel extends OptionPanel {
         JFormattedTextField seedHoursField = ((JSpinner.DefaultEditor)seedHoursSpinner.getEditor()).getTextField();
         seedHoursField.addKeyListener(new PeriodicFieldValidator(seedHoursField));
 
-        chooseTorrentsCheckBox = new JCheckBox(I18n.tr("Let me choose files to download when starting a torrent"));
+        chooseTorrentsCheckBox = new JCheckBox(I18n.tr("Prompt for files to download before starting a torrent"));
         chooseTorrentsCheckBox.setOpaque(false);
 
         if (torrentManager.get().isValid()) {
             add(uploadTorrentsForeverButton, "span 3, wrap");
             add(uploadTorrentsControlButton, "span 3, wrap");
-            add(new JLabel(I18n.tr("Ratio:")), "split 2, gapleft 20");
+            add(new JLabel(I18n.tr("Upload/download ratio")), "split 2, gapleft 20");
             add(seedRatioSpinner, "span, wrap");
-            add(new JLabel(I18n.tr("Maximum days:")), "gapleft 20, split 4");
+            add(new JLabel(I18n.tr("Days and hours elapsed")), "gapleft 20, split 4");
             add(seedDaysSpinner, "");
-            add(new JLabel("Hours:"), "gapleft 20");
             add(seedHoursSpinner, "wrap");
             add(chooseTorrentsCheckBox, "span, gaptop 10, gapbottom 5, wrap");
         } else {
-            add(new MultiLineLabel(I18n.tr("There was an error loading bittorrent. You will not be able to use bittorrent capabilities until this is resolved."),
+            add(new MultiLineLabel(I18n.tr("Error connecting to BitTorrent.  Torrents will not work until this is resolved."),
                     500), "wrap");
         }
 

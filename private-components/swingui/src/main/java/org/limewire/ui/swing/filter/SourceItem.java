@@ -12,7 +12,7 @@ class SourceItem {
         ANONYMOUS, ANY_FRIEND, FRIEND;
     }
     
-    public static final SourceItem ANONYMOUS_SOURCE = new SourceItem(Type.ANONYMOUS, I18n.tr("P2P Users"));
+    public static final SourceItem ANONYMOUS_SOURCE = new SourceItem(Type.ANONYMOUS, I18n.tr("Peer-to-Peer Users"));
     public static final SourceItem ANY_FRIEND_SOURCE = new SourceItem(Type.ANY_FRIEND, I18n.tr("Any Friend"));
    
     private final Type type;

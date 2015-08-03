@@ -45,7 +45,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(LENGTH_INDEX, "CLASSIC_SEARCH_VIDEO_LENGTH", I18n.tr("Length"), 85, true, true), 
                 new ColumnStateInfo(QUALITY_INDEX, "CLASSIC_SEARCH_VIDEO_QUALITY", I18n.tr("Quality"), 85, true, true), 
                 new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_VIDEO_SIZE", I18n.tr("Size"), 81, true, true),
-                new ColumnStateInfo(MISC_INDEX, "CLASSIC_SEARCH_VIDEO_MISC", I18n.tr("Misc"), 60, false, true),
+                new ColumnStateInfo(MISC_INDEX, "CLASSIC_SEARCH_VIDEO_MISC", I18n.tr("Miscellaneous"), 60, false, true),
                 new ColumnStateInfo(RATING_INDEX, "CLASSIC_SEARCH_VIDEO_RATING", I18n.tr("Rating"), 60, false, true), 
                 new ColumnStateInfo(DIMENSION_INDEX, "CLASSIC_SEARCH_VIDEO_RESOLUTION", I18n.tr("Resolution"), 60, false, true),
                 new ColumnStateInfo(YEAR_INDEX, "CLASSIC_SEARCH_VIDEO_YEAR", I18n.tr("Year"), 60, false, true), 

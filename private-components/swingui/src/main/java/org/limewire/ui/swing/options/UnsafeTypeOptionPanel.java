@@ -59,9 +59,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         JPanel contentPanel = new JPanel(new MigLayout("nogrid"));
         contentPanel.setOpaque(false);
         
-        programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Programs with anyone"));
+        programCheckBox = new JCheckBox(I18n.tr("Allow searching for, and sharing of, programs"));
         programCheckBox.setContentAreaFilled(false);
-        documentCheckBox = new JCheckBox(I18n.tr("Allow me to share Documents with the world"));
+        documentCheckBox = new JCheckBox(I18n.tr("Allow sharing documents"));
         documentCheckBox.setContentAreaFilled(false);
         okButton = new JButton(new OKDialogAction());
     
@@ -69,11 +69,14 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
         settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
-        contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone " +
-        		"to accidently sharing personal information")
-                + "</html>"), "wrap");
+        contentPanel.add(new JLabel("<html>" + I18n.tr("Warning: by enabling this setting, you " +
+	"acknowledge the risk of fraud, should any personal or confidential document " +
+	"inadvertently be shared, and you agree to accept responsibility for any loss which " +
+	may arise.") +
+	"</html>"), "wrap");
+
         contentPanel.add(documentCheckBox, "gapleft 25");
-        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Documents?")) {
+        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are documents?")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ExtensionClassificationPanel panel = extensionClassificationPanelProvider.get();
@@ -84,10 +87,11 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         
         contentPanel.add(new JSeparator(), "growx, gaptop 5, gapbottom 5, wrap");
         
-        contentPanel.add(new JLabel("<html>" + I18n.tr("Enabling this setting makes you more prone to viruses")
-        + "</html>"), "wrap");
+        contentPanel.add(new JLabel("<html>" + I18n.tr("Program files may be infected " +
+	"with viruses.  WireShare does not include a virus scanner.  Download program " +
+	"files at your own risk. ") + "</html>"), "wrap");
         contentPanel.add(programCheckBox, "gapleft 25");
-        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are Programs?")) {
+        contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are programs?")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ExtensionClassificationPanel panel = extensionClassificationPanelProvider.get();

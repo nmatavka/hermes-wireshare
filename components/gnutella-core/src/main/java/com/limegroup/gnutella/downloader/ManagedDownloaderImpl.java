@@ -32,7 +32,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadPiecesInfo;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.network.BandwidthCollector;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.settings.DownloadSettings;
@@ -87,8 +86,6 @@ import com.limegroup.gnutella.library.GnutellaFiles;
 import com.limegroup.gnutella.library.Library;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.malware.DangerousFileChecker;
-import com.limegroup.gnutella.malware.VirusScanException;
-import com.limegroup.gnutella.malware.VirusScanner;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.spam.SpamManager;
@@ -459,7 +456,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final RemoteFileDescFactory remoteFileDescFactory;
     protected final Provider<PushList> pushListProvider;
     protected final DangerousFileChecker dangerousFileChecker;
-    protected final VirusScanner virusScanner;
     protected final SpamManager spamManager;
     protected final Library library;
     protected final CategoryManager categoryManager;
@@ -506,7 +502,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             SocketsManager socketsManager,
             @Named("downloadStateProcessingQueue")ListeningExecutorService downloadStateProcessingQueue,
             DangerousFileChecker dangerousFileChecker,
-            VirusScanner virusScanner,
             SpamManager spamManager,
             Library library,
             CategoryManager categoryManager,
@@ -538,7 +533,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
         this.dangerousFileChecker = dangerousFileChecker;
-        this.virusScanner = virusScanner;
         this.spamManager = spamManager;
         this.library = library;
         this.categoryManager = categoryManager;
@@ -1847,31 +1841,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
     }
     
-    /**
-     * Checks whether a file fragment is infected or dangerous. If the virus
-     * scan fails, the user will be asked whether to preview the file anyway.
-     * @param fragment the file to check
-     * @param listener a listener to be informed of virus scan progress
-     * @return true if the file cannot be previewed.
-     */
-    private boolean isInfectedOrDangerous(File fragment, ScanListener listener) {
-        if(virusScanner.isEnabled()) {
-            listener.scanStarted();
-            try {
-                boolean infected = isInfected(fragment);
-                listener.scanStopped();
-                if(infected)
-                    return true;                
-            } catch (VirusScanException e) {
-                listener.scanStopped();
-                if(promptAboutUnscannedPreview()) {
-                    // The user chose to cancel the preview
-                    return true;
-                }
-            }
-        }
-        return isDangerous(fragment);
-    }
+
 
     /**
      * Returns the amount of the file written on disk that can be safely
@@ -2017,25 +1987,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private DownloadState verifyAndSave() throws InterruptedException {
 
-        // Scan the file for viruses
-        if(virusScanner.isEnabled()) {
-            setState(DownloadState.SCANNING);
-        }
-        
-        DownloadState scanFailed = null;
-        try {
-            if(isInfected(incompleteFile))
-                return DownloadState.THREAT_FOUND;
-        } catch(VirusScanException e) {
-            setAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT, e.getDetail(), false);
-            scanFailed = DownloadState.SCAN_FAILED;
-        }
-        
-        // Check whether this is a dangerous file
-        if(isDangerous(incompleteFile)) {
-            return DownloadState.DANGEROUS;
-        }
-
         // Find out the hash of the file and verify that its the same
         // as our hash.
         URN fileHash = scanForCorruption();
@@ -2070,24 +2021,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return false;
     }
     
-    /**
-     * Returns true if the given file is infected, after stopping the download,
-     * marking it as spam and deleting the file.
-     */
-    private boolean isInfected(File file) throws VirusScanException {
-        if(virusScanner.isEnabled() && virusScanner.isInfected(file)) {
-            setState(DownloadState.THREAT_FOUND);
-            // Mark the file as spam in future search results
-            RemoteFileDesc[] type = new RemoteFileDesc[0];
-            spamManager.handleUserMarkedSpam(cachedRFDs.toArray(type));
-            // Stop the download and delete the file
-            stop();                
-            library.remove(file);
-            file.delete();
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Scans the file for corruption, returning the hash of the file if it

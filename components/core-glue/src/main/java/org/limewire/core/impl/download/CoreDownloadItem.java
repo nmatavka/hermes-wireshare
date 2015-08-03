@@ -20,7 +20,6 @@ import org.limewire.core.api.download.DownloadPropertyKey;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.core.api.malware.VirusEngine;
 import org.limewire.core.api.transfer.SourceInfo;
 import org.limewire.core.impl.RemoteHostRFD;
 import org.limewire.core.impl.friend.GnutellaPresence;
@@ -40,8 +39,6 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadStateEvent;
-import com.limegroup.gnutella.malware.VirusDefinitionDownloader;
-import com.limegroup.gnutella.malware.VirusDefinitionDownloaderKeys;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
@@ -70,8 +67,6 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         this.categoryManager = categoryManager;
         if(downloader instanceof BTDownloader)
             downloadItemType = DownloadItemType.BITTORRENT;
-        else if(downloader instanceof VirusDefinitionDownloader)
-            downloadItemType = DownloadItemType.ANTIVIRUS;
         else
             downloadItemType = DownloadItemType.GNUTELLA;
         
@@ -356,8 +351,6 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case SCAN_FAILED:
             return DownloadState.SCAN_FAILED;
             
-        case APPLYING_ANTIVIRUS_DEFINITION_UPDATE:
-            return DownloadState.APPLYING_DEFINITION_UPDATE;
             
         default:
             throw new IllegalStateException("Unknown State: " + state);
@@ -552,20 +545,5 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         return files;
     }
 
-    @Override
-    public Object getDownloadProperty(DownloadPropertyKey key) {
-        switch(key) {
-        case ANTIVIRUS_FAIL_HINT:
-            return downloader.getAttribute(VirusEngine.DOWNLOAD_FAILURE_HINT);
-        case ANTIVIRUS_UPDATE_TYPE:
-            return downloader.getAttribute(VirusDefinitionDownloaderKeys.TYPE); 
-        case ANTIVIRUS_INCREMENT_COUNT:
-            Object count = downloader.getAttribute(VirusDefinitionDownloaderKeys.COUNT);
-            return count == null ? 0 : count;
-        case ANTIVIRUS_INCREMENT_INDEX:
-            Object index = downloader.getAttribute(VirusDefinitionDownloaderKeys.INDEX);
-            return index == null ? 0 : index;
-        }
-        return null;
-    }
+
 }

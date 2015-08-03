@@ -48,7 +48,7 @@ public class BrowseDirectoryAction extends AbstractAction {
         this.currentDirectoryTextField = currentDirectoryTextField;
 
         putValue(Action.NAME, I18n.tr("Browse..."));
-        putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a different Save Location"));
+        putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a Different Save Location"));
     }
 
     @Override

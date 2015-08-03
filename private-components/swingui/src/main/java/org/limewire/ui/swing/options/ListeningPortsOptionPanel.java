@@ -61,7 +61,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
         p.setLayout(new MigLayout("fillx"));
         p.setOpaque(false);
         
-        p.add(new MultiLineLabel(I18n.tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number is required for direct incoming connections by your firewall. You must also configure your router when choosing \"manual port forward\" or \"do nothing\""),
+        p.add(new MultiLineLabel(I18n.tr("No network port may be used to listen for more than one type of traffic at a time.  Furthermore, some Internet service providers may block access to specific ports.  The port to listen to may be set here; note that, if either \"manual port forwarding\" or \"do nothing\" is chosen, the router must be configured likewise."),
                         AdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "pad 0, growx, wrap");
 
         p.add(gnutellaListeningPorts, "gaptop 10, growx, wrap");
@@ -133,9 +133,9 @@ public class ListeningPortsOptionPanel extends OptionPanel {
             add(gnutellaPortField, "wrap");
 
             gnutellaPlugAndPlayRadioButton = new JRadioButton(I18n
-                    .tr("Use Universal Plug n' Play (Recommended)"));
-            gnutellaPortForwardRadioButton = new JRadioButton(I18n.tr("Manual Port Forward:"));
-            gnutellaDoNothingRadioButton = new JRadioButton(I18n.tr("Do Nothing"));
+                    .tr("Use Universal Plug'n'Play (Recommended)"));
+            gnutellaPortForwardRadioButton = new JRadioButton(I18n.tr("Manual port forwarding:"));
+            gnutellaDoNothingRadioButton = new JRadioButton(I18n.tr("Do nothing"));
 
             gnutellaPlugAndPlayRadioButton.setOpaque(false);
             gnutellaPortForwardRadioButton.setOpaque(false);
@@ -151,7 +151,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
 
             gnutellaForcePortTextField = new NumericTextField(5, 1, 0xFFFF);
             gnutellaManualConfigurationWarning = new JLabel(I18n
-                    .tr("* You must also configure your router"));
+                    .tr("WARNING: Ensure router is properly configured for manual port forwarding."));
             gnutellaManualConfigurationWarning.setVisible(false);
 
             add(gnutellaForcePortTextField, "wrap");
@@ -177,8 +177,8 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                     networkManager.portChanged();
                 } catch (IOException ioe) {
                     FocusJOptionPane.showMessageDialog(ListeningPortsOptionPanel.this, I18n.tr(
-                            "The port chosen {0}, is already in use.", newGnutellaPort), I18n
-                            .tr("Network Port Error"), JOptionPane.ERROR_MESSAGE);
+                            "Port {0} is in use.", newGnutellaPort), I18n
+                            .tr("Network port error!"), JOptionPane.ERROR_MESSAGE);
                     NetworkSettings.PORT.setValue(gnutellaPort);
                     gnutellaPortField.setValue(gnutellaPort);
                 }
@@ -298,8 +298,8 @@ public class ListeningPortsOptionPanel extends OptionPanel {
             add(torrentPortController, "wrap");
 
             torrentPlugAndPlayRadioButton = new JRadioButton(I18n
-                    .tr("Use Universal Plug n' Play (Recommended)"));
-            torrentDoNothingRadioButton = new JRadioButton(I18n.tr("Do Nothing"));
+                    .tr("Use Universal Plug'n'Play (Recommended)"));
+            torrentDoNothingRadioButton = new JRadioButton(I18n.tr("Do nothing"));
 
             torrentPlugAndPlayRadioButton.setOpaque(false);
             torrentDoNothingRadioButton.setOpaque(false);

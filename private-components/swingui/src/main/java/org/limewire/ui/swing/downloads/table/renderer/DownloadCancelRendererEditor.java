@@ -77,18 +77,6 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
         removeButton.addActionListener(listener);
     }
 
-    private void updateButtons(DownloadItem item) {
-        if (item.getDownloadItemType() != DownloadItemType.ANTIVIRUS) {
-            DownloadState state = item.getState();
-            cancelButton.setVisible(!state.isFinished());
-            removeButton.setVisible(state.isFinished());
-        } else {
-            // Hide all buttons for anti-virus updates.
-            cancelButton.setVisible(false);
-            removeButton.setVisible(false);
-        }
-    }
-    
     @Override    
     protected Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {

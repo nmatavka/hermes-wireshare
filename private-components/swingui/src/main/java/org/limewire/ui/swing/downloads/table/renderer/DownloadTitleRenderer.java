@@ -20,7 +20,6 @@ import com.google.inject.Inject;
  */
 public class DownloadTitleRenderer extends TransferTitleRenderer {
 
-    @Resource private Icon antivirusIcon;
     @Resource private Icon warningIcon;
     @Resource private Icon downloadingIcon;
     
@@ -39,28 +38,7 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
             return null;
         }
         DownloadItem item = (DownloadItem) value;
-        
-        if (item.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
-            return antivirusIcon;
-        }
-        
-        switch (item.getState()) {
-        case ERROR:
-        case DANGEROUS:
-        case THREAT_FOUND:
-        case SCAN_FAILED:
-            return warningIcon;
-
-        case FINISHING:
-        case DONE:
-            return categoryIconManager.getIcon(item.getCategory());
-            
-        case SCANNING:
-        case SCANNING_FRAGMENT:
-            return antivirusIcon;
-            
-        default:
-            return downloadingIcon;
+        return downloadingIcon
         }
     }
     
@@ -82,25 +60,4 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         }
     }
     
-    private String getAntivirusText(DownloadItem item) {
-        AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);
-
-        switch (type) {
-        case CHECKING:
-            return I18n.tr("Checking for AVG Anti-Virus updates");
-            
-        case FULL:
-            return I18n.tr("Updating AVG Anti-Virus");
-            
-        case INCREMENTAL:
-            Integer index = (Integer) item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_INCREMENT_INDEX);
-            Integer count = (Integer) item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_INCREMENT_COUNT);
-            // {0}: current update, {1} total number of updates
-            return I18n.tr("Updating AVG Anti-Virus definitions - {0} of {1}", index, count);
-            
-        default:
-            return I18n.tr("Updating AVG Anti-Virus definitions");
-        }
-
-    }
 }

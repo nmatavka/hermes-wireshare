@@ -265,7 +265,9 @@ public final class BugManager {
     private void reviewBug(final LocalClientInfo info, boolean notImplemented) {
         _dialogsShowing++;
         
-        String title = notImplemented ? I18n.tr("Oops!") : I18n.tr("A problem occurred...");
+	// How does this line work?  I assume the colon separates title bar from dialogue box.  
+	// If it doesn't, this needs to be fixed.  Of course, that's going to fuck up the i18n...
+        String title = notImplemented ? I18n.tr("Error") : I18n.tr("An internal error has occurred.");
         final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), title, ModalityType.APPLICATION_MODAL);
         final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
         DIALOG.setSize(DIALOG_DIMENSION);
@@ -287,9 +289,9 @@ public final class BugManager {
 
         String msg;
         if(notImplemented) {
-            msg = I18n.tr("Oops!  You did something we haven't written yet.  Sorry about that.  WireShare's still going to run just fine, so don't worry.  If you want, you can click \'Show Bug\' to look at the information about the error.");
+            msg = I18n.tr("An error has occurred: this function has not yet been implemented.  To continue using WireShare, close this window; for more information, click \'Show Bug\'.");
         } else {
-            msg = I18n.tr("WireShare has encountered an internal error. It is possible for WireShare to recover and continue running normally. To continue using WireShare, close this window. If desired, you can click \'Show Bug\' to look at the information about the error.");
+            msg = I18n.tr("An internal error has occurred.  To continue using WireShare, close this window; for more information, click \'Show Bug\'.");
         }
 
         MultiLineLabel label = new MultiLineLabel(msg, 500);
@@ -324,7 +326,7 @@ public final class BugManager {
         constraints.gridy = 0;
         bugSpecificsPanel.add(showBugScroller, constraints);
 
-        final String defaultDesc = I18n.tr("Tell us what you were doing before WireShare ran into this problem.");
+        final String defaultDesc = I18n.tr("What were you doing before WireShare ran into this problem?");
         final JTextArea userCommentsTextArea = new JTextArea(defaultDesc);
         userCommentsTextArea.setLineWrap(true);
         userCommentsTextArea.setWrapStyleWord(true);

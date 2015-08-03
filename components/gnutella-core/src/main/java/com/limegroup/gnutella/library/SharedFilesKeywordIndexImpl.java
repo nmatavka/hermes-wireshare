@@ -111,7 +111,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         registry.register(new Service() {
             @Override
             public String getServiceName() {
-                return "P2P Network Keyword Library";
+                return "Peer-to-Peer Network Keyword Library";
             }
             @Override
             public void initialize() {

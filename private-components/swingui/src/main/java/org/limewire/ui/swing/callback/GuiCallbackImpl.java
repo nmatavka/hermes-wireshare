@@ -134,6 +134,7 @@ public class GuiCallbackImpl implements GuiCallback {
         return result.get() == JOptionPane.YES_OPTION;
     }
     
+    // 00000 DEPRECATED?
     /**
      * Asks the user whether to continue with a torrent download if the torrent file could not be scanned.
      * @return true if the download should continue.

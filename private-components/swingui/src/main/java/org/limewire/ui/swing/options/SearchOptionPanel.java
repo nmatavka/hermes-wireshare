@@ -69,10 +69,10 @@ public class SearchOptionPanel extends OptionPanel {
  		this.filterKeywordOptionPanelProvider = filterKeywordOptionPanelProvider;
         this.filterFileExtensionsOptionPanelProvider = filterFileExtensionsOptionPanelProvider;
         
-        groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
+        groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results."));
         groupSimilarResults.setContentAreaFilled(false);
         
-        torrentWebSearchActivated = new JCheckBox(I18n.tr("Use web search to find additional torrent sources"));
+        torrentWebSearchActivated = new JCheckBox(I18n.tr("Search the Web to find additional torrent sources."));
         torrentWebSearchActivated.setContentAreaFilled(false);
                 
         setLayout(new MigLayout("nogrid, insets 15 15 15 15, fillx, gap 4"));
@@ -159,10 +159,10 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            suggestSmartQueries = new JCheckBox(I18n.tr("Suggest smart searches"));
+            suggestSmartQueries = new JCheckBox(I18n.tr("Suggest smart searches."));
             suggestSmartQueries.setOpaque(false);
 
-            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
+            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches."));
             searchTabNumberCheckBox.setOpaque(false);
             
             clearNowButton = new JButton(new AbstractAction(I18n.tr("Clear Now")) {
@@ -236,7 +236,7 @@ public class SearchOptionPanel extends OptionPanel {
         private final class SpamOptionPanel extends JPanel {
             {
                 setLayout(new MigLayout("gapy 10, nogrid"));
-                add(new JLabel(I18n.tr("Do you want to reset the Spam Filter?")) , "wrap");
+                add(new JLabel(I18n.tr("Do you want to reset the spam filter?")) , "wrap");
                 add(new MultiLineLabel(I18n.tr("This will clear all the files marked as spam. Doing this may result in more spam in search results."), 400) , "wrap");
                 JButton okButton = new JButton(new OKDialogAction(I18n.tr("Reset")));
                 okButton.addActionListener(new ActionListener() {
@@ -274,7 +274,7 @@ public class SearchOptionPanel extends OptionPanel {
             filterFileExtensionPanel = filterFileExtensionsOptionPanelProvider.get();
             filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
             
-            adultContentCheckBox = new JCheckBox("<html>"+I18n.tr("Don't show adult content in search results")+"</html>");
+            adultContentCheckBox = new JCheckBox("<html>"+I18n.tr("Hide adult content in search results.")+"</html>");
             adultContentCheckBox.setContentAreaFilled(false);
             
             filterKeywordsButton = new JButton(new DialogDisplayAction(SearchOptionPanel.this,

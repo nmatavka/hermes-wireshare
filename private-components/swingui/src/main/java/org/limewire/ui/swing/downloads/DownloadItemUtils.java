@@ -30,21 +30,11 @@ public class DownloadItemUtils {
      * Launches the download, loading the launchable portion in the background
      * if necessary.
      */
+    // 00000 DEPRECATED?
     public static void launch(final DownloadItem downloadItem, final Provider<PlayerMediator> playerMediator) {
         assert EventQueue.isDispatchThread();
         assert downloadItem.isLaunchable();
-        
-        // Warn user that the file has not been scanned for viruses.
-        if (downloadItem.getState() == DownloadState.SCAN_FAILED) {
-            String message = I18n.tr("This file has not been scanned for viruses.  Do you want to launch anyway?");
-            int answer = FocusJOptionPane.showConfirmDialog(GuiUtils.getMainFrame(),
-                    new MultiLineLabel(message, 400), I18n.tr("Message"), 
-                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-            if (answer != JOptionPane.YES_OPTION) {
-                return;
-            }
-        }
-        
+                
         GuiUtils.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         new SwingWorker<File, Void>() {
             @Override

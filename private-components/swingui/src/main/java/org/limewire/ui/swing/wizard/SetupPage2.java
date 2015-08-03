@@ -131,18 +131,18 @@ public class SetupPage2 extends WizardPage {
 
         if (newInstall) {
             autoSharingPanel.add(shareDownloadedFilesCheckBox);
-            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from P2P Users to my Public Shared list."), shareDownloadedFilesCheckBox));
+            autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Add files I download from peer-to-peer users to my Public Shared list."), shareDownloadedFilesCheckBox));
             autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
             autoSharingPanel.add(sharePartialFilesCheckBox);
             autoSharingPanel.add(createAndDecorateMultiLine(I18n.tr("Enable partial file sharing."), sharePartialFilesCheckBox));
             autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
         } else {
         	if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue()) {
-               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will add files you download from P2P Users into your Public Shared list.")), "alignx center");
+               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will add files you download from peer-to-peer users into your Public Shared list.")), "alignx center");
                autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
         	}
             if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
-               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will will share partially downloaded files from P2P Users.")), "alignx center");
+               autoSharingPanel.add(createAndDecorateSubHeading(I18n.tr("WireShare will will share partially downloaded files from peer-to-peer users.")), "alignx center");
                autoSharingPanel.add(createAndDecorateHyperlink("http://www.gnutellaforums.com/"), "wrap");
             }
         }

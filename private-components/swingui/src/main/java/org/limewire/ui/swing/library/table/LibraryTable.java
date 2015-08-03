@@ -408,7 +408,7 @@ public class LibraryTable extends MouseableTable {
             if(!localFileItem.isLoaded()) {
                 return I18n.tr("This file is still processing.");
             } else if(!localFileItem.isShareable()) {
-                return I18n.tr("This file cannot be shared.");
+                return I18n.tr("This file can not be shared.");
             }
         }  
         return super.getToolTipText(row, col);

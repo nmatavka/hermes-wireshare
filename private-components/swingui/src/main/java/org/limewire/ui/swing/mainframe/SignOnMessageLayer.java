@@ -466,7 +466,7 @@ class SignOnMessageLayer {
             rightMessageLabel.setFont(sharingFont);
             rightMessageLabel.setForeground(messageForeground);
             rightMessageLabel.setIcon(addFileIcon);
-            rightMessageLabel.setText(I18n.tr("Add files to it"));
+            rightMessageLabel.setText(I18n.tr("Add files"));
             
             // Add message elements to component.
             messageComponent.addComponent(closeButton, "span 2, align right, push, wrap");

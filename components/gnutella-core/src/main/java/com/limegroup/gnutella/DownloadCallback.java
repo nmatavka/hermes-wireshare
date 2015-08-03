@@ -21,14 +21,6 @@ public interface DownloadCallback {
       */   
     public void downloadsComplete();
 
-    /**
-     * Warns the user that a file being previewed could not be scanned for
-     * viruses.
-     * <p>
-     * This method MUST call dloader.discardUnscannedPreview(boolean)
-     * to cancel or continue with the preview.
-     */
-    public void promptAboutUnscannedPreview(Downloader dloader);
     
     /**
      * Prompts the user about what priorities to assign the files in this

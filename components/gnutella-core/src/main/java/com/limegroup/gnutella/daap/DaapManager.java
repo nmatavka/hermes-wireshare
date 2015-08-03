@@ -124,7 +124,7 @@ public class DaapManager {
                         DaapManager.this.start();
                     } catch (IOException err) {
                         LOG.debug("error starting DAAP", err);
-                        MessageService.showError(I18nMarker.marktr("WireShare was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under Advanced -> Files -> iTunes."));
+                        MessageService.showError(I18nMarker.marktr("Digital Audio Access Protocol service could not be started.  DAAP has been disabled; it can be restarted by clicking Tools -> Options -> My Files -> Configure (under iTunes)."));
                         DaapSettings.DAAP_ENABLED.setValue(false);
                     }
                 }

@@ -58,7 +58,7 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
         HTMLLabel htmlLabel = new HTMLLabel(
                 I18n
                         .tr(
-                                "<html><body>Warning: You are sharing Documents with the world. These Documents may contain personal information. <a href=\"{0}\">learn more</a></body></html>",
+                                "<html><body>Warning: document sharing is enabled.  Shared documents could inadvertently include confidential or personal information liable to be misused by an attacker. <a href=\"{0}\">learn more</a></body></html>",
                                 learnMoreUrl));
         htmlLabel.setEditable(false);
         htmlLabel.setOpaque(false);
@@ -69,7 +69,7 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
 
         add(htmlLabel, "wrap");
         MultiLineLabel sharingLabel = new MultiLineLabel(I18n
-                .tr("Do you want to keep sharing Documents with the world?"));
+                .tr("Do you wish to continue sharing documents?"));
         sharingLabel.setForeground(fontColor);
         sharingLabel.setFont(font);
 
