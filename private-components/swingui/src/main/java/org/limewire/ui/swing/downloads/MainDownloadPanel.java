@@ -22,7 +22,6 @@ import org.limewire.core.api.download.DownloadItem.DownloadItemType;
 import org.limewire.inject.EagerSingleton;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.ui.swing.downloads.table.AVInfoPanel;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableFactory;
 import org.limewire.ui.swing.player.PlayerMediator;
@@ -51,7 +50,6 @@ public class MainDownloadPanel extends JPanel {
     private final Provider<DownloadTableFactory> downloadTableFactory;
     private final DownloadListManager downloadListManager;
     private final Provider<PlayerMediator> playerMediator;
-    private final Provider<AVInfoPanel> avInfoPanelFactory;
     
     private TrayNotifier notifier;
     private boolean isInitialized = false;
@@ -66,13 +64,11 @@ public class MainDownloadPanel extends JPanel {
             DownloadMediator downloadMediator,
             TrayNotifier notifier, 
             DownloadListManager downloadListManager,
-            Provider<PlayerMediator> playerMediator,
-            Provider<AVInfoPanel> avInfoPanelFactory) {
+            Provider<PlayerMediator> playerMediator) {
         this.downloadMediator = downloadMediator;
         this.downloadTableFactory = downloadTableFactory;
         this.downloadListManager = downloadListManager;
         this.playerMediator = playerMediator;
-        this.avInfoPanelFactory = avInfoPanelFactory;
         this.notifier = notifier;
 
         GuiUtils.assignResources(this);
@@ -144,12 +140,6 @@ public class MainDownloadPanel extends JPanel {
                 DownloadState state = downloadItem.getState();
                 if(downloadItem.getDownloadItemType() == DownloadItemType.ANTIVIRUS) {
                     // Don't show a popup when an antivirus download completes
-                } else if (state == DownloadState.THREAT_FOUND) {
-                    avInfoPanelFactory.get().showThreatMessage(downloadItem, true);
-                } else if (state == DownloadState.SCAN_FAILED) {
-                    avInfoPanelFactory.get().showFailureMessage(downloadItem, true);
-                } else if (state == DownloadState.DANGEROUS) {
-                    avInfoPanelFactory.get().showDangerMessage(downloadItem, true);
                 } else {
                     notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), 
                             new AbstractAction() {

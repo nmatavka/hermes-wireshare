@@ -325,9 +325,8 @@ public class CoreDownloadListManager implements DownloadListManager {
             if (state.isFinished()) {
                 changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
             }
-            else if (state != DownloadState.ERROR && 
+            if (state != DownloadState.ERROR && 
                     state != DownloadState.DANGEROUS &&
-                    state != DownloadState.THREAT_FOUND &&
                     (SharingSettings.CLEAR_DOWNLOAD.getValue() || !state.isFinished())) {
                 remove(item);
             }

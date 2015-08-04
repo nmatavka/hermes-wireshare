@@ -199,8 +199,7 @@ public class LibraryMediator implements NavMediator<LibraryPanel> {
 
     public void locateInLibrary(DownloadItem item) {
         File file;
-        if(item.getState() == DownloadState.DONE ||
-                item.getState() == DownloadState.SCAN_FAILED) {
+        if(item.getState() == DownloadState.DONE) {
             file = item.getLaunchableFile();
         } else {
             file = item.getDownloadingFile();

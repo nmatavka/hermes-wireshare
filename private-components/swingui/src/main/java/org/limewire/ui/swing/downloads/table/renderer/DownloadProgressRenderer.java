@@ -31,9 +31,7 @@ public class DownloadProgressRenderer extends TransferProgressRenderer {
             progressBar.setValue(item.getPercentComplete());
             progressBar.setVisible(columnWidth > resources.getProgressBarCutoffWidth() &&
                     (state == DownloadState.DOWNLOADING ||
-                            state == DownloadState.PAUSED ||
-                            state == DownloadState.SCANNING ||
-                            state == DownloadState.SCANNING_FRAGMENT));
+                            state == DownloadState.PAUSED));
             progressBar.setEnabled(state != DownloadState.PAUSED);
         
         } else {
@@ -49,12 +47,7 @@ public class DownloadProgressRenderer extends TransferProgressRenderer {
             DownloadItem item = (DownloadItem) value;
             DownloadState state = item.getState();
 
-            if (state == DownloadState.SCANNING) {
-                timeLabel.setText(I18n.tr("Finalizing..."));
-                timeLabel.setMinimumSize(timeLabel.getPreferredSize());
-                timeLabel.setVisible(true);
-                
-            } else if (state != DownloadState.DOWNLOADING || 
+            if (state != DownloadState.DOWNLOADING || 
                     item.getRemainingDownloadTime() > Long.MAX_VALUE - 1000) {
                 timeLabel.setVisible(false);
                 

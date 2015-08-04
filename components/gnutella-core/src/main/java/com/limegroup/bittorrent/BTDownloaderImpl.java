@@ -121,7 +121,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         this.torrentUploadManager = torrentUploadManager;
         this.dangerousFileChecker = dangerousFileChecker;
         this.downloadCallback = downloadCallback;
-        discardUnscannedPreview = true;
     }
 
     @Override
@@ -130,9 +129,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             LOG.debug("Finished");
             finishing.set(true);
             torrentsFinished.incrementAndGet();
-            if (isInfectedOrDangerous()) {
-                return;
-            }
             FileUtils.forceDeleteRecursive(getSaveFile());
             File completeDir = getSaveFile().getParentFile();
             torrent.getLock().lock();
@@ -165,20 +161,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             addFileToCollections(completeFile);
             complete.set(true);
             deleteIncompleteFiles();
-            if(lastState.get() != DownloadState.SCAN_FAILED) {
-                lastState.set(DownloadState.COMPLETE);
-                listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
-            }
+            lastState.set(DownloadState.COMPLETE);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.COMPLETE));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
             torrent.removeListener(this);
             // Was the torrent stopped because of a virus or dangerous file?
-            if (lastState.get() != DownloadState.DANGEROUS &&
-                    lastState.get() != DownloadState.THREAT_FOUND) {
-                lastState.set(DownloadState.ABORTED);
-                listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
-            }
+            lastState.set(DownloadState.ABORTED);
+            listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             deleteIncompleteFiles();
         } else if (TorrentEventType.FAST_RESUME_FILE_SAVED == event.getType()) {
@@ -234,14 +225,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return false;
     }
 
-    private boolean promptAboutUnscannedPreview() {
-        downloadCallback.get().promptAboutUnscannedPreview(this);
-        return discardUnscannedPreview;
-    }
-
     @Override
     public void discardUnscannedPreview(boolean delete) {
-        discardUnscannedPreview = delete;
     }
 
     /**
@@ -417,11 +402,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             LOG.debug("Failed to create preview copy");
             return null;
         }
-        if (isInfectedOrDangerous(copy, listener)) {
-            LOG.debug("Not returning infected or dangerous preview copy");
-            copy.delete();
-            return null;
-        }
         LOG.debug("Returning preview copy");
         return copy;
     }
@@ -431,12 +411,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         switch(lastState.get()) {
         case DANGEROUS:
             return DownloadState.DANGEROUS;
-        case THREAT_FOUND:
-            return DownloadState.THREAT_FOUND;
-        case SCAN_FAILED:
-            return DownloadState.SCAN_FAILED;
-        case SCANNING:
-            return DownloadState.SCANNING;
         }
 
         TorrentStatus status = torrent.getStatus();
@@ -586,10 +560,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case ABORTED:
         case COMPLETE:
         case DANGEROUS:
-        case THREAT_FOUND:
-        case SCAN_FAILED:
-            LOG.debug("Should be removed");
-            return true;
         }
         LOG.debug("Should not be removed");
         return false;

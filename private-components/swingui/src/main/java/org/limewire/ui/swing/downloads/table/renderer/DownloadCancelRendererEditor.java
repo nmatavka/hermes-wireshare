@@ -76,6 +76,12 @@ public class DownloadCancelRendererEditor extends TableRendererEditor {
         cancelButton.addActionListener(listener);
         removeButton.addActionListener(listener);
     }
+    
+    private void updateButtons(DownloadItem item) {
+        DownloadState state = item.getState();
+        cancelButton.setVisible(!state.isFinished());
+        removeButton.setVisible(state.isFinished());
+    }
 
     @Override    
     protected Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,

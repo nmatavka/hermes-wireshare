@@ -18,7 +18,7 @@ public enum DownloadState {
 	ERROR(false, false, false),
 	RESUMING(false, false, false),
 	/** Threat detected by dangerous file checker. */
-	DANGEROUS(false, false, true),
+	DANGEROUS(false, false, true);
 
 	private final boolean pausable;
 	private final boolean resumable;

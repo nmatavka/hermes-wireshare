@@ -135,7 +135,6 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
             Map<?, ?> torrentFileMap = (Map<?, ?>) Token.parse(torrentInputStream.getChannel());
             BTData btData = new BTDataImpl(torrentFileMap);
                     downloadStatus = DownloadState.COMPLETE;
-            } 
 
             // The torrent file is copied into the incomplete file
             // directory.

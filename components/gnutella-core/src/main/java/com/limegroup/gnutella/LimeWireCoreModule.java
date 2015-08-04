@@ -18,7 +18,6 @@ import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
-import org.limewire.core.settings.LimeWireCoreSettingsModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inject.EagerSingleton;
@@ -186,7 +185,6 @@ public class LimeWireCoreModule extends AbstractModule {
     @Override
     protected void configure() {
         binder().install(new LimeWireCommonModule());
-        binder().install(new LimeWireCoreSettingsModule());
         binder().install(new LimeWireSettingsModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());

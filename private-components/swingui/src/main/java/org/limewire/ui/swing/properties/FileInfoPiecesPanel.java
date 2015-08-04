@@ -228,9 +228,7 @@ public class FileInfoPiecesPanel implements FileInfoPanel {
                 // TODO: use DownloadState.isFinished() ?  doesn't match properly right now though.
                 
                 return state == DownloadState.DONE || state == DownloadState.FINISHING
-                         || state == DownloadState.CANCELLED || state == DownloadState.DANGEROUS
-                         || state == DownloadState.SCAN_FAILED 
-                         || state == DownloadState.THREAT_FOUND;
+                         || state == DownloadState.CANCELLED || state == DownloadState.DANGEROUS;
             }
         });
         

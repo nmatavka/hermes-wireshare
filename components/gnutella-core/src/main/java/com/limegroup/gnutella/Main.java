@@ -189,11 +189,6 @@ public class Main {
         @Override
         public void uploadsComplete() {}
     
-        @Override
-        public void promptAboutUnscannedPreview(Downloader dloader) {
-            dloader.discardUnscannedPreview(false);
-        }
-        
         @Override public void restoreApplication() {}
     
         @Override public boolean isQueryAlive(GUID guid) {

@@ -21,7 +21,6 @@ class DownloadStateComparator  implements Comparator<DownloadItem>{
         switch(state){
         case DONE: return 1;
         case FINISHING: return 2;
-        case APPLYING_DEFINITION_UPDATE: return 2;
         case DOWNLOADING: return 3;
         case RESUMING: return 4;
         case CONNECTING: return 5;
@@ -33,10 +32,6 @@ class DownloadStateComparator  implements Comparator<DownloadItem>{
         case ERROR: return 11;       
         case CANCELLED: return 12;
         case DANGEROUS: return 13;
-        case SCANNING: return 14;
-        case SCANNING_FRAGMENT: return 15;
-        case THREAT_FOUND: return 16;
-        case SCAN_FAILED: return 17;
         }
         
        throw new IllegalArgumentException("Unknown DownloadState: " + state);

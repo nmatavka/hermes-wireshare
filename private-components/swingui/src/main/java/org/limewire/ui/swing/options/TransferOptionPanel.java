@@ -17,8 +17,6 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.malware.VirusEngine;
-import org.limewire.core.settings.MalwareSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -45,7 +43,6 @@ public class TransferOptionPanel extends OptionPanel {
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final TransferLimitsOptionPanel connectionsOptionPanel;
     private final BitTorrentOptionPanel bitTorrentOptionPanel;
-    private final VirusEngine virusEngine;    
 
     private DownloadsPanel downloadsPanel;
     private TrayPanel trayPanel;
@@ -55,13 +52,11 @@ public class TransferOptionPanel extends OptionPanel {
     public TransferOptionPanel(Provider<IconManager> iconManager,
             ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory,
             Provider<TransferLimitsOptionPanel> connectionOptionPanel,
-            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel,
-            VirusEngine virusEngine) {
+            Provider<BitTorrentOptionPanel> bitTorrentOptionPanel) {
         this.iconManager = iconManager;
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.connectionsOptionPanel = connectionOptionPanel.get();
         this.bitTorrentOptionPanel = bitTorrentOptionPanel.get();
-        this.virusEngine = virusEngine;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap, gap 4"));
 
@@ -143,7 +138,6 @@ public class TransferOptionPanel extends OptionPanel {
         private final LabelTextField downloadSaveTextField;
         private final JButton browseSaveLocationButton;
         private final JCheckBox autoRenameDuplicateFilesCheckBox;
-        private final JCheckBox useAntivirusCheckBox;
         private final ManageSaveFoldersOptionPanel saveFolderPanel;
         private final JButton multiLocationConfigureButton;
         private final JRadioButton singleLocationButton;
@@ -184,7 +178,6 @@ public class TransferOptionPanel extends OptionPanel {
             add(multiLocationConfigureButton, "wrap");
 
             add(autoRenameDuplicateFilesCheckBox, "wrap");
-            add(useAntivirusCheckBox, "hidemode 3, wrap");
 
             ActionListener downloadSwitchAction = new ActionListener() {
                 @Override

@@ -59,7 +59,6 @@ public class DownloadActionHandler {
     private DownloadListManager downloadListManager;
     private LibraryManager libraryManager;
     private final FileInfoDialogFactory fileInfoFactory;
-    private final Provider<AVInfoPanel> avInfoPanelFactory;
     private final Provider<DownloadExceptionHandler> downloadExceptionHandler;
     private final SearchHandler searchHandler;
     private final Provider<KeywordAssistedSearchBuilder> searchBuilder;
@@ -68,7 +67,6 @@ public class DownloadActionHandler {
     @Inject
     public DownloadActionHandler(DownloadListManager downloadListManager, 
             LibraryMediator libraryMediator, LibraryManager libraryManager, FileInfoDialogFactory fileInfoFactory,
-            Provider<AVInfoPanel> avInfoPanelFactory,
             Provider<DownloadExceptionHandler> downloadExceptionHandler,
             SearchHandler searchHandler, Provider<KeywordAssistedSearchBuilder> searchBuilder,
             Provider<PlayerMediator> playerMediator){
@@ -76,7 +74,6 @@ public class DownloadActionHandler {
         this.libraryMediator = libraryMediator;
         this.libraryManager = libraryManager;
         this.fileInfoFactory = fileInfoFactory;
-        this.avInfoPanelFactory = avInfoPanelFactory;
         this.downloadExceptionHandler = downloadExceptionHandler;
         this.searchHandler = searchHandler;
         this.searchBuilder = searchBuilder;
@@ -124,8 +121,7 @@ public class DownloadActionHandler {
      * instead.
      */
     private void createFileInfoDialog(DownloadItem item) {
-        if(item.getState() != DownloadState.DONE &&
-                item.getState() != DownloadState.SCAN_FAILED) {
+        if(item.getState() != DownloadState.DONE ) {
             JDialog dialog = fileInfoFactory.createFileInfoDialog(item, FileInfoType.DOWNLOADING_FILE);
             dialog.setVisible(true);
         } else if(item.getLaunchableFile() != null) {
@@ -191,45 +187,13 @@ public class DownloadActionHandler {
      */
     private void showInfoDialog(DownloadItem item) {
         switch (item.getDownloadItemType()) {
-        case ANTIVIRUS:
-            avInfoPanelFactory.get().showVendorMessage();
-            return;
         case BITTORRENT:
-            switch (item.getState()) {
-            case DANGEROUS:
-                avInfoPanelFactory.get().showDangerMessage(item, false);
-                return;
-            case SCANNING:
-            case SCANNING_FRAGMENT:
-                avInfoPanelFactory.get().showVendorMessage();
-                return;
-            case THREAT_FOUND:
-                avInfoPanelFactory.get().showThreatMessage(item, false);
-                return;    
-            case SCAN_FAILED:
-                avInfoPanelFactory.get().showFailureMessage(item, false);
-                return;
-            default:
-                createFileInfoDialog(item);
-                return;
-            }
+            createFileInfoDialog(item);
+            return;
         case GNUTELLA:
-            switch (item.getState()) {
-            case DANGEROUS:
-                avInfoPanelFactory.get().showDangerMessage(item, false);
-                return;
-            case SCANNING:
-            case SCANNING_FRAGMENT:
-                avInfoPanelFactory.get().showVendorMessage();
-                return;
-            case THREAT_FOUND:
-                avInfoPanelFactory.get().showThreatMessage(item, false);
-                return;
-            case SCAN_FAILED:
-                avInfoPanelFactory.get().showFailureMessage(item, false);
-                return;
-            }
-            break;
+			break;
+		default:
+			break;
         }
     }
     

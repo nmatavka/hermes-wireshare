@@ -33,7 +33,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.TextFieldClipboardControl;
 import org.limewire.ui.swing.painter.factories.BarPainterFactory;

@@ -69,11 +69,10 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         settingMap.put(LibrarySettings.ALLOW_PROGRAMS, programCheckBox);
         settingMap.put(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING, documentCheckBox);
         
-        contentPanel.add(new JLabel("<html>" + I18n.tr("Warning: by enabling this setting, you " +
-	"acknowledge the risk of fraud, should any personal or confidential document " +
-	"inadvertently be shared, and you agree to accept responsibility for any loss which " +
-	may arise.") +
-	"</html>"), "wrap");
+        contentPanel.add(new JLabel("<html>" + I18n.tr(
+        		"Warning: by enabling this setting, you acknowledge the risk of fraud, " +
+        		"should any personal or confidential document inadvertently") + "<br>" + I18n.tr(
+        		"be shared, and you agree to accept responsibility for any loss which may arise.") +	"</html>"), "wrap");
 
         contentPanel.add(documentCheckBox, "gapleft 25");
         contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are documents?")) {
@@ -87,9 +86,9 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         
         contentPanel.add(new JSeparator(), "growx, gaptop 5, gapbottom 5, wrap");
         
-        contentPanel.add(new JLabel("<html>" + I18n.tr("Program files may be infected " +
-	"with viruses.  WireShare does not include a virus scanner.  Download program " +
-	"files at your own risk. ") + "</html>"), "wrap");
+        contentPanel.add(new JLabel("<html>" + I18n.tr(
+        		"Program files may be infected with viruses.  WireShare does not include " +
+        		"a virus scanner.  Download program files at your own risk. ") + "</html>"), "wrap");
         contentPanel.add(programCheckBox, "gapleft 25");
         contentPanel.add(new HyperlinkButton(new AbstractAction(I18n.tr("What are programs?")) {
             @Override

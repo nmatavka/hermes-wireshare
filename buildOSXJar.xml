@@ -66,7 +66,7 @@
 	    <jarbundler dir="${macosx.app}"
 			verbose="true"
 	    	name="${app.name}"
-			version="5.6.4.1"
+			version="5.6.4.4"
 			shortname="${app.name}"
 			jar="${app.resrc}/WireShare.jar"
 			mainclass="org.limewire.ui.swing.Main"

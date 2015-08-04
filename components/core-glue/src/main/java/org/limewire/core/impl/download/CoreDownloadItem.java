@@ -140,7 +140,7 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     @Override
     public long getCurrentSize() {
         DownloadState state = getState();
-        if (state == DownloadState.SCANNING || state.isFinished()) {
+        if (state.isFinished()) {
             return getTotalSize();
         } else {
             return cachedSize;
@@ -214,7 +214,6 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     public int getPercentComplete() {
         DownloadState state = getState();
         if(state == DownloadState.FINISHING ||
-                state == DownloadState.SCANNING ||
                 state.isFinished()){
             return 100;
         }
@@ -250,9 +249,6 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
     public DownloadState getState() {
         if(cancelled){
             return DownloadState.CANCELLED;
-        }
-        if(scanningFragment) {
-            return DownloadState.SCANNING_FRAGMENT;
         }
         return convertState(downloader.getState());
     }
@@ -342,16 +338,6 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         case DANGEROUS:
             return DownloadState.DANGEROUS;
 
-        case SCANNING:
-            return DownloadState.SCANNING;
-
-        case THREAT_FOUND:
-            return DownloadState.THREAT_FOUND;
-
-        case SCAN_FAILED:
-            return DownloadState.SCAN_FAILED;
-            
-            
         default:
             throw new IllegalStateException("Unknown State: " + state);
         }
@@ -544,6 +530,12 @@ class CoreDownloadItem implements DownloadItem, Downloader.ScanListener {
         }
         return files;
     }
+
+	@Override
+	public Object getDownloadProperty(DownloadPropertyKey key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 }

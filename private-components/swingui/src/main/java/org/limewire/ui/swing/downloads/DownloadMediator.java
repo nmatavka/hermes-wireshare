@@ -116,9 +116,7 @@ public class DownloadMediator {
         // Add list listeners to enable/show header buttons.
         EventList<DownloadItem> doneList = GlazedListsFactory.filterList(getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.DONE,
-                        DownloadState.DANGEROUS,
-                        DownloadState.THREAT_FOUND,
-                        DownloadState.SCAN_FAILED));
+                        DownloadState.DANGEROUS));
         EventList<DownloadItem> stalledList = GlazedListsFactory.filterList(getDownloadList(), 
                 new DownloadStateMatcher(DownloadState.STALLED));
 
@@ -246,9 +244,7 @@ public class DownloadMediator {
 	                new DownloadStateExcluder(DownloadState.ERROR,
 	                        DownloadState.DONE,
 	                        DownloadState.CANCELLED,
-	                        DownloadState.DANGEROUS,
-	                        DownloadState.THREAT_FOUND,
-	                        DownloadState.SCAN_FAILED));
+	                        DownloadState.DANGEROUS));
 	    }
 	    return activeList;
 	}

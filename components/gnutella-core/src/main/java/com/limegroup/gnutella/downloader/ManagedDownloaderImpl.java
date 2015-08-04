@@ -733,11 +733,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 case DISK_PROBLEM:
                 case CORRUPT_FILE:
                 case DANGEROUS:
-                case THREAT_FOUND:
-                case SCAN_FAILED:
-                    clearingNeeded = true;
-                    setState(status);
-                    break;
                 case BUSY:
                 case GAVE_UP:
                     if (invalidated) {
@@ -952,9 +947,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case CORRUPT_FILE:
             case INVALID:
             case DANGEROUS:
-            case THREAT_FOUND:
-            case SCAN_FAILED:
-                return true;
+            	return true;
         }
         return false;
     }
@@ -988,8 +981,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             case REMOTE_QUEUED:
             case HASHING:
             case SAVING:
-            case SCANNING:
-                return true;
+            	return true;
         }
         return false;
     }
@@ -1560,11 +1552,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
     @Override
     public boolean isLaunchable() {
-        if(state == DownloadState.DANGEROUS ||
-                state == DownloadState.THREAT_FOUND)
-            return false;
-        if(state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED)
+        if(state == DownloadState.COMPLETE )
             return true;
         return amountForPreview() > 0;
     }
@@ -1809,13 +1797,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             File corrupt = corruptFile;
             if (corrupt == null)
                 return null;
-            if (isInfectedOrDangerous(corrupt, listener)) {
-                corruptFile = null;
-                return null;
-            }
             return corrupt;
-        } else if (state == DownloadState.COMPLETE ||
-                state == DownloadState.SCAN_FAILED) {
+        } else if (state == DownloadState.COMPLETE) {
             // If the download is complete, return the whole file.
             return getSaveFile();
         } else {
@@ -1833,10 +1816,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Copy the first block, returning null if nothing was copied.
             if (FileUtils.copy(incompleteFile, size, copy) <= 0)
                 return null;
-            if (isInfectedOrDangerous(copy, listener)) {
-                incompleteFile.delete();
-                return null;
-            }
             return copy;
         }
     }
@@ -1920,9 +1899,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     case DANGEROUS: // Detected during preview
                         status = DownloadState.DANGEROUS;
                         break;
-                    case THREAT_FOUND: // Detected during preview
-                        status = DownloadState.THREAT_FOUND;
-                        break;
                     case CORRUPT_FILE: // Detected by a download worker
                         cleanupCorrupt(incompleteFile, getSaveFile().getName());
                         status = DownloadState.CORRUPT_FILE;
@@ -1997,8 +1973,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Save the file to disk.
         DownloadState saveState = saveFile(fileHash);
-        if(saveState == DownloadState.COMPLETE && scanFailed != null)
-            return scanFailed;
         return saveState;
     }
 
@@ -2557,11 +2531,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         incompleteFile.delete();
     }
     
-    private boolean promptAboutUnscannedPreview() {
-        downloadCallback.promptAboutUnscannedPreview(this);
-        return discardUnscannedPreview;
-    }
-
     @Override
     public void discardUnscannedPreview(boolean delete) {
         discardUnscannedPreview = delete;

@@ -38,8 +38,17 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
             return null;
         }
         DownloadItem item = (DownloadItem) value;
-        return downloadingIcon
+        
+        switch (item.getState()) {
+        case ERROR:
+        case DANGEROUS:
+        case FINISHING:
+        case DONE:
+            return categoryIconManager.getIcon(item.getCategory());
+        default:
+            return downloadingIcon;
         }
+
     }
     
     @Override
@@ -50,8 +59,6 @@ public class DownloadTitleRenderer extends TransferTitleRenderer {
         DownloadItem item = (DownloadItem) value;
         
         switch (item.getDownloadItemType()) {
-        case ANTIVIRUS:          
-            return getAntivirusText(item);
         case BITTORRENT:
             return I18n.tr("{0} (torrent)", PropertiableFileUtils.getNameProperty(item, true));
         case GNUTELLA:

@@ -102,19 +102,13 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         
         resources.decorateComponent(messageLabel);
         messageLabel.setText(getPercentMessage(item) + getMessage(item));
-        if (state == DownloadState.DANGEROUS ||
-                state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED) {
+        if (state == DownloadState.DANGEROUS ) {
             messageLabel.setForeground(resources.getDisabledForeground());
         }
         
         infoButton.setVisible(item.getDownloadItemType() == DownloadItemType.ANTIVIRUS ||
                 item.getDownloadItemType() == DownloadItemType.BITTORRENT ||
-                state == DownloadState.DANGEROUS ||
-                state == DownloadState.SCANNING ||
-                state == DownloadState.SCANNING_FRAGMENT || 
-                state == DownloadState.THREAT_FOUND ||
-                state == DownloadState.SCAN_FAILED);
+                state == DownloadState.DANGEROUS);
     }
     
     /**
@@ -125,9 +119,7 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
         DownloadState state = item.getState();
         if (percent == 0 || state.isFinished() ||
                 state == DownloadState.DOWNLOADING ||
-                state == DownloadState.ERROR ||
-                state == DownloadState.SCANNING || 
-                state == DownloadState.APPLYING_DEFINITION_UPDATE) {
+                state == DownloadState.ERROR) {
             return "";
         }
         return percent + "% - ";    
@@ -201,20 +193,6 @@ public class DownloadMessageRendererEditor extends TableRendererEditor {
                     item.getRemoteQueuePosition(), item.getRemoteQueuePosition());
         case DANGEROUS:
             return I18n.tr("File deleted - Dangerous file");
-        case SCANNING:
-            return I18n.tr("Scanning for viruses - Powered by AVG");
-        case SCANNING_FRAGMENT:
-            return I18n.tr("Scanning preview - Powered by AVG");
-        case THREAT_FOUND:
-            return I18n.tr("File deleted - Threat detected by AVG");
-        case SCAN_FAILED:
-            return I18n.tr("Done, but unable to scan for viruses");
-        case APPLYING_DEFINITION_UPDATE:
-            AntivirusUpdateType type = (AntivirusUpdateType)item.getDownloadProperty(DownloadPropertyKey.ANTIVIRUS_UPDATE_TYPE);
-            if (type == AntivirusUpdateType.CHECKING) {
-                return I18n.tr("Evaluating...");
-            }
-       return I18n.tr("Applying update...");
         default:
             return null;
         }

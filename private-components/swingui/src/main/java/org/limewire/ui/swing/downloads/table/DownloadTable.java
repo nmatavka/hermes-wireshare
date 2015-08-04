@@ -194,9 +194,7 @@ public class DownloadTable extends TransferTable<DownloadItem> {
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             DownloadItem item = getDownloadItem(adapter.row);
             DownloadState state = item.getState();
-            return (state == DownloadState.DANGEROUS ||
-                    state == DownloadState.THREAT_FOUND ||
-                    state == DownloadState.SCAN_FAILED);
+            return (state == DownloadState.DANGEROUS);
         }
     }
 }
