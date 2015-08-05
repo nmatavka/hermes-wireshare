@@ -107,7 +107,7 @@ public class BrowserUtils {
             // null, text or password are text controls. Filters out checkbox,
             // etc
             isText = type == null || "text".equalsIgnoreCase(type.getNodeValue())
-                    || "password".equalsIgnoreCase(type.getNodeValue());
+                    || "password".equalsIgnoreCase(type.getNodeValue()) || "search".equalsIgnoreCase(type.getNodeValue());
         } else {
             isText = "textarea".equalsIgnoreCase(node.getNodeName());
         }

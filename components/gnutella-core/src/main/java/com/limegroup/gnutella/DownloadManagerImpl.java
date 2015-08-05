@@ -456,6 +456,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         case REMOTE_QUEUED:
         case WAITING_FOR_USER:
         case DANGEROUS:
+            return false;
         default:
             return true;
         }

@@ -733,6 +733,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 case DISK_PROBLEM:
                 case CORRUPT_FILE:
                 case DANGEROUS:
+                    clearingNeeded = true;
+                    setState(status);
+                    break;
                 case BUSY:
                 case GAVE_UP:
                     if (invalidated) {

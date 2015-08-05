@@ -167,9 +167,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             torrent.removeListener(BTDownloaderImpl.this);
         } else if (TorrentEventType.STOPPED == event.getType()) {
             torrent.removeListener(this);
-            // Was the torrent stopped because of a virus or dangerous file?
-            lastState.set(DownloadState.ABORTED);
-            listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
+            // Was the torrent stopped because of a dangerous file?
+            if (lastState.get() != DownloadState.DANGEROUS) {
+            	lastState.set(DownloadState.ABORTED);
+            	listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
+           }
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             deleteIncompleteFiles();
         } else if (TorrentEventType.FAST_RESUME_FILE_SAVED == event.getType()) {
@@ -560,7 +562,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case ABORTED:
         case COMPLETE:
         case DANGEROUS:
-        }
+        	LOG.debug("Should be removed");
+            return true;
+            }
         LOG.debug("Should not be removed");
         return false;
     }
