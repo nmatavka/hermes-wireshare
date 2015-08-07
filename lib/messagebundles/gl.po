@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-16 18:49-0600\n"
+"POT-Creation-Date: 2015-08-07 14:38-0500\n"
 "PO-Revision-Date: 2010-04-25 21:29+0000\n"
 "Last-Translator: Marcos X. <Unknown>\n"
 "Language-Team: Marcos Lans - Ciberirmandade <marcoslansgarza@gmail.com>\n"
@@ -99,20 +99,23 @@ msgid "Torrents"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:38
-msgid "There is a disk problem"
-msgstr "Hai un problema co disco"
+#, fuzzy
+msgid "There is a problem with your disk."
+msgstr "Houbo un problema vendo estas persoas."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:39
-msgid "The file is corrupted"
+#, fuzzy
+msgid "The file is corrupted."
 msgstr "O ficheiro está corrompido"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:40
-msgid "The copyright holder has not authorized this for sharing"
+msgid "The copyright holder has not authorized this for sharing."
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:41
-msgid "Trouble connecting to people"
-msgstr "Hai problemas para conectar con outras persoas"
+#, fuzzy
+msgid "Can not connect to servers."
+msgstr "Non puido conectar con WireShare"
 
 #. *
 #. * The DownloadItem is not in an error state.
@@ -123,16 +126,8 @@ msgstr "Non hai problemas."
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:161
 msgid ""
-"<html><b>Your WireShare may have been corrupted by a virus or trojan!</b></"
-"html>"
+"<html><b>WireShare may have been corrupted by a virus or trojan.</b></html>"
 msgstr ""
-
-#. FIXME: replace this with a proper warning message
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:226
-msgid "The file could not be scanned for viruses. Preview anyway?"
-msgstr ""
-"Non foi posible analizar o ficheiro na procura de virus. Desexa visionalo "
-"igualmente?"
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/friend/CoreGlueFriendService.java:42
 msgid "XMPP Service"
@@ -145,8 +140,8 @@ msgstr "Servizo REST"
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:109
-msgid "Free to chat"
-msgstr "Listo para chatear"
+msgid "Online"
+msgstr ""
 
 #: components/friend/src/main/java/org/limewire/friend/api/FriendPresence.java:110
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:131
@@ -167,10 +162,10 @@ msgid "Do not disturb"
 msgstr "Non molesten"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/AcceptorImpl.java:304
-#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
+#, fuzzy
 msgid ""
 "WireShare was unable to set up a port to listen for incoming connections. "
-"Some features of WireShare may not work as expected."
+"Some features may not work as expected."
 msgstr ""
 "WireShare non puido habilitar un porto para as conexións entrantes. Isto "
 "pode facer que algunhas funcionalidades do WireShare non se executen "
@@ -214,23 +209,15 @@ msgstr "Xestión de descargas"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:282
 msgid ""
-"Sorry, WireShare couldn't read your old downloads.  You can restart them by "
-"clicking 'Try Again' on the downloads.  When WireShare finds a source for "
-"the file, the download will pick up where it left off."
+"Could not find partially-downloaded files.  Ensure that the files are in the "
+"Incomplete directory, then click 'Try Again' to resume."
 msgstr ""
-"WireShare non puido ler as descargas antigas. Pode reinicialas premendo "
-"'Volvelo tentar' sobre as descargas. Cando WireShare atope unha fonte para o "
-"ficheiro, a descarga continuará no momento en que se detivo."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/DownloadManagerImpl.java:284
 msgid ""
-"Sorry, WireShare couldn't read some of your old downloads.  You can restart "
-"them by clicking 'Try Again' on the downloads.  When WireShare finds a "
-"source for the file, the download will pick up where it left off."
+"Could not find some partially-downloaded files.  Ensure that the files "
+"exist, then click 'Try Again' to resume."
 msgstr ""
-"WireShare non puido ler as descargas antigas. Pode reinicialas premendo "
-"'Volvelo tentar' sobre as descargas. Cando WireShare atope unha fonte para o "
-"ficheiro a descarga continuará no momento en que se detivo."
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -272,20 +259,25 @@ msgstr "Consulta direccionada"
 msgid "Local Socket Listener"
 msgstr "Escoitador de socket local"
 
+#: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalAcceptor.java:48
+msgid ""
+"WireShare was unable to set up a port to listen for incoming connections. "
+"Some features of WireShare may not work as expected."
+msgstr ""
+"WireShare non puido habilitar un porto para as conexións entrantes. Isto "
+"pode facer que algunhas funcionalidades do WireShare non se executen "
+"correctamente."
+
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
 msgstr "Procesador Magnet"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:127
 msgid ""
-"WireShare was unable to start the Digital Audio Access Protocol Service (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under Advanced -> Files -> iTunes."
+"Digital Audio Access Protocol service could not be started.  DAAP has been "
+"disabled; it can be restarted by clicking Tools -> Options -> My Files -> "
+"Configure (under iTunes)."
 msgstr ""
-"WireShare foi incapaz de comezar o Servizo de Protocolo de Acceso de Audio "
-"Dixital (para compartir arquivos en iTunes). Esta  funcionalidade será "
-"desactivada. Pódea activar de novo en Ferramentas-> Opcións-> Avanzado-> "
-"Ficheiros-> iTunes"
 
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/daap/DaapManager.java:181
 msgid "What's New"
@@ -396,7 +388,7 @@ msgstr "Pista"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllTableFormat.java:43
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/DocumentTableFormat.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:39
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:155
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:158
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:353
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:42
@@ -591,74 +583,56 @@ msgstr "Cargador de metadatos"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
-"WireShare was unable to write a necessary file because your hard drive is "
-"full. To continue using WireShare you must free up space on your hard drive."
+"Insufficient hard drive space to access application resources.  Delete "
+"unwanted files and try again."
 msgstr ""
-"WireShare non puido escribir un ficheiro necesario porque o disco duro está "
-"cheo. Para continuar empregando WireShare debe liberar espazo no disco."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
-"WireShare was unable to open a necessary file because another program has "
-"locked the file. WireShare may act unexpectedly until this file is released."
+"Application resources in use.  WireShare may behave erratically.  Close all "
+"open applications or restart the computer, and try again."
 msgstr ""
-"WireShare non puido abrir un ficheiro necesario porque outro programa "
-"bloquea este ficheiro. WireShare pode actuar de xeito imprevisible até que o "
-"ficheiro estea accesible."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
-"WireShare was unable to write a necessary file because you do not have the "
-"necessary permissions. Your preferences may not be maintained the next time "
-"you start WireShare, or WireShare may behave in unexpected ways."
+"Access to application resources denied.  WireShare may not save preferences, "
+"or it may behave erratically.  Try running with elevated permissions or "
+"contact your system administrator."
 msgstr ""
-"WireShare non puido escribir un ficheiro necesario porque non ten os "
-"permisos precisos. As preferencias poden perderse cando volva abrir "
-"WireShare ou o aplicativo pode funcionar de xeito inesperado."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:57
+#, fuzzy
 msgid ""
-"WireShare cannot open a necessary file because the filename contains "
-"characters which are not supported by your operating system. WireShare may "
-"behave in unexpected ways."
+"Unable to open an application resource because its name is not supported by "
+"your operating system.  WireShare may behave erratically."
 msgstr ""
 "WireShare non puido abrir un ficheiro necesario por conter caracteres "
 "incompatibles co sistema operativo. WireShare pode ter un fallo imprevisto."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
-"WireShare cannot download the selected file because your hard drive is full. "
-"To download more files, you must free up space on your hard drive."
+"Insufficient storage space available to download selected file.  Either "
+"clear up some storage space or change download target drive, then try again."
 msgstr ""
-"WireShare non puido descargar o ficheiro seleccionado xa que non hai espazo "
-"no disco duro. Se quere continuar descargando ficheiros, ten que liberar "
-"espazo."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
-"WireShare was unable to download the selected file because another program "
-"is using the file. Please close the other program and retry the download."
+"Unable to download selected file because a file with the same name is in "
+"use.  Close all open applications or restart the computer, and try again."
 msgstr ""
-"WireShare non puido descargar un ficheiro porque outro programa está a "
-"empregalo. Por favor, peche o outro programa e vólvao  tentar."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
-"WireShare was unable to create or continue writing an incomplete file for "
-"the selected download because you do not have permission to write files to "
-"the incomplete folder. To continue using WireShare, please choose a "
-"different Save Folder."
+"Unable to create or write to incomplete download file because access to the "
+"Incomplete directory was denied.  Check permissions or contact your system "
+"administrator."
 msgstr ""
-"WireShare non puido crear ou continuar escribindo nun ficheiro incompleto "
-"para a descarga seleccionada porque non ten permiso para escribir no "
-"cartafol de descargas incompletas. Para continuar usando WireShare, escolla "
-"outro cartafol."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:67
+#, fuzzy
 msgid ""
-"WireShare was unable to open the incomplete file for the selected download "
-"because the filename contains characters which are not supported by your "
-"operating system."
+"Unable to open incomplete download file because its name is not supported by "
+"your operating system."
 msgstr ""
 "WireShare non puido abrir o ficheiro incompleto desta descarga porque o nome "
 "do ficheiro contén caracteres que non soporta o sistema operativo."
@@ -668,120 +642,99 @@ msgid "Firewall Manager"
 msgstr "Xestor do firewall"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
-msgid "Statistic Management"
+#, fuzzy
+msgid "Statistics Management"
 msgstr "Xestión das estatísticas"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:268
-msgid "Oops!"
-msgstr "Vaites!"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:268
-msgid "A problem occurred..."
-msgstr "Aconteceu un problema..."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:290
-msgid ""
-"Oops!  You did something we haven't written yet.  Sorry about that.  "
-"WireShare's still going to run just fine, so don't worry.  If you want, you "
-"can click 'Show Bug' to look at the information about the error."
-msgstr ""
-"Vaites! Fixo algo que non temos desenvolvido aínda. Desculpe por elo. Non se "
-"preocupe WireShare seguirá a  funcionar sen problemas.  Se o desexa prema en "
-"'Amosar fallo' para ver a información sobre este fallo."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:292
-msgid ""
-"WireShare has encountered an internal error. It is possible for WireShare to "
-"recover and continue running normally. To continue using WireShare, close "
-"this window. If desired, you can click 'Show Bug' to look at the information "
-"about the error."
-msgstr ""
-"WireShare atopou un erro interno. É posible para WireShare continuar "
-"funcionando normalmente. Para seguir a usar WireShare peche esta ventá. Pode "
-"ver a información deste erro premendo en 'Amosar fallo'."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:327
-msgid "Tell us what you were doing before WireShare ran into this problem."
-msgstr "Indíquenos que estaba a facer cando WireShare atopou o problema."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:346
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:354
-msgid "Show Bug"
-msgstr "Amosar fallo"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:358
-msgid "Hide Bug"
-msgstr "Ocultar fallo"
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:366
-msgid "Ask for help on the forums"
-msgstr "Solicitar axuda nos foros"
-
-#. Load up the HTML engine.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:430
-msgid "Loading the HTML engine..."
-msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:448
-#, fuzzy
-msgid "Loading the browser..."
-msgstr "A cargar WireShare..."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:483
-#, fuzzy
-msgid "Loading the user interface..."
-msgstr "A cargar WireShare..."
-
-#. Touch the I18N stuff to ensure it loads properly.
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:524
-msgid "Starting the user interface..."
-msgstr ""
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:556
-msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr "Esta versión Alpha caducou, Prema Aceptar para saír. "
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:562
-msgid ""
-"WireShare was unable to initialize and start. This is usually due to a "
-"security program blocking WireShare's access to the internet or loopback "
-"connections on the local machine. Please add WireShare as an exception to "
-"your security software and restart WireShare."
-msgstr ""
-"WireShare non puido iniciarse. Podese deber ao bloqueo do acceso á rede por "
-"un programa de seguridade ou tamén por un bucle na máquina local. Engada o "
-"WireShare como unha excepción ao seu software de protección e reinicie o "
-"programa."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:567
-#, fuzzy
-msgid ""
-"WireShare could not create a temporary preferences folder.\n"
-"\n"
-"This is generally caused by a lack of permissions.  Please make sure that "
-"WireShare (and you) have access to create files/folders on your computer.  "
-"If the problem persists, please visit http://www.gnutellaforums.com/ for "
-"support.\n"
-"\n"
-"WireShare will now exit.  Thank You."
-msgstr ""
-"WireShare non puido crear un cartafol temporal de preferencias.\n"
-"\n"
-"Isto é causado xeralmente por falta de permisos. Por favor, asegúrese que "
-"WireShare (e vostede) teña acceso para crear ficheiros/cartafoles na sua "
-"computadora. Se o problema persiste, por favor visite www.limewire.com e "
-"faga clic na ligazón 'Support'."
-
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:577
+#. How does this line work?  I assume the colon separates title bar from dialogue box.
+#. If it doesn't, this needs to be fixed.  Of course, that's going to fuck up the i18n...
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:270
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:572
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:35
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:47
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:81
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:94
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:230
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:329
 msgid "Error"
 msgstr "Erro"
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:593
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:270
+msgid "An internal error has occurred."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:292
+msgid ""
+"An error has occurred: this function has not yet been implemented.  To "
+"continue using WireShare, close this window; for more information, click "
+"'Show Bug'."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:294
+msgid ""
+"An internal error has occurred.  To continue using WireShare, close this "
+"window; for more information, click 'Show Bug'."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:329
+#, fuzzy
+msgid "What were you doing before WireShare ran into this problem?"
+msgstr "Indíquenos que estaba a facer cando WireShare atopou o problema."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:348
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:356
+msgid "Show Bug"
+msgstr "Amosar fallo"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:360
+msgid "Hide Bug"
+msgstr "Ocultar fallo"
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:368
+msgid "Ask for help on the forums"
+msgstr "Solicitar axuda nos foros"
+
+#. Load up the HTML engine.
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:425
+#, fuzzy
+msgid "Loading HTML engine..."
+msgstr "A iniciar a sesión..."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:443
+#, fuzzy
+msgid "Loading browser..."
+msgstr "A cargar WireShare..."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:478
+#, fuzzy
+msgid "Loading user interface..."
+msgstr "A cargar WireShare..."
+
+#. Touch the I18N stuff to ensure it loads properly.
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:519
+#, fuzzy
+msgid "Starting user interface..."
+msgstr "A cargar WireShare..."
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:551
+#, fuzzy
+msgid "The test period for this alpha version is over.  Click OK to exit."
+msgstr "Esta versión Alpha caducou, Prema Aceptar para saír. "
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:557
+msgid ""
+"Fatal error: a firewall has prevented WireShare from connecting to itself "
+"(loopback).   Verify that your whitelist is set up correctly and try again."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:562
+msgid ""
+"Fatal error: insufficient permissions to create preferences directory.  "
+"Please contact your system administrator or visit http://www.gnutellaforums."
+"com/ for support.  WireShare will now exit."
+msgstr ""
+
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:588
 msgid ""
 "Another instance of WireShare appears to be running. Please completely shut "
 "down all other instances of WireShare before continuing. If this problem "
@@ -791,7 +744,7 @@ msgstr ""
 "todas as instancias en funcionamento antes de continuar. Se o problema "
 "persiste reinicie o computador."
 
-#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:602
+#: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:597
 msgid "WireShare is already running"
 msgstr "WireShare aínda está a se executar"
 
@@ -799,7 +752,6 @@ msgstr "WireShare aínda está a se executar"
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:70
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:106
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:120
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadItemUtils.java:41
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:142
 msgid "Message"
 msgstr "Mensaxe"
@@ -824,10 +776,6 @@ msgid ""
 msgstr ""
 "WireShare atopou problemas cando xestionaba a configuración.  Os trocos "
 "feitos pode que non se conserven ao pechar WireShare."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
-msgid "Lookup on Bitzi"
-msgstr "Procurar en Bitzi"
 
 #. *
 #. * The copy action.
@@ -881,7 +829,8 @@ msgid "Connections"
 msgstr "Conexións"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:54
-msgid "View connections to other P2P clients"
+#, fuzzy
+msgid "View connections to other peer-to-peer clients"
 msgstr "Ver as conexións a outros clientes P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:55
@@ -897,7 +846,8 @@ msgid "Mojito"
 msgstr "Mojito"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:56
-msgid "View incoming and outgoing DHT messages"
+#, fuzzy
+msgid "View incoming and outgoing Distributed Hash Table messages"
 msgstr "Ver as mensaxes DHT entrantes e saíntes"
 
 #. * Identifier for Advanced Tools window.
@@ -981,23 +931,28 @@ msgid "Unable to view files - not yet connected to host"
 msgstr "Non é posible ver os ficheros - Aínda non está conectado co servidor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:63
-msgid "You are an Ultrapeer node"
+#, fuzzy
+msgid "You are an Ultrapeer node."
 msgstr "Vostede é un nodo ultrapar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:64
-msgid "You are a Leaf node"
+#, fuzzy
+msgid "You are a Leaf node."
 msgstr "Vostede é un nodo folla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:65
-msgid "You are not behind a firewall"
+#, fuzzy
+msgid "You are not behind a firewall."
 msgstr "Non está detrás dun firewall"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:66
-msgid "You are behind a firewall and support firewall transfers"
+#, fuzzy
+msgid "You are behind a firewall and support firewall transfers."
 msgstr "Está detrás dun firewall que soporta transferencias"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:67
-msgid "You are behind a firewall and do not support firewall transfers"
+#, fuzzy
+msgid "You are behind a firewall and do not support firewall transfers."
 msgstr "Está detrás dun firewall que non admite transferencias"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:68
@@ -1005,29 +960,29 @@ msgid "Connected to:"
 msgstr "Conectado a:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:69
-msgid "Show hostnames of connected peers"
+#, fuzzy
+msgid "Resolve IP addresses of connected peers"
 msgstr "Amosar os nomes dos servidores dos parceiros conectados"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:245
-msgid "No internet connection!"
-msgstr "Non hai conexión de internet"
+msgid "You are not connected to the Internet."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:248
-msgid "Gnutella is disconnected however internet connection detected!"
+msgid ""
+"You are connected to the Internet, but not connected to the Gnutella network."
 msgstr ""
-"Gnutella está desconectada aínda que se detecta unha conexión a internet."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:261
-msgid ""
-"WireShare has not been able to determine the external IP address of your NAT "
-"or firewall"
+#, fuzzy
+msgid "Unable to determine the external IP address of your NAT or firewall."
 msgstr ""
 "WireShare non foi capaz de determinar o enderezo IP externo do seu firewall "
 "ou NAT"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:263
-msgid "WireShare has not received any incoming UDP messages"
-msgstr "WireShare non recibiu ningunha mensaxe UDP entrante"
+msgid "No incoming UDP messages received."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:265
 msgid ""
@@ -1037,9 +992,9 @@ msgstr ""
 "anterior"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionSummaryPanel.java:267
+#, fuzzy
 msgid ""
-"WireShare is behind a NAT or firewall that assigns a different external port "
-"to each connection"
+"Your NAT or firewall assigns a different external port to each connection."
 msgstr ""
 "WireShare está detrás dun NAT ou firewall que asigna un porto externo "
 "diferente para cada conexión"
@@ -1091,7 +1046,7 @@ msgstr "Máis opcións"
 
 #. * String for connecting status
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionTableFormat.java:30
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:152
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:144
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:117
 msgid "Connecting..."
 msgstr "A conectar..."
@@ -1210,17 +1165,16 @@ msgid "QRP Empty"
 msgstr "QRP baleiro"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/IncomingSearchPanel.java:64
-msgid "Incoming Searches - people on the P2P Network are now searching for..."
-msgstr "Procuras entrantes: os usuarios da rede P2P están buscando..."
+msgid "Incoming Gnutella searches:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/browser/Browser.java:138
 msgid "Loading..."
 msgstr "A cargar..."
 
-#. Display as modal dialog.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:86
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:146
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:235
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:147
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
 msgid "Warning"
 msgstr "Aviso"
 
@@ -1246,11 +1200,11 @@ msgstr ""
 msgid "Warning: {0}"
 msgstr "Aviso: {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:143
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
 msgid "The torrent file download could not be virus scanned."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:144
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/callback/GuiCallbackImpl.java:145
 msgid "Do you want to continue and download the torrent?"
 msgstr ""
 
@@ -1327,12 +1281,12 @@ msgid "Block User {0}"
 msgstr "Bloquear usuario {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:175
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:238
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:216
 msgid "nobody"
 msgstr "ninguén"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:195
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:268
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:246
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:119
 #, java-format
 msgid "{0} Person"
@@ -1364,26 +1318,26 @@ msgid "Web Search"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:209
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:240
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:270
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:218
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:248
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:121
-#, java-format
-msgid "{0} P2P User"
-msgid_plural "{0} P2P Users"
+#, fuzzy, java-format
+msgid "{0} Peer-to-Peer User"
+msgid_plural "{0} Peer-to-Peer Users"
 msgstr[0] "{0} usuario P2P"
 msgstr[1] "{0} usuarios P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:211
-msgid "P2P User"
-msgid_plural "P2P Users"
-msgstr[0] "Usuario P2P"
-msgstr[1] "Usuarios P2P"
+msgid "Peer-to-Peer User"
+msgid_plural "Peer-to-Peer Users"
+msgstr[0] ""
+msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:280
 msgid "Locate"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:117
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/components/SplashWindow.java:112
 msgid "Loading WireShare..."
 msgstr "A cargar WireShare..."
 
@@ -1485,23 +1439,16 @@ msgstr "Extensión do ficheiro."
 msgid "Reverse Order"
 msgstr "Inverter a orde"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadItemUtils.java:39
-msgid ""
-"This file has not been scanned for viruses.  Do you want to launch anyway?"
-msgstr ""
-"Non se analizou este ficheiro na procura de virus. Desexa inicialo de todos "
-"os xeitos?"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:397
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:393
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadMediator.java:508
 msgid "Clear Finished"
 msgstr "Limpar as rematadas"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:412
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadMediator.java:408
 msgid "Fix Stalled"
 msgstr "Arranxar as estancadas"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:154
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:144
 msgid "Download Complete"
 msgstr "Descarga completada"
 
@@ -1524,107 +1471,7 @@ msgstr "Máis opcións de transferencia..."
 msgid "Show Uploads in Tray"
 msgstr "Amosar os envíos na bandexa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:92
-msgid "Do not show message again"
-msgstr "Non amosar esta mensaxe de novo"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:105
-msgid "Anti-Virus Protection"
-msgstr "Protección anti-virus"
-
-#. Set message text.  We also set the preferred size to control the
-#. message and dialog width.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:109
-msgid ""
-"WireShare's Anti-Virus protection is powered by AVG.  AVG scans, detects and "
-"deletes files that are suspected to contain viruses or spyware.  <a href="
-"\"{0}\">Learn more</a>"
-msgstr ""
-"A protección antivirus do WireShare está respaldada por AVG. A análise de "
-"AVG detecta e elimina ficheiros sospeitosos de estar infectados por virus ou "
-"spyware. <a href=\"{0}\">Saber máis</a>"
-
-#. Set OK button action.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:114
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:292
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:225
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:280
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:125
-msgid "OK"
-msgstr "Aceptar"
-
-#. Display as modal dialog.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:131
-msgid "About AVG Anti-Virus"
-msgstr "Sobre o anti-virus AVG"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:142
-msgid "Dangerous File"
-msgstr "Ficheiro perigoso"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:143
-#, java-format
-msgid ""
-"{0} is considered a dangerous file and has automatically been deleted for "
-"your protection.  <a href=\"{1}\">Learn more</a>"
-msgstr ""
-"{0} consíderase un ficheiro perigoso e foi eliminado automaticamente para a "
-"súa protección.  <a href=\"{1}\">Saber máis</a>"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:156
-msgid "Threat Detected"
-msgstr "Detectouse unha ameaza"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:157
-#, java-format
-msgid ""
-"{0} is suspected to contain a virus or spyware and has automatically been "
-"deleted for your protection.  WireShare's Anti-Virus protection is powered "
-"by AVG."
-msgstr ""
-"Pode ser que {0} contivese un virus ou spyware polo que foi eliminado "
-"automaticamente. A protección antivirus do WireShare está respaldada por AVG."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:178
-msgid "Can't Scan Yet"
-msgstr "Aínda non se pode analizar"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:179
-#, java-format
-msgid ""
-"{0} could not be inspected because the virus scanner is still downloading "
-"its first set of virus definitions.  WireShare Anti-Virus protection is "
-"powered by AVG."
-msgstr ""
-"{0} non foi analizado porque o escáner antivirus aínda está a descargar a "
-"primeira listaxe de definicións de virus. A protección antivirus do "
-"WireShare está respaldada por AVG."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:182
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:186
-msgid "Unable to Scan"
-msgstr "Non foi posible a búsqueda"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:183
-#, java-format
-msgid ""
-"{0} could not be inspected because the virus scanner cannot be loaded.  "
-"WireShare Anti-Virus protection is powered by AVG."
-msgstr ""
-"{0} non foi analizado porque non foi posible cargar o escáner antivirus. A "
-"protección antivirus do WireShare está respaldada por AVG."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/AVInfoPanel.java:187
-#, java-format
-msgid ""
-"{0} could not be inspected due to a problem with the virus scanner.  "
-"WireShare Anti-Virus protection is powered by AVG."
-msgstr ""
-"{0} non foi analizado debido a un problema co escáner antivirus. A "
-"protección antivirus do WireShare está respaldada por AVG."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:236
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:233
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:45
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/PlayerControlPanel.java:156
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/player/VideoPanel.java:251
@@ -1633,35 +1480,35 @@ msgstr ""
 msgid "Pause"
 msgstr "Pausar"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:243
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:240
 msgid "Cancel Download"
 msgstr "Cancelar a descarga"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:250
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadButtonPanel.java:57
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadActionRendererEditor.java:49
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:299
 msgid "Resume"
 msgstr "Continuar"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:257
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:254
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:165
 msgid "Try Again"
 msgstr "Volvelo tentar"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:264
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:261
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LaunchFileAction.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:119
 msgid "Play/Open"
 msgstr "Reproducir/Abrir"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:271
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:278
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:268
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:275
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:279
 msgid "Clear from Tray"
 msgstr "Limpar da bandexa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:285
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:282
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LocateFileAction.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:310
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:408
@@ -1670,7 +1517,7 @@ msgstr "Limpar da bandexa"
 msgid "Locate on Disk"
 msgstr "Localizar no disco"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:292
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:289
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:318
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoGeneralPanel.java:424
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:153
@@ -1679,18 +1526,18 @@ msgid "Locate in Library"
 msgstr "Localizar na biblioteca"
 
 #. Add View File Info menu item.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:299
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:296
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ViewFileInfoAction.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:196
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupMenu.java:309
 msgid "View File Info..."
 msgstr "Ver a información do ficheiro"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:303
 msgid "Change Location..."
 msgstr "Cambiar a ubicación..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:328
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableMenu.java:325
 msgid "Preview File"
 msgstr "Pre-visualizar o  ficheiro"
 
@@ -1725,19 +1572,19 @@ msgstr "Eliminar a descarga"
 msgid "Info"
 msgstr "Información"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:142
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:134
 msgid "Resuming"
 msgstr "Continuar"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:144
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:136
 msgid "Cancelled"
 msgstr "Cancelado"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:146
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:138
 msgid "Finishing..."
 msgstr "A rematar..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:148
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoBittorrentPanel.java:560
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:133
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/FileProcessingPanel.java:107
@@ -1745,94 +1592,68 @@ msgid "Done"
 msgstr "Feito"
 
 #. {0}: 1 person, 2 people, etc
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:155
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:147
 #, java-format
 msgid "Connecting to {0}"
 msgstr "A conectar con {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:162
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:154
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:119
 #, java-format
 msgid "{0} of {1} ({2})"
 msgstr "{0} de {1} ({2})"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:159
 #, java-format
 msgid "{0} of {1} ({2}) from {3}"
 msgstr "{0} de {1} ({2}) desde {3}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:177
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:169
 msgid "Error downloading torrent"
 msgstr "Erro na descarga do Torrent"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:171
 #, java-format
 msgid "Stalled - {0} of {1}"
 msgstr "Estancado - {0} de {1}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:187
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:179
 msgid "Unable to download: "
 msgstr "Non é posible a descarga: "
 
 #. {0}: current size, {1} total size
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:191
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:183
 #, java-format
 msgid "Paused - {0} of {1}"
 msgstr "Pausado - {0} de {1}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:199
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:191
 #, java-format
 msgid "Waiting - Next in line"
 msgid_plural "Waiting - {0} in line"
 msgstr[0] "Agardando - Seguinte na cola"
 msgstr[1] "Agardando - {0} na cola"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:203
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:137
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:195
 msgid "File deleted - Dangerous file"
 msgstr "Eliminouse o ficheiro - Ficheiro perigoso"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:205
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:127
-msgid "Scanning for viruses - Powered by AVG"
-msgstr "Análise de virus - Respaldada por AVG"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:207
-msgid "Scanning preview - Powered by AVG"
-msgstr "Vista previa do escaneo - Respaldado por AVG"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:209
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:132
-msgid "File deleted - Threat detected by AVG"
-msgstr "Eliminouse o ficheiro - A ameaza foi detectada polo AVG"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:211
-msgid "Done, but unable to scan for viruses"
-msgstr "Feito pero non foi posible a análise de virus"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:215
-msgid "Evaluating..."
-msgstr "A evaluar..."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:217
-msgid "Applying update..."
-msgstr "Estanse a aplicar as actualizacións..."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:226
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:204
 msgid "Looking for file..."
 msgstr "A procurar o ficheiro..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:228
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:206
 #, java-format
 msgid "Looking for file ({0} left)"
 msgstr "A procurar o ficheiro ({0} restante)"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:246
-msgid "1 P2P User"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:224
+#, fuzzy
+msgid "1 Peer-to-Peer User"
 msgstr "1 usuario P2P"
 
 #. just friends
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:273
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:123
 #, java-format
 msgid "{0} Friend"
@@ -1841,44 +1662,22 @@ msgstr[0] "{0} Amigo"
 msgstr[1] "{0} Amigos"
 
 #. if(queueTime == DownloadItem.UNKNOWN_TIME){
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:280
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:258
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadMessageRenderer.java:129
 msgid "Waiting..."
 msgstr "A agardar..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadProgressRenderer.java:53
-msgid "Finalizing..."
-msgstr "A rematar..."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadProgressRenderer.java:62
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadProgressRenderer.java:55
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadProgressRenderer.java:59
 #, java-format
 msgid "{0} left"
 msgstr "Faltan {0}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:78
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:63
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTitleRenderer.java:71
 #, java-format
 msgid "{0} (torrent)"
 msgstr "{0} (torrent)"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:90
-msgid "Checking for AVG Anti-Virus updates"
-msgstr "Estase a comprobar se hai actualizacións para o AVG Anti-Virus"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:93
-msgid "Updating AVG Anti-Virus"
-msgstr "A actualizar o AVG Anti-Virus"
-
-#. {0}: current update, {1} total number of updates
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:99
-#, java-format
-msgid "Updating AVG Anti-Virus definitions - {0} of {1}"
-msgstr "Estanse a actualizar as definicións do AVG Anti-Virus - {0} de {1}"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadTitleRenderer.java:102
-msgid "Updating AVG Anti-Virus definitions"
-msgstr "Estanse a actualizar as definicións do AVG Anti-Virus"
 
 #. * Text field for text filter.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/AdvancedFilterPanel.java:87
@@ -2005,8 +1804,8 @@ msgstr "amigos"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:15
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
-msgid "P2P Users"
-msgstr "Usuarios P2P"
+msgid "Peer-to-Peer Users"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:16
 msgid "Any Friend"
@@ -2019,7 +1818,6 @@ msgstr "Engadir un amigo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:37
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:238
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:109
 msgid "Username:"
 msgstr "Nome de usuario:"
 
@@ -2135,7 +1933,7 @@ msgstr "O chat de Facebook non está soportado nesta versión de WireShare."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatSettings.java:10
 #, fuzzy
 msgid ""
-"We at Lime Wire are actively looking into remedies.  In the meantime, you "
+"We at WireShare are actively looking into remedies.  In the meantime, you "
 "will still be able to browse friends."
 msgstr ""
 "Estamos a buscar unha solución activamente.  Entrementres aínda pode "
@@ -2201,11 +1999,6 @@ msgstr "Erro na descarga do ficheiro. Prema o botón para reintentar"
 msgid "{0}Downloaded{1}"
 msgstr "{0}Descargado{1}"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:120
-#, java-format
-msgid "{0}Downloaded but not scanned for viruses{1}"
-msgstr "{0}Descargado pero sen comprobar a existencia de virus{1}"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageWriterImpl.java:44
 msgid "Message not sent because friend signed off."
 msgstr "A mensaxe non foi enviada porque o seu amigo pechou a sesión."
@@ -2240,8 +2033,8 @@ msgid "Signing in..."
 msgstr "Iniciando sesión..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:89
-msgid "Incorrect username or password."
-msgstr "O nome de usuario ou o contrasinal  son incorrectos."
+msgid "The user name or password you have entered is incorrect."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:90
 msgid "Network error."
@@ -2271,8 +2064,9 @@ msgid "Password"
 msgstr "Contrasinal"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:227
-msgid "Sign in when I start WireShare"
-msgstr "Iniciar sesión ao abrir o WireShare"
+#, fuzzy
+msgid "Sign in automatically"
+msgstr "Ordenar automaticamente"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/XMPPUserEntryLoginPanel.java:276
 msgid "Choose another account"
@@ -2292,7 +2086,7 @@ msgid "All Files and Folders"
 msgstr "Todos os ficheiros e cartafoles"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibraryFilterPanel.java:92
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:308
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:311
 msgid "All"
 msgstr "Todo"
 
@@ -2422,8 +2216,8 @@ msgid "Library"
 msgstr "Biblioteca"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavItem.java:78
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:231
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:159
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:236
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:167
 msgid "Public Shared"
 msgstr "Compartido de forma pública"
 
@@ -2702,7 +2496,8 @@ msgid "This file is still processing."
 msgstr "Este ficheiro aínda está a se procesar."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:411
-msgid "This file cannot be shared."
+#, fuzzy
+msgid "This file can not be shared."
 msgstr "Este ficheiro non pode ser compartido."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/NameCategoryRenderer.java:52
@@ -2737,12 +2532,13 @@ msgid "Remove from Lists"
 msgstr "Eliminar das listaxes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:68
-msgid "Remove this file from All Lists?"
+#, fuzzy
+msgid "Remove file from all lists?"
 msgstr "Quere eliminar este ficheiro de todas as listaxes?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromAllListAction.java:70
-#, java-format
-msgid "Remove {0} files from All Lists?"
+#, fuzzy, java-format
+msgid "Remove {0} files from all lists?"
 msgstr "Quere eliminar {0} ficheiros de todas as listaxes?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:37
@@ -2758,27 +2554,24 @@ msgstr[1] "Eliminar os ficheiros"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:66
 #, java-format
-msgid "Remove \"{0}\" from Library? This will unshare this file with everyone."
+msgid ""
+"Are you sure you want to remove \"{0}\" from the Library and stop sharing it?"
 msgstr ""
-"Desexa eliminar \"{0}\" da biblioteca? Deste xeito deixará de compartir este "
-"ficheiro."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:68
-#, java-format
-msgid "Remove \"{0}\" from Library?"
-msgstr "Desexa eliminar \"{0}\" da biblioteca?"
+#, fuzzy, java-format
+msgid "Are you sure you want to remove \"{0}\" from the Library?"
+msgstr "Está certo de que desexa deter este envío?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:71
 #, java-format
 msgid ""
-"Remove {0} files from Library? This will unshare these files with everyone."
+"Are you sure you want to remove {0} files from Library and stop sharing them?"
 msgstr ""
-"Desexa eliminar \"{0}\" da biblioteca? Deste xeito deixará de compartir "
-"estes ficheiros."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromLibraryAction.java:73
-#, java-format
-msgid "Remove {0} files from Library?"
+#, fuzzy, java-format
+msgid "Are you sure you want to remove {0} files from Library?"
 msgstr "Desexa eliminar {0} ficheiros da biblioteca?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/RemoveFromListAction.java:27
@@ -2812,8 +2605,8 @@ msgstr "Localizadores"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:44
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:48
-msgid "Misc"
-msgstr "Varios"
+msgid "Miscellaneous"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/VideoTableFormat.java:50
@@ -2825,8 +2618,9 @@ msgid "&About WireShare..."
 msgstr "&Acerca de WireShare..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:38
-msgid "Automatically Scroll"
-msgstr "Desprazamento automático"
+#, fuzzy
+msgid "Scroll automatically"
+msgstr "Ordenar automaticamente"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:52
 msgid "About WireShare"
@@ -2844,35 +2638,39 @@ msgid "Close"
 msgstr "Pechar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:103
-msgid "Close This Window"
+#, fuzzy
+msgid "Close this window."
 msgstr "Pechar esta ventá"
 
 #. introduction
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:130
+#. 345678901234567890123456789012345678901234567890123456789012345678901234567890
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:131
 msgid ""
-"WireShare is a lightweight open-source fork of the original LimeWire open "
-"source project. We give full credit to the creators, and have no intention "
-"of changing this section, or by any means diminishing the contributions of "
-"all the people involved in Limewire.   Our sole intention is to create and "
-"maintain a bona fide continuation of the project. All work is undertaken on "
-"a pro bono basis; we do not control any part of the Gnutella network, nor do "
-"we hold any substantial monetary assets. We are not a company; we have no "
-"leaders and no structure to speak of. WireShare is also, of course, the "
-"result of the countless hours of work by LimeWire's developers:"
+"Here at the WireShare project, we believe in the value of hard work.  "
+"Because we are in no way a formally-organised or structured enterprise, "
+"because we hold no assets to speak of, because we do not control or intend "
+"to control the Gnutella network, and because we subscribe to the pro bono "
+"ethos, authorship credit is the major benefit that our contributors derive "
+"from their activity.  Since our primary mission is to maintain bona fide "
+"continuity and fidelity with the final version of the LimeWire Gnutella "
+"servent software, and in our role as the final fork and continuation of that "
+"project, we have no intention of diminishing the credit due to their "
+"contributors.  On the contrary, this page serves to memorialise the "
+"developers, testers, technical writers, and designers of Lime Wire LLC:"
 msgstr ""
 
 #. previous developers
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:188
 #, fuzzy
 msgid ""
 "In addition, the following individuals had worked on the LimeWire team but "
-"had transitioned to other projects prior to LimeWire's discontinuation:"
+"had transitioned to other projects prior to its discontinuation:"
 msgstr ""
 "Os seguintes desenvolvedores traballaron no equipo de WireShare no pasado "
 "pero dende entón fóronse a outros proxectos:"
 
 #. open source contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:276
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:281
 #, fuzzy
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
@@ -2887,7 +2685,7 @@ msgstr ""
 "código ou ambas as cousas:"
 
 #. internationalization contributors
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:349
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:354
 #, fuzzy
 msgid ""
 "We would also like to thank the many contributors to the "
@@ -2898,7 +2696,7 @@ msgstr ""
 "internacionalización, tanto para a aplicación como para o sitio web."
 
 #. community VIPs
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:353
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:358
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -2907,29 +2705,31 @@ msgstr ""
 "Estes son:"
 
 #. conclusion
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:375
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:380
 #, fuzzy
 msgid ""
 "The makers of WireShare would like to extend their sincere thanks to those "
 "developers, users, and all others who have contributed their ideas to the "
-"project. Without our valued users, the P2P Network would not exist."
+"project. Without our valued users, the Gnutella Peer-to-Peer Network would "
+"not exist."
 msgstr ""
 "Finalmente, WireShare quérelles dar as grazas máis sinceiras a aqueles "
 "desenvolvedores, usuarios e demais persoas que contribuíron coas súas ideas "
 "neste proxecto. Sen estes usuarios, a rede P2P non existiría."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:380
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/AboutWindow.java:385
 msgid ""
 "Finally, WireShare is a continuation of LimeWire Pirate Edition which, "
 "contrary to popular belief, is fully in accordance with relevant national "
-"and international laws and statutes."
+"and international laws and statutes.  Therefore, thanks also go out to Meta "
+"Pirate for making this possible."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:148
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:405
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/BottomHeaderPanel.java:407
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ShowDownloadsTrayAction.java:21
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:153
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:147
 msgid "Downloads"
 msgstr "Descargas"
 
@@ -2972,7 +2772,8 @@ msgid "Share this list with friends"
 msgstr "Compartir esta listaxe con amigos"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/SignOnMessageLayer.java:469
-msgid "Add files to it"
+#, fuzzy
+msgid "Add files"
 msgstr "Engadir ficheiros"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:84
@@ -2985,9 +2786,9 @@ msgid "Refresh"
 msgstr "Actualizar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:123
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:220
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:225
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:153
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:161
 msgid "My Files"
 msgstr "Os meus ficheiros"
 
@@ -3185,64 +2986,54 @@ msgstr "Acceso externo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:82
 msgid ""
-"We recommend you don't touch these unless you really know what you're doing."
+"If you do not know what these options do, it is recommended that you leave "
+"them as they are."
 msgstr ""
-"Recomendámoslle  que non cambie estas opcións a menos que saiba ben o que "
-"está a facer."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:58
-msgid "Upload torrents forever"
-msgstr "Enviar torrents sen límite"
+msgid "Seed forever"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:65
-msgid "Upload torrents until either of the following:"
+#, fuzzy
+msgid "Seed until one of the following is met:"
 msgstr "Enviar torrents até unha das opcións :"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:114
-msgid "Let me choose files to download when starting a torrent"
+#, fuzzy
+msgid "Prompt for files to download before starting a torrent"
 msgstr "Permitir escoller os ficheiros a descargar cando se inicia un torrent"
 
-#. add the spinners to the component
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:120
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:174
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:225
-msgid "Ratio:"
-msgstr "Taxa:"
+#, fuzzy
+msgid "Upload/download ratio"
+msgstr "Límites para envíos/descargas"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:122
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:227
-msgid "Maximum days:"
-msgstr "Número máx. de días:"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:128
-msgid ""
-"There was an error loading bittorrent. You will not be able to use "
-"bittorrent capabilities until this is resolved."
+msgid "Days and hours elapsed"
 msgstr ""
-"Houbo un erro na carga do bittorrent. Non poderá empregar o bittorrent até "
-"que se resolva esta incidencia."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:84
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/BitTorrentOptionPanel.java:127
 msgid ""
-"Below are the file extensions WireShare knows about and how they are "
-"classified throughout the program"
+"Error connecting to BitTorrent.  Torrents will not work until this is "
+"resolved."
 msgstr ""
-"Debaixo están as extensións que WireShare recoñece e como están clasificadas "
-"no programa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:118
-msgid ""
-"File types that WireShare doesn't know about are classified as \"Other\". "
-"Add these files to a List by dragging them, or when adding a folder, click "
-"\"Advanced\" and choose specific file extensions"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:86
+msgid "WireShare knows about these extensions and classifies them as follows:"
 msgstr ""
-"Os tipos de ficheiro que non recoñeza o WireShare clasificaranse como "
-"\"Outros\". Pode engadir estes ficheiros a unha listaxe arrastrándoos, "
-"premendo en  \"Avanzado\" e escollendo a extensión específica  cando engada "
-"un cartafol."
+
+#. 3456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:121
+msgid ""
+"Unknown file types are classified as \"Other\"; to categorize them, simply "
+"drag and drop them onto the relevant category.  If adding several file "
+"types, drag and drop the folder they are in, click \"Advanced\", and then "
+"choose the specific file extensions to associate."
+msgstr ""
 
 #. Icon
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:150
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:153
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/AllTableFormat.java:41
@@ -3255,19 +3046,20 @@ msgstr ""
 msgid "Extension"
 msgstr "Extensión"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:152
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:155
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:223
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:364
 msgid "Category"
 msgstr "Categoría"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:306
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:309
 msgid "Show:"
 msgstr "Amosar:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:322
-msgid "File extension Classification"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExtensionClassificationPanel.java:325
+#, fuzzy
+msgid "File Extension Classification"
 msgstr "Clasificación das extensións"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ExternalAccessOptionPanel.java:45
@@ -3348,23 +3140,21 @@ msgid "Allow Hosts"
 msgstr "Permitir servidores"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:37
-msgid "Add audio files I downloaded from WireShare to iTunes"
-msgstr "Engadir a iTunes os ficheiros de audio descargados de WireShare"
+msgid "Automatically add downloaded audio files to iTunes Library"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:91
 msgid ""
-"Share audio and video files in Public Shared list on my local network with "
-"iTunes"
+"Enable Digital Audio Access Protocol and share audio across LAN with iTunes"
 msgstr ""
-"Compartir o audio e vídeo da listaxe pública compartida  na miña rede local  "
-"con iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:99
 msgid "Require password"
 msgstr "É necesario o contrasinal"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:131
-msgid "Daap Password cannot be null, iTunes settings not saved"
+#, fuzzy
+msgid "DAAP password can not be empty.  iTunes settings were not saved."
 msgstr ""
 "O contrasinal Daap non pode estar baleiro, non se gardou a configuración de "
 "iTunes"
@@ -3374,7 +3164,8 @@ msgid "iTunes Error"
 msgstr "Erro de iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:179
-msgid "Could not restart the Daap connection"
+#, fuzzy
+msgid "Error restarting the DAAP connection."
 msgstr "Non se puido reiniciar a  conexión Daap"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ITunesOptionPanel.java:180
@@ -3390,9 +3181,9 @@ msgid "iTunes Configuration"
 msgstr "Configuración de iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:103
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:201
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:204
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:269
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:174
 msgid "Configure..."
 msgstr "Configurar..."
 
@@ -3401,53 +3192,55 @@ msgid "Configure iTunes"
 msgstr "Configurar iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:105
-msgid "Configure how files in your WireShare interact with iTunes"
+#, fuzzy
+msgid "Configure Public Shared file interactions with iTunes"
 msgstr "Configurar cantos ficheiros do WireShare interactúan con iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:137
-msgid "Use the WireShare player when I play Audio and Video files"
-msgstr "Empregar o lector de WireShare para reproducir audio e vídeo."
+msgid "Open audio and video files in WireShare Player."
+msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:192
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:193
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoTabPanel.java:39
 msgid "Sharing"
 msgstr "Compartindo"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:196
-msgid "Add files I download from P2P Users to my Public Shared List"
-msgstr "Engadir á miña listaxe pública compartida os ficheiros que descargo"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:197
+#, fuzzy
+msgid "Share downloaded files."
+msgstr "Ficheiros compartidos"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:200
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:199
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:137
+msgid "Enable partial file sharing."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:203
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:268
 msgid "Unsafe File Sharing"
 msgstr "Compartir ficheiros inseguros"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:201
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:204
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:269
 msgid "Configure unsafe file sharing settings"
 msgstr "Configurar os axustes para compartir ficheiros inseguros"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:210
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:215
 msgid "Configure unsafe sharing settings"
 msgstr "Configurar axustes de compartición insegura"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:224
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:229
 msgid "To see or modify files in your Public Shared list, go to:"
 msgstr "Para ver ou modificar ficheiros na listaxe pública compartida ir a:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:64
 msgid ""
-"You can set the local network port that listens for incoming connections. "
-"This port may be changed in case of conflict with another program or if a "
-"specific port number is required for direct incoming connections by your "
-"firewall. You must also configure your router when choosing \"manual port "
-"forward\" or \"do nothing\""
+"No network port may be used to listen for more than one type of traffic at a "
+"time.  Furthermore, some Internet service providers may block access to "
+"specific ports.  The port to listen to may be set here; note that, if either "
+"\"manual port forwarding\" or \"do nothing\" is chosen, the router must be "
+"configured likewise."
 msgstr ""
-"Pode establecer o porto de rede local para escoitar conexións entrantes. "
-"Este porto pódese cambiar se ten conflitos con outro programa ou ben se o "
-"seu firewall precisa un número específico de porto. Debe tamén configurar o "
-"router cando escolla \"encamiñamento manual dos portos\" ou \"non facer nada"
-"\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:130
 msgid "Gnutella port:"
@@ -3455,29 +3248,34 @@ msgstr "Porto Gnutella:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:136
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:301
-msgid "Use Universal Plug n' Play (Recommended)"
+#, fuzzy
+msgid "Use Universal Plug'n'Play (Recommended)"
 msgstr "Usar o Universal Plug n' Play (recomendado)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:137
-msgid "Manual Port Forward:"
+#, fuzzy
+msgid "Manual port forwarding:"
 msgstr "Encamiñamento manual dos portos:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:138
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:302
-msgid "Do Nothing"
+#, fuzzy
+msgid "Do nothing"
 msgstr "Non facer nada"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:154
-msgid "* You must also configure your router"
-msgstr "* Tamén ten  que configurar o seu router"
+msgid ""
+"WARNING: Ensure router is properly configured for manual port forwarding."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:180
-#, java-format
-msgid "The port chosen {0}, is already in use."
+#, fuzzy, java-format
+msgid "Port {0} is in use."
 msgstr "O porto escollido {0} xa está en uso."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:181
-msgid "Network Port Error"
+#, fuzzy
+msgid "Network port error!"
 msgstr "Erro no porto de rede"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ListeningPortsOptionPanel.java:297
@@ -3555,7 +3353,8 @@ msgid "Let WireShare choose my network interface (Recommended)"
 msgstr "Permitir que WireShare escolla a  interface de rede (recomendado)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:83
-msgid "Let me choose a specific network interface"
+#, fuzzy
+msgid "Use a specific network interface"
 msgstr "Permitirme escoller unha interface de rede específica"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/NetworkInterfaceOptionPanel.java:227
@@ -3594,32 +3393,35 @@ msgid ""
 msgstr ""
 "Unha ou máis opcións terán efecto a próxima vez que WireShare sexa iniciado."
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:225
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:15
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoDialog.java:280
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentSelectorPanel.java:125
+msgid "OK"
+msgstr "Aceptar"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:27
 msgid ""
-"If your computer has a fast internet connection, WireShare may act as an "
-"\"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you "
-"notice performance issues."
+"In order to abate network fragmentation, WireShare may operate in Ultrapeer "
+"mode or launch the Mojito Distributed Hash Table, subject to connection "
+"quality.  If quality degradation occurs, these features may be disabled by "
+"checking one or both of the boxes below."
 msgstr ""
-"Se o seu computador ten unha conexión rápida a internet, WireShare pode "
-"actuar como \"Ultrapar\" ou conectar a DHT Mojito. Pode desactivar esta "
-"característica se dá problemas."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:28
 msgid ""
-"WireShare uses a secure communications mode called TLS, which may use more "
-"CPU resources."
+"WireShare uses a secure communications mode called Transport Layer "
+"Security.  If it becomes resource intensive, it can be disabled by checking "
+"the box below."
 msgstr ""
-"WireShare emprega un modo de comunicación segura chamado TLS que pode "
-"consumir máis recursos da CPU."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:29
 msgid ""
-"Out-of-band Searching helps deliver faster search results to you, but some "
-"internet connections may not work well with this feature."
+"In order to optimise search query turnaround times, servers may send replies "
+"along the shortest path, rather than that of the original request.  This is "
+"called out-of-band searching.  Some connections may not handle this feature "
+"well, however; in this case, it may be disabled by checking the box below."
 msgstr ""
-"As procuras fóra de banda poden acelerar a entrega dos resultados buscados, "
-"pero algunhas conexións de internet traballan defectuosamente con este "
-"recurso."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:54
 msgid "Disable Ultrapeer capabilities"
@@ -3635,20 +3437,22 @@ msgid "Disable TLS capabilities"
 msgstr "Desactivar as funcións TLS"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/PerformanceOptionPanel.java:58
-msgid "Disable Out-of-band searching"
+#, fuzzy
+msgid "Disable out-of-band searching"
 msgstr "Desactivar as procuras fóra-de-banda"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:75
-msgid "No Proxy"
+#, fuzzy
+msgid "No proxy"
 msgstr "Sen Proxy"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:77
-msgid "Socks v4"
-msgstr "Socks v4"
+msgid "SOCKS 4"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:79
-msgid "Socks v5"
-msgstr "Socks v5"
+msgid "SOCKS 5"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:81
 msgid "HTTP"
@@ -3663,15 +3467,22 @@ msgid "Port:"
 msgstr "Porto:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:108
-msgid "Enable Authentication"
+#, fuzzy
+msgid "Enable authentication"
 msgstr "Habilitar a autenticación"
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ProxyOptionPanel.java:109
+#, fuzzy
+msgid "User name:"
+msgstr "Nome de usuario:"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:72
-msgid "Group similar search results together"
+#, fuzzy
+msgid "Group similar search results."
 msgstr "Agrupar os resultados de procura semellantes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:75
-msgid "Use web search to find additional torrent sources"
+msgid "Search the Web to find additional torrent sources."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:139
@@ -3683,11 +3494,13 @@ msgid "By default, search for"
 msgstr "Por defecto, procurar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:162
-msgid "Suggest smart searches"
+#, fuzzy
+msgid "Suggest smart searches."
 msgstr "Suxerir procuras intelixentes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:165
-msgid "Remember my recent searches"
+#, fuzzy
+msgid "Remember my recent searches."
 msgstr "Lembrar as miñas procuras recentes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:168
@@ -3695,7 +3508,8 @@ msgid "Clear Now"
 msgstr "Limpar agora"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:239
-msgid "Do you want to reset the Spam Filter?"
+#, fuzzy
+msgid "Do you want to reset the spam filter?"
 msgstr "Desexa restaurar o filtro de lixo?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:240
@@ -3711,7 +3525,8 @@ msgid "Search Filtering"
 msgstr "Filtrado de procuras"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:277
-msgid "Don't show adult content in search results"
+#, fuzzy
+msgid "Hide adult content in search results."
 msgstr "Non presentar contidos adultos nos resultados das procuras"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:281
@@ -3774,7 +3589,8 @@ msgid "\"magnet\" links"
 msgstr "Ligazóns \"magnet\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:116
-msgid "Warn me when other programs want to automatically open these types"
+#, fuzzy
+msgid "Warn me when other programs want to open these types automatically"
 msgstr ""
 "Avisarme cando outros programas queiran abrir automaticamente estes tipos"
 
@@ -3783,11 +3599,12 @@ msgid "Startup and Shutdown"
 msgstr "Inicio e apagado"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:218
-msgid "Run WireShare on System Startup"
-msgstr "Executar WireShare cando se inicie o sistema"
+msgid "Start WireShare every time I log in"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:220
-msgid "Minimize to system tray"
+#, fuzzy
+msgid "Minimize to notifications area"
 msgstr "Minimizar para a bandexa do sistema"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:222
@@ -3795,7 +3612,8 @@ msgid "Exit program"
 msgstr "Sair do programa"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:233
-msgid "When I press X:"
+#, fuzzy
+msgid "When I press the close button:"
 msgstr "Ao premer X:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferLimitsOptionPanel.java:135
@@ -3814,119 +3632,130 @@ msgstr "Limitar o largo de banda dos envíos"
 msgid "Maximum uploads at once:"
 msgstr "Máximo de envíos á vez:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:66
 msgid "Configure Torrent Settings"
 msgstr "Configurar os axustes torrent"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:66
 msgid "Configure Torrent Settings..."
 msgstr "Configurar os axustes torrent..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:71
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:66
 msgid "Configure torrent settings."
 msgstr "Configurar os axustes torrent."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:156
-msgid "Save all downloads to one folder:"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:150
+#, fuzzy
+msgid "Save all downloads to one directory:"
 msgstr "Gardar todas as descargas nun cartafol:"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:157
-msgid "Save different categories to different folders"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:151
+#, fuzzy
+msgid "Save different categories to different directories"
 msgstr "Gardar as categorías distintas en cartafoles diferentes"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:169
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:163
 msgid "If the file already exists, download it with a different name"
 msgstr "Se o ficheiro xa existe, descargalo cun nome diferente"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:172
-msgid "Scan files I download for viruses"
-msgstr "Buscar virus nos ficheiros descargados"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:183
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:174
 msgid "Download Folders"
 msgstr "Cartafoles de descargas"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:184
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:175
 msgid "Configure where different categories are downloaded"
 msgstr "Configurar onde se descargan as diferentes categorías"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:245
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:223
 msgid "Could not save download directory, reverted to old directory"
 msgstr ""
 "Non se puido gardar o cartafol de descarga, recuperouse o cartafol antigo"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:246
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:224
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:80
 msgid "Save Folder Error"
 msgstr "Erro no cartafol de destino"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:345
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:313
 msgid "Tray"
 msgstr "Bandexa"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:346
-msgid "Close tray when there are no transfers"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:314
+#, fuzzy
+msgid "Close tray when there are no transfers."
 msgstr "Pechar a bandexa cando non haxa transferencias"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:349
-msgid "Show total bandwidth"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:317
+#, fuzzy
+msgid "Show total bandwidth."
 msgstr "Amosar o largo de banda total"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:353
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:321
 msgid "Clear downloads from list when finished"
 msgstr "Ao rematar borrar da listaxe os ficheiros descargados"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:356
-msgid "Clear uploads from list when finished"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:324
+#, fuzzy
+msgid "Clear uploads from list when finished."
 msgstr "Ao rematar borrar da listaxe os ficheiros enviados"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:410
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:378
 msgid "Upload/Download Limits"
 msgstr "Límites para envíos/descargas"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:412
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:380
 msgid "Set limits on downloads and uploads"
 msgstr "Fixar límites para descargas e envíos"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:413
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:381
 msgid "Transfer Limits"
 msgstr "Límites para transferencias"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:413
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:381
 msgid "Settings..."
 msgstr "Configuración..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:413
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferOptionPanel.java:381
 msgid "Configure transfer limit settings."
 msgstr "Configurar os  límites das transferencias."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:62
-msgid "Allow me to search for and share Programs with anyone"
+#, fuzzy
+msgid "Allow searching for, and sharing of, programs"
 msgstr "Permitir que se busquen e compartan programas con calquera"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:64
-msgid "Allow me to share Documents with the world"
-msgstr "Permitir a compartición de documentos na rede"
+#, fuzzy
+msgid "Allow sharing documents"
+msgstr "Novos documentos"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:72
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:73
 msgid ""
-"Enabling this setting makes you more prone to accidently sharing personal "
-"information"
+"Warning: by enabling this setting, you acknowledge the risk of fraud, should "
+"any personal or confidential document inadvertently"
 msgstr ""
-"Activando este axuste correrá máis riscos de compartir accidentalmente "
-"imformación privada"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:76
-msgid "What are Documents?"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:75
+msgid ""
+"be shared, and you agree to accept responsibility for any loss which may "
+"arise."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:78
+#, fuzzy
+msgid "What are documents?"
 msgstr "Cales son documentos?"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:87
-msgid "Enabling this setting makes you more prone to viruses"
-msgstr "Activando este axuste será máis vulnerable aos virus"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:90
-msgid "What are Programs?"
+msgid ""
+"Program files may be infected with viruses.  WireShare does not include a "
+"virus scanner.  Download program files at your own risk. "
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:93
+#, fuzzy
+msgid "What are programs?"
 msgstr "Cales son programas?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:26
@@ -3949,7 +3778,8 @@ msgid "Browse..."
 msgstr "Procurar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/BrowseDirectoryAction.java:51
-msgid "Choose a different Save Location"
+#, fuzzy
+msgid "Choose a Different Save Location"
 msgstr "Escolla unha localización diferente  para gardar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/CancelDialogAction.java:17
@@ -4083,11 +3913,11 @@ msgstr ""
 msgid "Torrent Settings"
 msgstr "Axustes para torrents"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:140
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:139
 msgid "Copy Magnet Link"
 msgstr "Copiar a ligazón magnet"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:396
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoOverviewPanel.java:395
 msgid "Rename File"
 msgstr "Renomear o ficheiro"
 
@@ -4135,15 +3965,23 @@ msgstr "Descargas fallidas:"
 msgid "Uploaded:"
 msgstr "Enviados:"
 
+#. add the spinners to the component
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:174
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:225
+msgid "Ratio:"
+msgstr "Taxa:"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:191
-msgid "Download Cancelled!"
+#, fuzzy
+msgid "Download cancelled"
 msgstr "Descarga cancelada"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:201
-msgid "Download Already Finished!"
+#, fuzzy
+msgid "Download already finished"
 msgstr "Rematou a descarga"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:313
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoPiecesPanel.java:311
 #, java-format
 msgid "({0} verified)"
 msgstr "({0} verificado)"
@@ -4157,12 +3995,14 @@ msgid "This file is not shared"
 msgstr "Este ficheiro non é compartido"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:158
-msgid "This file cannot be shared"
+#, fuzzy
+msgid "This file can not be shared"
 msgstr "Este ficheiro non é para compartir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:197
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:191
-msgid "Don't ask me again"
+#, fuzzy
+msgid "Do not ask me again"
 msgstr "Non preguntar de novo"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/FileInfoSharingPanel.java:243
@@ -4254,6 +4094,10 @@ msgstr "Enviar este torrent para sempre"
 msgid "Upload this torrent until either of the following:"
 msgstr "Enviar este torrent até:"
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:227
+msgid "Maximum days:"
+msgstr "Número máx. de días:"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/TorrentManagementPanel.java:237
 msgid "Limit this torrent's download bandwidth"
 msgstr "Limitar a esta largura de banda a descarga de torrents"
@@ -4275,25 +4119,27 @@ msgid "WireShare is connecting..."
 msgstr "WireShare está a conectar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:81
-msgid "All P2P Users"
+#, fuzzy
+msgid "All Peer-to-Peer Users"
 msgstr "Todos os usuarios P2P"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:132
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:168
-#, java-format
-msgid "Block P2P User {0}?"
+#, fuzzy, java-format
+msgid "Block Peer-to-Peer User {0}?"
 msgstr "Quere bloquear o usuario {0}?"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:138
-msgid "Block P2P uUers?"
+#, fuzzy
+msgid "Block Peer-to-Peer users?"
 msgstr "Bloquear usuario?"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:174
-#, java-format
-msgid "Block {0} P2P Users?"
+#, fuzzy, java-format
+msgid "Block {0} Peer-to-Peer Users?"
 msgstr "Bloquear {0} usuarios P2P?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:144
@@ -4360,8 +4206,9 @@ msgid "You are offline."
 msgstr "Está desconectado."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:110
-msgid "There are updates!"
-msgstr "Hai actualizacións"
+#, fuzzy
+msgid "Update Available"
+msgstr "Non dispoñible"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:169
 msgid "Unable to Browse"
@@ -4411,27 +4258,19 @@ msgstr "Procura intelixente"
 msgid ":"
 msgstr ":"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:20
-msgid "Downloading programs can result in viruses"
-msgstr "Os programas descargados poden ocultar virus"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:25
 msgid ""
-"We recommend you don't download programs using WireShare. However, you can "
-"enable downloading programs via Preferences > Search > Configure..."
+"Program files may contain viruses.  WireShare does not include a virus "
+"scanner.  For your protection, program downloading has been disabled.  To "
+"enable it, click Preferences -> Options -> Search -> Configure..."
 msgstr ""
-"Recomendamos que non se descargue software empregando o WireShare. Con todo, "
-"pode activar a descarga de software vía Preferencias > Procurar > "
-"Configurar..."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:30
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/ProgramsNotAllowedPanel.java:31
 msgid ""
-"We recommend you don't download programs using WireShare. However, you can "
-"enable downloading programs via Tools > Options > Search > Configure..."
+"Program files may contain viruses.  WireShare does not include a virus "
+"scanner.  For your protection, program downloading has been disabled.  To "
+"enable it, click Tools -> Options -> Search -> Configure..."
 msgstr ""
-"Recomendamos que non se descargue software empregando o WireShare. Con todo, "
-"pode activar a descarga de software vía Ferramentas >Opcións > Procurar > "
-"Configurar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:128
 msgid "Search..."
@@ -4439,11 +4278,13 @@ msgstr "Procurar..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:146
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:202
-msgid "Search P2P Network"
+#, fuzzy
+msgid "Search Peer-to-Peer Network"
 msgstr "Procurar na rede P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:199
-msgid "Search P2P Network and Friends"
+#, fuzzy
+msgid "Search Peer-to-Peer Network and Friends"
 msgstr "Procurar nas redes P2P e amigos"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
@@ -4790,52 +4631,74 @@ msgstr ""
 "este programa?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:105
-msgid "No internet connection"
-msgstr "Non hai conexión de internet"
+#, fuzzy
+msgid "Connection strength is 0/5"
+msgstr "Escoitador de  conexión"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:106
 msgid "You have no internet connection"
 msgstr "Non ten conexión con internet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:110
-msgid "Couldn't connect"
-msgstr "Non se pode conectar"
+#, fuzzy
+msgid "Disconnected"
+msgstr "Conectado en"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:111
 msgid "You couldn't connect to WireShare"
 msgstr "Non puido conectar con WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:122
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:127
-msgid "Weak connection"
-msgstr "Conexíón feble"
+#, fuzzy
+msgid "Connection strength is 1/5"
+msgstr "Escoitador de  conexión"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:123
+#, fuzzy
+msgid "You have a very weak connection"
+msgstr "Ten unha conexión feble"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:127
+#, fuzzy
+msgid "Connection strength is 2/5"
+msgstr "Escoitador de  conexión"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:128
 msgid "You have a weak connection"
 msgstr "Ten unha conexión feble"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:132
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:137
-msgid "Medium connection"
-msgstr "Conexión media"
+#, fuzzy
+msgid "Connection strength is 3/5"
+msgstr "Escoitador de  conexión"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:133
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:138
 msgid "You have a medium connection"
 msgstr "Ten unha conexión media"
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:137
+#, fuzzy
+msgid "Connection strength is 4/5"
+msgstr "Escoitador de  conexión"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:138
+#, fuzzy
+msgid "You have a fair connection"
+msgstr "Ten unha conexión feble"
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:143
-msgid "Full connection"
-msgstr "Conexión perfecta"
+#, fuzzy
+msgid "Connection strength is 5/5"
+msgstr "Escoitador de  conexión"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 msgid "You are fully connected"
 msgstr "Ten unha conexión perfecta"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:149
-msgid "Turbo-charged connection"
-msgstr "Conexión Turbo-charged"
+#, fuzzy
+msgid "Connection strength is 6/5"
+msgstr "Escoitador de  conexión"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 msgid "You have a turbo-charged connection"
@@ -4918,7 +4781,6 @@ msgstr "Saír despois das transferencias"
 
 #. exit
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:129
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:298
 msgid "Exit"
 msgstr "Saír"
 
@@ -5023,20 +4885,24 @@ msgid "Save File As..."
 msgstr "Gardar o  ficheiro como..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:151
-msgid "Sorry, this file is already being uploaded."
+#, fuzzy
+msgid "This file is already uploading."
 msgstr "Este ficheiro xa está a ser enviado."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:155
-msgid "Sorry, this file is already being downloaded."
+#, fuzzy
+msgid "This file is already downloading."
 msgstr "Este ficheiro xa se está descargando."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:161
-msgid "Sorry, you can't download files to this location."
+#, fuzzy
+msgid "Unable to download files to this location."
 msgstr "Non pode descargar ficheiros nesa ubicación."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:166
+#, fuzzy
 msgid ""
-"Sorry, there is a problem with torrents.\n"
+"The torrent manager is missing.\n"
 "Please try reinstalling WireShare to solve this problem."
 msgstr ""
 "Hai un problema cos torrents.\n"
@@ -5047,16 +4913,18 @@ msgid "You can also ask for help on the forums."
 msgstr "Vostede tamén pode pedir axuda nos foros."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:181
+#, fuzzy
 msgid ""
-"Sorry, we are still loading your old downloads.\n"
-"Please wait to add a new download until we are done."
+"Your old downloads are still resuming.\n"
+"Please wait to add a new download until the process is finished."
 msgstr ""
 "Estanse a cargar aínda as descargas antigas.\n"
 "Agarde a que rematen de se cargar antes de engadir unha nova."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:184
-msgid "Sorry, there was a problem downloading your file."
-msgstr "Houbo un problema descargando o seu ficheiro."
+#, fuzzy
+msgid "Error downloading file."
+msgstr "Erro na descarga do Torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/DownloadExceptionHandlerImpl.java:238
 msgid "File already exists. What do you want to do?"
@@ -5220,22 +5088,19 @@ msgid "The file "
 msgstr "O ficheiro "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:328
+#, fuzzy
 msgid ""
-" could not be opened! There are no registered applications on your system "
-"for this file type."
+" could not be opened because no application is associated with this file "
+"type."
 msgstr ""
 " Non é posible abrir o ficheiro, non hai aplicacións instaladas no sistema "
 "para este tipo de ficheiro."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:329
-msgid "File cannot be opened"
-msgstr "Non é posíble abrir o ficheiro"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:49
+#, fuzzy
 msgid ""
-"Your save folder is not valid. It may have been deleted, you may not have "
-"permissions to write to it, or there may be another problem. Please choose a "
-"different folder."
+"Invalid save folder.  It may not exist or you may have insufficient "
+"permissions to write to it.  Please choose a different folder."
 msgstr ""
 "O cartafol  para gardar non é válido. É posible que fose eliminado, que "
 "vostede non teña permisos de escritura ou calquera outro problema. Por favor "
@@ -5246,13 +5111,12 @@ msgid "Invalid Folder"
 msgstr "Cartafol incorrecto"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:166
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Saving downloads to {0} may not function correctly.\n"
-"To be sure downloads are saved properly you should save them to a sub-folder "
-"of\n"
+"To ensure that downloads are saved properly, save them to a sub-folder of\n"
 "{1}.\n"
-"Would you like to choose another location?"
+"Do you wish to choose another location?"
 msgstr ""
 "Gardar as descargas en {0} pode dar problemas de funcionamento.\n"
 "Para asegurarse de que as descargas son gardadas apropiadamente debe "
@@ -5265,18 +5129,19 @@ msgid "Folder Warning"
 msgstr "Aviso de cartafol"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:61
-#, java-format
+#, fuzzy, java-format
 msgid ""
-"<html><body>Warning: You are sharing Documents with the world. These "
-"Documents may contain personal information. <a href=\"{0}\">learn more</a></"
-"body></html>"
+"<html><body>Warning: document sharing is enabled.  Shared documents could "
+"inadvertently include confidential or personal information liable to be "
+"misused by an attacker. <a href=\"{0}\">learn more</a></body></html>"
 msgstr ""
 "<html><body>Aviso: vostede está a compartir documentos cos demais usuarios. "
 "Estes documentos poden conter información privada. <a href=\"{0}\">Saber "
 "máis</a></body></html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:72
-msgid "Do you want to keep sharing Documents with the world?"
+#, fuzzy
+msgid "Do you wish to continue sharing documents?"
 msgstr "Desexa seguir a compartir Documentos con todos os usuarios?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/warnings/DocumentWarningPanel.java:78
@@ -5369,75 +5234,6 @@ msgstr "Só \"{0}\""
 msgid "{0} folders only"
 msgstr "Só {0} cartafoles"
 
-#. TODO validate new text changes with legal, and nathan.
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:287
-msgid "Some Legal Stuff"
-msgstr "Algunhas legalidades"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:289
-#, fuzzy, java-format
-msgid ""
-"<html><body>WireShare is a peer-to-peer programs for sharing authorized "
-"files only. Copyright laws may forbid obtaining or distributing certain "
-"copyrighted content. Learn more information about <a href=\"{0}\">Copyright</"
-"a></body></html>."
-msgstr ""
-"<html><body>WireShare Basic e WireShare PRO son programas p2p para compartir "
-"unicamente ficheiros autorizados. As leis de propiedade intelectual poden "
-"prohibir a obtención ou distribución de certos contidos con dereitos de "
-"autoría. Saiba máis sobre <a href=\"{0}\">Copyright</a></body></html>."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:290
-msgid "Copyright Infringement"
-msgstr "Vulneración do copyright"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:291
-msgid "WireShare Privacy Policy"
-msgstr "Política de privacidade de WireShare"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:292
-msgid "WireShare License Agreement"
-msgstr "Aceptación da licenza de WireShare"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:293
-msgid "AVG Anti-Virus License Agreement"
-msgstr "Conformidade coa Licenza do anti-virus AVG"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
-msgid ""
-"By clicking \"I Agree\", you agree that you have read, understand and assent "
-"to the terms of the WireShare and AVG Anti-Virus License Agreements and "
-"WireShare Privacy Policy. You also agree that you will not use WireShare for "
-"copyright infringement."
-msgstr ""
-"Premendo en \"Dacordo\", vostede asume que leu, entendeu e aceptou os termos "
-"da Licenza e a Política de privacidade do WireShare e do Antivirus AVG. "
-"Vostede tamén acepta que non empregará o WireShare para vulnerar copyright "
-"ningún."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:294
-msgid ""
-"By clicking \"I Agree\", you agree that you have read, understand and assent "
-"to the terms of the WireShare License Agreement and WireShare Privacy "
-"Policy. You also agree that you will not use WireShare for copyright "
-"infringement."
-msgstr ""
-"Premendo en \"Dacordo\", vostede asume que leu, entendeu e aceptou os termos "
-"da Licenza e a Política de privacidade. Vostede tamén acepta que non "
-"empregará o WireShare para vulnerar copyright ningún."
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:295
-msgid "Choose your language"
-msgstr "Escolla o seu idioma"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:296
-msgid "Policies Governing Your Use:"
-msgstr "Normas de uso:"
-
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:305
-msgid "I Agree"
-msgstr "Dacordo"
-
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
 msgid "File Associations and Startup"
 msgstr "Asociacións de ficheiros e Inicio"
@@ -5466,51 +5262,58 @@ msgstr ""
 "Por favor, tome uns minutos para configurar estas opcións antes de empezar."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:84
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:104
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:107
 msgid "All settings can be changed later from WireShare > Preferences"
 msgstr ""
 "Todos os axustes poden cambiarse máis tarde en WireShare > Preferencias"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:85
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:105
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:108
 msgid "All settings can be changed later in Tools > Options"
 msgstr "Todos os axustes poden cambiarse en Ferramentas > Opcións"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:110
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:113
 msgid "Learn about sharing."
 msgstr "Aprenda como compartir."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:126
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:129
 msgid "Files in your Public Shared list are shared with the world."
 msgstr ""
 "Os ficheiros da listaxe pública compartida serán accesibles para todos."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:131
-msgid "Add files I download from P2P Users to my Public Shared list."
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:134
+#, fuzzy
+msgid "Add files I download from peer-to-peer users to my Public Shared list."
 msgstr ""
 "Engadir á listaxe pública compartida os ficheiros que descargue da rede P2P."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:136
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:141
+#, fuzzy
 msgid ""
-"WireShare will add files you download from P2P Users into your Public Shared "
-"list."
+"WireShare will add files you download from peer-to-peer users into your "
+"Public Shared list."
 msgstr ""
 "O WireShare engadirá  á súa listaxe pública compartida os ficheiros que "
 "descargue dos usuarios P2P."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:150
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:145
+msgid ""
+"WireShare will will share partially downloaded files from peer-to-peer users."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:158
 msgid "To see or modify files in your Public Shared list, go to"
 msgstr ""
 "Para ver ou modificar ficheiros na súa listaxe pública compartida vaia a"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:179
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:187
 msgid ""
 "Shared files from your old version will continue to be shared with the world."
 msgstr ""
 "Os ficheiros compartidos da versión anterior seguirán a seren compartidos na "
 "rede."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:184
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:192
 #, java-format
 msgid ""
 "{0} shared files from your previous version will continue to be shared with "
@@ -5537,6 +5340,546 @@ msgstr "Configuración - paso {0} de {1}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:207
 msgid "Setup"
 msgstr "Configuración"
+
+#~ msgid "There is a disk problem"
+#~ msgstr "Hai un problema co disco"
+
+#~ msgid "Trouble connecting to people"
+#~ msgstr "Hai problemas para conectar con outras persoas"
+
+#~ msgid "The file could not be scanned for viruses. Preview anyway?"
+#~ msgstr ""
+#~ "Non foi posible analizar o ficheiro na procura de virus. Desexa visionalo "
+#~ "igualmente?"
+
+#~ msgid "Free to chat"
+#~ msgstr "Listo para chatear"
+
+#~ msgid ""
+#~ "Sorry, WireShare couldn't read your old downloads.  You can restart them "
+#~ "by clicking 'Try Again' on the downloads.  When WireShare finds a source "
+#~ "for the file, the download will pick up where it left off."
+#~ msgstr ""
+#~ "WireShare non puido ler as descargas antigas. Pode reinicialas premendo "
+#~ "'Volvelo tentar' sobre as descargas. Cando WireShare atope unha fonte "
+#~ "para o ficheiro, a descarga continuará no momento en que se detivo."
+
+#~ msgid ""
+#~ "Sorry, WireShare couldn't read some of your old downloads.  You can "
+#~ "restart them by clicking 'Try Again' on the downloads.  When WireShare "
+#~ "finds a source for the file, the download will pick up where it left off."
+#~ msgstr ""
+#~ "WireShare non puido ler as descargas antigas. Pode reinicialas premendo "
+#~ "'Volvelo tentar' sobre as descargas. Cando WireShare atope unha fonte "
+#~ "para o ficheiro a descarga continuará no momento en que se detivo."
+
+#~ msgid ""
+#~ "WireShare was unable to start the Digital Audio Access Protocol Service "
+#~ "(for sharing files in iTunes). This feature will be turned off. You can "
+#~ "turn it back on in options, under Advanced -> Files -> iTunes."
+#~ msgstr ""
+#~ "WireShare foi incapaz de comezar o Servizo de Protocolo de Acceso de "
+#~ "Audio Dixital (para compartir arquivos en iTunes). Esta  funcionalidade "
+#~ "será desactivada. Pódea activar de novo en Ferramentas-> Opcións-> "
+#~ "Avanzado-> Ficheiros-> iTunes"
+
+#~ msgid ""
+#~ "WireShare was unable to write a necessary file because your hard drive is "
+#~ "full. To continue using WireShare you must free up space on your hard "
+#~ "drive."
+#~ msgstr ""
+#~ "WireShare non puido escribir un ficheiro necesario porque o disco duro "
+#~ "está cheo. Para continuar empregando WireShare debe liberar espazo no "
+#~ "disco."
+
+#~ msgid ""
+#~ "WireShare was unable to open a necessary file because another program has "
+#~ "locked the file. WireShare may act unexpectedly until this file is "
+#~ "released."
+#~ msgstr ""
+#~ "WireShare non puido abrir un ficheiro necesario porque outro programa "
+#~ "bloquea este ficheiro. WireShare pode actuar de xeito imprevisible até "
+#~ "que o ficheiro estea accesible."
+
+#~ msgid ""
+#~ "WireShare was unable to write a necessary file because you do not have "
+#~ "the necessary permissions. Your preferences may not be maintained the "
+#~ "next time you start WireShare, or WireShare may behave in unexpected ways."
+#~ msgstr ""
+#~ "WireShare non puido escribir un ficheiro necesario porque non ten os "
+#~ "permisos precisos. As preferencias poden perderse cando volva abrir "
+#~ "WireShare ou o aplicativo pode funcionar de xeito inesperado."
+
+#~ msgid ""
+#~ "WireShare cannot download the selected file because your hard drive is "
+#~ "full. To download more files, you must free up space on your hard drive."
+#~ msgstr ""
+#~ "WireShare non puido descargar o ficheiro seleccionado xa que non hai "
+#~ "espazo no disco duro. Se quere continuar descargando ficheiros, ten que "
+#~ "liberar espazo."
+
+#~ msgid ""
+#~ "WireShare was unable to download the selected file because another "
+#~ "program is using the file. Please close the other program and retry the "
+#~ "download."
+#~ msgstr ""
+#~ "WireShare non puido descargar un ficheiro porque outro programa está a "
+#~ "empregalo. Por favor, peche o outro programa e vólvao  tentar."
+
+#~ msgid ""
+#~ "WireShare was unable to create or continue writing an incomplete file for "
+#~ "the selected download because you do not have permission to write files "
+#~ "to the incomplete folder. To continue using WireShare, please choose a "
+#~ "different Save Folder."
+#~ msgstr ""
+#~ "WireShare non puido crear ou continuar escribindo nun ficheiro incompleto "
+#~ "para a descarga seleccionada porque non ten permiso para escribir no "
+#~ "cartafol de descargas incompletas. Para continuar usando WireShare, "
+#~ "escolla outro cartafol."
+
+#~ msgid "Oops!"
+#~ msgstr "Vaites!"
+
+#~ msgid "A problem occurred..."
+#~ msgstr "Aconteceu un problema..."
+
+#~ msgid ""
+#~ "Oops!  You did something we haven't written yet.  Sorry about that.  "
+#~ "WireShare's still going to run just fine, so don't worry.  If you want, "
+#~ "you can click 'Show Bug' to look at the information about the error."
+#~ msgstr ""
+#~ "Vaites! Fixo algo que non temos desenvolvido aínda. Desculpe por elo. Non "
+#~ "se preocupe WireShare seguirá a  funcionar sen problemas.  Se o desexa "
+#~ "prema en 'Amosar fallo' para ver a información sobre este fallo."
+
+#~ msgid ""
+#~ "WireShare has encountered an internal error. It is possible for WireShare "
+#~ "to recover and continue running normally. To continue using WireShare, "
+#~ "close this window. If desired, you can click 'Show Bug' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "WireShare atopou un erro interno. É posible para WireShare continuar "
+#~ "funcionando normalmente. Para seguir a usar WireShare peche esta ventá. "
+#~ "Pode ver a información deste erro premendo en 'Amosar fallo'."
+
+#~ msgid ""
+#~ "WireShare was unable to initialize and start. This is usually due to a "
+#~ "security program blocking WireShare's access to the internet or loopback "
+#~ "connections on the local machine. Please add WireShare as an exception to "
+#~ "your security software and restart WireShare."
+#~ msgstr ""
+#~ "WireShare non puido iniciarse. Podese deber ao bloqueo do acceso á rede "
+#~ "por un programa de seguridade ou tamén por un bucle na máquina local. "
+#~ "Engada o WireShare como unha excepción ao seu software de protección e "
+#~ "reinicie o programa."
+
+#, fuzzy
+#~ msgid ""
+#~ "WireShare could not create a temporary preferences folder.\n"
+#~ "\n"
+#~ "This is generally caused by a lack of permissions.  Please make sure that "
+#~ "WireShare (and you) have access to create files/folders on your "
+#~ "computer.  If the problem persists, please visit http://www."
+#~ "gnutellaforums.com/ for support.\n"
+#~ "\n"
+#~ "WireShare will now exit.  Thank You."
+#~ msgstr ""
+#~ "WireShare non puido crear un cartafol temporal de preferencias.\n"
+#~ "\n"
+#~ "Isto é causado xeralmente por falta de permisos. Por favor, asegúrese que "
+#~ "WireShare (e vostede) teña acceso para crear ficheiros/cartafoles na sua "
+#~ "computadora. Se o problema persiste, por favor visite www.limewire.com e "
+#~ "faga clic na ligazón 'Support'."
+
+#~ msgid "Lookup on Bitzi"
+#~ msgstr "Procurar en Bitzi"
+
+#~ msgid "No internet connection!"
+#~ msgstr "Non hai conexión de internet"
+
+#~ msgid "Gnutella is disconnected however internet connection detected!"
+#~ msgstr ""
+#~ "Gnutella está desconectada aínda que se detecta unha conexión a internet."
+
+#~ msgid "WireShare has not received any incoming UDP messages"
+#~ msgstr "WireShare non recibiu ningunha mensaxe UDP entrante"
+
+#~ msgid ""
+#~ "Incoming Searches - people on the P2P Network are now searching for..."
+#~ msgstr "Procuras entrantes: os usuarios da rede P2P están buscando..."
+
+#~ msgid "P2P User"
+#~ msgid_plural "P2P Users"
+#~ msgstr[0] "Usuario P2P"
+#~ msgstr[1] "Usuarios P2P"
+
+#~ msgid ""
+#~ "This file has not been scanned for viruses.  Do you want to launch anyway?"
+#~ msgstr ""
+#~ "Non se analizou este ficheiro na procura de virus. Desexa inicialo de "
+#~ "todos os xeitos?"
+
+#~ msgid "Do not show message again"
+#~ msgstr "Non amosar esta mensaxe de novo"
+
+#~ msgid "Anti-Virus Protection"
+#~ msgstr "Protección anti-virus"
+
+#~ msgid ""
+#~ "WireShare's Anti-Virus protection is powered by AVG.  AVG scans, detects "
+#~ "and deletes files that are suspected to contain viruses or spyware.  <a "
+#~ "href=\"{0}\">Learn more</a>"
+#~ msgstr ""
+#~ "A protección antivirus do WireShare está respaldada por AVG. A análise de "
+#~ "AVG detecta e elimina ficheiros sospeitosos de estar infectados por virus "
+#~ "ou spyware. <a href=\"{0}\">Saber máis</a>"
+
+#~ msgid "About AVG Anti-Virus"
+#~ msgstr "Sobre o anti-virus AVG"
+
+#~ msgid "Dangerous File"
+#~ msgstr "Ficheiro perigoso"
+
+#~ msgid ""
+#~ "{0} is considered a dangerous file and has automatically been deleted for "
+#~ "your protection.  <a href=\"{1}\">Learn more</a>"
+#~ msgstr ""
+#~ "{0} consíderase un ficheiro perigoso e foi eliminado automaticamente para "
+#~ "a súa protección.  <a href=\"{1}\">Saber máis</a>"
+
+#~ msgid "Threat Detected"
+#~ msgstr "Detectouse unha ameaza"
+
+#~ msgid ""
+#~ "{0} is suspected to contain a virus or spyware and has automatically been "
+#~ "deleted for your protection.  WireShare's Anti-Virus protection is "
+#~ "powered by AVG."
+#~ msgstr ""
+#~ "Pode ser que {0} contivese un virus ou spyware polo que foi eliminado "
+#~ "automaticamente. A protección antivirus do WireShare está respaldada por "
+#~ "AVG."
+
+#~ msgid "Can't Scan Yet"
+#~ msgstr "Aínda non se pode analizar"
+
+#~ msgid ""
+#~ "{0} could not be inspected because the virus scanner is still downloading "
+#~ "its first set of virus definitions.  WireShare Anti-Virus protection is "
+#~ "powered by AVG."
+#~ msgstr ""
+#~ "{0} non foi analizado porque o escáner antivirus aínda está a descargar a "
+#~ "primeira listaxe de definicións de virus. A protección antivirus do "
+#~ "WireShare está respaldada por AVG."
+
+#~ msgid "Unable to Scan"
+#~ msgstr "Non foi posible a búsqueda"
+
+#~ msgid ""
+#~ "{0} could not be inspected because the virus scanner cannot be loaded.  "
+#~ "WireShare Anti-Virus protection is powered by AVG."
+#~ msgstr ""
+#~ "{0} non foi analizado porque non foi posible cargar o escáner antivirus. "
+#~ "A protección antivirus do WireShare está respaldada por AVG."
+
+#~ msgid ""
+#~ "{0} could not be inspected due to a problem with the virus scanner.  "
+#~ "WireShare Anti-Virus protection is powered by AVG."
+#~ msgstr ""
+#~ "{0} non foi analizado debido a un problema co escáner antivirus. A "
+#~ "protección antivirus do WireShare está respaldada por AVG."
+
+#~ msgid "Scanning for viruses - Powered by AVG"
+#~ msgstr "Análise de virus - Respaldada por AVG"
+
+#~ msgid "Scanning preview - Powered by AVG"
+#~ msgstr "Vista previa do escaneo - Respaldado por AVG"
+
+#~ msgid "File deleted - Threat detected by AVG"
+#~ msgstr "Eliminouse o ficheiro - A ameaza foi detectada polo AVG"
+
+#~ msgid "Done, but unable to scan for viruses"
+#~ msgstr "Feito pero non foi posible a análise de virus"
+
+#~ msgid "Evaluating..."
+#~ msgstr "A evaluar..."
+
+#~ msgid "Applying update..."
+#~ msgstr "Estanse a aplicar as actualizacións..."
+
+#~ msgid "Finalizing..."
+#~ msgstr "A rematar..."
+
+#~ msgid "Checking for AVG Anti-Virus updates"
+#~ msgstr "Estase a comprobar se hai actualizacións para o AVG Anti-Virus"
+
+#~ msgid "Updating AVG Anti-Virus"
+#~ msgstr "A actualizar o AVG Anti-Virus"
+
+#~ msgid "Updating AVG Anti-Virus definitions - {0} of {1}"
+#~ msgstr "Estanse a actualizar as definicións do AVG Anti-Virus - {0} de {1}"
+
+#~ msgid "Updating AVG Anti-Virus definitions"
+#~ msgstr "Estanse a actualizar as definicións do AVG Anti-Virus"
+
+#~ msgid "P2P Users"
+#~ msgstr "Usuarios P2P"
+
+#~ msgid "{0}Downloaded but not scanned for viruses{1}"
+#~ msgstr "{0}Descargado pero sen comprobar a existencia de virus{1}"
+
+#~ msgid "Incorrect username or password."
+#~ msgstr "O nome de usuario ou o contrasinal  son incorrectos."
+
+#~ msgid "Sign in when I start WireShare"
+#~ msgstr "Iniciar sesión ao abrir o WireShare"
+
+#~ msgid ""
+#~ "Remove \"{0}\" from Library? This will unshare this file with everyone."
+#~ msgstr ""
+#~ "Desexa eliminar \"{0}\" da biblioteca? Deste xeito deixará de compartir "
+#~ "este ficheiro."
+
+#~ msgid "Remove \"{0}\" from Library?"
+#~ msgstr "Desexa eliminar \"{0}\" da biblioteca?"
+
+#~ msgid ""
+#~ "Remove {0} files from Library? This will unshare these files with "
+#~ "everyone."
+#~ msgstr ""
+#~ "Desexa eliminar \"{0}\" da biblioteca? Deste xeito deixará de compartir "
+#~ "estes ficheiros."
+
+#~ msgid "Misc"
+#~ msgstr "Varios"
+
+#~ msgid "Automatically Scroll"
+#~ msgstr "Desprazamento automático"
+
+#~ msgid "Add files to it"
+#~ msgstr "Engadir ficheiros"
+
+#~ msgid ""
+#~ "We recommend you don't touch these unless you really know what you're "
+#~ "doing."
+#~ msgstr ""
+#~ "Recomendámoslle  que non cambie estas opcións a menos que saiba ben o que "
+#~ "está a facer."
+
+#~ msgid "Upload torrents forever"
+#~ msgstr "Enviar torrents sen límite"
+
+#~ msgid ""
+#~ "There was an error loading bittorrent. You will not be able to use "
+#~ "bittorrent capabilities until this is resolved."
+#~ msgstr ""
+#~ "Houbo un erro na carga do bittorrent. Non poderá empregar o bittorrent "
+#~ "até que se resolva esta incidencia."
+
+#~ msgid ""
+#~ "Below are the file extensions WireShare knows about and how they are "
+#~ "classified throughout the program"
+#~ msgstr ""
+#~ "Debaixo están as extensións que WireShare recoñece e como están "
+#~ "clasificadas no programa"
+
+#~ msgid ""
+#~ "File types that WireShare doesn't know about are classified as \"Other\". "
+#~ "Add these files to a List by dragging them, or when adding a folder, "
+#~ "click \"Advanced\" and choose specific file extensions"
+#~ msgstr ""
+#~ "Os tipos de ficheiro que non recoñeza o WireShare clasificaranse como "
+#~ "\"Outros\". Pode engadir estes ficheiros a unha listaxe arrastrándoos, "
+#~ "premendo en  \"Avanzado\" e escollendo a extensión específica  cando "
+#~ "engada un cartafol."
+
+#~ msgid "Add audio files I downloaded from WireShare to iTunes"
+#~ msgstr "Engadir a iTunes os ficheiros de audio descargados de WireShare"
+
+#~ msgid ""
+#~ "Share audio and video files in Public Shared list on my local network "
+#~ "with iTunes"
+#~ msgstr ""
+#~ "Compartir o audio e vídeo da listaxe pública compartida  na miña rede "
+#~ "local  con iTunes"
+
+#~ msgid "Use the WireShare player when I play Audio and Video files"
+#~ msgstr "Empregar o lector de WireShare para reproducir audio e vídeo."
+
+#~ msgid "Add files I download from P2P Users to my Public Shared List"
+#~ msgstr "Engadir á miña listaxe pública compartida os ficheiros que descargo"
+
+#~ msgid ""
+#~ "You can set the local network port that listens for incoming connections. "
+#~ "This port may be changed in case of conflict with another program or if a "
+#~ "specific port number is required for direct incoming connections by your "
+#~ "firewall. You must also configure your router when choosing \"manual port "
+#~ "forward\" or \"do nothing\""
+#~ msgstr ""
+#~ "Pode establecer o porto de rede local para escoitar conexións entrantes. "
+#~ "Este porto pódese cambiar se ten conflitos con outro programa ou ben se o "
+#~ "seu firewall precisa un número específico de porto. Debe tamén configurar "
+#~ "o router cando escolla \"encamiñamento manual dos portos\" ou \"non facer "
+#~ "nada\""
+
+#~ msgid "* You must also configure your router"
+#~ msgstr "* Tamén ten  que configurar o seu router"
+
+#~ msgid ""
+#~ "If your computer has a fast internet connection, WireShare may act as an "
+#~ "\"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you "
+#~ "notice performance issues."
+#~ msgstr ""
+#~ "Se o seu computador ten unha conexión rápida a internet, WireShare pode "
+#~ "actuar como \"Ultrapar\" ou conectar a DHT Mojito. Pode desactivar esta "
+#~ "característica se dá problemas."
+
+#~ msgid ""
+#~ "WireShare uses a secure communications mode called TLS, which may use "
+#~ "more CPU resources."
+#~ msgstr ""
+#~ "WireShare emprega un modo de comunicación segura chamado TLS que pode "
+#~ "consumir máis recursos da CPU."
+
+#~ msgid ""
+#~ "Out-of-band Searching helps deliver faster search results to you, but "
+#~ "some internet connections may not work well with this feature."
+#~ msgstr ""
+#~ "As procuras fóra de banda poden acelerar a entrega dos resultados "
+#~ "buscados, pero algunhas conexións de internet traballan defectuosamente "
+#~ "con este recurso."
+
+#~ msgid "Socks v4"
+#~ msgstr "Socks v4"
+
+#~ msgid "Socks v5"
+#~ msgstr "Socks v5"
+
+#~ msgid "Don't show adult content in search results"
+#~ msgstr "Non presentar contidos adultos nos resultados das procuras"
+
+#~ msgid "Run WireShare on System Startup"
+#~ msgstr "Executar WireShare cando se inicie o sistema"
+
+#~ msgid "Scan files I download for viruses"
+#~ msgstr "Buscar virus nos ficheiros descargados"
+
+#~ msgid "Allow me to share Documents with the world"
+#~ msgstr "Permitir a compartición de documentos na rede"
+
+#~ msgid ""
+#~ "Enabling this setting makes you more prone to accidently sharing personal "
+#~ "information"
+#~ msgstr ""
+#~ "Activando este axuste correrá máis riscos de compartir accidentalmente "
+#~ "imformación privada"
+
+#~ msgid "Enabling this setting makes you more prone to viruses"
+#~ msgstr "Activando este axuste será máis vulnerable aos virus"
+
+#~ msgid "There are updates!"
+#~ msgstr "Hai actualizacións"
+
+#~ msgid "Downloading programs can result in viruses"
+#~ msgstr "Os programas descargados poden ocultar virus"
+
+#~ msgid ""
+#~ "We recommend you don't download programs using WireShare. However, you "
+#~ "can enable downloading programs via Preferences > Search > Configure..."
+#~ msgstr ""
+#~ "Recomendamos que non se descargue software empregando o WireShare. Con "
+#~ "todo, pode activar a descarga de software vía Preferencias > Procurar > "
+#~ "Configurar..."
+
+#~ msgid ""
+#~ "We recommend you don't download programs using WireShare. However, you "
+#~ "can enable downloading programs via Tools > Options > Search > "
+#~ "Configure..."
+#~ msgstr ""
+#~ "Recomendamos que non se descargue software empregando o WireShare. Con "
+#~ "todo, pode activar a descarga de software vía Ferramentas >Opcións > "
+#~ "Procurar > Configurar..."
+
+#~ msgid "No internet connection"
+#~ msgstr "Non hai conexión de internet"
+
+#~ msgid "Couldn't connect"
+#~ msgstr "Non se pode conectar"
+
+#~ msgid "Weak connection"
+#~ msgstr "Conexíón feble"
+
+#~ msgid "Medium connection"
+#~ msgstr "Conexión media"
+
+#~ msgid "Full connection"
+#~ msgstr "Conexión perfecta"
+
+#~ msgid "Turbo-charged connection"
+#~ msgstr "Conexión Turbo-charged"
+
+#~ msgid "Sorry, there was a problem downloading your file."
+#~ msgstr "Houbo un problema descargando o seu ficheiro."
+
+#~ msgid "File cannot be opened"
+#~ msgstr "Non é posíble abrir o ficheiro"
+
+#~ msgid "Some Legal Stuff"
+#~ msgstr "Algunhas legalidades"
+
+#, fuzzy
+#~ msgid ""
+#~ "<html><body>WireShare is a peer-to-peer programs for sharing authorized "
+#~ "files only. Copyright laws may forbid obtaining or distributing certain "
+#~ "copyrighted content. Learn more information about <a href="
+#~ "\"{0}\">Copyright</a></body></html>."
+#~ msgstr ""
+#~ "<html><body>WireShare Basic e WireShare PRO son programas p2p para "
+#~ "compartir unicamente ficheiros autorizados. As leis de propiedade "
+#~ "intelectual poden prohibir a obtención ou distribución de certos contidos "
+#~ "con dereitos de autoría. Saiba máis sobre <a href=\"{0}\">Copyright</a></"
+#~ "body></html>."
+
+#~ msgid "Copyright Infringement"
+#~ msgstr "Vulneración do copyright"
+
+#~ msgid "WireShare Privacy Policy"
+#~ msgstr "Política de privacidade de WireShare"
+
+#~ msgid "WireShare License Agreement"
+#~ msgstr "Aceptación da licenza de WireShare"
+
+#~ msgid "AVG Anti-Virus License Agreement"
+#~ msgstr "Conformidade coa Licenza do anti-virus AVG"
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree that you have read, understand and "
+#~ "assent to the terms of the WireShare and AVG Anti-Virus License "
+#~ "Agreements and WireShare Privacy Policy. You also agree that you will not "
+#~ "use WireShare for copyright infringement."
+#~ msgstr ""
+#~ "Premendo en \"Dacordo\", vostede asume que leu, entendeu e aceptou os "
+#~ "termos da Licenza e a Política de privacidade do WireShare e do Antivirus "
+#~ "AVG. Vostede tamén acepta que non empregará o WireShare para vulnerar "
+#~ "copyright ningún."
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree that you have read, understand and "
+#~ "assent to the terms of the WireShare License Agreement and WireShare "
+#~ "Privacy Policy. You also agree that you will not use WireShare for "
+#~ "copyright infringement."
+#~ msgstr ""
+#~ "Premendo en \"Dacordo\", vostede asume que leu, entendeu e aceptou os "
+#~ "termos da Licenza e a Política de privacidade. Vostede tamén acepta que "
+#~ "non empregará o WireShare para vulnerar copyright ningún."
+
+#~ msgid "Choose your language"
+#~ msgstr "Escolla o seu idioma"
+
+#~ msgid "Policies Governing Your Use:"
+#~ msgstr "Normas de uso:"
+
+#~ msgid "I Agree"
+#~ msgstr "Dacordo"
 
 #~ msgid ""
 #~ "<html><b>Your WireShare may have been corrupted by a virus or trojan!</"
