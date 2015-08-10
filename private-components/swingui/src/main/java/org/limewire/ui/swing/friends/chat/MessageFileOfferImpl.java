@@ -114,7 +114,10 @@ class MessageFileOfferImpl extends AbstractMessageImpl implements MessageFileOff
                             tr("{0}Downloaded{1}","<a href=\"" +
                             ChatDocumentBuilder.MY_LIBRARY_LINK + "\">", "</a>");
                     break;
-                                        
+                case DANGEROUS:
+                	fileOfferFormatted = fileOfferReceived + "<br/><br/>" +
+                            tr("File deleted - Dangerous file");
+                	break;
                 default:
                     fileOfferFormatted = defaultFileOfferFormatted;
                     break;

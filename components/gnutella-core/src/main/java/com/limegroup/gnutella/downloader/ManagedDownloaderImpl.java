@@ -1555,7 +1555,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     */
     @Override
     public boolean isLaunchable() {
-        if(state == DownloadState.COMPLETE )
+    	if(state == DownloadState.DANGEROUS)
+    		return false;
+    	if(state == DownloadState.COMPLETE )
             return true;
         return amountForPreview() > 0;
     }
@@ -1800,6 +1802,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             File corrupt = corruptFile;
             if (corrupt == null)
                 return null;
+            if (isDangerous(corrupt)) {
+                corruptFile = null;
+                return null;
+            }
             return corrupt;
         } else if (state == DownloadState.COMPLETE) {
             // If the download is complete, return the whole file.
@@ -1819,6 +1825,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // Copy the first block, returning null if nothing was copied.
             if (FileUtils.copy(incompleteFile, size, copy) <= 0)
                 return null;
+            if (isDangerous(copy)) {
+                incompleteFile.delete();
+                return null;
+            }
             return copy;
         }
     }
@@ -1966,6 +1976,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private DownloadState verifyAndSave() throws InterruptedException {
 
+        // Check whether this is a dangerous file
+        if(isDangerous(incompleteFile)) {
+            return DownloadState.DANGEROUS;
+        }
         // Find out the hash of the file and verify that its the same
         // as our hash.
         URN fileHash = scanForCorruption();

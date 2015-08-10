@@ -129,6 +129,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             LOG.debug("Finished");
             finishing.set(true);
             torrentsFinished.incrementAndGet();
+            if (isDangerous()) {
+                return;
+            }
             FileUtils.forceDeleteRecursive(getSaveFile());
             File completeDir = getSaveFile().getParentFile();
             torrent.getLock().lock();
@@ -171,7 +174,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
             if (lastState.get() != DownloadState.DANGEROUS) {
             	lastState.set(DownloadState.ABORTED);
             	listeners.broadcast(new DownloadStateEvent(this, DownloadState.ABORTED));
-           }
+            }
             BTDownloaderImpl.this.downloadManager.remove(BTDownloaderImpl.this, true);
             deleteIncompleteFiles();
         } else if (TorrentEventType.FAST_RESUME_FILE_SAVED == event.getType()) {
@@ -198,7 +201,18 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         }
     }
 
-    private void createUploadMemento() {
+    /**
+     * Returns true if the given file is dangerous, after stopping the download.
+     */
+    private boolean isDangerous() {
+    	for(File f : getIncompleteFiles()) {
+    		if(isDangerous(f))
+    			return true;
+    	}
+    	return false;
+    }
+
+	private void createUploadMemento() {
         try {
             torrentUploadManager.get().writeMemento(torrent);
             torrent.setAutoManaged(true);
@@ -563,8 +577,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         case COMPLETE:
         case DANGEROUS:
         	LOG.debug("Should be removed");
-            return true;
-            }
+        	return true;
+        }
         LOG.debug("Should not be removed");
         return false;
     }
