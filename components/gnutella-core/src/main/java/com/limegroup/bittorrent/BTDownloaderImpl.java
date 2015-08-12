@@ -241,9 +241,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader implements BTDownlo
         return false;
     }
 
-    @Override
-    public void discardUnscannedPreview(boolean delete) {
-    }
 
     /**
      * Checks to see if this torrent has any priority zero files and removes

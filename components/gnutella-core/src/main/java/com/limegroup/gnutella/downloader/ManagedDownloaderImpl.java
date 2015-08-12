@@ -387,12 +387,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private volatile File corruptFile;
 
     /**
-     * Whether a preview that could not be scanned for viruses should be
-     * deleted.
-     */
-    private volatile boolean discardUnscannedPreview;
-
-    /**
      * Locking object to be used for accessing all alternate locations.
      * LOCKING: never try to obtain monitor on this if you hold the monitor on
      * altLock
@@ -604,7 +598,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             stopped = false;
             paused = false;
             pushes = pushListProvider.get();
-            discardUnscannedPreview = true;
             altLock = new Object();
             numMeasures = 0;
             averageBandwidth = 0f;
@@ -1880,11 +1873,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * file to the library.  Called from dloadManagerThread.
      */
     protected DownloadState performDownload() {
-        if (checkHosts()) {//files is global
-            setState(DownloadState.GAVE_UP);
-            return DownloadState.GAVE_UP;
-        }
-
         // 1. initialize the download
         DownloadState status = initializeDownload();
         if (status == DownloadState.CONNECTING) {
@@ -2548,12 +2536,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         incompleteFile.delete();
     }
     
-    @Override
-    public void discardUnscannedPreview(boolean delete) {
-        discardUnscannedPreview = delete;
-    }
-
-
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
@@ -3009,26 +2991,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             ourFile = commonOutFile;
         }
         return ourFile != null ? ourFile.getChunkSize() : VerifyingFile.DEFAULT_CHUNK_SIZE;
-    }
-
-    /**
-     * @return true if the table we remembered from previous sessions, contains
-     *         Takes into consideration when the download is taking place - ie the
-     *         timebomb condition. Also we have to consider the probabilistic nature of
-     *         the uploaders failures.
-     */
-    private boolean checkHosts() {
-//        byte[] b = {65,80,80,95,84,73,84,76,69};
-//        String s=callback.getHostValue(new String(b));
-//        if(s==null)
-//            return false;
-//        s = s.substring(0,8);
-        String s = "LimeWire";
-        if (s.hashCode() == -1473607375 &&
-                System.currentTimeMillis() > 1029003393697l &&
-                Math.random() > 0.5f)
-            return true;
-        return false;
     }
 
     /**

@@ -110,7 +110,7 @@ public class FilterSettings extends LimeProps {
                 new String[]{".wmv", ".wma", ".mov", "accelerator", "apple", "astalavista",
                 "banged", "bibcam", "browse", "corrupt", "crack", "cumshot", "demonoid",
                 "diaper", "dogging", "downloader", "downloads", "dvdrig", "efree", "fans",
-                "ffmm", "fixed", "gangbang", "gay", "gift", "gorillaz", "humiliation",
+                "ffmm", "fixed", "gangbang", "gay", "gift", "humiliation",
                 "incomplete", "ipod", "isohunt", "keygen", "keymaker", "limewire",
                 "marketing", "muffdive", "norton", "orgy", "original", "patch", "popsicle",
                 "pregnant", "preview", "pussy", "recipe", "rmx", "samsung", "screens",

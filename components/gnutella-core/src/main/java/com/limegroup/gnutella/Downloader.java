@@ -148,13 +148,6 @@ public interface Downloader extends BandwidthTracker,
 	public boolean isLaunchable();
 
     /**
-     * Handles the user's response to
-     * DownloadCallback.promptAboutUnscannedPreview().
-     * @param delete whether to discard the unscanned preview
-     */
-    public void discardUnscannedPreview(boolean delete);
-
-    /**
      * Returns a list of all RemoteFileDescs currently
      * associated with this Download.
      */

@@ -391,5 +391,5 @@ public final class ConnectionSettings extends LimeProps {
     /** GWebCache servers. */
     public static final StringArraySetting GWEBCACHE_SERVERS = 
     		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
-    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php","http://wireshare.byethost15.com/gwc/gwc.php"});  // ADD GWEBCACHE SERVERS HERE
+    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php"});  // ADD GWEBCACHE SERVERS HERE
 }

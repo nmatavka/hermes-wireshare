@@ -72,11 +72,6 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     }
 
     @Override
-    public void discardUnscannedPreview(boolean delete) {
-        // No previews for Mozilla downloads
-    }
-
-    @Override
     public long getAmountLost() {
         return 0;
     }
