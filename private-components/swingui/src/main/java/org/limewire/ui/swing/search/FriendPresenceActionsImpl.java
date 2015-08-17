@@ -118,7 +118,7 @@ class FriendPresenceActionsImpl implements FriendPresenceActions {
         if (hasP2P && hasFriends){
             return I18n.trn("{0} Person", "{0} People", people.size());
         } else if (hasP2P){
-            return I18n.trn("{0} Peer-to-Peer User", "{0} Peer-to-Peer Users", people.size());            
+            return I18n.trn("{0} User", "{0} Users", people.size());            
         } else if (hasFriends){
             return I18n.trn("{0} Friend", "{0} Friends", people.size());            
         }

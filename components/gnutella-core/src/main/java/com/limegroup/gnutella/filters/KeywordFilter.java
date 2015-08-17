@@ -20,38 +20,37 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A filter that blocks queries and responses matching certain banned keywords.
  */
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
-
     static final String[] ADULT_WORDS = {
         "abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
-        "ass", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", "bibcam",
-        "blow", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
+        "ass", "arse", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", 
+        "blowjob", "bj", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
         "brazzers", "breached ip camera", "bukkake", "candygirl", "casting couch teen",
         "celebrity nude", "centerfold", "cinemakid", "clitoris", "club seventeen",
-        "cock", "cum", "cunt", "dick", "dildo", "erotrix", "eurocreme",
-        "exploited black teen", "facial","fantasia model", "fantasia-model",
-        "femjoy", "fm teen", "ftv girls", "fuck", "galitsin-news", "gangbang",
-        "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny", "hussyfan",
-        "incest", "incezt", "jenna", "karinaworld", "kate's playground next",
-        "kdv", "kiddy porn", "kinder", "lolita network", "lolitabeach",
+        "cock", "cum", "cumshot", "cunt", "defloration", "dick", "dildo", "dogsex", "erotrix", 
+        "eurocreme", "exploited black teen", "facial", "fantasia model", "fantasia-model", "fisting",
+        "femjoy", "fm teen", "ftv girls", "fuck*", "galitsin-news", "gangbang", "gay", "gilf",
+        "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny", 
+        "incest", "incezt", "jenna", "karinaworld", "kate's playground next", "kink*",
+        "lesbian", "lolita network", "lolitabeach",
         "ls model", "ls-magazine", "ls-model", "lsg model", "lsm",
-        "magazine lsm", "masturbat", "mbla", "met art", "met-art",
+        "magazine lsm", "masturbat*", "mature", "mbla", "met art", "met-art",
         "metart", "milf", "molested", "msn not stickam", "mummy edit", "naakt nackt",
         "nackt", "naked gymnast", "naked news", "naked on stage", "naked sport",
         "naked women", "naked-gymnast", "newstar", "nipple", "nubile", "nude beach",
         "nude bellydance", "nude exhib", "nude foto", "nude in public", "nude photo",
         "nude scene", "nude sports", "nude yoga", "nude-in-public", "nudebeach",
-        "online naked", "orgasm", "paraphili", "pedo", "penis", "pink teen", "pjk",
-        "playboy", "porn", "posing naked", "pr0nstars", "premature", "preteen",
-        "profileasian", "profileblond", "pthc", "ptsc", "public nudity", "pussy",
-        "qqaazz", "qsh", "qwerty", "r@ygold", "rape", "reallola", "russian slaves",
-        "scroops", "sex", "sf-model", "slut", "sodom", "spermaholic", "squirt",
+        "online naked", "orgasm", "paraphili", "penatrat*", "penis", "pink teen", "pjk",
+        "playboy", "porn", "posing naked", "pr0nstars", "preggo", "pregnant", "premature", 
+        "profileasian", "profileblond", "public nudity", "pussy",
+        "qqaazz", "qsh", "qwerty", "rape", "reallola", "rimjob", "russian slaves",
+        "scroops", "sex", "sf-model", "slut", "sodom*", "spermaholic", "squirt*",
         "stickam", "strapon", "strappon", "stripper", "studio siberian mouse",
-        "suck", "teen nacked", "teen nackt", "teen naked", "teen nude",
+        "suck", "sucking", "teen nacked", "teen nackt", "teen naked", "teen nude",
         "teens like it big", "teenburg", "teenfuns", "teeniepalace", "teenmodel",
-        "teens nackt", "teentraps", "tits", "tittie", "titty", "top black model",
+        "teens nackt", "teentraps", "tit", "tittie", "titty", "top black model",
         "topless teen", "ttl model", "twat", "uncensored naturist", "underage",
         "vagina", "video angel", "vladmodel", "voyeurweb", "whore", "xpuss",
-        "xxx", "young male nudist", "young video model", "youngvideomodel", 
+        "xxx*", "young male nudist", "young video model", "youngvideomodel", 
         "yovo", "zoophilia"
     };
 
@@ -72,10 +71,10 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
         }
         if(banPersonal) {
             for(String word : FilterSettings.BANNED_WORDS.get()) {
-                builder.add(word);
+                builder.add(word.toLowerCase(Locale.US));
             }
             for(String ext : FilterSettings.BANNED_EXTENSIONS.get()) {
-                builder.add(ext);
+                builder.add(ext.toLowerCase(Locale.US));
             }
         }
         ban = builder.build();
@@ -114,8 +113,22 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
     protected boolean matches(String phrase) {
         String canonical = phrase.toLowerCase(Locale.US);
         for(String word : ban) {
-            if(canonical.indexOf(word) != -1)
-                return true;
+            if (word.endsWith("*")) { 			//filter if phrase contains keyword 
+            	if (canonical.indexOf(word.replace("*","" )) != -1 ) {
+            		return true;
+            	}
+            } else if (word.startsWith(".")) { 	//filter by file extensions
+            	if (canonical.indexOf(word) != -1 ) {
+            		return true;
+            	}            	
+            } else { 							//filter by keyword
+	        	int idx = canonical.indexOf(word);
+	            if(idx != -1
+	              && (idx == 0 || "abcdefghijklmnopqrstuvwxyz".indexOf(canonical.charAt(idx - 1)) == -1) // start of word boundary
+	              && (word.length() + idx == canonical.length() || "abcdefghijklmnopqrtuvwxyz".indexOf(canonical.charAt(word.length() + idx)) == -1)) {// end of word boundary
+	                return true;
+	            }
+            }
         }
         return false;
     }

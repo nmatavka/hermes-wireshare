@@ -78,7 +78,7 @@ public class BlockUserMenuFactory {
         JMenu blockMenu = new JMenu(I18n.tr("Block User"));
 
         if (p2pUsers.size() > 1) {
-            blockMenu.add(new AbstractAction(I18n.tr("All Peer-to-Peer Users")) {
+            blockMenu.add(new AbstractAction(I18n.tr("All Users")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (blockHandler.confirmBlockAll(p2pUsers.size())) {
@@ -129,13 +129,13 @@ public class BlockUserMenuFactory {
         @Override
         public boolean confirmBlock(String name) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block Peer-to-Peer User {0}?", name));
+            return confirm(I18n.tr("Block User {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block Peer-to-Peer users?"));
+            return confirm(I18n.tr("Block users?"));
         }
         
         @Override
@@ -165,13 +165,13 @@ public class BlockUserMenuFactory {
         @Override
         public boolean confirmBlock(String name) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block Peer-to-Peer User {0}?", name));
+            return confirm(I18n.tr("Block User {0}?", name));
         }
 
         @Override
         public boolean confirmBlockAll(int hostCount) {
             //{0}: P2P User's name
-            return confirm(I18n.tr("Block {0} Peer-to-Peer Users?", hostCount));
+            return confirm(I18n.tr("Block {0} Users?", hostCount));
         }
 
         @Override
