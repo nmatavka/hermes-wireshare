@@ -113,21 +113,23 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
     protected boolean matches(String phrase) {
         String canonical = phrase.toLowerCase(Locale.US);
         for(String word : ban) {
-            if (word.endsWith("*")) { 			//filter if phrase contains keyword 
+            if (word.endsWith("*")) { 			// filter if phrase contains keyword 
             	if (canonical.indexOf(word.replace("*","" )) != -1 ) {
             		return true;
             	}
-            } else if (word.startsWith(".")) { 	//filter by file extensions
+            } else if (word.startsWith(".")) { 	// filter by file extensions
             	if (canonical.indexOf(word) != -1 ) {
             		return true;
             	}            	
-            } else { 							//filter by keyword
+            } else { 							// filter by keyword
 	        	int idx = canonical.indexOf(word);
-	            if(idx != -1
-	              && (idx == 0 || "abcdefghijklmnopqrstuvwxyz".indexOf(canonical.charAt(idx - 1)) == -1) // start of word boundary
-	              && (word.length() + idx == canonical.length() || "abcdefghijklmnopqrtuvwxyz".indexOf(canonical.charAt(word.length() + idx)) == -1)) {// end of word boundary
-	                return true;
-	            }
+	            while (idx != -1){				// scan for multiple occurrences in string
+	            	if((idx == 0 || "abcdefghijklmnopqrstuvwxyz".indexOf(canonical.charAt(idx - 1)) == -1) // start of word boundary check
+		              && (word.length() + idx == canonical.length() || "abcdefghijklmnopqrtuvwxyz".indexOf(canonical.charAt(word.length() + idx)) == -1)) {// end of word boundary check
+		                return true;
+		            }
+	            	idx = canonical.indexOf(word,idx + 1);	
+	        	}
             }
         }
         return false;
