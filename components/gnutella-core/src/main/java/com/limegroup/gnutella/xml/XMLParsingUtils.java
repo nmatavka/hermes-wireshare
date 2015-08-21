@@ -103,7 +103,7 @@ public class XMLParsingUtils {
             super(size*2/3);
         }
         
-        public String schemaURI;            //like http://www.limewire.com/schemas/audio.xsd
+        public String schemaURI;            //like http://wireshare.sourceforge.net/schemas/audio.xsd
         public String type;                 //e.g. audio, video, etc.
         public String canonicalKeyPrefix;   //like audios__audio__
     }
@@ -167,7 +167,7 @@ public class XMLParsingUtils {
             
             if(_result.type==null) {
                 _result.type = qualifiedName;
-                _result.schemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
+                _result.schemaURI = "http://wireshare.sourceforge.net/schemas/"+_result.type+".xsd";
                 _result.canonicalKeyPrefix += "__"+qualifiedName+"__";
             } 
             

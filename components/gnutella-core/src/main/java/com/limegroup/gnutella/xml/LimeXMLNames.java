@@ -8,7 +8,7 @@ import org.limewire.i18n.I18nMarker;
 
 public class LimeXMLNames {
 
-    public static final String AUDIO_SCHEMA = "http://www.limewire.com/schemas/audio.xsd";
+    public static final String AUDIO_SCHEMA = "http://wireshare.sourceforge.net/schemas/audio.xsd";
     
     public static final String AUDIO = "audios__audio";
     public static final String AUDIO_TITLE = "audios__audio__title__";
@@ -29,7 +29,7 @@ public class LimeXMLNames {
     public static final String AUDIO_LICENSE = "audios__audio__license__";
     public static final String AUDIO_LICENSETYPE = "audios__audio__licensetype__";
     
-    public static final String APPLICATION_SCHEMA = "http://www.limewire.com/schemas/application.xsd";
+    public static final String APPLICATION_SCHEMA = "http://wireshare.sourceforge.net/schemas/application.xsd";
     
     public static final String APPLICATION = "applications__application";
     public static final String APPLICATION_NAME = "applications__application__name__";
@@ -38,7 +38,7 @@ public class LimeXMLNames {
     public static final String APPLICATION_LICENSETYPE = "applications__application__licensetype__";
     public static final String APPLICATION_LICENSE = "applications__application__license";
     
-    public static final String DOCUMENT_SCHEMA = "http://www.limewire.com/schemas/document.xsd";
+    public static final String DOCUMENT_SCHEMA = "http://wireshare.sourceforge.net/schemas/document.xsd";
     
     public static final String DOCUMENT = "documents__document";
     public static final String DOCUMENT_TITLE = "documents__document__title__";
@@ -47,7 +47,7 @@ public class LimeXMLNames {
     public static final String DOCUMENT_LICENSE = "documents__document__license__";
     public static final String DOCUMENT_LICENSETYPE = "documents__document__licensetype__";
     
-    public static final String IMAGE_SCHEMA = "http://www.limewire.com/schemas/image.xsd";
+    public static final String IMAGE_SCHEMA = "http://wireshare.sourceforge.net/schemas/image.xsd";
     
     public static final String IMAGE = "images__image";
     public static final String IMAGE_TITLE = "images__image__title__";
@@ -56,7 +56,7 @@ public class LimeXMLNames {
     public static final String IMAGE_LICENSE = "images__image__license__";
     public static final String IMAGE_LICENSETYPE = "images__image__licensetype__";
     
-    public static final String VIDEO_SCHEMA = "http://www.limewire.com/schemas/video.xsd";
+    public static final String VIDEO_SCHEMA = "http://wireshare.sourceforge.net/schemas/video.xsd";
     
     public static final String VIDEO = "videos__video";
     public static final String VIDEO_TITLE = "videos__video__title__";
@@ -79,7 +79,7 @@ public class LimeXMLNames {
     public static final String VIDEO_SUBTITLES = "videos__video__subtitles__";
     
     
-    public static final String TORRENT_SCHEMA = "http://www.limewire.com/schemas/torrent.xsd";
+    public static final String TORRENT_SCHEMA = "http://wireshare.sourceforge.net/schemas/torrent.xsd";
     
     public static final String TORRENT_INFO_HASH = "torrents__torrent__infohash__";
     public static final String TORRENT_TRACKERS = "torrents__torrent__trackers__";
