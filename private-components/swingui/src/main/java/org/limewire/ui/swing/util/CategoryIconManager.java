@@ -47,12 +47,12 @@ public class CategoryIconManager {
         
         if (OSUtils.isMacOSX()) {
             programIcon = smallProgramIconOSX;
-        } else if (OSUtils.isWindowsVista()) {
-            programIcon = smallProgramIconWinVista;
+        } else if (OSUtils.isLinux()) {
+            programIcon = smallProgramIconLinux;
         } else if (OSUtils.isWindowsXP()) {
             programIcon = smallProgramIconWinXP;
         } else {
-            programIcon = smallProgramIconLinux;
+            programIcon = smallProgramIconWinVista;
         }
     }
     
