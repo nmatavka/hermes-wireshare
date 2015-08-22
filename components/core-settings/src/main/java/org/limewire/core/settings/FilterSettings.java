@@ -29,7 +29,7 @@ public class FilterSettings extends LimeProps {
      * banned.
      */
     public static final BooleanSetting FILTER_ADULT =
-        FACTORY.createBooleanSetting("FILTER_ADULT", false);
+        FACTORY.createBooleanSetting("FILTER_ADULT", true);
     
     /**
      * Sets whether or not known spam and malware URNs are banned.
@@ -107,14 +107,9 @@ public class FilterSettings extends LimeProps {
      */
     public static final StringArraySetting BANNED_WORDS =
         FACTORY.createStringArraySetting("BANNED_WORDS", new String[]{ 
-        		//CP words to filter
-        		"1yo", "2yo", "3yo", "4yo", "5yo","6yo", "7yo", "8yo", "9yo",
-        		"11yo", "12yo", "13yo", "14yo", "15yo","16yo", "17yo", "bibcam",
-        		"childlover", "hussyfan","kdv", "kiddy porn", "kingpass", "kinder*", "lolita", 
-        		"opva", "pedo*", "preteen", "pthc", "ptsc", "r@ygold", "reelkiddymov",
         		//Spam words to filter
         		"accelerator", "apple", "astalavista", "browse", 
-                "corrupt", "crack", "demonoid","diaper", "dogging", "downloader", 
+                "corrupt", "crack", "demonoid", "diaper", "dogging", "downloader", 
                 "downloads", "dvdrig", "efree", "ffmm", "fixed", "gift", "humiliation",
                 "incomplete", "ipod", "isohunt", "keygen", "keymaker", "limewire",
                 "marketing", "norton", "original", "patch", "popsicle",
@@ -124,16 +119,14 @@ public class FilterSettings extends LimeProps {
                 "black_x).zip", "free music.wma", "hot new track.mp3", "orion).zip",
                 "pbay", "pbr.*", "radio edit.wma", "rare record.wma", "snd].zip",
                 "tsrh.zip", "torrents download.zip", "uncut track",
-                "unreleased studio edition.", "unreleased version.snd", " verified ",
+                "unreleased studio edition.", "unreleased version.snd", "verified",
                 "upload.by", " new album ", "()", "bittorrent complete", "bubanee",
-                "complete).wma", "complete", "confirmed", "confirmed complete",
+                "complete).wma", "confirmed", "confirmed complete",
                 "conteo david_pl99", "explicit", "eztv", "full version",
                 "good).", "good copy", "greatest hits mix", "good audio",
-                "hd).mov*", "hi def", "including crack by",
-                "instrumental version).wma", "jute", "keygen inside.zip",
+                "hd).mov*", "hi def", "including crack by", "jute", "keygen inside.zip",
                 "keygen is included).zip", "kimmiboi", "less_mucca", "nyc remix",
-                "new album).wma", "radio edit).mov", "unreleased live record).mp3",
-                "fix).zip", ".horrorspoke",
+                "radio edit).mov", "unreleased live record).mp3", "fix).zip", ".horrorspoke",
                 ".yuridia.zip", "256k stereo.mp3", "5000passwords", "anuzbitt", "arestra",
                 "aardbob", "adultfriendfinder", "adultpeak", "allcoolmusic", "azoogle",
                 "best song ever", "bestqualiti", "bestbartersoftware", "brrip.mov",
@@ -143,8 +136,8 @@ public class FilterSettings extends LimeProps {
                 "freemusic", "gnoozle", "godaddy", "goudkov", "greatest hits remix",
                 "himegimi", "i2cams", "ipad2", "iwannadownload", "ifreeclub", "iphone",
                 "isohunt >", "isohunt..diabolic.zip", "jironimo", "joethehob0",
-                "justin-be ", "justin-girl ", "Kingpass", "keygen for ", "keymaker by ",
-                "live.wma*", "mininova", "monova", "mp3baby", "myaffiliatead", "p2pads",
+                "justin-be ", "justin-girl ", "keygen for ", "keymaker by ",
+                "mininova", "monova", "mp3baby", "myaffiliatead", "p2pads",
                 "p2pblast", "pbay.torrent", "patched", "piratebay",
                 "puzzledesktop", "quality", "quibus", "radarsync", "reddragon.rar",
                 "redlightcenter", "reesexyworld", "savenow", "screamsaver", "seonomad",
@@ -153,7 +146,7 @@ public class FilterSettings extends LimeProps {
                 "kickasstorrent", "torrentdownloads", "torrentfreak", "torrentfunk",
                 "torrenthound", "torrentmatrix", "torrentpond", "torrentportal",
                 "torrentpump", "torrentsource", "torrentzap", "touslesfilmsx", "verified ",
-                "victor.torrent", "versaTel", "whentoaskforhelp", "wonderfultracks",
+                "victor.torrent", "versatel", "whentoaskforhelp", "wonderfultracks",
                 "zapshares", "zerotracker", "zibbik", "zip.avi", "zipam."});
     
     /**

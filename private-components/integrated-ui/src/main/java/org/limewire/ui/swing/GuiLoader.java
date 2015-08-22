@@ -52,8 +52,8 @@ final class GuiLoader {
             if ( currversion != null ) {
             	if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
             		int reply = JOptionPane.showConfirmDialog (null,  
-            			"WireShare version " + currversion.toString() + " is now availible. Would you like to open the download page?", 
-            			"Updated version availible",
+            			"WireShare version " + currversion.toString() + " is now available. Would you like to open the download page?", 
+            			"Updated version available",
             			JOptionPane.YES_NO_OPTION,
             			JOptionPane.INFORMATION_MESSAGE );
             		if (reply == JOptionPane.YES_OPTION) openUrl("http://sourceforge.net/projects/wireshare/files/");

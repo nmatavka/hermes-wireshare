@@ -21,9 +21,17 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
     static final String[] ADULT_WORDS = {
-        "abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
+    	//CP words to filter
+		"1yo", "2yo", "3yo", "4yo", "5yo","6yo", "7yo", "8yo", "9yo", "10yo", 
+		"11yo", "12yo", "13yo", "14yo", "15yo","16yo", "17yo", "babyj", 
+		"babyshi*", "bibcam", "childlover", "hussyfan","kdv", "kdquality", 
+		"kiddy porn", "kingpass", "kinder*", "lolita*", "ls model", "ls-magazine", 
+		"ls-model", "lsg model", "lsm", "magazine lsm", "opva", "pedo*", 
+		"preteen", "preteenz", "pthc", "ptsc", "r@ygold", "reelkiddymov", "underage",
+		// Adult words to filter
+		"abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
         "ass", "arse", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", 
-        "blowjob", "bj", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
+        "blowjob", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
         "brazzers", "breached ip camera", "bukkake", "candygirl", "casting couch teen",
         "celebrity nude", "centerfold", "cinemakid", "clitoris", "club seventeen",
         "cock", "cum", "cumshot", "cunt", "defloration", "dick", "dildo", "dogsex", "erotrix", 
@@ -31,9 +39,7 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
         "femjoy", "fm teen", "ftv girls", "fuck*", "galitsin-news", "gangbang", "gay", "gilf",
         "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny", 
         "incest", "incezt", "jenna", "karinaworld", "kate's playground next", "kink*",
-        "lesbian", "lolita network", "lolitabeach",
-        "ls model", "ls-magazine", "ls-model", "lsg model", "lsm",
-        "magazine lsm", "masturbat*", "mature", "mbla", "met art", "met-art",
+        "lesbian", "masturbat*", "mature", "mbla", "met art", "met-art",
         "metart", "milf", "molested", "msn not stickam", "mummy edit", "naakt nackt",
         "nackt", "naked gymnast", "naked news", "naked on stage", "naked sport",
         "naked women", "naked-gymnast", "newstar", "nipple", "nubile", "nude beach",
@@ -48,10 +54,10 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
         "suck", "sucking", "teen nacked", "teen nackt", "teen naked", "teen nude",
         "teens like it big", "teenburg", "teenfuns", "teeniepalace", "teenmodel",
         "teens nackt", "teentraps", "tit", "tittie", "titty", "top black model",
-        "topless teen", "ttl model", "twat", "uncensored naturist", "underage",
+        "topless teen", "ttl model", "twat", "uncensored naturist", 
         "vagina", "video angel", "vladmodel", "voyeurweb", "whore", "xpuss",
         "xxx*", "young male nudist", "young video model", "youngvideomodel", 
-        "yovo", "zoophilia"
+        "yovo", "zoophilia", "zooskool"
     };
 
     /** INVARIANT: strings in ban contain only lowercase */
