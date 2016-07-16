@@ -9,8 +9,8 @@ public interface TcpBootstrap {
     /**
      * Attempts to contact a gwebcache to retrieve endpoints.
      */
-    public boolean fetchHosts(Bootstrapper.Listener listener, Boolean Bootstrap);
-
+    public boolean fetchHosts(Bootstrapper.Listener listener); 
+    
     /**
      * Attempts to update a gwebcache.
      */

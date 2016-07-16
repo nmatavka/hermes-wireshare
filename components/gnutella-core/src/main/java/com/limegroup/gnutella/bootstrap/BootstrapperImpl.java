@@ -39,7 +39,7 @@ class BootstrapperImpl implements Bootstrapper {
     static int TCP_INTERVAL = 60 * 60 * 1000;
 
     /** Milliseconds to wait before trying TCP if gnutella.net doesn't exist. */
-    static int ONE_SHOT_TCP_DELAY = 10 * 1000;
+    static int ONE_SHOT_TCP_DELAY = 0 * 1000;
     
     /** Milliseconds to wait before updating the GWebCache. */
     static int GWC_UPDATE_INTERVAL = 60 * 60 * 1000;
@@ -141,11 +141,6 @@ class BootstrapperImpl implements Bootstrapper {
     }
 
     @Override
-    public void getGnet() {
-    	tcpBootstrap.fetchHosts(listener,true);
-    }
-    
-    @Override
     public boolean addUDPHostCache(ExtendedEndpoint ee) {
         return udpHostCache.add(ee);
     }
@@ -168,7 +163,7 @@ class BootstrapperImpl implements Bootstrapper {
         if(listener.needsHosts()) {
             if(delay > ONE_SHOT_TCP_DELAY && !oneShotTcpTried) {
                 if(LOG.isTraceEnabled())
-                    LOG.trace("One-shot TCP allowed after " + delay + " ms");
+                    LOG.trace("One-shot TCP allowed");
                 oneShotTcpAllowed = true;
             }
             LOG.trace("Need hosts: none known");
@@ -237,7 +232,7 @@ class BootstrapperImpl implements Bootstrapper {
     private boolean tcpHostCacheFetch(long now) {
         if(nextAllowedTcpTime < now || oneShotTcpAllowed) {
             LOG.trace("Fetching via TCP");
-            tcpBootstrap.fetchHosts(listener,false);
+            tcpBootstrap.fetchHosts(listener);
             nextAllowedTcpTime = now +  TCP_INTERVAL;
             oneShotTcpAllowed = false;
             oneShotTcpTried = true;

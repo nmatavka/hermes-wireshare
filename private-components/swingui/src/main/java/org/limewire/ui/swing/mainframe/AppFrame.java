@@ -215,9 +215,6 @@ public class AppFrame extends SingleFrameApplication {
         if (application.isNewInstall()) {
             initializeNewInstall();
         }
-        else if (SetupWizard.shouldShowWizard()) {
-            showSetupWizard();
-        }       
 
         ui.goHome();
         ui.focusOnSearch();

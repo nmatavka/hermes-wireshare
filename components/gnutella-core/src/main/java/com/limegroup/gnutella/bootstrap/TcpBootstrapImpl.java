@@ -53,7 +53,6 @@ class TcpBootstrapImpl implements TcpBootstrap {
     private final ConnectionServices connectionServices;
     private final ConnectionManager connectionManager;
     private final Statistics statistics;
-    private final List<URI> hosts = new ArrayList<URI>();
     private final List<URI> GWChosts = new ArrayList<URI>();
     
     @Inject
@@ -68,17 +67,13 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
         this.statistics = statistics;
-        
-        String[] servers = ConnectionSettings.BOOTSTRAP_SERVERS.get();
-        for(String server : servers) {
-            add(URI.create(server.trim()),hosts);
-        }
+
+        GWChosts.add(URI.create("http://wireshare.sourceforge.net/gwc/gwc.php"));
         String[] GWCservers = ConnectionSettings.GWEBCACHE_SERVERS.get();
         for(String server : GWCservers) {
             add(URI.create(server.trim()),GWChosts);
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Loaded " + servers.length + " bootstrap servers");
             LOG.debug("Loaded " + GWCservers.length + " GWebCache servers");
         }
    }
@@ -97,18 +92,15 @@ class TcpBootstrapImpl implements TcpBootstrap {
     }
     
     @Override
-    public synchronized boolean fetchHosts(Bootstrapper.Listener listener, Boolean Bootstrap) {
+    public synchronized boolean fetchHosts(Bootstrapper.Listener listener){ 
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        List<URI> Hosts = (Bootstrap) ? hosts : GWChosts;
-        for(URI host : Hosts) {
-            if (!Bootstrap) {
-            	host = URI.create(host.toString() + "?get=1&net=gnutella&" + 
-            			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
-            			"&version=" + LimeWireUtils.getLimeWireVersion() 
-            			);
-            }
-        	HttpUriRequest request = newRequest(host); //
+        for(URI host : GWChosts) {
+            host = URI.create(host.toString() + "?get=1&net=gnutella" + 
+        			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+        			"&version=" + LimeWireUtils.getLimeWireVersion() 
+        			);
+            HttpUriRequest request = newRequest(host); 
             requests.add(request);
             requestToHost.put(request,host);
         }
@@ -138,7 +130,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
     public boolean UpdateGWC(String addr, Bootstrapper.Listener listener) {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        String IP = ((String[]) addr.split(":"))[0];
+        //String IP = ((String[]) addr.split(":"))[0];
 		for(URI host : GWChosts) {
         	host = URI.create(host.toString() + "?update=1&ip=" + URLEncode(addr) + 
         			"&net=gnutella&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
@@ -222,7 +214,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
                     		}
                     		if (!NoAdd) {
                     			add(URI.create(words[1]),GWChosts);
-                    			//addServer(words[1].toString(), servers);
+                    			addServer(words[1].toString(), servers);
                     		}
                     	} else if (words[0].equals("I")) { 		
                     		if (words[1].equals("update") ) {

@@ -15,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryData;
+import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.SegmentLayout;
@@ -99,7 +100,10 @@ public class SetupPage2 extends WizardPage {
         // Auto-Sharing downloaded files Setting
         SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareDownloadedFilesCheckBox.isSelected());
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(sharePartialFilesCheckBox.isSelected());
-        InstallSettings.AUTO_SHARING_OPTION.setValue(true);
+        if (InstallSettings.SPAM_VER.get() < 1) {
+        	InstallSettings.SPAM_VER.set(1);
+        	FilterSettings.BANNED_WORDS.revertToDefault();
+        }
    }
 
     @Override

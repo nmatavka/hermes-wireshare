@@ -73,14 +73,14 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     /**
      * The number of good addresses to store (definitely ultrapeers).
      */
-    static final int GOOD_SIZE = 2000;
+    static final int GOOD_SIZE = 1000;
 
     /**
      * The number of normal addresses to store (maybe not ultrapeers). This
      * is also the number of addresses (good or normal) that will be saved
      * between sessions. Addresses read from disk are given normal priority.
      */
-    static final int NORMAL_SIZE = 1600;
+    static final int NORMAL_SIZE = 400;
 
     /**
      * Constant for identifying good priority hosts (definitely ultrapeers).
@@ -163,7 +163,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
     /**
      * Number of hosts to keep in each locale set.
      */
-    private static final int LOCALE_SET_SIZE = 400;
+    private static final int LOCALE_SET_SIZE = 100;
 
     /**
      * Hosts that should be saved in the host file for future sessions. The
@@ -539,10 +539,6 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
         
             try {
             	read(getHostsFile());
-            } catch (FileNotFoundException ex) {
-            	if(LOG.isInfoEnabled())
-            	LOG.info("Hostfile " + getHostsFile() + " was not found. Getting one from bootstrap server.",ex);
-            	bootstrapper.getGnet();
             } catch (IOException iox) {
             	if(LOG.isInfoEnabled())
             	LOG.info("Exception reading host file " + getHostsFile(), iox);
@@ -556,7 +552,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
      */
     void read(File hostFile) throws FileNotFoundException, IOException {
         LOG.trace("Reading host file");
-    /* The Following code deletes the Gnutella.net if more than 28 days old
+    //* The Following code deletes the Gnutella.net if more than 28 days old
         long now = System.currentTimeMillis();
         long lastModified = hostFile.lastModified(); // 0 if file does not exist
         if(now - lastModified > STALE_HOST_FILE) {
@@ -566,7 +562,7 @@ public class HostCatcher implements Service, Bootstrapper.Listener {
             }
             return; // Hit the bootstrap hosts instead
         }
-     */
+     //*/
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(hostFile));

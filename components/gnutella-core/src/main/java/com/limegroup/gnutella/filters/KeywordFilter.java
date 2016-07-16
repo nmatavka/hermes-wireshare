@@ -20,32 +20,33 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A filter that blocks queries and responses matching certain banned keywords.
  */
 public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFilter {
-    static final String[] ADULT_WORDS = {
+
+	static final String[] ADULT_WORDS = {
     	//CP words to filter
 		"1yo", "2yo", "3yo", "4yo", "5yo","6yo", "7yo", "8yo", "9yo", "10yo", 
 		"11yo", "12yo", "13yo", "14yo", "15yo","16yo", "17yo", "babyj", 
-		"babyshi*", "bibcam", "childlover", "hussyfan","kdv", "kdquality", 
+		"babyshi*", "bibcam", "childlover","cinemakid", "hussyfan","kdv", "kdquality", 
 		"kiddy porn", "kingpass", "kinder*", "lolita*", "ls model", "ls-magazine", 
-		"ls-model", "lsg model", "lsm", "magazine lsm", "opva", "pedo*", 
+		"ls-model", "lsg model", "lsm", "magazine lsm", "mbla", "opva", "pedo*", 
 		"preteen", "preteenz", "pthc", "ptsc", "r@ygold", "reelkiddymov", "underage",
 		// Adult words to filter
 		"abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
         "ass", "arse", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", 
-        "blowjob", "bondage", "boob", "booty talk ebony", "boy + boy", "boy boy",
+        "blowjob", "bondage", "boob*", "booty talk ebony", "boy + boy", "boy boy",
         "brazzers", "breached ip camera", "bukkake", "candygirl", "casting couch teen",
-        "celebrity nude", "centerfold", "cinemakid", "clitoris", "club seventeen",
+        "celebrity nude", "centerfold",  "clitoris", "club seventeen",
         "cock", "cum", "cumshot", "cunt", "defloration", "dick", "dildo", "dogsex", "erotrix", 
         "eurocreme", "exploited black teen", "facial", "fantasia model", "fantasia-model", "fisting",
         "femjoy", "fm teen", "ftv girls", "fuck*", "galitsin-news", "gangbang", "gay", "gilf",
         "handjob", "headjob", "hegre art", "hegre-art", "hentai", "horny", 
-        "incest", "incezt", "jenna", "karinaworld", "kate's playground next", "kink*",
-        "lesbian", "masturbat*", "mature", "mbla", "met art", "met-art",
+        "incest", "incezt", "jenna", "jerking", "karinaworld", "kate's playground next", "kink*",
+        "lesbian", "masturbat*", "mature", "met art", "met-art",
         "metart", "milf", "molested", "msn not stickam", "mummy edit", "naakt nackt",
         "nackt", "naked gymnast", "naked news", "naked on stage", "naked sport",
         "naked women", "naked-gymnast", "newstar", "nipple", "nubile", "nude beach",
         "nude bellydance", "nude exhib", "nude foto", "nude in public", "nude photo",
         "nude scene", "nude sports", "nude yoga", "nude-in-public", "nudebeach",
-        "online naked", "orgasm", "paraphili", "penatrat*", "penis", "pink teen", "pjk",
+        "online naked", "orgasm", "paraphili*", "penatrat*", "penis", "pink teen", "pjk",
         "playboy", "porn", "posing naked", "pr0nstars", "preggo", "pregnant", "premature", 
         "profileasian", "profileblond", "public nudity", "pussy",
         "qqaazz", "qsh", "qwerty", "rape", "reallola", "rimjob", "russian slaves",

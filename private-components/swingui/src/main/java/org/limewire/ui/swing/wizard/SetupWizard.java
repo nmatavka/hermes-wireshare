@@ -6,6 +6,8 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.InstallSettings;
+import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -21,16 +23,6 @@ public class SetupWizard {
                       Provider<LibraryManager> libraryManagerProvider) {
         this.libraryData = libraryManagerProvider.get().getLibraryData();        
         createWizard(decoratorFactory.get(), libraryData);
-    }
-
-    public static boolean shouldShowWizard() {
-        if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
-            return true;
-        }
-        if (!InstallSettings.START_STARTUP.getValue()) {
-            return GuiUtils.shouldShowStartOnStartupWindow();
-        }
-        return false;
     }
 
     public void showDialog(Frame owner) {           
@@ -52,14 +44,14 @@ public class SetupWizard {
     }
 
     private static boolean shouldShowPage1() {
-        if (!InstallSettings.AUTO_SHARING_OPTION.getValue()) {
+        if (LimeAssociations.isMagnetAssociationSupported() || LimeAssociations.isTorrentAssociationSupported()) {
+            return true;
+        }
+        if (!FilterSettings.FILTER_ADULT.getValue()) {
             return true;
         }
         if (!InstallSettings.START_STARTUP.getValue()) {
             return GuiUtils.shouldShowStartOnStartupWindow();
-        }
-        if (!FilterSettings.FILTER_ADULT.getValue()) {
-            return true;
         }
         return false;
     }

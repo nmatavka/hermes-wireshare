@@ -18,7 +18,8 @@ import org.limewire.util.OSUtils;
 
 public class SetupPage1 extends WizardPage {
 
-    private final JCheckBox associationFileTypeCheckBox;
+    private final JCheckBox associationMagFileTypeCheckBox;
+    private final JCheckBox associationTorFileTypeCheckBox;
     private final JCheckBox launchAtStartupCheckBox;
     private final JCheckBox filterAdultContentCheckBox;
     
@@ -28,7 +29,8 @@ public class SetupPage1 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0 14 0 0, gap 0, nogrid"));       
    
-        associationFileTypeCheckBox = createAndDecorateCheckBox(true);
+        associationMagFileTypeCheckBox = createAndDecorateCheckBox(true);
+        associationTorFileTypeCheckBox = createAndDecorateCheckBox(true);
         launchAtStartupCheckBox = createAndDecorateCheckBox(true);
         filterAdultContentCheckBox = createAndDecorateCheckBox(true);
 
@@ -48,8 +50,10 @@ public class SetupPage1 extends WizardPage {
 
              if (LimeAssociations.isMagnetAssociationSupported() 
                      || LimeAssociations.isTorrentAssociationSupported()) {
-                 add(associationFileTypeCheckBox, "gaptop 5, gapleft 26");
-                 add(createAndDecorateMultiLine(I18n.tr("Associate magnet links and torrent files with WireShare"), associationFileTypeCheckBox), "gaptop 5, gapleft 5, wrap");
+                 add(associationMagFileTypeCheckBox, "gaptop 5, gapleft 26");
+                 add(createAndDecorateMultiLine(I18n.tr("Associate magnet links with WireShare"), associationMagFileTypeCheckBox), "gaptop 5, gapleft 5, wrap");
+                 add(associationTorFileTypeCheckBox, "gaptop 5, gapleft 26");
+                 add(createAndDecorateMultiLine(I18n.tr("Associate torrent files with WireShare"), associationTorFileTypeCheckBox), "gaptop 5, gapleft 5, wrap");
              }
              
              if (shouldShowStartOnStartupWindow()) {
@@ -64,7 +68,8 @@ public class SetupPage1 extends WizardPage {
     }
     
     private void initSettings() {
-        associationFileTypeCheckBox.setSelected(SwingUiSettings.HANDLE_MAGNETS.getValue());
+        associationMagFileTypeCheckBox.setSelected(SwingUiSettings.HANDLE_MAGNETS.getValue());
+        associationTorFileTypeCheckBox.setSelected(SwingUiSettings.HANDLE_TORRENTS.getValue());
         launchAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
         filterAdultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
     }
@@ -88,19 +93,17 @@ public class SetupPage1 extends WizardPage {
     @Override
     public void applySettings() {
         // File Associations
-        SwingUiSettings.HANDLE_MAGNETS.setValue(associationFileTypeCheckBox.isSelected());
+        SwingUiSettings.HANDLE_MAGNETS.setValue(associationMagFileTypeCheckBox.isSelected());
         LimeAssociationOption magnetAssociationOption = LimeAssociations.getMagnetAssociation();
         if (magnetAssociationOption != null) {
-            magnetAssociationOption.setEnabled(associationFileTypeCheckBox.isSelected());
+            magnetAssociationOption.setEnabled(associationMagFileTypeCheckBox.isSelected());
         }
 
-        SwingUiSettings.HANDLE_TORRENTS.setValue(associationFileTypeCheckBox.isSelected());
+        SwingUiSettings.HANDLE_TORRENTS.setValue(associationTorFileTypeCheckBox.isSelected());
         LimeAssociationOption torrentAssociationOption = LimeAssociations.getTorrentAssociation();
         if (torrentAssociationOption != null) {
-            torrentAssociationOption.setEnabled(associationFileTypeCheckBox.isSelected());
+            torrentAssociationOption.setEnabled(associationTorFileTypeCheckBox.isSelected());
         }
-
-        InstallSettings.ASSOCIATION_OPTION.setValue(2);
 
         // launch at startup
         if (shouldShowStartOnStartupWindow()) {
@@ -117,7 +120,6 @@ public class SetupPage1 extends WizardPage {
             StartupSettings.RUN_ON_STARTUP.setValue(launchAtStartupCheckBox.isSelected());
         } else
             StartupSettings.RUN_ON_STARTUP.setValue(false);
-        InstallSettings.START_STARTUP.setValue(true);
         
         // Adult Filter Setting
         FilterSettings.FILTER_ADULT.setValue(filterAdultContentCheckBox.isSelected());

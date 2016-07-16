@@ -106,48 +106,7 @@ public class FilterSettings extends LimeProps {
      * search results.
      */
     public static final StringArraySetting BANNED_WORDS =
-        FACTORY.createStringArraySetting("BANNED_WORDS", new String[]{ 
-        		//Spam words to filter
-        		"accelerator", "apple", "astalavista", "browse", 
-                "corrupt", "crack", "demonoid", "diaper", "dogging", "downloader", 
-                "downloads", "dvdrig", "efree", "ffmm", "fixed", "gift", "humiliation",
-                "incomplete", "ipod", "isohunt", "keygen", "keymaker", "limewire",
-                "marketing", "norton", "original", "patch", "popsicle",
-                "preview", "recipe", "rmx", "samsung", "screens","serialz", "shorties", "toolbar",
-                "almighty", "verified", "vertor", "candide", "high quality", 
-                "hi def).mov", "new album).wma", "radio edit", "uploaded.by.wahpee",
-                "black_x).zip", "free music.wma", "hot new track.mp3", "orion).zip",
-                "pbay", "pbr.*", "radio edit.wma", "rare record.wma", "snd].zip",
-                "tsrh.zip", "torrents download.zip", "uncut track",
-                "unreleased studio edition.", "unreleased version.snd", "verified",
-                "upload.by", " new album ", "()", "bittorrent complete", "bubanee",
-                "complete).wma", "confirmed", "confirmed complete",
-                "conteo david_pl99", "explicit", "eztv", "full version",
-                "good).", "good copy", "greatest hits mix", "good audio",
-                "hd).mov*", "hi def", "including crack by", "jute", "keygen inside.zip",
-                "keygen is included).zip", "kimmiboi", "less_mucca", "nyc remix",
-                "radio edit).mov", "unreleased live record).mp3", "fix).zip", ".horrorspoke",
-                ".yuridia.zip", "256k stereo.mp3", "5000passwords", "anuzbitt", "arestra",
-                "aardbob", "adultfriendfinder", "adultpeak", "allcoolmusic", "azoogle",
-                "best song ever", "bestqualiti", "bestbartersoftware", "brrip.mov",
-                "collegemegaparties", "complete.mov", "coolhousing", "divxvl",
-                "downloadmedia", "edirectclub", "esaveclub", "Evar.torrent",
-                "edition}.zip", "exe.torrent", "extratorrent", "fff.zip", "freeclub",
-                "freemusic", "gnoozle", "godaddy", "goudkov", "greatest hits remix",
-                "himegimi", "i2cams", "ipad2", "iwannadownload", "ifreeclub", "iphone",
-                "isohunt >", "isohunt..diabolic.zip", "jironimo", "joethehob0",
-                "justin-be ", "justin-girl ", "keygen for ", "keymaker by ",
-                "mininova", "monova", "mp3baby", "myaffiliatead", "p2pads",
-                "p2pblast", "pbay.torrent", "patched", "piratebay",
-                "puzzledesktop", "quality", "quibus", "radarsync", "reddragon.rar",
-                "redlightcenter", "reesexyworld", "savenow", "screamsaver", "seonomad",
-                "serialy", "shareaccelerator", "sharewarning", "sponsored", "sudoku",
-                "sumotracker", "techkiing", "teddycash", "thebestofnet", "track.mov",
-                "kickasstorrent", "torrentdownloads", "torrentfreak", "torrentfunk",
-                "torrenthound", "torrentmatrix", "torrentpond", "torrentportal",
-                "torrentpump", "torrentsource", "torrentzap", "touslesfilmsx", "verified ",
-                "victor.torrent", "versatel", "whentoaskforhelp", "wonderfultracks",
-                "zapshares", "zerotracker", "zibbik", "zip.avi", "zipam."});
+        FACTORY.createStringArraySetting("BANNED_WORDS", new String[0]);
     
     /**
      * An array of extensions that the user has banned from appearing in

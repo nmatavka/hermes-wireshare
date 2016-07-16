@@ -12,9 +12,6 @@ public interface Bootstrapper extends Runnable {
     /** Resets the bootstrapper to its initial state. */
     void reset();
     
-    /** Get a gnutella.net file from a bootstrapper server. */
-    void getGnet();
-
     /** Adds a UHC to the bootstrapper, returning true if the UHC was added. */
     boolean addUDPHostCache(ExtendedEndpoint ee);
 

@@ -22,7 +22,17 @@ public class PhraseFilter implements SpamFilter, ResponseFilter, SearchResultFil
     
     /** INVARIANT: strings in ban contain only lowercase */
     private final List<String> ban;
-
+	static final String[] SPAM_WORDS = {
+   		//Spam words to filter
+		"256k stereo.mp3", "5000passwords", "black_x).zip", "brrip.mov", "complete.mov", 
+		"complete).wma", "crack.zip", "diabolic.zip", "edition}.zip", "evar.torrent", 
+		"exe.torrent", "fff.zip", "fix).zip", "free music.wma", "greatest hits mix",
+		"keygen.zip", "keygen inside.zip", "keygen is included).zip", "hd).mov", 
+		"hi def).mov", "hot new track.mp3", "installer.zip", "new album).wma", "orion).zip", 
+		"patch.zip", "radio edit.wma", "radio edit).mov", "rare record.wma", "reddragon.rar", 
+		"snd].zip", "tsrh.zip", "unreleased live record).mp3", "victor.torrent", "yuridia.zip", "zip.avi"
+	};
+	
     PhraseFilter() {
         ban = createDefaultList();
     }
@@ -33,7 +43,9 @@ public class PhraseFilter implements SpamFilter, ResponseFilter, SearchResultFil
     
     private List<String> createDefaultList() {
         ImmutableList.Builder<String> builder = ImmutableList.builder();
-        // ADD PHRASES HERE
+    	for(String word : SPAM_WORDS) {
+            builder.add(word.toLowerCase(Locale.US));
+        }
         return builder.build();
     }
 
@@ -72,12 +84,19 @@ public class PhraseFilter implements SpamFilter, ResponseFilter, SearchResultFil
     public boolean isBanned(String input) {
         String canonical = input.toLowerCase(Locale.US);
         for(String word : ban) {
-            int idx = canonical.indexOf(word);
-            if(idx != -1
-              && (idx == 0 || canonical.charAt(idx - 1) == ' ') // start of word boundary
-              && (word.length() + idx == canonical.length() || canonical.charAt(word.length() + idx) == ' ')) // end of word boundary
-            {
-                return true;
+            if (word.endsWith("*")) { 			// filter if phrase contains keyword 
+            	if (canonical.indexOf(word.replace("*","" )) != -1 ) {
+            		return true;
+            	}
+            } else { 							// filter by keyword
+	        	int idx = canonical.indexOf(word);
+	            while (idx != -1){				// scan for multiple occurrences in string
+	            	if((idx == 0 || "abcdefghijklmnopqrstuvwxyz".indexOf(canonical.charAt(idx - 1)) == -1) // start of word boundary check
+		              && (word.length() + idx == canonical.length() || "abcdefghijklmnopqrtuvwxyz".indexOf(canonical.charAt(word.length() + idx)) == -1)) {// end of word boundary check
+		                return true;
+		            }
+	            	idx = canonical.indexOf(word,idx + 1);	
+	        	}
             }
         }
         return false;

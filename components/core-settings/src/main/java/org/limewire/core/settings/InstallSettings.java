@@ -25,10 +25,10 @@ public final class InstallSettings extends LimeWireSettings {
     }
     
     /**
-     * Whether or not the 'Scan for files' question has been asked.
+     * Current version of spam words.
      */
-    public static final BooleanSetting SCAN_FILES =
-        FACTORY.createBooleanSetting("SCAN_FILES", false);
+    public static final IntSetting SPAM_VER =
+        FACTORY.createIntSetting("SPAM_VER", 0);
         
     /**
      * Whether or not the 'Start on startup' question has been asked.
@@ -48,14 +48,6 @@ public final class InstallSettings extends LimeWireSettings {
     public static final BooleanSetting FIREWALL_WARNING =
         FACTORY.createBooleanSetting("FIREWALL_WARNING", false);
     
-    /** Whether Auto-Sharing question has been asked. */
-    public static final BooleanSetting AUTO_SHARING_OPTION =
-        FACTORY.createBooleanSetting("AUTO_SHARING_OPTION", false);
-    
-    /** Whether the association option has been asked. */
-    public static final IntSetting ASSOCIATION_OPTION =
-    	FACTORY.createIntSetting("ASSOCIATION_OPTION", 0);
-
     /** Whether the association option has been asked. */
     public static final BooleanSetting EXTENSION_OPTION =
         FACTORY.createBooleanSetting("EXTENSION_OPTION", false);

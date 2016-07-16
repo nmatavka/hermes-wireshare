@@ -382,14 +382,9 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final LongSetting LAST_GWCUPDATE_TIME = FACTORY.createLongSetting(
             "LAST_GWCUPDATE_TIME", 0);
-    
-    /** Bootstrap servers. */
-    public static final StringArraySetting BOOTSTRAP_SERVERS =
-        FACTORY.createStringArraySetting("BOOTSTRAP_SERVERS",
-                new String[] {"http://wireshare.sourceforge.net/gnutella.net"});  // ADD BOOTSTRAP SERVERS HERE
-    
+
     /** GWebCache servers. */
     public static final StringArraySetting GWEBCACHE_SERVERS = 
     		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
-    				new String[] {"http://wireshare.sourceforge.net/gwc/gwc.php"});  // ADD GWEBCACHE SERVERS HERE
+    				new String[0] );  // ADD GWEBCACHE SERVERS HERE
 }
