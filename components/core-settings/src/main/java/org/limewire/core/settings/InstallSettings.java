@@ -29,7 +29,19 @@ public final class InstallSettings extends LimeWireSettings {
      */
     public static final IntSetting SPAM_VER =
         FACTORY.createIntSetting("SPAM_VER", 0);
-        
+    
+    /**
+     * The default Security Level.
+     */
+    public static final IntSetting SECURITY_LEVEL =
+        FACTORY.createIntSetting("SECURITY_LEVEL", 3);
+    
+    /**
+     * The Security Version.
+     */
+    public static final StringSetting SECURITY_VERSION =
+        FACTORY.createStringSetting("SECURITY_VERSION", "0.0.0");
+    
     /**
      * Whether or not the 'Start on startup' question has been asked.
      */
