@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.InstallSettings;
+import org.limewire.io.Expand;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.settings.StartupSettings;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -311,15 +314,15 @@ public class SystemOptionPanel extends OptionPanel {
         private int SecurityLevel;
         
         public SecurityPanel() {
-            super(I18n.tr("Security Options"));
+            super(I18n.tr("Security Level"));
 
             Strong = new JRadioButton(I18n.tr("Strong Security - Full Japanese Block."));
             Strong.setContentAreaFilled(false);
             StrongNJ = new JRadioButton(I18n.tr("Strong Security."));
             StrongNJ.setContentAreaFilled(false);
-            Lite = new JRadioButton(I18n.tr("Lite Security - Full Japanese Block."));
+            Lite = new JRadioButton(I18n.tr("Light Security - Full Japanese Block."));
             Lite.setContentAreaFilled(false);
-            LiteNJ = new JRadioButton(I18n.tr("Lite Security."));
+            LiteNJ = new JRadioButton(I18n.tr("Light Security."));
             LiteNJ.setContentAreaFilled(false);
             None = new JRadioButton(I18n.tr("None."));
             None.setContentAreaFilled(false);
@@ -369,38 +372,42 @@ public class SystemOptionPanel extends OptionPanel {
         ApplyOptionResult applyOptions() {
         	if (hasChanged()) {
 	        	String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
-	        	String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.txt";
+	        	String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
 	        	boolean Success = true;
 	            switch (SecurityLevel) {
-	            case 1:
+	            case 4:
 	            	try {
-						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
-					} catch (IOException e) {
-						Success = false;
-					}
-	            	break;
-	            case 2:
-	            	try {
-						downloadFromUrl(url + "HostilesNJ.txt", Hostiles);
+						downloadFromUrl(url + "HostilesFull.zip", Hostiles);
+						Extract(Hostiles,CommonUtils.getUserSettingsDir());
 					} catch (IOException e) {
 						Success = false;
 					}
 	            	break;
 	            case 3:
 	            	try {
-						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
+						downloadFromUrl(url + "HostilesNJ.zip", Hostiles);
+						Extract(Hostiles,CommonUtils.getUserSettingsDir());
 					} catch (IOException e) {
 						Success = false;
 					}
 	            	break;
-	            case 4:
+	            case 2:
 	            	try {
-						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
+						downloadFromUrl(url + "HostilesLight.zip", Hostiles);
+						Extract(Hostiles,CommonUtils.getUserSettingsDir());
 					} catch (IOException e) {
 						Success = false;
 					}
 	            	break;
-	            default:
+	            case 1:
+	            	try {
+						downloadFromUrl(url + "HostilesLightNJ.zip", Hostiles);
+						Extract(Hostiles,CommonUtils.getUserSettingsDir());
+					} catch (IOException e) {
+						Success = false;
+					}
+	            	break;
+	            case 0:
 	            	File hostiles = new File(Hostiles);
 	            	hostiles.delete();
 	            	Success = true;
@@ -445,9 +452,20 @@ public class SystemOptionPanel extends OptionPanel {
         	case 1:
         		LiteNJ.setSelected(true);
         		break;
-        	default:
+        	case 0:
         		None.setSelected(true);
         		}
+        }
+        
+        private void Extract(String zipFilePath, File Path) throws FileNotFoundException{
+        	FileInputStream in = new FileInputStream(zipFilePath);
+    	    try {
+    			Expand.expandFile(in, Path, true, null);
+    			in.close();
+    			File zip = new File(zipFilePath);
+    			zip.delete();
+    		} catch (IOException e) {
+    		}
         }
         
         private void downloadFromUrl(String strURL, String localFilename) throws IOException {

@@ -2,18 +2,29 @@ package com.limegroup.gnutella.filters;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.inject.EagerSingleton;
+import org.limewire.io.Expand;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IP;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -48,8 +59,8 @@ public final class LocalIPFilter extends AbstractIPFilter {
         this.hostileNetworkFilter = hostileNetworkFilter;
         this.ipLoader = ipLoader;
         
-        File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
-        shouldLoadHostiles = hostiles.exists();
+        //File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+        shouldLoadHostiles = InstallSettings.SECURITY_LEVEL.get() > 0; //hostiles.exists();
         
         refreshHosts();
     }
@@ -108,7 +119,60 @@ public final class LocalIPFilter extends AbstractIPFilter {
         // Load data from hostiles.txt (if it wasn't already loaded!)...
         if(shouldLoadHostiles) {
             shouldLoadHostiles = false;
-            
+            Version currversion = null;
+            try {
+            	currversion = new Version(getVersion("http://wireshare.sourceforge.net/WSSecurityUpdates/version"));
+            } catch (VersionFormatException impossible){};
+            if ( currversion != null ) {
+            	try {
+					if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 ) {
+						String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
+						String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
+						boolean Success = true;
+					    switch (InstallSettings.SECURITY_LEVEL.get()) {
+					    case 4:
+					    	try {
+								downloadFromUrl(url + "HostilesFull.zip", Hostiles);
+								Extract(Hostiles,CommonUtils.getUserSettingsDir());
+							} catch (IOException e) {
+								Success = false;
+							}
+					    	break;
+					    case 3:
+					    	try {
+								downloadFromUrl(url + "HostilesNJ.zip", Hostiles);
+								Extract(Hostiles,CommonUtils.getUserSettingsDir());
+							} catch (IOException e) {
+								Success = false;
+							}
+					    	break;
+					    case 2:
+					    	try {
+								downloadFromUrl(url + "HostilesLight.zip", Hostiles);
+								Extract(Hostiles,CommonUtils.getUserSettingsDir());
+							} catch (IOException e) {
+								Success = false;
+							}
+					    	break;
+					    case 1:
+					    	try {
+								downloadFromUrl(url + "HostilesLightNJ.zip", Hostiles);
+								Extract(Hostiles,CommonUtils.getUserSettingsDir());
+							} catch (IOException e) {
+								Success = false;
+							}
+					    	break;
+					    default:
+					    	Success = false;
+					    }
+					    if (Success) {
+					    	InstallSettings.SECURITY_VERSION.set(currversion.toString());
+					    }
+
+					}
+				} catch (VersionFormatException e) {
+				}
+            }
             LOG.debug("Loading hostiles.txt");
             File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
             BufferedReader reader = null;
@@ -129,6 +193,61 @@ public final class LocalIPFilter extends AbstractIPFilter {
         goodHosts = newGood;
     }
     
+    private void Extract(String zipFilePath, File Path) throws FileNotFoundException{
+    	FileInputStream in = new FileInputStream(zipFilePath);
+	    try {
+			Expand.expandFile(in, Path, true, null);
+			in.close();
+			File zip = new File(zipFilePath);
+			zip.delete();
+		} catch (IOException e) {
+		}
+    }
+    
+    private String getVersion(String urlToRead) {
+    	String result = null;
+    	try {
+           URL url = new URL(urlToRead);
+           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+           BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+           result = rd.readLine();
+           rd.close();
+        } catch (IOException e) {
+        } catch (Exception e) {
+        }
+        return result;
+    }
+    
+    private void downloadFromUrl(String strURL, String localFilename) throws IOException {
+        InputStream is = null;
+        FileOutputStream fos = null;
+        URL url = new URL(strURL);
+        try {
+            URLConnection urlConn = url.openConnection();//connect
+
+            is = urlConn.getInputStream();               //get connection inputstream
+            fos = new FileOutputStream(localFilename);   //open outputstream to local file
+
+            byte[] buffer = new byte[4096];              //declare 4KB buffer
+            int len;
+
+            //while we have available data, continue downloading and storing to local file
+            while ((len = is.read(buffer)) > 0) {  
+                fos.write(buffer, 0, len);
+            }
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } finally {
+                if (fos != null) {
+                    fos.close();
+                }
+            }
+        }
+    }
+ 
     /** Determines if any blacklisted hosts exist. */
     @Override
     public boolean hasBlacklistedHosts() {

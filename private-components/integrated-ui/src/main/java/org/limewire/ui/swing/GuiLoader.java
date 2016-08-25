@@ -21,13 +21,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 
@@ -61,53 +59,7 @@ final class GuiLoader {
             		if (reply == JOptionPane.YES_OPTION) openUrl("http://sourceforge.net/projects/wireshare/files/");
             	}
             }
-            try {
-            	currversion = new Version(getVersion("http://wireshare.sourceforge.net/WSSecurityUpdates/version"));
-            } catch (VersionFormatException impossible){};
-            if ( currversion != null && InstallSettings.SECURITY_LEVEL.get() > 0) {
-            	if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 ) {
-    	        	String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
-    	        	String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.txt";
-    	        	boolean Success = true;
-    	            switch (InstallSettings.SECURITY_LEVEL.get()) {
-    	            case 1:
-    	            	try {
-    						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
-    					} catch (IOException e) {
-    						Success = false;
-    					}
-    	            	break;
-    	            case 2:
-    	            	try {
-    						downloadFromUrl(url + "HostilesNJ.txt", Hostiles);
-    					} catch (IOException e) {
-    						Success = false;
-    					}
-    	            	break;
-    	            case 3:
-    	            	try {
-    						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
-    					} catch (IOException e) {
-    						Success = false;
-    					}
-    	            	break;
-    	            case 4:
-    	            	try {
-    						downloadFromUrl(url + "HostilesFull.txt", Hostiles);
-    					} catch (IOException e) {
-    						Success = false;
-    					}
-    	            	break;
-    	            default:
-    	            	Success = false;
-    	            }
-    	            if (Success) {
-    	            	InstallSettings.SECURITY_VERSION.set(currversion.toString());
-    	            }
-
-            	}
-            }
-        } 
+        }
 //        catch(StartupFailedException sfe) {
 //            GuiUtils.hideAndDisposeAllWindows();
 //            showCorruptionError(sfe);
@@ -262,7 +214,7 @@ final class GuiLoader {
         DIALOG.setVisible(true);
     }   
     
-    public String getVersion(String urlToRead) {
+    private String getVersion(String urlToRead) {
     	String result = null;
     	try {
            URL url = new URL(urlToRead);
@@ -275,37 +227,8 @@ final class GuiLoader {
         }
         return result;
     }
-    private void downloadFromUrl(String strURL, String localFilename) throws IOException {
-        InputStream is = null;
-        FileOutputStream fos = null;
-        URL url = new URL(strURL);
-        try {
-            URLConnection urlConn = url.openConnection();//connect
-
-            is = urlConn.getInputStream();               //get connection inputstream
-            fos = new FileOutputStream(localFilename);   //open outputstream to local file
-
-            byte[] buffer = new byte[4096];              //declare 4KB buffer
-            int len;
-
-            //while we have available data, continue downloading and storing to local file
-            while ((len = is.read(buffer)) > 0) {  
-                fos.write(buffer, 0, len);
-            }
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } finally {
-                if (fos != null) {
-                    fos.close();
-                }
-            }
-        }
-    }
     
-     public void openUrl(String url) throws IOException, URISyntaxException {
+    public void openUrl(String url) throws IOException, URISyntaxException {
     	  if(java.awt.Desktop.isDesktopSupported() ) {
     	        java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 
