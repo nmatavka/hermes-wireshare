@@ -3,6 +3,7 @@ package org.limewire.ui.swing.wizard;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.UrlAction;
@@ -89,4 +90,11 @@ public abstract class WizardPage extends JPanel {
         decorator.decorateGreyButton(button);
         return button;
     }
+    
+    protected JRadioButton createAndDecorateLargeRadioButton(String text) {
+    	JRadioButton box = new JRadioButton(text);
+    	decorator.decorateLargeRadioButton(box);
+    	return box;
+    }
+    
 }

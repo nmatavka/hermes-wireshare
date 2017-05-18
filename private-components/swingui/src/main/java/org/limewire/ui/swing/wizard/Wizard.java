@@ -235,7 +235,7 @@ public class Wizard extends JPanel {
     }
     
     private void updateBackButton(WizardPage page) {
-        backButton.setVisible(currentPage == pageList.size() - 1 && page.hasBackButton());
+        backButton.setVisible(currentPage > 0 && currentPage <= pageList.size()  && page.hasBackButton());
     }
     
     private void updateFooter(WizardPage page) {

@@ -376,37 +376,17 @@ public class SystemOptionPanel extends OptionPanel {
 	        	boolean Success = true;
 	            switch (SecurityLevel) {
 	            case 4:
-	            	try {
-						downloadFromUrl(url + "HostilesFull.zip", Hostiles);
-						Extract(Hostiles,CommonUtils.getUserSettingsDir());
-					} catch (IOException e) {
-						Success = false;
-					}
+	            	Success = getHostiles(url + "HostilesFull.zip", Hostiles);
 	            	break;
 	            case 3:
-	            	try {
-						downloadFromUrl(url + "HostilesNJ.zip", Hostiles);
-						Extract(Hostiles,CommonUtils.getUserSettingsDir());
-					} catch (IOException e) {
-						Success = false;
-					}
+	            	Success = getHostiles(url + "HostilesNJ.zip", Hostiles);
 	            	break;
 	            case 2:
-	            	try {
-						downloadFromUrl(url + "HostilesLight.zip", Hostiles);
-						Extract(Hostiles,CommonUtils.getUserSettingsDir());
-					} catch (IOException e) {
-						Success = false;
-					}
+	            	Success = getHostiles(url + "HostilesLight.zip", Hostiles);
 	            	break;
 	            case 1:
-	            	try {
-						downloadFromUrl(url + "HostilesLightNJ.zip", Hostiles);
-						Extract(Hostiles,CommonUtils.getUserSettingsDir());
-					} catch (IOException e) {
-						Success = false;
-					}
-	            	break;
+	            	Success = getHostiles(url + "HostilesLightNJ.zip", Hostiles);
+					break;
 	            case 0:
 	            	File hostiles = new File(Hostiles);
 	            	hostiles.delete();
@@ -468,6 +448,16 @@ public class SystemOptionPanel extends OptionPanel {
     		}
         }
         
+        private boolean getHostiles(String strURL, String localFilename){
+        	try {
+    			downloadFromUrl(strURL, localFilename);
+    			Extract(localFilename,CommonUtils.getUserSettingsDir());
+    			return true;
+    		} catch (IOException e) {
+    			return false;
+    		}
+        }
+        	
         private void downloadFromUrl(String strURL, String localFilename) throws IOException {
             InputStream is = null;
             FileOutputStream fos = null;

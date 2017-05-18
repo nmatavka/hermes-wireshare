@@ -120,47 +120,28 @@ public final class LocalIPFilter extends AbstractIPFilter {
         if(shouldLoadHostiles) {
             shouldLoadHostiles = false;
             Version currversion = null;
+            File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
             try {
             	currversion = new Version(getVersion("http://wireshare.sourceforge.net/WSSecurityUpdates/version"));
             } catch (VersionFormatException impossible){};
             if ( currversion != null ) {
             	try {
-					if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 ) {
+            		if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 || !hostiles.exists() ) {
 						String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
 						String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
 						boolean Success = true;
 					    switch (InstallSettings.SECURITY_LEVEL.get()) {
 					    case 4:
-					    	try {
-								downloadFromUrl(url + "HostilesFull.zip", Hostiles);
-								Extract(Hostiles,CommonUtils.getUserSettingsDir());
-							} catch (IOException e) {
-								Success = false;
-							}
+					    	Success = getHostiles(url + "HostilesFull.zip", Hostiles);
 					    	break;
 					    case 3:
-					    	try {
-								downloadFromUrl(url + "HostilesNJ.zip", Hostiles);
-								Extract(Hostiles,CommonUtils.getUserSettingsDir());
-							} catch (IOException e) {
-								Success = false;
-							}
+					    	Success = getHostiles(url + "HostilesNJ.zip", Hostiles);
 					    	break;
 					    case 2:
-					    	try {
-								downloadFromUrl(url + "HostilesLight.zip", Hostiles);
-								Extract(Hostiles,CommonUtils.getUserSettingsDir());
-							} catch (IOException e) {
-								Success = false;
-							}
+					    	Success = getHostiles(url + "HostilesLight.zip", Hostiles);
 					    	break;
 					    case 1:
-					    	try {
-								downloadFromUrl(url + "HostilesLightNJ.zip", Hostiles);
-								Extract(Hostiles,CommonUtils.getUserSettingsDir());
-							} catch (IOException e) {
-								Success = false;
-							}
+					    	Success = getHostiles(url + "HostilesLightNJ.zip", Hostiles);
 					    	break;
 					    default:
 					    	Success = false;
@@ -174,7 +155,6 @@ public final class LocalIPFilter extends AbstractIPFilter {
 				}
             }
             LOG.debug("Loading hostiles.txt");
-            File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
             BufferedReader reader = null;
             try {
                 reader = new BufferedReader(new FileReader(hostiles));
@@ -218,6 +198,16 @@ public final class LocalIPFilter extends AbstractIPFilter {
         return result;
     }
     
+    private boolean getHostiles(String strURL, String localFilename){
+    	try {
+			downloadFromUrl(strURL, localFilename);
+			Extract(localFilename,CommonUtils.getUserSettingsDir());
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+    }
+    	
     private void downloadFromUrl(String strURL, String localFilename) throws IOException {
         InputStream is = null;
         FileOutputStream fos = null;

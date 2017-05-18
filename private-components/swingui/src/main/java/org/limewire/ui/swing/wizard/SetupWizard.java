@@ -41,6 +41,7 @@ public class SetupWizard {
         }
         
         wizard.addPage(new SetupPage2(decorator, libraryData));
+        wizard.addPage(new SetupPage3(decorator));
     }
 
     private static boolean shouldShowPage1() {

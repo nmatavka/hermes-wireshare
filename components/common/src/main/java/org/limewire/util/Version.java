@@ -133,9 +133,14 @@ public class Version implements Comparable<Version> {
     private int[] parse(String vers) throws VersionFormatException {
 	    int major, minor, service, revision;
 	    int dot1, dot2, lastNum;
-
-        dot1 = vers.indexOf(".");
-	    if(dot1 != -1) {
+	    
+        try {
+        	dot1 = vers.indexOf(".");
+        } catch(NullPointerException npe) {
+            throw new VersionFormatException(vers);
+        }
+        
+        if(dot1 != -1) {
     	    dot2 = vers.indexOf(".", dot1 + 1);
             if(dot2 == -1)
                 dot2 = vers.length();
