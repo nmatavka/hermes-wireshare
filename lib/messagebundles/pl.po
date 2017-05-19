@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WireShare Polish\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-07 14:20-0500\n"
+"POT-Creation-Date: 2017-05-19 01:01-0400\n"
 "PO-Revision-Date: 2010-07-16 15:00+0000\n"
 "Last-Translator: Piotr Strębski <strebski@o2.pl>\n"
 "Language-Team: none\n"
@@ -1332,18 +1332,19 @@ msgstr "Szukaj w sieci"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:248
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:121
 #, fuzzy, java-format
-msgid "{0} Peer-to-Peer User"
-msgid_plural "{0} Peer-to-Peer Users"
-msgstr[0] "{0} użytkownik P2P"
-msgstr[1] "{0} użytkowników P2P"
-msgstr[2] "{0} użytkowników P2P"
+msgid "{0} User"
+msgid_plural "{0} Users"
+msgstr[0] "{0} osoba"
+msgstr[1] "{0} osoby"
+msgstr[2] "{0} ludzi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:211
-msgid "Peer-to-Peer User"
-msgid_plural "Peer-to-Peer Users"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+#, fuzzy
+msgid "User"
+msgid_plural "Users"
+msgstr[0] "Nazwa użytkownika"
+msgstr[1] "Nazwa użytkownika"
+msgstr[2] "Nazwa użytkownika"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:280
 msgid "Locate"
@@ -1647,6 +1648,7 @@ msgstr[0] "Czekam - Następny w kolejce"
 msgstr[1] "Czekam - {0} w kolejce"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:195
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/MessageFileOfferImpl.java:119
 msgid "File deleted - Dangerous file"
 msgstr "Plik usunięty - niebezpieczny plik"
 
@@ -1661,8 +1663,8 @@ msgstr "Poszukiwanie pliku ({0} pozostało)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:224
 #, fuzzy
-msgid "1 Peer-to-Peer User"
-msgstr "1 Użytkownik P2P"
+msgid "1 User"
+msgstr "Użytkownik sieci P2P"
 
 #. just friends
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:251
@@ -1815,7 +1817,6 @@ msgid "friends"
 msgstr "przyjaciele"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/filter/SourceItem.java:15
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
 msgid "Peer-to-Peer Users"
 msgstr ""
 
@@ -2224,7 +2225,7 @@ msgstr "Biblioteka"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/navigator/LibraryNavItem.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:236
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:167
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:171
 msgid "Public Shared"
 msgstr "Udostępnione publicznie"
 
@@ -2795,7 +2796,7 @@ msgstr "Odśwież"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:123
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:225
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:60
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:161
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:165
 msgid "My Files"
 msgstr "Moje pliki"
 
@@ -2886,7 +2887,7 @@ msgid "Open Torrent"
 msgstr "Otwórz Torrenta"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/OpenFileAction.java:56
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:108
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:119
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:86
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/LimeAssociations.java:104
 msgid "\".torrent\" files"
@@ -3212,7 +3213,7 @@ msgid "Share downloaded files."
 msgstr "Udostępnione pliki"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:199
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:137
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:141
 msgid "Enable partial file sharing."
 msgstr ""
 
@@ -3575,42 +3576,75 @@ msgstr ""
 msgid "Unlimited"
 msgstr "Nieograniczony"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:95
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:106
 msgid "File Associations"
 msgstr "Skojarzenia plików"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:99
-msgid "\"magnet\" links"
-msgstr ""
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:110
+#, fuzzy
+msgid "\".magnet\" links"
+msgstr "odnośniki \"magnet:\""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:116
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:127
 #, fuzzy
 msgid "Warn me when other programs want to open these types automatically"
 msgstr ""
 "Ostrzeż mnie kiedy inne programy chcą automatycznie otworzyć programy tego "
 "typu"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:216
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:227
 msgid "Startup and Shutdown"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:218
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:229
 msgid "Start WireShare every time I log in"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:220
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:231
 #, fuzzy
 msgid "Minimize to notifications area"
 msgstr "Minimalizuj do ikony systemowej"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:222
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:233
 msgid "Exit program"
 msgstr "Zakończ"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:233
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:244
 #, fuzzy
 msgid "When I press the close button:"
 msgstr "Kiedy wcisnę X:"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:305
+#, fuzzy
+msgid "Security Level"
+msgstr "Bezpieczeństwo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:307
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:34
+msgid "Strong Security - Full Japanese Block."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:309
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:36
+#, fuzzy
+msgid "Strong Security."
+msgstr "Bezpieczeństwo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:38
+msgid "Light Security - Full Japanese Block."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:40
+#, fuzzy
+msgid "Light Security."
+msgstr "Bezpieczeństwo"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:42
+msgid "None."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferLimitsOptionPanel.java:135
 msgid "Limit your download bandwidth"
@@ -4115,26 +4149,27 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:81
 #, fuzzy
-msgid "All Peer-to-Peer Users"
-msgstr "Wszyscy użytkownicy P2P"
+msgid "All Users"
+msgstr "Wszystkie foldery"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:132
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:168
 #, fuzzy, java-format
-msgid "Block Peer-to-Peer User {0}?"
+msgid "Block User {0}?"
 msgstr "Zablokuj użytkownika {0}"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:138
-msgid "Block Peer-to-Peer users?"
-msgstr ""
+#, fuzzy
+msgid "Block users?"
+msgstr "Zablokuj użytkownika"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:174
-#, java-format
-msgid "Block {0} Peer-to-Peer Users?"
-msgstr ""
+#, fuzzy, java-format
+msgid "Block {0} Users?"
+msgstr "Zablokuj użytkownika"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:144
 msgid "Retry"
@@ -4201,6 +4236,11 @@ msgstr ""
 "Dostępna (singular, feminine) \r\n"
 "Dostępne (singular, no genre / plurar, feminine)\r\n"
 "Dostępni (plurar, masculine)"
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
+#, fuzzy
+msgid "Users"
+msgstr "Użytkownicy sieci P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:169
 msgid "Unable to Browse"
@@ -5196,60 +5236,66 @@ msgstr ""
 msgid "{0} folders only"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:49
 msgid "File Associations and Startup"
 msgstr "Skojarzenia typów plików i uruchomienie"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:52
-msgid "Associate magnet links and torrent files with WireShare"
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:54
+msgid "Associate magnet links with WireShare"
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:57
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:56
+msgid "Associate torrent files with WireShare"
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
 msgid "Launch WireShare at system startup"
 msgstr "Uruchom WireShare przy starcie systemu"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:60
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:64
 #, fuzzy
 msgid "Search Filter Settings"
 msgstr "Filtrowanie wyszukiwania"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:62
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:66
 #, fuzzy
 msgid "Filter adult content from my search results."
 msgstr ""
 "Nie pokazuj zawartości przeznaczonej dla dorosłych w wynikach wyszukiwania"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:74
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:79
 msgid "Please take a minute to configure these options before moving on."
 msgstr "Proszę poświęcić chwilę na konfigurację tych opcji przed przejściem na"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:84
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:107
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:89
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:111
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:97
 msgid "All settings can be changed later from WireShare > Preferences"
 msgstr ""
 "Wszystkie ustawienia mogą być później zmienione z WireShare> Preferencje"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:85
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:108
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:90
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:112
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:98
 msgid "All settings can be changed later in Tools > Options"
 msgstr "Wszystkie ustawienia mogą być później zmienione w Narzędzia > Opcje"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:113
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:117
 msgid "Learn about sharing."
 msgstr "Dowiedz się więcej na temat udostępniania."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:129
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:133
 msgid "Files in your Public Shared list are shared with the world."
 msgstr "Pliki w twojej Dzielonej Publicznie liście są dzielone ze światem"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:134
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:138
 #, fuzzy
 msgid "Add files I download from peer-to-peer users to my Public Shared list."
 msgstr ""
 "Dodaj pliki , które pobrałem z Użytkownika P2P do mojej listy Dzielonej "
 "Publicznie"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:141
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:145
 #, fuzzy
 msgid ""
 "WireShare will add files you download from peer-to-peer users into your "
@@ -5258,33 +5304,46 @@ msgstr ""
 "WireShare doda pliki, które ściągnąłeś od użytkowników P2P, do Twojej "
 "Publicznie Współużytkowanej listy."
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:145
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:149
 msgid ""
 "WireShare will will share partially downloaded files from peer-to-peer users."
 msgstr ""
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:158
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:162
 msgid "To see or modify files in your Public Shared list, go to"
 msgstr ""
 "Aby zobaczyć lub zmodyfikować pliki w Twojej Publicznie Współużytkowanej "
 "liście, idź do"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:187
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:191
 msgid ""
 "Shared files from your old version will continue to be shared with the world."
 msgstr ""
 "Współzielone pliki z twojej starszej wersji  nadal będą dzielone ze światem"
 
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:192
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:196
 #, java-format
 msgid ""
 "{0} shared files from your previous version will continue to be shared with "
 "the world."
 msgstr ""
 
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:87
+msgid "Please select your desired security level."
+msgstr ""
+
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:92
+#, fuzzy
+msgid ""
+"NOTE: Changes to security level settings will not take effect until after "
+"WireShare is restarted."
+msgstr ""
+"Jedna lub więcej opcji zacznie działać, gdy WireShare zostanie ponownie "
+"uruchomiony."
+
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75
-#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/WizardPage.java:29
+#: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/WizardPage.java:30
 msgid "Continue"
 msgstr "Kontynuuj"
 
@@ -5300,6 +5359,25 @@ msgstr "Instalacja - krok {0} z {1}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:207
 msgid "Setup"
 msgstr "Ustawienia"
+
+#, fuzzy
+#~ msgid "{0} Peer-to-Peer User"
+#~ msgid_plural "{0} Peer-to-Peer Users"
+#~ msgstr[0] "{0} użytkownik P2P"
+#~ msgstr[1] "{0} użytkowników P2P"
+#~ msgstr[2] "{0} użytkowników P2P"
+
+#, fuzzy
+#~ msgid "1 Peer-to-Peer User"
+#~ msgstr "1 Użytkownik P2P"
+
+#, fuzzy
+#~ msgid "All Peer-to-Peer Users"
+#~ msgstr "Wszyscy użytkownicy P2P"
+
+#, fuzzy
+#~ msgid "Block Peer-to-Peer User {0}?"
+#~ msgstr "Zablokuj użytkownika {0}"
 
 #~ msgid "Trouble connecting to people"
 #~ msgstr "Problem podczas łączenia z użytkownikami"
@@ -5464,12 +5542,6 @@ msgstr "Ustawienia"
 #~ msgstr ""
 #~ "Przychodzące Wyszukiwania - osoby z Sieci P2P w tej chwili poszukują..."
 
-#~ msgid "P2P User"
-#~ msgid_plural "P2P Users"
-#~ msgstr[0] "Użytkownik sieci P2P"
-#~ msgstr[1] "Użytkownicy sieci P2P"
-#~ msgstr[2] "Użytkownicy sieci P2P"
-
 #~ msgid ""
 #~ "This file has not been scanned for viruses.  Do you want to launch anyway?"
 #~ msgstr ""
@@ -5526,9 +5598,6 @@ msgstr "Ustawienia"
 
 #~ msgid "Updating AVG Anti-Virus definitions"
 #~ msgstr "Aktualizowanie definicji AVG Anti-Virus"
-
-#~ msgid "P2P Users"
-#~ msgstr "Użytkownicy sieci P2P"
 
 #~ msgid "Incorrect username or password."
 #~ msgstr "Podana nazwa użytkownika lub hasło nie są poprawne."
