@@ -37,6 +37,12 @@ public final class InstallSettings extends LimeWireSettings {
         FACTORY.createIntSetting("SECURITY_LEVEL", 3);
     
     /**
+     * Whether or not to update the security file.
+     */
+    public static final BooleanSetting SECURITY_UPDATE =
+        FACTORY.createBooleanSetting("SECURITY_UPDATE", true);
+        
+    /**
      * The Security Version.
      */
     public static final StringSetting SECURITY_VERSION =

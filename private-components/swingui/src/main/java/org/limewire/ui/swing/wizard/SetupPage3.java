@@ -2,38 +2,16 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
-
-import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.InstallSettings;
-import org.limewire.io.Expand;
-import org.limewire.ui.swing.options.OptionPanel;
-import org.limewire.ui.swing.options.OptionPanel.ApplyOptionResult;
-import org.limewire.ui.swing.settings.StartupSettings;
-import org.limewire.ui.swing.settings.SwingUiSettings;
-import org.limewire.ui.swing.shell.LimeAssociationOption;
-import org.limewire.ui.swing.shell.LimeAssociations;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
+
+import javax.swing.ButtonGroup;
+
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.MacOSXUtils;
-import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
@@ -111,7 +89,7 @@ public class SetupPage3 extends WizardPage {
     
     @Override
     public String getLine2() {
-        return "";
+        return I18n.tr("NOTE: Changes to security level settings will not take effect until after WireShare is restarted.");
     }
     
     @Override
@@ -119,45 +97,25 @@ public class SetupPage3 extends WizardPage {
         return OSUtils.isMacOSX() ? I18n.tr("All settings can be changed later from WireShare > Preferences") :
             I18n.tr("All settings can be changed later in Tools > Options");
     }
+    
     @Override
     public void  applySettings() {
-    	String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
-    	String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
-    	boolean Success = true;
-        switch (SecurityLevel) {
-        case 4:
-        	Success = getHostiles(url + "HostilesFull.zip", Hostiles);
-        	break;
-        case 3:
-        	Success = getHostiles(url + "HostilesNJ.zip", Hostiles);
-        	break;
-        case 2:
-        	Success = getHostiles(url + "HostilesLight.zip", Hostiles);
-        	break;
-        case 1:
-        	Success = getHostiles(url + "HostilesLightNJ.zip", Hostiles);
-			break;
-        case 0:
-        	File hostiles = new File(Hostiles);
-        	hostiles.delete();
-        	Success = true;
-        }
-        if (Success) {
-        	try {
-				URL vurl = new URL("http://wireshare.sourceforge.net/WSSecurityUpdates/version");
-		        URLConnection con = vurl.openConnection();
-		        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		        String version;
-		        version=in.readLine();
-		        in.close();
-		        InstallSettings.SECURITY_VERSION.set(version);
-        	} catch (MalformedURLException e) {
-			} catch (IOException e) {
-			}
+        if (hasChanged()) {
         	InstallSettings.SECURITY_LEVEL.setValue(SecurityLevel);
+        	if (SecurityLevel == 0) {
+	        	InstallSettings.SECURITY_UPDATE.setValue(false);
+	        	File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
+	        	if (hostiles.exists()) hostiles.delete();
+	        } else {
+	        	InstallSettings.SECURITY_UPDATE.setValue(true);
+	        }
         }
     }
-
+    
+    boolean hasChanged() {
+        return InstallSettings.SECURITY_LEVEL.getValue() != SecurityLevel;
+    }
+    
     private void initOptions() {
     	SecurityLevel = InstallSettings.SECURITY_LEVEL.getValue();
     	switch (SecurityLevel) { 
@@ -175,57 +133,6 @@ public class SetupPage3 extends WizardPage {
     		break;
     	case 0:
     		None.setSelected(true);
-    		}
-    }
-    
-    private void Extract(String zipFilePath, File Path) throws FileNotFoundException{
-    	FileInputStream in = new FileInputStream(zipFilePath);
-	    try {
-			Expand.expandFile(in, Path, true, null);
-			in.close();
-			File zip = new File(zipFilePath);
-			zip.delete();
-		} catch (IOException e) {
-		}
-    }
-    
-    private boolean getHostiles(String strURL, String localFilename){
-    	try {
-			downloadFromUrl(strURL, localFilename);
-			Extract(localFilename,CommonUtils.getUserSettingsDir());
-			return true;
-		} catch (IOException e) {
-			return false;
-		}
-    }
-    	
-    private void downloadFromUrl(String strURL, String localFilename) throws IOException {
-        InputStream is = null;
-        FileOutputStream fos = null;
-        URL url = new URL(strURL);
-        try {
-            URLConnection urlConn = url.openConnection();//connect
-
-            is = urlConn.getInputStream();               //get connection inputstream
-            fos = new FileOutputStream(localFilename);   //open outputstream to local file
-
-            byte[] buffer = new byte[4096];              //declare 4KB buffer
-            int len;
-
-            //while we have available data, continue downloading and storing to local file
-            while ((len = is.read(buffer)) > 0) {  
-                fos.write(buffer, 0, len);
-            }
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } finally {
-                if (fos != null) {
-                    fos.close();
-                }
-            }
-        }
+    	}
     }
 }

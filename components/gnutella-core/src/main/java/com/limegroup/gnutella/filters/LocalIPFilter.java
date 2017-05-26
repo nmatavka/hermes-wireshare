@@ -60,7 +60,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
         this.ipLoader = ipLoader;
         
         //File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
-        shouldLoadHostiles = InstallSettings.SECURITY_LEVEL.get() > 0; //hostiles.exists();
+        shouldLoadHostiles = InstallSettings.SECURITY_LEVEL.get() > 0 || InstallSettings.SECURITY_UPDATE.getValue(); //hostiles.exists();
         
         refreshHosts();
     }
@@ -126,7 +126,9 @@ public final class LocalIPFilter extends AbstractIPFilter {
             } catch (VersionFormatException impossible){};
             if ( currversion != null ) {
             	try {
-            		if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 || !hostiles.exists() ) {
+            		if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 
+            				|| !hostiles.exists()
+            				|| InstallSettings.SECURITY_UPDATE.getValue()) {
 						String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
 						String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
 						boolean Success = true;
@@ -148,8 +150,8 @@ public final class LocalIPFilter extends AbstractIPFilter {
 					    }
 					    if (Success) {
 					    	InstallSettings.SECURITY_VERSION.set(currversion.toString());
+					    	InstallSettings.SECURITY_UPDATE.setValue(false);
 					    }
-
 					}
 				} catch (VersionFormatException e) {
 				}
