@@ -50,7 +50,7 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
         setLayout(new MigLayout("nogrid, insets 10"));
         setSize(320, 190);
         setPreferredSize(new Dimension(320, 190));
-        setMaximumSize(new Dimension(320, 190));
+        setMaximumSize(new Dimension(320, 320));
         setMinimumSize(new Dimension(320, 190));
         setBackground(backgroundColor);
 
