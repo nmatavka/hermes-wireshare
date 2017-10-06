@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: WireShare 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-05-19 01:01-0400\n"
-"PO-Revision-Date: 2016-08-24 16:32+0200\n"
+"PO-Revision-Date: 2017-10-05 21:21+0300\n"
 "Last-Translator: \n"
 "Language-Team: WireShare translators <https://launchpad.net/~limewire-"
 "translators>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Launchpad-Export-Date: 2010-07-27 03:33+0000\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 #: components/gnutella-core/src/main/java/com/limegroup/gnutella/xml/LimeXMLNames.java:101
@@ -1352,18 +1352,17 @@ msgstr "Recherche web"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:218
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:248
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/FriendPresenceActionsImpl.java:121
-#, fuzzy, java-format
+#, java-format
 msgid "{0} User"
 msgid_plural "{0} Users"
-msgstr[0] "{0} personne"
-msgstr[1] "{0} personnes"
+msgstr[0] "{0} utilisateur"
+msgstr[1] "{0} utilisateurs"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:211
-#, fuzzy
 msgid "User"
 msgid_plural "Users"
-msgstr[0] "Nom d’utilisateur"
-msgstr[1] "Nom d’utilisateur"
+msgstr[0] "Utilisateur"
+msgstr[1] "Utilisateurs"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/components/RemoteHostWidget.java:280
 msgid "Locate"
@@ -1681,9 +1680,8 @@ msgid "Looking for file ({0} left)"
 msgstr "Recherche du fichier en cours ({0} restant)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:224
-#, fuzzy
 msgid "1 User"
-msgstr "Utilisateur P2P"
+msgstr "1 utilisateur"
 
 #. just friends
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/renderer/DownloadMessageRendererEditor.java:251
@@ -3661,9 +3659,8 @@ msgid "File Associations"
 msgstr "Associations de fichiers"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:110
-#, fuzzy
 msgid "\".magnet\" links"
-msgstr "Fichiers « .magnet »"
+msgstr "Liens « .magnet »"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:127
 msgid "Warn me when other programs want to open these types automatically"
@@ -3692,36 +3689,33 @@ msgid "When I press the close button:"
 msgstr "Lorsque je clique sur le bouton de fermeture :"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:305
-#, fuzzy
 msgid "Security Level"
-msgstr "Sécurité"
+msgstr "Niveau de sécurité"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:307
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:34
 msgid "Strong Security - Full Japanese Block."
-msgstr ""
+msgstr "Sécurité forte - Blocage complet du Japon"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:309
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:36
-#, fuzzy
 msgid "Strong Security."
-msgstr "Sécurité"
+msgstr "Sécurité forte."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:38
 msgid "Light Security - Full Japanese Block."
-msgstr ""
+msgstr "Sécurité légère - Blocage complet du Japon"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:40
-#, fuzzy
 msgid "Light Security."
-msgstr "Sécurité"
+msgstr "Sécurité légère."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:42
 msgid "None."
-msgstr ""
+msgstr "Aucun."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/TransferLimitsOptionPanel.java:135
 msgid "Limit your download bandwidth"
@@ -4222,28 +4216,26 @@ msgid "WireShare is connecting..."
 msgstr "WireShare en cours de connexion..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:81
-#, fuzzy
 msgid "All Users"
-msgstr "Tous les dossiers"
+msgstr "Tous les utilisateurs"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:132
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:168
-#, fuzzy, java-format
+#, java-format
 msgid "Block User {0}?"
-msgstr "Bloquer l’utilisateur {0}"
+msgstr "Bloquer l’utilisateur {0} ?"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:138
-#, fuzzy
 msgid "Block users?"
-msgstr "Bloquer l’utilisateur"
+msgstr "Bloquer l’utilisateur ?"
 
 #. {0}: P2P User's name
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BlockUserMenuFactory.java:174
-#, fuzzy, java-format
+#, java-format
 msgid "Block {0} Users?"
-msgstr "Bloquer l’utilisateur"
+msgstr "Bloquer les utilisateurs {0} ?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseFailedMessagePanel.java:144
 msgid "Retry"
@@ -4314,9 +4306,8 @@ msgid "Update Available"
 msgstr "Mise à jour disponible"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:163
-#, fuzzy
 msgid "Users"
-msgstr "Utilisateurs P2P"
+msgstr "Utilisateurs"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/BrowseStatusPanel.java:169
 msgid "Unable to Browse"
@@ -5340,14 +5331,12 @@ msgid "File Associations and Startup"
 msgstr "Associations de fichiers et démarrage"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:54
-#, fuzzy
 msgid "Associate magnet links with WireShare"
-msgstr "Associer les liens magnet et les fichiers torrent avec WireShare"
+msgstr "Associer les liens magnet avec WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:56
-#, fuzzy
 msgid "Associate torrent files with WireShare"
-msgstr "Associer les fichiers .magnet et .torrent avec WireShare"
+msgstr "Associer les fichiers .torrent avec WireShare"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:61
 msgid "Launch WireShare at system startup"
@@ -5437,16 +5426,15 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:87
 msgid "Please select your desired security level."
-msgstr ""
+msgstr "Veuillez sélectionner le niveau de sécurité désiré"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage3.java:92
-#, fuzzy
 msgid ""
 "NOTE: Changes to security level settings will not take effect until after "
 "WireShare is restarted."
 msgstr ""
-"Une ou plusieurs des options prendront effet lors du prochain redémarrage de "
-"WireShare."
+"NOTE : Les modifications apportées au réglages du niveau de sécurité "
+"prendront effet lors du prochain démarrage de WireShare."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:59
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:75
