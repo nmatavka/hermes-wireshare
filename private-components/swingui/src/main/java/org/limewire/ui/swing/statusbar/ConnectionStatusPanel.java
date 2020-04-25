@@ -102,7 +102,7 @@ class ConnectionStatusPanel extends JXPanel {
         
         switch(strength) {
         case NO_INTERNET:
-            statusMessage = I18n.tr("Connection strength is 0/5");
+            statusMessage = I18n.tr("No internet connection");
             tooltipText = I18n.tr("You have no internet connection");
             strengthIcon = noInternet;
             break;
@@ -119,34 +119,34 @@ class ConnectionStatusPanel extends JXPanel {
             strengthIcon = connecting;
             break;
         case WEAK:
-            statusMessage = I18n.tr("Connection strength is 1/5");
+            statusMessage = I18n.tr("Weak connection");
             tooltipText = I18n.tr("You have a very weak connection");
             strengthIcon = weak;
             break;
          case WEAK_PLUS:
-            statusMessage = I18n.tr("Connection strength is 2/5");
+            statusMessage = I18n.tr("Weak connection");
             tooltipText = I18n.tr("You have a weak connection");
             strengthIcon = weakPlus;
             break;            
          case MEDIUM:
-            statusMessage = I18n.tr("Connection strength is 3/5");
+            statusMessage = I18n.tr("Medium connection");
             tooltipText = I18n.tr("You have a medium connection");
             strengthIcon = medium; 
             break;
          case MEDIUM_PLUS:
-             statusMessage = I18n.tr("Connection strength is 4/5");
+             statusMessage = I18n.tr("Medium connection");
              tooltipText = I18n.tr("You have a fair connection");
              strengthIcon = mediumPlus; 
              break;            
         case FULL:
             shouldHideStatusLater = true;
-            statusMessage = I18n.tr("Connection strength is 5/5");
+            statusMessage = I18n.tr("Full connection");
             tooltipText = I18n.tr("You are fully connected");
             strengthIcon = full;
             break;
         case TURBO:
             shouldHideStatusLater = true;
-            statusMessage = I18n.tr("Connection strength is 6/5");
+            statusMessage = I18n.tr("Turbo-charged connection");
             tooltipText = I18n.tr("You have a turbo-charged connection");
             strengthIcon = turbo; 
             break;

@@ -344,7 +344,7 @@ public class AppFrame extends SingleFrameApplication {
      */
     private void initUIDefaults() {       
         if (OSUtils.isMacOSX()) {
-            initMacUIDefaults();
+           initMacUIDefaults();
         }
         
         if (OSUtils.isWindows()) {
@@ -411,10 +411,10 @@ public class AppFrame extends SingleFrameApplication {
      * Sets some mac only UI settings.
      */
     private void initMacUIDefaults() {
-        UIManager.put("MenuItemUI", "javax.swing.plaf.basic.BasicMenuItemUI");
-        UIManager.put("CheckBoxMenuItemUI", "javax.swing.plaf.basic.BasicCheckBoxMenuItemUI");
-        UIManager.put("RadioButtonMenuItemUI", "javax.swing.plaf.basic.BasicRadioButtonMenuItemUI");
-        UIManager.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
+    	//UIManager.put("MenuItemUI", "javax.swing.plaf.basic.BasicMenuItemUI");
+        //UIManager.put("CheckBoxMenuItemUI", "javax.swing.plaf.basic.BasicCheckBoxMenuItemUI");
+        //UIManager.put("RadioButtonMenuItemUI", "javax.swing.plaf.basic.BasicRadioButtonMenuItemUI");
+        //UIManager.put("MenuUI", "javax.swing.plaf.basic.BasicMenuUI");
         // these two lines have to be here in the mac UI settings method.
         // if they're put under initUIDefaults, then they turn the application menus in Windows green as well...
         // On OSX they have no effect on the application menu color.

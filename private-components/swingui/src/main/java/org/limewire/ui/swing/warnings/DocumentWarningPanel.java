@@ -6,7 +6,9 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLayeredPane;
+import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -48,12 +50,12 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
         GuiUtils.assignResources(this);
 
         setLayout(new MigLayout("nogrid, insets 10"));
-        setSize(320, 190);
-        setPreferredSize(new Dimension(320, 190));
-        setMaximumSize(new Dimension(320, 320));
-        setMinimumSize(new Dimension(320, 190));
+        setSize(400, 200);
+        setPreferredSize(new Dimension(400, 200));
+        setMaximumSize(new Dimension(400, 200));
+        setMinimumSize(new Dimension(400, 200));
         setBackground(backgroundColor);
-
+        
         final String learnMoreUrl = "http://www.limewire.com/client_redirect/?page=documentsSharing";
         HTMLLabel htmlLabel = new HTMLLabel(
                 I18n
@@ -68,6 +70,7 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
         htmlLabel.setHtmlLinkForeground(linkFontColor);
 
         add(htmlLabel, "wrap");
+        
         MultiLineLabel sharingLabel = new MultiLineLabel(I18n
                 .tr("Do you wish to continue sharing documents?"));
         sharingLabel.setForeground(fontColor);
@@ -101,13 +104,12 @@ public class DocumentWarningPanel extends OverlayPopupPanel {
         
         add(continueSharingButton, "alignx center, gaptop 15");
         add(unshareAllButton, "wrap");
-        
         resize();
     }
 
     @Override
     public void resize() {
-        Rectangle parentBounds = layeredPane.getBounds();
+    	Rectangle parentBounds = layeredPane.getBounds();
         int w = getPreferredSize().width;
         int h = getPreferredSize().height;
         setLocation(parentBounds.width - w, parentBounds.height - h);
