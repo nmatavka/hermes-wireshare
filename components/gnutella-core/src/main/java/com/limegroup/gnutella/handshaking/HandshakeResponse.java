@@ -200,7 +200,7 @@ public class HandshakeResponse {
      * Constant for whether or not this node is a LimeWire (or derivative)
      */
     private final boolean IS_LIMEWIRE;
-    private final boolean IS_LIME_CLONE;
+
     /**
      * Constant for whether or nor this node is an older limewire.
      */
@@ -270,10 +270,6 @@ public class HandshakeResponse {
         PROBE_QUERIES = isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
         NO_REQUERYING = isFalseValue(HEADERS, HeaderNames.X_REQUERIES);
 
-        IS_LIME_CLONE = extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
-                Locale.US).contains("lime") || extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
-                Locale.US).contains("wire");
-        
         IS_LIMEWIRE = extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
                 Locale.US).startsWith("limewire/") || extractStringHeaderValue(headers, HeaderNames.USER_AGENT).toLowerCase(
                 Locale.US).startsWith("wireshare/");
@@ -281,7 +277,7 @@ public class HandshakeResponse {
         GOOD_ULTRAPEER = isHighDegreeConnection() && isUltrapeerQueryRoutingConnection()
                 && (getMaxTTL() < 5) && isDynamicQueryConnection();
 
-        GOOD_LEAF = GOOD_ULTRAPEER && (IS_LIMEWIRE || (IS_LIME_CLONE && NO_REQUERYING));
+        GOOD_LEAF = GOOD_ULTRAPEER && IS_LIMEWIRE;
 
         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);

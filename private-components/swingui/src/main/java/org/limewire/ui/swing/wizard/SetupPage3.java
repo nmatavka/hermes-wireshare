@@ -17,10 +17,10 @@ import org.limewire.util.OSUtils;
 
 public class SetupPage3 extends WizardPage {
 
-    private final JRadioButton Strong;
-    private final JRadioButton Lite;
+    //private final JRadioButton Strong;
+    //private final JRadioButton Light;
     private final JRadioButton StrongNJ;
-    private final JRadioButton LiteNJ;        
+    private final JRadioButton LightNJ;        
     private final JRadioButton None;        
     
     private int SecurityLevel;
@@ -31,40 +31,40 @@ public class SetupPage3 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 100 200 0 0, gap 0, nogrid"));       
 
-        Strong = createAndDecorateLargeRadioButton(I18n.tr("Strong Security - Full Japanese Block."));
-        Strong.setContentAreaFilled(false);
+        //Strong = createAndDecorateLargeRadioButton(I18n.tr("Strong Security - Full Japanese Block."));
+        //Strong.setContentAreaFilled(false);
         StrongNJ = createAndDecorateLargeRadioButton(I18n.tr("Strong Security."));
         StrongNJ.setContentAreaFilled(false);
-        Lite = createAndDecorateLargeRadioButton(I18n.tr("Light Security - Full Japanese Block."));
-        Lite.setContentAreaFilled(false);
-        LiteNJ = createAndDecorateLargeRadioButton(I18n.tr("Light Security."));
-        LiteNJ.setContentAreaFilled(false);
+        //Light = createAndDecorateLargeRadioButton(I18n.tr("Light Security - Full Japanese Block."));
+        //Light.setContentAreaFilled(false);
+        LightNJ = createAndDecorateLargeRadioButton(I18n.tr("Light Security."));
+        LightNJ.setContentAreaFilled(false);
         None = createAndDecorateLargeRadioButton(I18n.tr("None."));
         None.setContentAreaFilled(false);
         
         ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(Strong);
+        //buttonGroup.add(Strong);
         buttonGroup.add(StrongNJ);
-        buttonGroup.add(Lite);
-        buttonGroup.add(LiteNJ);
+        //buttonGroup.add(Light);
+        buttonGroup.add(LightNJ);
         buttonGroup.add(None);
 
-        Strong.addActionListener(new ActionListener( ) {
+        /*Strong.addActionListener(new ActionListener( ) {
             public void actionPerformed(ActionEvent ae) {           
              SecurityLevel = 4;
             }          
-         });
+         });*/
         StrongNJ.addActionListener(new ActionListener( ) {
             public void actionPerformed(ActionEvent ae) {           
              SecurityLevel = 3;
             }          
          });
-        Lite.addActionListener(new ActionListener( ) {
+        /*Light.addActionListener(new ActionListener( ) {
             public void actionPerformed(ActionEvent ae) {           
              SecurityLevel = 2;
             }          
-         });
-        LiteNJ.addActionListener(new ActionListener( ) {
+         });*/
+        LightNJ.addActionListener(new ActionListener( ) {
             public void actionPerformed(ActionEvent ae) {           
              SecurityLevel = 1;
             }          
@@ -75,10 +75,10 @@ public class SetupPage3 extends WizardPage {
             }          
          });
         
-        add(Strong,"gapleft 5, wrap");
+        //add(Strong,"gapleft 5, wrap");
         add(StrongNJ,"gapleft 5, wrap");
-        add(Lite,"gapleft 5, wrap");
-        add(LiteNJ,"gapleft 5, wrap");
+        //add(Light,"gapleft 5, wrap");
+        add(LightNJ,"gapleft 5, wrap");
         add(None,"gapleft 5");
         initOptions();
     }
@@ -120,16 +120,16 @@ public class SetupPage3 extends WizardPage {
     	SecurityLevel = InstallSettings.SECURITY_LEVEL.getValue();
     	switch (SecurityLevel) { 
     	case 4:
-    		Strong.setSelected(true);
-    		break;
+    		//Strong.setSelected(true);
+    		//break;
     	case 3: 
     		StrongNJ.setSelected(true);
     		break;
     	case 2:
-    		Lite.setSelected(true);
-    		break;
+    		//Light.setSelected(true);
+    		//break;
     	case 1:
-    		LiteNJ.setSelected(true);
+    		LightNJ.setSelected(true);
     		break;
     	case 0:
     		None.setSelected(true);

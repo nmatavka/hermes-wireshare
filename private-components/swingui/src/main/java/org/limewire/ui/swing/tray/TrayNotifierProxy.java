@@ -22,7 +22,7 @@ class TrayNotifierProxy implements TrayNotifier {
     @Inject
     TrayNotifierProxy() {
         if(OSUtils.isMacOSX()) {
-            notifier = new GrowlNotifier();            
+            notifier = new MacOSNotifier();            
         } else {
             notifier = new SystemTrayNotifier();
             if(!showTrayIcon()) {

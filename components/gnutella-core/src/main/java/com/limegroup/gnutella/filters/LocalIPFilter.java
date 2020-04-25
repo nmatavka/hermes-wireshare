@@ -125,23 +125,26 @@ public final class LocalIPFilter extends AbstractIPFilter {
             	currversion = new Version(getVersion("http://wireshare.sourceforge.net/WSSecurityUpdates/version"));
             } catch (VersionFormatException impossible){};
             if ( currversion != null ) {
+            	LOG.debug("Current security version online = v" + currversion);
+            	LOG.debug("Installed security version = v" + InstallSettings.SECURITY_VERSION.get());
             	try {
             		if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 
             				|| !hostiles.exists()
             				|| InstallSettings.SECURITY_UPDATE.getValue()) {
 						String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
 						String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
+						LOG.debug("Updating security files...");
 						boolean Success = true;
 					    switch (InstallSettings.SECURITY_LEVEL.get()) {
 					    case 4:
-					    	Success = getHostiles(url + "HostilesFull.zip", Hostiles);
-					    	break;
+					    	//Success = getHostiles(url + "HostilesFull.zip", Hostiles);
+					    	//break;
 					    case 3:
 					    	Success = getHostiles(url + "HostilesNJ.zip", Hostiles);
 					    	break;
 					    case 2:
-					    	Success = getHostiles(url + "HostilesLight.zip", Hostiles);
-					    	break;
+					    	//Success = getHostiles(url + "HostilesLight.zip", Hostiles);
+					    	//break;
 					    case 1:
 					    	Success = getHostiles(url + "HostilesLightNJ.zip", Hostiles);
 					    	break;
@@ -149,11 +152,15 @@ public final class LocalIPFilter extends AbstractIPFilter {
 					    	Success = false;
 					    }
 					    if (Success) {
+					    	LOG.debug("Security files updated.");
 					    	InstallSettings.SECURITY_VERSION.set(currversion.toString());
 					    	InstallSettings.SECURITY_UPDATE.setValue(false);
+					    } else {
+					    	LOG.debug("Failed to update security files.");	
 					    }
 					}
 				} catch (VersionFormatException e) {
+					LOG.debug(e.getMessage());
 				}
             }
             LOG.debug("Loading hostiles.txt");

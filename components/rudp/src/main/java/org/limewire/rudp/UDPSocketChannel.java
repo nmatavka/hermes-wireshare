@@ -3,10 +3,12 @@ package org.limewire.rudp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketOption;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +23,6 @@ import org.limewire.rudp.messages.DataMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.util.BufferUtils;
-
 
 /**
  * Interface between reading channels & UDP's data.
@@ -423,4 +424,15 @@ public class UDPSocketChannel extends AbstractNBSocketChannel implements Interes
             return addr.toString();
         }
     }
+
+	@Override
+	public <T> T getOption(SocketOption<T> arg0) throws IOException {
+		throw new IOException("unsupported");
+	}
+
+	@Override
+	public Set<SocketOption<?>> supportedOptions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -293,10 +293,10 @@ public class SystemOptionPanel extends OptionPanel {
     }
     private class SecurityPanel extends OptionPanel {
 
-        private JRadioButton Strong;
-        private JRadioButton Lite;
+        //private JRadioButton Strong;
+        //private JRadioButton Light;
         private JRadioButton StrongNJ;
-        private JRadioButton LiteNJ;        
+        private JRadioButton LightNJ;        
         private JRadioButton None;        
         
         private int SecurityLevel;
@@ -304,40 +304,40 @@ public class SystemOptionPanel extends OptionPanel {
         public SecurityPanel() {
             super(I18n.tr("Security Level"));
 
-            Strong = new JRadioButton(I18n.tr("Strong Security - Full Japanese Block."));
-            Strong.setContentAreaFilled(false);
+            //Strong = new JRadioButton(I18n.tr("Strong Security."));
+            //Strong.setContentAreaFilled(false);
             StrongNJ = new JRadioButton(I18n.tr("Strong Security."));
             StrongNJ.setContentAreaFilled(false);
-            Lite = new JRadioButton(I18n.tr("Light Security - Full Japanese Block."));
-            Lite.setContentAreaFilled(false);
-            LiteNJ = new JRadioButton(I18n.tr("Light Security."));
-            LiteNJ.setContentAreaFilled(false);
+            //Light = new JRadioButton(I18n.tr("Light Security - Full Japanese Block."));
+            //Light.setContentAreaFilled(false);
+            LightNJ = new JRadioButton(I18n.tr("Light Security."));
+            LightNJ.setContentAreaFilled(false);
             None = new JRadioButton(I18n.tr("None."));
             None.setContentAreaFilled(false);
             
             ButtonGroup buttonGroup = new ButtonGroup();
-            buttonGroup.add(Strong);
+            //buttonGroup.add(StrongNJ);
             buttonGroup.add(StrongNJ);
-            buttonGroup.add(Lite);
-            buttonGroup.add(LiteNJ);
+            //buttonGroup.add(Light);
+            buttonGroup.add(LightNJ);
             buttonGroup.add(None);
 
-            Strong.addActionListener(new ActionListener( ) {
+            /*Strong.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {           
                  SecurityLevel = 4;
                 }          
-             });
+             });*/
             StrongNJ.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {           
                  SecurityLevel = 3;
                 }          
              });
-            Lite.addActionListener(new ActionListener( ) {
+            /*Light.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {           
                  SecurityLevel = 2;
                 }          
-             });
-            LiteNJ.addActionListener(new ActionListener( ) {
+             });*/
+            LightNJ.addActionListener(new ActionListener( ) {
                 public void actionPerformed(ActionEvent ae) {           
                  SecurityLevel = 1;
                 }          
@@ -348,10 +348,10 @@ public class SystemOptionPanel extends OptionPanel {
                 }          
              });
             
-            add(Strong,"gapleft 5, wrap");
+            //add(Strong,"gapleft 5, wrap");
             add(StrongNJ,"gapleft 5, wrap");
-            add(Lite,"gapleft 5, wrap");
-            add(LiteNJ,"gapleft 5, wrap");
+            //add(Light,"gapleft 5, wrap");
+            add(LightNJ,"gapleft 5, wrap");
             add(None,"gapleft 5");
             
         }
@@ -383,16 +383,16 @@ public class SystemOptionPanel extends OptionPanel {
         	SecurityLevel = InstallSettings.SECURITY_LEVEL.getValue();
         	switch (SecurityLevel) { 
         	case 4:
-        		Strong.setSelected(true);
-        		break;
+        		//Strong.setSelected(true);
+        		//break;
         	case 3: 
         		StrongNJ.setSelected(true);
         		break;
         	case 2:
-        		Lite.setSelected(true);
-        		break;
+        		//Lite.setSelected(true);
+        		//break;
         	case 1:
-        		LiteNJ.setSelected(true);
+        		LightNJ.setSelected(true);
         		break;
         	case 0:
         		None.setSelected(true);

@@ -29,7 +29,7 @@ public class Dock {
                 System.loadLibrary("Dock");
                 hasDock = true;
             } catch (UnsatisfiedLinkError err) {
-                 ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("libDock.jnilib"));
+                 ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("libDock.dylib"));
             }
         }
         HAS_DOCK = hasDock;

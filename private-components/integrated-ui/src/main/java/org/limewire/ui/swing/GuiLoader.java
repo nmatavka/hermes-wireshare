@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -25,7 +26,7 @@ import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
-
+import org.limewire.util.OSUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 
@@ -45,18 +46,30 @@ final class GuiLoader {
             //sanityCheck();
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
-            Version currversion = null;
-            try {
-            	currversion = new Version(getVersion("http://wireshare.sourceforge.net/version"));
-            } catch (VersionFormatException impossible){};
-            if ( currversion != null ) {
-            	if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
-            		int reply = JOptionPane.showConfirmDialog (null,  
-            			"WireShare version " + currversion.toString() + " is now available. Would you like to open the download page?", 
-            			"Updated version available",
-            			JOptionPane.YES_NO_OPTION,
-            			JOptionPane.INFORMATION_MESSAGE );
-            		if (reply == JOptionPane.YES_OPTION) openUrl("http://sourceforge.net/projects/wireshare/files/");
+            String currversions = null;
+            currversions = getVersion("http://wireshare.sourceforge.net/CVersions");
+            if ( currversions != null ) {
+            	Version currversion = null;
+            	String url = null;
+            	String[] versions = currversions.split("\\n");
+            	String ThisOS = OSUtils.getOS().toLowerCase(Locale.US);
+        		for (String version : versions) {
+            		String[] fields = version.split(";");
+            		if (ThisOS.startsWith(fields[0])) {
+            			currversion = new Version(fields[1]);
+            			url = fields[2];
+            			break;
+            		}
+            	}
+            	if ( currversion != null ) {
+            		if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
+	            		int reply = JOptionPane.showConfirmDialog (null,  
+	            			"WireShare version " + currversion.toString() + " is now available. Would you like to open the download page?", 
+	            			"Updated version available",
+	            			JOptionPane.YES_NO_OPTION,
+	            			JOptionPane.INFORMATION_MESSAGE );
+	            		if (reply == JOptionPane.YES_OPTION) openUrl(url);
+            		}
             	}
             }
         }
@@ -216,11 +229,15 @@ final class GuiLoader {
     
     private String getVersion(String urlToRead) {
     	String result = null;
+    	String line = null;
     	try {
            URL url = new URL(urlToRead);
            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
            result = rd.readLine();
+           while (( line = rd.readLine()) != null) {
+               result = result + "\\n" + line;
+           }
            rd.close();
         } catch (IOException e) {
         } catch (Exception e) {

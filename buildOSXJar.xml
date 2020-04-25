@@ -66,7 +66,7 @@
 	    <jarbundler dir="${macosx.app}"
 			verbose="true"
 	    	name="${app.name}"
-			version="5.6.6"
+			version="6.0.0"
 			shortname="${app.name}"
 			jar="${app.resrc}/WireShare.jar"
 			mainclass="org.limewire.ui.swing.Main"
@@ -78,7 +78,7 @@
 	    	bundleid="com.wireshare.gnutella"
 	    	jvmversion="1.6+"
 	    	LSArchitecturePriority="i386 x86_64"
-	    	vmoptions="-ea:com.limegroup... -ea:org.limewire... -Xms128m -Xmx768m -XX:MaxPermSize=256m -XX:PermSize=256m">
+	    	vmoptions="-ea:com.limegroup... -ea:org.limewire... -Xms128m -Xmx768m">
 
 	    	<!-- The below Java properties can be set to get a better MacOSX look-and-feel -->
 	    	<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
@@ -100,8 +100,6 @@
 	    	<javafileset dir="lib/native/osx"/>
 	    	<javafileset dir=".">
 	    		<include name="lib/WSHome.xhtml"/>
-	    		<include name="lib/bootstrap"/>
-	    		<include name="lib/img/TPB.jpg"/>
 	    		<include name="lib/img/*.png"/>
 	    	</javafileset>
 	    	<resourcefileset dir="lib/resources/osx">
