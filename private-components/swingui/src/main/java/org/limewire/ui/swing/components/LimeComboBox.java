@@ -133,7 +133,7 @@ public class LimeComboBox extends JXButton {
             }
             
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {
                 paintNormal(e.getSource(), true);
             }
             

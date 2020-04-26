@@ -14,7 +14,7 @@ public class MouseActionListener extends MouseAdapter {
     }
     
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         if (actionListener != null) {
             actionListener.actionPerformed(new ActionEvent(e.getComponent(),
                     ActionEvent.ACTION_PERFORMED, null));

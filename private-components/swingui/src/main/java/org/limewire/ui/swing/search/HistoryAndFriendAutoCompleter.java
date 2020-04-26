@@ -248,7 +248,7 @@ public class HistoryAndFriendAutoCompleter implements AutoCompleter {
         protected void processMouseEvent(MouseEvent me) {
             super.processMouseEvent(me);
             
-            if(me.getID() == MouseEvent.MOUSE_CLICKED) {
+            if(me.getID() == MouseEvent.MOUSE_PRESSED) {
                 int idx = locationToIndex(me.getPoint());
                 if(idx != -1 && isSelectedIndex(idx)) {
                     callback.itemSuggested(getSelectedValue().toString(), false, true);
