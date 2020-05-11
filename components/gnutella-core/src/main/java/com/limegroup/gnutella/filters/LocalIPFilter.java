@@ -169,7 +169,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
                 reader = new BufferedReader(new FileReader(hostiles));
                 String read = null;
                 while( (read = reader.readLine()) != null) {
-                    hostilesTXTHosts.add(read);
+                    if (!read.equals("")) hostilesTXTHosts.add(read);
                 }
             } catch(IOException e) {
                 LOG.debug("Error loading hostiles.txt", e);

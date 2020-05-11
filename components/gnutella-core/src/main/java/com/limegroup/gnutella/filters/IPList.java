@@ -72,7 +72,8 @@ public class IPList {
         try {
             ip = new IP(ipStr);
         } catch (IllegalArgumentException e) {
-            return false;
+            e.printStackTrace();
+        	return false;
         }
         add(ip);
         return true;
