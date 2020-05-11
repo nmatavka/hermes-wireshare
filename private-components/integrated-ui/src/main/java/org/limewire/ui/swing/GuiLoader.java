@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -51,7 +53,7 @@ final class GuiLoader {
             if ( currversions != null ) {
             	Version currversion = null;
             	String url = null;
-            	String[] versions = currversions.split("\\n");
+            	String[] versions = currversions.split("&");
             	String ThisOS = OSUtils.getOS().toLowerCase(Locale.US);
         		for (String version : versions) {
             		String[] fields = version.split(";");
@@ -63,12 +65,23 @@ final class GuiLoader {
             	}
             	if ( currversion != null ) {
             		if (currversion.compareTo( new Version(LimeWireUtils.getLimeWireVersion())) > 0 && !LimeWireUtils.isBetaRelease()) {
-	            		int reply = JOptionPane.showConfirmDialog (null,  
-	            			"WireShare version " + currversion.toString() + " is now available. Would you like to open the download page?", 
-	            			"Updated version available",
-	            			JOptionPane.YES_NO_OPTION,
-	            			JOptionPane.INFORMATION_MESSAGE );
-	            		if (reply == JOptionPane.YES_OPTION) openUrl(url);
+            			if (currversion.compareTo( new Version(InstallSettings.NO_REMIND_VERSION.get())) > 0) {
+                			JCheckBox checkbox = new JCheckBox("Do not remind me again for this version.");
+                			String message = "WireShare version " + currversion.toString() + " is now available. Would you like to open the download page?";
+                			Object[] params = {message, checkbox};
+    	            		int reply = JOptionPane.showConfirmDialog (null,  
+    	            			params, 
+    	            			"Updated version available",
+    	            			JOptionPane.YES_NO_OPTION,
+    	            			JOptionPane.INFORMATION_MESSAGE );
+    	            		if (reply == JOptionPane.YES_OPTION) {
+    	            			openUrl(url);
+    	            		} 
+    	            		if (checkbox.isSelected()) {
+    	            			InstallSettings.NO_REMIND_VERSION.set(currversion.toString());
+    	            		}
+            			}
+	            		
             		}
             	}
             }
@@ -236,7 +249,7 @@ final class GuiLoader {
            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
            result = rd.readLine();
            while (( line = rd.readLine()) != null) {
-               result = result + "\\n" + line;
+               result = result + "&" + line;
            }
            rd.close();
         } catch (IOException e) {

@@ -49,6 +49,12 @@ public final class InstallSettings extends LimeWireSettings {
         FACTORY.createStringSetting("SECURITY_VERSION", "0.0.0");
     
     /**
+     * The Security Version.
+     */
+    public static final StringSetting NO_REMIND_VERSION =
+        FACTORY.createStringSetting("NO_REMIND_VERSION", "0.0.0");
+    
+    /**
      * Whether or not the 'Start on startup' question has been asked.
      */
     public static final BooleanSetting START_STARTUP =
