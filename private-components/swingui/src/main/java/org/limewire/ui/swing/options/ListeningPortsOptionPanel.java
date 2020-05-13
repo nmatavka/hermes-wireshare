@@ -194,6 +194,7 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                     ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
                 }
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
+                ConnectionSettings.FORCED_IP_ADDRESS_STRING.revertToDefault();
                 if (oldUPNP || oldForce) {
                     restart = true;
                 }
@@ -202,7 +203,6 @@ public class ListeningPortsOptionPanel extends OptionPanel {
                 ConnectionSettings.DISABLE_UPNP.setValue(true);
             } else { // PORT.isSelected()
                 int gnutellaForcedPort = gnutellaForcePortTextField.getValue(oldForcedPort);
-
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
                 ConnectionSettings.UPNP_IN_USE.setValue(false);
