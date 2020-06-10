@@ -55,7 +55,7 @@
 	
 	    <taskdef name="jarbundler"
 				classname="net.sourceforge.jarbundler.JarBundler"
-				classpath="lib/jars/ant/jarbundler-2.3.1.jar"/>
+				classpath="lib\jars\ant\jarbundler-2.3.2.jar"/>
 	
 	    <!-- Delete the old .app if it exists -->
 	    <delete dir="${macosx.app}/${app.name}.app" quiet="yes" failonerror="false"/>
@@ -65,8 +65,9 @@
 	         the main class to run. -->
 	    <jarbundler dir="${macosx.app}"
 			verbose="true"
+	    	UseEmbeddedJVM="true"
 	    	name="${app.name}"
-			version="6.0.0"
+			version="6.0.1"
 			shortname="${app.name}"
 			jar="${app.resrc}/WireShare.jar"
 			mainclass="org.limewire.ui.swing.Main"
@@ -76,12 +77,12 @@
 			workingdirectory="$APP_PACKAGE/Contents/Resources/Java"
 	    	signature="WSHR"
 	    	bundleid="com.wireshare.gnutella"
-	    	jvmversion="1.6+"
+	    	jvmversion="1.8"
 	    	LSArchitecturePriority="i386 x86_64"
 	    	vmoptions="-ea:com.limegroup... -ea:org.limewire... -Xms128m -Xmx768m">
 
 	    	<!-- The below Java properties can be set to get a better MacOSX look-and-feel -->
-	    	<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+	    	<javaproperty name="apple.laf.useScreenMenuBar" value="false"/>
 	        <javaproperty name="apple.awt.brushMetalRounded" value="true"/>
 	        <javaproperty name="apple.awt.showGrowBox" value="true"/>
 	    	
@@ -98,17 +99,22 @@
 	    	
 	    	<!-- Include all the needed files to your application package. -->
 	    	<javafileset dir="lib/native/osx"/>
+	    	
 	    	<javafileset dir=".">
 	    		<include name="lib/WSHome.xhtml"/>
 	    		<include name="lib/img/*.png"/>
 	    	</javafileset>
+	    	
+	    	<!-- Include the embedded Java archive if using an embeddded runtime -->
+	    	<javafileset dir="lib/resources/osx/Java-1.8"/>
+
 	    	<resourcefileset dir="lib/resources/osx">
 	    		<include name="*.lproj/*"/>
 	    		<include name="*.icns"/>
 	    	</resourcefileset>
 
 	    	<urltype name="Magnet"
-		    	iconFile="LimeWire.icns" 
+		    	iconFile="WireShare.icns" 
 	        	role="Editor" 
 	        	schemes="magnet"/>
 	    	

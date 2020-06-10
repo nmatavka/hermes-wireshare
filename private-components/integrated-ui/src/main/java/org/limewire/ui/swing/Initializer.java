@@ -365,7 +365,7 @@ final class Initializer {
         
         if (OSUtils.isMacOSX()) {
             System.setProperty("user.fullname", MacOSXUtils.getUserName()); // for DAAP
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            //System.setProperty("apple.laf.useScreenMenuBar", "true");
             stopwatch.resetAndLog("set OSX properties");
         }
 
