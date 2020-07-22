@@ -65,7 +65,7 @@ public final class ConnectionSettings extends LimeProps {
 
     /** The maximum ratio of non-limewire peers to allow. */
     public static final FloatSetting MAX_NON_LIME_PEERS = FACTORY.createRemoteFloatSetting(
-            "MAX_NON_LIME_PEERS", 0.2f);
+            "MAX_NON_LIME_PEERS", 0.75f);
 
     /** The minimum ratio of non-limewire peers to allow. */
     public static final FloatSetting MIN_NON_LIME_PEERS = FACTORY.createRemoteFloatSetting(
@@ -278,7 +278,7 @@ public final class ConnectionSettings extends LimeProps {
      * How many attempts to connect to a remote host must elapse before we start
      * accepting non-LW vendors as UPs.
      */
-    public static final IntSetting LIME_ATTEMPTS = FACTORY.createIntSetting("LIME_ATTEMPTS", 50);
+    public static final IntSetting LIME_ATTEMPTS = FACTORY.createIntSetting("LIME_ATTEMPTS", 0);
 
     /**
      * How long we believe firewalls will let us send solicited udp traffic.
@@ -335,7 +335,7 @@ public final class ConnectionSettings extends LimeProps {
      * How many connections to maintain as a leaf when idle.
      */
     public static final IntSetting IDLE_CONNECTIONS = FACTORY.createIntSetting(
-            "IDLE_CONNECTIONS_2", 2);
+            "IDLE_CONNECTIONS_2", 3);
 
     /**
      * The maximum line length we'll try to parse while reading a header.
@@ -387,4 +387,8 @@ public final class ConnectionSettings extends LimeProps {
     public static final StringArraySetting GWEBCACHE_SERVERS = 
     		FACTORY.createStringArraySetting("GWEBCACHE_SERVERS", 
     				new String[0] );  // ADD GWEBCACHE SERVERS HERE
+    
+    public static final StringArraySetting BANNED_GWEBCACHE_SERVERS = 
+    		FACTORY.createStringArraySetting("BANNED_GWEBCACHE_SERVERS", 
+    				new String[0] );  // ADD BANNED GWEBCACHE SERVERS HERE
 }

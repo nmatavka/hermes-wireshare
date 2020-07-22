@@ -8,9 +8,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.http.HttpResponse;
@@ -54,7 +57,15 @@ class TcpBootstrapImpl implements TcpBootstrap {
     private final ConnectionManager connectionManager;
     private final Statistics statistics;
     private final List<URI> GWChosts = new ArrayList<URI>();
-    
+    private final List<String> BannedGWCs = new ArrayList<String>();
+    private final List<String> GWCservers = new ArrayList<String>();
+    private final List<String> Probation = new ArrayList<String>();
+    private final String DefaultGWC = "http://wireshare.sourceforge.net/gwc/gwc.php";
+    private enum Flag {
+    	Fetching,Pinging,Updating,NeedsValidating,Validating,Validated;
+    }
+    private Flag HostsValidity = Flag.NeedsValidating;
+    static int OneDay = 24*60*60*1000;
     @Inject
     TcpBootstrapImpl(HttpExecutor httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
@@ -68,27 +79,30 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.connectionManager = connectionManager;
         this.statistics = statistics;
 
-        GWChosts.add(URI.create("http://wireshare.sourceforge.net/gwc/gwc.php"));
-        String[] GWCservers = ConnectionSettings.GWEBCACHE_SERVERS.get();
-        for(String server : GWCservers) {
+        GWChosts.add(URI.create(DefaultGWC));
+        String[] servers = ConnectionSettings.GWEBCACHE_SERVERS.get();
+        Collections.shuffle(Arrays.asList(servers));
+    	for(String server : servers) {
             add(URI.create(server.trim()),GWChosts);
+            GWCservers.add(server);
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Loaded " + GWCservers.length + " GWebCache servers");
+            LOG.debug("Loaded " + servers.length + " GWebCache servers");
         }
-   }
+        
+        String[] BannedGWCservers = ConnectionSettings.BANNED_GWEBCACHE_SERVERS.get();
+        for(String server : BannedGWCservers) {
+        	BannedGWCs.add(server.trim());
+        }
+
+    }
 
     boolean add(URI Addr, List<URI> arr) {
         return arr.add(Addr);
     }
     
-    void addServer(String uri, String[] servers) {
-		String[] tmp = new String[servers.length+1];
-		for (int cnt=0 ;cnt<servers.length; cnt++) {
-			tmp[cnt] = servers[cnt].trim();
-		}
-		tmp[servers.length] = uri;
-		ConnectionSettings.GWEBCACHE_SERVERS.set(tmp);
+    boolean remove(URI Addr, List<URI> arr) {
+        return arr.remove(Addr);
     }
     
     @Override
@@ -96,7 +110,8 @@ class TcpBootstrapImpl implements TcpBootstrap {
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
         for(URI host : GWChosts) {
-            host = URI.create(host.toString() + "?get=1&net=gnutella" + 
+            host = URI.create(host.toString() + "?get=1" + 
+            		"&net=gnutella" + 
         			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
         			"&version=" + LimeWireUtils.getLimeWireVersion() 
         			);
@@ -106,7 +121,8 @@ class TcpBootstrapImpl implements TcpBootstrap {
         }
 
         if(requests.isEmpty()) {
-            LOG.debug("No TCP host caches to try");
+        	if (LOG.isDebugEnabled()) 
+        		LOG.debug("No GWC host caches to try");
             return false;
         }
 
@@ -114,26 +130,88 @@ class TcpBootstrapImpl implements TcpBootstrap {
         params = new DefaultedHttpParams(params, defaultParams.get());
 
         if(LOG.isDebugEnabled())
-            LOG.debug("Trying 1 of " + requests.size() + " TCP host caches");
+            LOG.debug("Fetching from GWC host 1 of " + requests.size() + " caches");
 
-        httpExecutor.executeAny(new Listener(requestToHost, listener),
+        httpExecutor.executeAny(new Listener(requestToHost, listener, Flag.Fetching),
                 bootstrapQueue, requests, params,
                 new Cancellable() {
             public boolean isCancelled() {
-                return (connectionServices.getNumInitializedConnections() > 0);
+            	Boolean Cancelled = (connectionServices.getNumInitializedConnections() > 0);
+            	if (Cancelled && LOG.isDebugEnabled() ) LOG.debug("Fetching cancelled. We are already connected.");
+                return Cancelled;
             }
         });
         return true;
     }
     
     @Override
-    public boolean UpdateGWC(String addr, Bootstrapper.Listener listener) {
+    public synchronized boolean pingHosts(Bootstrapper.Listener listener){ 
+        if (HostsValidity.equals(Flag.Validated)) { 
+        	if (LOG.isDebugEnabled()) 
+        		LOG.debug("Pinging not performed. No new hosts to try.");
+        	return false;
+        } else {
+        	HostsValidity = Flag.Validating;	
+		}
+        recoverProbation();
         List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
         Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
-        //String IP = ((String[]) addr.split(":"))[0];
+        for(URI host : GWChosts) {
+            host = URI.create(host.toString() + "?ping=1" + 
+            		"&net=gnutella" +
+        			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+        			"&version=" + LimeWireUtils.getLimeWireVersion() 
+        			);
+            HttpUriRequest request = newRequest(host); 
+            requests.add(request);
+            requestToHost.put(request,host);
+        }
+
+        if(requests.isEmpty()) {
+        	if (LOG.isDebugEnabled()) 
+        		LOG.debug("No GWC host caches to try");
+            return false;
+        }
+
+        HttpParams params = new BasicHttpParams();
+        params = new DefaultedHttpParams(params, defaultParams.get());
+
+        if(LOG.isDebugEnabled())
+            LOG.debug("Pinging GWC host 1 of " + requests.size() + " caches");
+
+        httpExecutor.executeAny(new Listener(requestToHost, listener, Flag.Pinging),
+                bootstrapQueue, requests, params,
+                new Cancellable() {
+            public boolean isCancelled() {
+                return false;
+            }
+        });
+        return true;
+    }
+    
+    @Override
+    public synchronized boolean UpdateGWC(String addr, Bootstrapper.Listener listener) {
+        List<HttpUriRequest> requests = new ArrayList<HttpUriRequest>();
+        Map<HttpUriRequest, URI> requestToHost = new HashMap<HttpUriRequest, URI>();
+        recoverProbation();
+        String url = "";
+        String randomHost = "";
+        if (HostsValidity.equals(Flag.Validated)) { 
+	        if (!GWCservers.isEmpty()) {
+	        	Collections.shuffle(GWCservers);
+	        	randomHost = GWCservers.get(new Random().nextInt(GWCservers.size()));
+	        }
+        } else {
+        	HostsValidity = Flag.Validating;	
+    		url = "&ping=1";
+		}
 		for(URI host : GWChosts) {
-        	host = URI.create(host.toString() + "?update=1&ip=" + URLEncode(addr) + 
-        			"&net=gnutella&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
+			if (!randomHost.isEmpty()) {
+				if (!host.toString().equals(randomHost)) url = "&url=" + URLEncode(randomHost); else url = "";
+			}
+			host = URI.create(host.toString() + "?update=1&ip=" + URLEncode(addr) + url +
+        			"&net=gnutella" + 
+        			"&client=" + LimeWireUtils.QHD_VENDOR_NAME + 
         			"&version=" + LimeWireUtils.getLimeWireVersion() +
         			"&uptime=" + statistics.calculateDailyUptime() + 
         			"&x_leaves=" + connectionManager.getNumInitializedClientConnections() +
@@ -145,7 +223,8 @@ class TcpBootstrapImpl implements TcpBootstrap {
         }
 
         if(requests.isEmpty()) {
-            LOG.debug("No TCP host caches to try");
+        	if (LOG.isDebugEnabled()) 
+        		LOG.debug("No GWC host caches to try");
             return false;
         }
 
@@ -153,9 +232,9 @@ class TcpBootstrapImpl implements TcpBootstrap {
         params = new DefaultedHttpParams(params, defaultParams.get());
 
         if(LOG.isDebugEnabled())
-            LOG.debug("Updating 1 of " + requests.size() + " Gnutella Web Caches");
+            LOG.debug("Updating GWC host 1 of " + requests.size() + " caches");
 
-        httpExecutor.executeAny(new Listener(requestToHost, listener),
+        httpExecutor.executeAny(new Listener(requestToHost, listener, Flag.Updating),
                 bootstrapQueue, requests, params, 
                 new Cancellable() {
             public boolean isCancelled() {
@@ -172,6 +251,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
 			return "" ;
 		}
     }
+    
     private HttpUriRequest newRequest(URI host) {
         HttpGet get = new HttpGet(host);
         get.addHeader("Cache-Control", "no-cache");
@@ -180,59 +260,122 @@ class TcpBootstrapImpl implements TcpBootstrap {
         return get;
     }
 
-    private int parseResponse(HttpResponse response, Bootstrapper.Listener listener) {
+    private void recoverProbation() {
+    	if (!Probation.isEmpty()) {
+    		long now = System.currentTimeMillis();
+	    	for(String record : Probation) { 
+	    		String[] Field = record.split(";");
+	    		if (!GWCservers.contains(Field[0]) && Long.decode(Field[2]) < now) {
+    				GWCservers.add(Field[0]);
+    				add(URI.create(Field[0]),GWChosts);
+    				HostsValidity = Flag.NeedsValidating;
+	    		}
+	    	}
+    	}
+    }
+    
+    private void removeProbation(String url) {
+    	if (!Probation.isEmpty()) {
+	    	for(String record : Probation) { 
+	    		String[] Field = record.split(";");
+	    		if (Field[0].equals(url)){
+	    			Probation.remove(record);
+	    			if (LOG.isDebugEnabled()) 
+	    				LOG.debug("Host cache: " + url + " recovered from probation" );
+	    			break;
+	    		}
+	    	}
+    	}
+    }
+    
+    private int parseResponse(HttpResponse response, Bootstrapper.Listener listener, Flag ReqType, String url) {
         if(response.getEntity() == null) {
             LOG.warn("No response entity!");
             return 0;
         }
-
         String line = null;
+        boolean UpdateOK = false;
         List<Endpoint> endpoints = new ArrayList<Endpoint>();
         try {
             InputStream in = response.getEntity().getContent();
             String charset = EntityUtils.getContentCharSet(response.getEntity());
-            if(charset == null)
-                charset = HTTP.DEFAULT_CONTENT_CHARSET;
-            BufferedReader reader =
-                new BufferedReader(new InputStreamReader(in, charset));
+            if(charset == null) charset = HTTP.DEFAULT_CONTENT_CHARSET;
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset));
             while((line = reader.readLine()) != null && line.length() > 0) {
             	String[] words = line.trim().split( line.contains(",") ? "," : "\\|" );
                 if(words != null && words.length > 0) {
                     try {
-                        if (words[0].equals("H")) {
+                    	if (words[0].startsWith("<")) {
+                    		removeCache(url, true);
+                    		break;
+                    	} else if (words[0].equals("H")) {
 	                    	Endpoint host = new Endpoint(words[1], true);
-	                        if(LOG.isDebugEnabled())
-	                            LOG.debug("Received " + host);
+	                        if(LOG.isDebugEnabled()) 
+	                        	LOG.debug("Received " + host);
 	                        endpoints.add(host);
                     	} else if (words[0].equals("U")) {
-                			boolean NoAdd=false;
-                			String[] servers = ConnectionSettings.GWEBCACHE_SERVERS.get();
-                			for(String server : servers) {
-								if (server.equals(words[1])) {
-									NoAdd=true;
-								}
-                    		}
-                    		if (!NoAdd) {
+                			if (!GWCservers.contains(words[1]) && !words[1].startsWith(DefaultGWC) && !BannedGWCs.contains(words[1])) {
                     			add(URI.create(words[1]),GWChosts);
-                    			addServer(words[1].toString(), servers);
+                    			GWCservers.add(words[1]);
+                    			ConnectionSettings.GWEBCACHE_SERVERS.set(GWCservers.toArray(new String[0]));
+                    			HostsValidity = Flag.NeedsValidating;
                     		}
                     	} else if (words[0].equals("I")) { 		
                     		if (words[1].equals("update") ) {
-                    				if (words[2].equals("OK")) 
-                    					LOG.debug(line);
-                    		}else if (words[1].equals("access") ) {
-                    			
+                				if (words[2].equals("OK")) {
+                					UpdateOK = true;
+                					if (LOG.isDebugEnabled()) 
+                						LOG.debug(line);
+                				} else if (words[2].toLowerCase().equals("warning") ) {
+                					if (LOG.isDebugEnabled()) 
+                						LOG.debug(line);
+                        		}
+                    		} else if (words[1].equals("access") ) {
+                    			if (LOG.isDebugEnabled()) 
+                    				LOG.debug(line);
+                    		} else if (words[1].equals("pong") ) {
+                    			if (LOG.isDebugEnabled()) 
+                    				LOG.debug(line);
+                    			if (words.length > 3) {
+                    				boolean remove = true;
+                    				for (String nets : words[3].split("-")) {
+                    					if (nets.equals("gnutella")) {
+                    						remove = false;
+                    						break;
+                    					}
+                    				}
+	                    			if (remove) removeCache(url, true);
+                    			}
+                    		} else if (words[1].toLowerCase().equals("warning") ) {
+                    			if (LOG.isDebugEnabled()) 
+                    				LOG.debug(line);
+                    			if (words[2].toLowerCase().startsWith("invalid host")) removeCache(url, true);
+                    		} else if (words[1].equals("NO-HOSTS")) {
+                    			if (LOG.isDebugEnabled()) 
+                    				LOG.debug(line);
+                    			removeCache(url, true);
                     		}
                     	} else if (words[0].equals("OK")) { 	
-                    		LOG.debug(line);
+                    		if (ReqType.equals(Flag.Updating)) UpdateOK=true;
+                    		if (LOG.isDebugEnabled()) 
+                    			LOG.debug(line);
+                    	} else if (words[0].startsWith("PONG")) { 
+                    		if (LOG.isDebugEnabled()) 
+                    			LOG.debug(line);
+                    	} else if (words[0].startsWith("ERROR:")) { 
+                    		if (LOG.isDebugEnabled()) 
+                    			LOG.debug(line);
+                    		if (words[0].toLowerCase().contains("network not supported")) removeCache(url, true);
                     	} else if (words[0].startsWith("ERROR")) { 
-                    		LOG.debug(line);
+                    		if (LOG.isDebugEnabled()) 
+                    			LOG.debug(line);
                     	} else if (words[0].startsWith("WARNING")) { 
-                    		LOG.debug(line);
+                    		if (LOG.isDebugEnabled()) 
+                    			LOG.debug(line);
                     	} else {
 	                    	Endpoint host = new Endpoint(words[0], true);
-	                        if(LOG.isDebugEnabled())
-	                            LOG.debug("Received " + host);
+	                        if(LOG.isDebugEnabled()) 
+	                        	LOG.debug("Received " + host);
 	                        endpoints.add(host);
                         };
                     } catch(IllegalArgumentException e) {
@@ -243,44 +386,116 @@ class TcpBootstrapImpl implements TcpBootstrap {
         } catch(IOException e) {
             LOG.error("IOX", e);
         }
-
+        if (ReqType.equals(Flag.Updating) && !UpdateOK) removeCache(url, true);
         if(!endpoints.isEmpty()) {
+        	if (LOG.isDebugEnabled()) 
+        		LOG.debug(endpoints.size() + " endpoints received");
             return listener.handleHosts(endpoints);
         } else {
-            LOG.debug("No endpoints received");
+            if (ReqType.equals(Flag.Fetching) && LOG.isDebugEnabled()) 
+            	LOG.debug("No endpoints received");
             return 0;
         }
     }
-
+    
+    private void removeCache(String url, boolean Ban) {
+    	if (!url.equals(DefaultGWC)) {
+        	if (GWCservers.contains(url)) {
+        		GWCservers.remove(url);
+    			remove(URI.create(url),GWChosts); 
+			}
+        	if (!Ban) {
+				long NextCheck = System.currentTimeMillis() + OneDay;
+				boolean Updated = false;
+	    		if (!Probation.isEmpty()) {
+	    	    	for(String record : Probation) { 
+	    	    		String[] Field = record.split(";");
+	    	    		if (Field[0].equals(url)){
+	    	    			Probation.remove(record);
+	    	    			Integer intTries = Integer.decode(Field[1]);
+	    	    			if (intTries < 7) {
+	    	    				intTries++;
+		    	    			Field[1] = intTries.toString();
+		    	    			Field[2] = Long.toString(NextCheck);
+		    	    			Probation.add(String.join(";",Field));
+		    	    			Updated = true;	    			
+		    	    			if (LOG.isDebugEnabled()) 
+		    	    				LOG.debug("Host cache: " + url + " probation extened" );
+	    	    			} else { 
+	    	    				Ban = true;
+	    	    			}
+		    	    		break;
+	    	    		}
+	    	    	}
+	        	}        		
+	    		if (!Updated && !Ban) {
+	    			Probation.add(url + ";1;" + NextCheck);
+	    			if (LOG.isDebugEnabled()) 
+	    				LOG.debug("Host cache: " + url + " added to probation" );
+	    		}
+        	}
+	    	if (Ban) {
+	    		if (!BannedGWCs.contains(url)) {
+	    			BannedGWCs.add(url);
+	    			ConnectionSettings.BANNED_GWEBCACHE_SERVERS.set(BannedGWCs.toArray(new String[0]));
+	    		}	
+				List<String> PermHosts = new ArrayList<String>(Arrays.asList(ConnectionSettings.GWEBCACHE_SERVERS.get()));
+				if (PermHosts.contains(url)) {
+		    		PermHosts.remove(url);
+		    		ConnectionSettings.GWEBCACHE_SERVERS.set(PermHosts.toArray(new String[0]));
+		    		if (LOG.isDebugEnabled()) 
+	    				LOG.debug("Removed cache:" + url);
+				}
+	    	} 
+    	}
+    }
+    
+    private void removeCache(String url) {
+    	removeCache(url, false);
+    }
+    
     private class Listener implements HttpClientListener {
         private final Map<HttpUriRequest, URI> hosts;
         private final Bootstrapper.Listener listener;
-
-        Listener(Map<HttpUriRequest, URI> hosts, Bootstrapper.Listener listener) {
+        private int Contacted;
+        private Flag ReqType;
+        
+        Listener(Map<HttpUriRequest, URI> hosts, Bootstrapper.Listener listener, Flag ReqType) {
             this.hosts = hosts;
             this.listener = listener;
+            this.ReqType = ReqType;
+            this.Contacted = 0;
         }
 
         @Override
         public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
-            if(LOG.isDebugEnabled())
+        	if(LOG.isDebugEnabled())
                 LOG.debug("Completed request: " + request.getRequestLine());
-            int received = parseResponse(response, listener);
+            int received = 0;
+            String url = request.getURI().toString().substring(0,request.getURI().toString().indexOf("?"));
+            if (response.getStatusLine().getStatusCode() == 200) {
+            	removeProbation(url);
+            	received = parseResponse(response, listener, ReqType, url);
+            } else if (response.getStatusLine().getStatusCode() >= 400 && response.getStatusLine().getStatusCode() < 600) {
+            	removeCache(url);
+            }
             httpExecutor.releaseResources(response);
-            return received < 10;
+            return UpdateStatus(received < 10);
         }
 
         @Override
         public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
-            if(LOG.isDebugEnabled()) {
+        	if(LOG.isDebugEnabled()) {
                 LOG.debug("Failed request: " + request.getRequestLine());
                 if(response != null)
                     LOG.debug("Response " + response);
                 if(exc != null)
                     LOG.debug(exc);
             }
+        	String url = request.getURI().toString().substring(0,request.getURI().toString().indexOf("?"));
+            removeCache(url);
             httpExecutor.releaseResources(response);
-            return true;
+            return UpdateStatus(true);
         }
 
         @Override
@@ -289,6 +504,22 @@ class TcpBootstrapImpl implements TcpBootstrap {
             synchronized(TcpBootstrapImpl.this) {
                 return hosts.containsKey(request);
             }
+        }
+        
+        private boolean UpdateStatus(boolean Continue) {
+        	Contacted++;
+        	if (Contacted == hosts.size()) { 
+            	if (HostsValidity.equals(Flag.Validating)) HostsValidity = Flag.Validated;
+        	} else if (Continue && LOG.isDebugEnabled()){
+            	if (ReqType.equals(Flag.Fetching)) {
+            		LOG.debug("Fetching from GWC host " + (Contacted + 1) + " of " + hosts.size() + " caches");
+            	} else if (ReqType.equals(Flag.Pinging)) {
+            		LOG.debug("Pinging GWC host " + (Contacted + 1) + " of " + hosts.size() + " caches");
+            	} else if (ReqType.equals(Flag.Updating)) {
+            		LOG.debug("Updating GWC host " + (Contacted + 1) + " of " + hosts.size() + " caches");
+            	}
+            }
+            return Continue;
         }
     }
 }

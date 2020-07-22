@@ -1782,8 +1782,8 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         // 1 times the amount of connections.
         else {
             multiple = 1;
-            neededConnections -= 5; 
-                //+ ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
+            neededConnections -= 5 
+            		+ ConnectionSettings.MIN_NON_LIME_PEERS.getValue() * _preferredConnections;
         }
 
         int need = Math.min(10, multiple*neededConnections)
@@ -2442,7 +2442,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're
-            // alread retrying automatically, so just return.
+            // already retrying automatically, so just return.
             return;
         }
 

@@ -39,16 +39,22 @@ class BootstrapperImpl implements Bootstrapper {
     static int TCP_INTERVAL = 60 * 60 * 1000;
 
     /** Milliseconds to wait before trying TCP if gnutella.net doesn't exist. */
-    static int ONE_SHOT_TCP_DELAY = 0 * 1000;
+    static int ONE_SHOT_TCP_DELAY = 1 * 1000;
     
-    /** Milliseconds to wait before updating the GWebCache. */
-    static int GWC_UPDATE_INTERVAL = 60 * 60 * 1000;
-
+    /** Milliseconds to wait before pinging the GWebCaches. */
+    static int GWC_PING_DELAY = 15 * 60 * 1000;
+    
     /**
      * The next allowed GWebCache update time.
      * Incremented after each attempted update.
      */
-    private long nextAllowedGWCUpdateTime = 0; 
+    private long nextAllowedGWCUpdateTime = TCP_INTERVAL + ConnectionSettings.LAST_GWCUPDATE_TIME.get(); 
+    
+    /**
+     * The next allowed GWC ping time.
+     * Incremented after each attempted GWC ping.
+     */
+    private long nextAllowedGWCPingTime = Long.MAX_VALUE;
 
     /** The time at which we started to think about bootstrapping. */
     private long firstBootstrapCheck = 0;
@@ -58,6 +64,7 @@ class BootstrapperImpl implements Bootstrapper {
      * Incremented after each attempted multicast fetch.
      */
     private long nextAllowedMulticastTime = 0; 
+    
 
     /**
      * The next allowed UDP fetch time.
@@ -96,7 +103,7 @@ class BootstrapperImpl implements Bootstrapper {
         this.listener = listener;
         this.tcpBootstrap = tcpBootstrap;
         this.udpHostCache = udpHostCache;
-        nextAllowedGWCUpdateTime = GWC_UPDATE_INTERVAL + ConnectionSettings.LAST_GWCUPDATE_TIME.get();
+        
     }
 
     /**
@@ -105,31 +112,42 @@ class BootstrapperImpl implements Bootstrapper {
      */
     @Override
     public synchronized void run() {            
-    	if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
+        if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
             LOG.trace("Not bootstrapping");
             return;
         }
-
+        
         long now = System.currentTimeMillis();
+
         if(firstBootstrapCheck == 0) {
             firstBootstrapCheck = now;
-            
         }
-        if(nextAllowedGWCUpdateTime < now) {
-            if (connectionServices.isActiveSuperNode() && networkManager.get().canReceiveUnsolicited()) {
-        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + ":" + networkManager.get().getPort();
-        		tcpBootstrap.UpdateGWC(addr, listener);
-            }
-            nextAllowedGWCUpdateTime = now + GWC_UPDATE_INTERVAL;
-            ConnectionSettings.LAST_GWCUPDATE_TIME.set(System.currentTimeMillis());
-        }
+        
         // If we need endpoints, try any bootstrapping methods that
         // haven't been tried too recently
         if(needsHosts(now)) {
             multicastFetch(now);
             udpHostCacheFetch(now);
             tcpHostCacheFetch(now);
-        }
+        }   
+        
+    	if(connectionServices.isConnected()) {
+	        if(nextAllowedGWCUpdateTime < now) {
+	            if (connectionServices.isActiveSuperNode() && networkManager.get().acceptedIncomingConnection()) {
+	        		String addr = NetworkUtils.ip2string(networkManager.get().getExternalAddress()) + ":" + networkManager.get().getPort();
+	        		tcpBootstrap.UpdateGWC(addr, listener);
+		            nextAllowedGWCUpdateTime = now + TCP_INTERVAL;
+		            ConnectionSettings.LAST_GWCUPDATE_TIME.set(System.currentTimeMillis());
+	            }
+	        }
+	        
+	        if(nextAllowedGWCPingTime < now) {
+	        	if (!connectionServices.isSupernode()) {
+	        		tcpBootstrap.pingHosts(listener);
+	        		nextAllowedGWCPingTime = now + TCP_INTERVAL;
+	        	}
+	        }
+    	}
     }
 
     @Override
@@ -160,6 +178,9 @@ class BootstrapperImpl implements Bootstrapper {
      */
     private boolean needsHosts(long now) {
         long delay = now - firstBootstrapCheck;
+        if (nextAllowedGWCPingTime == Long.MAX_VALUE) {
+        	nextAllowedGWCPingTime = now + GWC_PING_DELAY;
+        }
         if(listener.needsHosts()) {
             if(delay > ONE_SHOT_TCP_DELAY && !oneShotTcpTried) {
                 if(LOG.isTraceEnabled())

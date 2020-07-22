@@ -53,12 +53,14 @@ final class GuiLoader {
             if ( currversions != null ) {
             	Version currversion = null;
             	String url = null;
-            	String[] versions = currversions.split("&");
+            	String[] versions = currversions.split("\\n");
             	String ThisOS = OSUtils.getOS().toLowerCase(Locale.US);
         		for (String version : versions) {
             		String[] fields = version.split(";");
             		if (ThisOS.startsWith(fields[0])) {
-            			currversion = new Version(fields[1]);
+            			try {
+            				currversion = new Version(fields[1]);
+            			} catch (VersionFormatException e ) {}
             			url = fields[2];
             			break;
             		}
@@ -249,7 +251,7 @@ final class GuiLoader {
            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
            result = rd.readLine();
            while (( line = rd.readLine()) != null) {
-               result = result + "&" + line;
+               result = result + "\n" + line;
            }
            rd.close();
         } catch (IOException e) {

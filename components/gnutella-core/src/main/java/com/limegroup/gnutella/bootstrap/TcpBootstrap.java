@@ -12,6 +12,11 @@ public interface TcpBootstrap {
     public boolean fetchHosts(Bootstrapper.Listener listener); 
     
     /**
+     * Attempts to contact a gwebcache to retrieve endpoints.
+     */
+    public boolean pingHosts(Bootstrapper.Listener listener); 
+    
+    /**
      * Attempts to update a gwebcache.
      */
     public boolean UpdateGWC(String Addr, Bootstrapper.Listener listener);
