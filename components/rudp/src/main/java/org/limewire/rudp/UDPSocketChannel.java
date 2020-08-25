@@ -3,12 +3,19 @@ package org.limewire.rudp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.SocketOption;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
+
+/*
+ * Begin Java 1.8 Additions
+ */
+import java.net.SocketOption;
 import java.util.Set;
+/*
+ * End Java 1.8 Additions
+ */
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -424,7 +431,10 @@ public class UDPSocketChannel extends AbstractNBSocketChannel implements Interes
             return addr.toString();
         }
     }
-
+    
+    /*
+     * Begin Java 1.8 Additions
+     */
 	@Override
 	public <T> T getOption(SocketOption<T> arg0) throws IOException {
 		throw new IOException("unsupported");
@@ -435,4 +445,7 @@ public class UDPSocketChannel extends AbstractNBSocketChannel implements Interes
 		// TODO Auto-generated method stub
 		return null;
 	}
+	/*
+	 * End Java 1.8 Additions
+	 */	
 }

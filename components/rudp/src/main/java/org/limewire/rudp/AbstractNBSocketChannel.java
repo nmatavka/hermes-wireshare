@@ -3,11 +3,16 @@ package org.limewire.rudp;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+/*
+ * Begin Java 1.8 Additions
+ */
 import java.net.SocketAddress;
 import java.net.SocketOption;
 import java.io.IOException;
+/*
+ * End Java 1.8 Additions
+ */
 
-import java.util.Set;
 import org.limewire.nio.AbstractNBSocket;
 
 public abstract class AbstractNBSocketChannel extends SocketChannel {
@@ -19,7 +24,9 @@ public abstract class AbstractNBSocketChannel extends SocketChannel {
     @Override
     public abstract AbstractNBSocket socket(); 
 
-	
+    /*
+     * Begin Java 1.8 Additions
+     */	
 	@Override
 	public SocketAddress getRemoteAddress()
                               throws IOException{
@@ -56,4 +63,7 @@ public abstract class AbstractNBSocketChannel extends SocketChannel {
                             throws IOException {
 		throw new IOException("not supported");							
 	}
+	/*
+	 * End Java 1.8 Additions
+	 */
 }

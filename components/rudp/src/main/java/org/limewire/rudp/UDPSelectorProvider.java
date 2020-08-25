@@ -5,7 +5,14 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.Pipe;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.spi.SelectorProvider;
+
+/*
+ * Begin Java 1.8 Additions
+ */
 import java.net.ProtocolFamily;
+/*
+ * End Java 1.8 Additions
+ */
 
 import org.limewire.listener.AsynchronousEventBroadcaster;
 import org.limewire.rudp.messages.SynMessage.Role;
@@ -29,10 +36,16 @@ public class UDPSelectorProvider extends SelectorProvider {
         this.connectionStateEventBroadcaster = connectionStateEventBroadcaster;
     }
     
+    /*
+     * Begin Java 1.8 Additions
+     */    
     @Override
 	public DatagramChannel openDatagramChannel(ProtocolFamily family) throws IOException {
 		throw new IOException("not supported");
 	}
+    /*
+     * End Java 1.8 Additions
+     */
     
     @Override
     public DatagramChannel openDatagramChannel() throws IOException {
