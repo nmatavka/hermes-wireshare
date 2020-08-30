@@ -2,10 +2,12 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 
-import com.sun.java.swing.plaf.windows.WindowsCheckBoxMenuItemUI;
+//import com.sun.java.swing.plaf.windows.WindowsCheckBoxMenuItemUI;
+import javax.swing.plaf.basic.BasicCheckBoxMenuItemUI;
 
 @SuppressWarnings("restriction")
-public class PlainWindowsCheckBoxMenuItemUI extends WindowsCheckBoxMenuItemUI {
+//public class PlainWindowsCheckBoxMenuItemUI extends WindowsCheckBoxMenuItemUI {
+public class PlainWindowsCheckBoxMenuItemUI extends BasicCheckBoxMenuItemUI {
     private static Color originalSelectionBackground;
     private static Color originalSelectionForeground;
 

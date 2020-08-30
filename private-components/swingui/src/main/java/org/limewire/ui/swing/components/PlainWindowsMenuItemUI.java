@@ -2,10 +2,12 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 
-import com.sun.java.swing.plaf.windows.WindowsMenuItemUI;
+//import com.sun.java.swing.plaf.windows.WindowsMenuItemUI;
+import javax.swing.plaf.basic.BasicMenuItemUI;
 
 @SuppressWarnings("restriction")
-public class PlainWindowsMenuItemUI extends WindowsMenuItemUI {
+//public class PlainWindowsMenuItemUI extends WindowsMenuItemUI {
+public class PlainWindowsMenuItemUI extends BasicMenuItemUI {
     private static Color originalSelectionBackground;
     private static Color originalSelectionForeground;
 
