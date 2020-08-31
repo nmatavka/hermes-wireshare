@@ -80,21 +80,24 @@ class TcpBootstrapImpl implements TcpBootstrap {
         this.statistics = statistics;
 
         GWChosts.add(URI.create(DefaultGWC));
-        String[] servers = ConnectionSettings.GWEBCACHE_SERVERS.get();
-        Collections.shuffle(Arrays.asList(servers));
-    	for(String server : servers) {
-            add(URI.create(server.trim()),GWChosts);
-            GWCservers.add(server);
-        }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Loaded " + servers.length + " GWebCache servers");
-        }
         
         String[] BannedGWCservers = ConnectionSettings.BANNED_GWEBCACHE_SERVERS.get();
         for(String server : BannedGWCservers) {
         	BannedGWCs.add(server.trim());
         }
-
+        
+        String[] servers = ConnectionSettings.GWEBCACHE_SERVERS.get();
+        Collections.shuffle(Arrays.asList(servers));
+    	for(String server : servers) {
+            if (!server.trim().equals(DefaultGWC) && !BannedGWCs.contains(server.trim())) {
+            	add(URI.create(server.trim()),GWChosts);
+            	GWCservers.add(server);
+            }
+        }
+    	
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Loaded " + GWChosts.size() + " GWebCache servers");
+        }
     }
 
     boolean add(URI Addr, List<URI> arr) {
