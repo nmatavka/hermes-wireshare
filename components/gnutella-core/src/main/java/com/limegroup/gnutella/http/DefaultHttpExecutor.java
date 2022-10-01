@@ -1,11 +1,23 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.ExecutorService;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.AbortableHttpRequest;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -121,6 +133,32 @@ public class DefaultHttpExecutor implements HttpExecutor {
 	    }
 	    
 		LimeHttpClient client = clientProvider.get();
+		
+		try {
+			SSLContext ctx;
+			ctx = SSLContext.getInstance("SSL");
+			
+	        X509TrustManager tm = new X509TrustManager() {
+	            public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+	            }
+	
+	            public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
+	            }
+	
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        };
+
+			ctx.init(null, new TrustManager[] { tm }, null);
+	        SSLSocketFactory ssf = new SSLSocketFactory(ctx);
+	        ClientConnectionManager ccm = client.getConnectionManager();
+	        SchemeRegistry sr = ccm.getSchemeRegistry();
+	        sr.register(new Scheme("https", ssf, 443));
+	        
+        } catch(Exception e) {
+		}
+		
         if(params != null) {
             client.setParams(params);
         }

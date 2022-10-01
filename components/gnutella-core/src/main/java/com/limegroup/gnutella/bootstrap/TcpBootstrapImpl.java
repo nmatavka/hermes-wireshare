@@ -60,7 +60,7 @@ class TcpBootstrapImpl implements TcpBootstrap {
     private final List<String> BannedGWCs = new ArrayList<String>();
     private final List<String> GWCservers = new ArrayList<String>();
     private final List<String> Probation = new ArrayList<String>();
-    private final String DefaultGWC = "http://wireshare.sourceforge.net/gwc/gwc.php";
+    private final String DefaultGWC = "https://wireshare.sourceforge.net/gwc/gwc.php";
     private enum Flag {
     	Fetching,Pinging,Updating,NeedsValidating,Validating,Validated;
     }

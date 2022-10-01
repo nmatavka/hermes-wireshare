@@ -27,8 +27,8 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
 		"11yo", "12yo", "13yo", "14yo", "15yo","16yo", "17yo", "babyj", 
 		"babyshi*", "bibcam", "childlover","cinemakid", "hussyfan","kdv", "kdquality", 
 		"kiddy porn", "kingpass", "kinder*", "lolita*", "ls model", "ls-magazine", 
-		"ls-model", "lsg model", "lsm", "magazine lsm", "mbla", "opva", "pedo*", 
-		"preteen", "preteenz", "pthc", "ptsc", "r@ygold", "reelkiddymov", "underage",
+		"ls-model", "lsg model", "lsm", "masha", "magazine lsm", "mbla", "opva", "pedo*", 
+		"preteen", "preteenz", "pthc*", "ptsc", "r@ygold", "reelkiddymov", "underage",
 		// Adult words to filter
 		"abby winters", "adult", "amateur nude", "amatrice new", "anal", "anul",
         "ass", "arse", "bang teen", "bangbros", "bdsm", "beach-nude", "bestiality", 
@@ -125,7 +125,7 @@ public class KeywordFilter implements SpamFilter, ResponseFilter, SearchResultFi
             		return true;
             	}
             } else if (word.startsWith(".")) { 	// filter by file extensions
-            	if (canonical.indexOf(word) != -1 ) {
+            	if (canonical.endsWith(word)) {
             		return true;
             	}            	
             } else { 							// filter by keyword

@@ -12,8 +12,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.FilterSettings;
@@ -122,7 +128,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
             Version currversion = null;
             File hostiles = new File(CommonUtils.getUserSettingsDir(), "hostiles.txt");
             try {
-            	currversion = new Version(getVersion("http://wireshare.sourceforge.net/WSSecurityUpdates/version"));
+            	currversion = new Version(getVersion("https://wireshare.sourceforge.net/WSSecurityUpdates/version"));
             } catch (VersionFormatException impossible){};
             if ( currversion != null ) {
             	LOG.debug("Current security version online = v" + currversion);
@@ -131,7 +137,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
             		if (currversion.compareTo( new Version(InstallSettings.SECURITY_VERSION.get())) > 0 
             				|| !hostiles.exists()
             				|| InstallSettings.SECURITY_UPDATE.getValue()) {
-						String url = "http://wireshare.sourceforge.net/WSSecurityUpdates/";
+						String url = "https://wireshare.sourceforge.net/WSSecurityUpdates/";
 						String Hostiles = CommonUtils.getUserSettingsDir() + "\\hostiles.zip";
 						LOG.debug("Updating security files...");
 						boolean Success = true;
@@ -196,8 +202,30 @@ public final class LocalIPFilter extends AbstractIPFilter {
     private String getVersion(String urlToRead) {
     	String result = null;
     	try {
-           URL url = new URL(urlToRead);
-           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        URL url = new URL(urlToRead);
+	        URLConnection conn = url.openConnection();
+	        if (conn instanceof HttpURLConnection) {
+	            HttpURLConnection hconn = (HttpURLConnection) conn;
+	            hconn.setInstanceFollowRedirects(false);
+	            int response = hconn.getResponseCode();
+	            boolean redirect = (response >= 300 && response <= 399);
+	            if (redirect) {
+	                String loc = conn.getHeaderField("Location");
+	                if (loc.startsWith("http", 0)) {
+	                    url = new URL(loc);
+	                } else {
+	                    url = new URL(url, loc);
+	                }
+	                conn = (HttpURLConnection) url.openConnection();
+	            }
+	        }
+	        if (conn instanceof HttpsURLConnection) {
+	     	   HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+	     	   SSLContext sc;
+	     	   sc = SSLContext.getInstance("TLS");
+	     	   sc.init(null, null, new java.security.SecureRandom());
+	     	   httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+	        }
            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
            result = rd.readLine();
            rd.close();
@@ -222,9 +250,31 @@ public final class LocalIPFilter extends AbstractIPFilter {
         FileOutputStream fos = null;
         URL url = new URL(strURL);
         try {
-            URLConnection urlConn = url.openConnection();//connect
+            URLConnection conn = url.openConnection();
+            if (conn instanceof HttpURLConnection) {
+                HttpURLConnection hconn = (HttpURLConnection) conn;
+                hconn.setInstanceFollowRedirects(false);
+                int response = hconn.getResponseCode();
+                boolean redirect = (response >= 300 && response <= 399);
+                if (redirect) {
+                    String loc = conn.getHeaderField("Location");
+                    if (loc.startsWith("http", 0)) {
+                        url = new URL(loc);
+                    } else {
+                        url = new URL(url, loc);
+                    }
+                    conn = (HttpURLConnection) url.openConnection();
+                }
+            }
+            if (conn instanceof HttpsURLConnection) {
+         	   HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+         	   SSLContext sc;
+         	   sc = SSLContext.getInstance("TLS");
+         	   sc.init(null, null, new java.security.SecureRandom());
+         	   httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+            }
 
-            is = urlConn.getInputStream();               //get connection inputstream
+            is = conn.getInputStream();               //get connection inputstream
             fos = new FileOutputStream(localFilename);   //open outputstream to local file
 
             byte[] buffer = new byte[4096];              //declare 4KB buffer
@@ -234,7 +284,9 @@ public final class LocalIPFilter extends AbstractIPFilter {
             while ((len = is.read(buffer)) > 0) {  
                 fos.write(buffer, 0, len);
             }
-        } finally {
+        } catch (IOException e) {
+        } catch (Exception e) {
+		} finally {
             try {
                 if (is != null) {
                     is.close();

@@ -11,6 +11,9 @@ import java.io.*;
 import java.net.*;
 import java.util.Locale;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -49,7 +52,7 @@ final class GuiLoader {
             Initializer initializer = new Initializer();
             initializer.initialize(args, splashFrame, splashImage);
             String currversions = null;
-            currversions = getVersion("http://wireshare.sourceforge.net/CVersions");
+            currversions = getVersion("https://wireshare.sourceforge.net/CVersions");
             if ( currversions != null ) {
             	Version currversion = null;
             	String url = null;
@@ -247,7 +250,29 @@ final class GuiLoader {
     	String line = null;
     	try {
            URL url = new URL(urlToRead);
-           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+           URLConnection conn = url.openConnection();
+           if (conn instanceof HttpURLConnection) {
+               HttpURLConnection hconn = (HttpURLConnection) conn;
+               hconn.setInstanceFollowRedirects(false);
+               int response = hconn.getResponseCode();
+               boolean redirect = (response >= 300 && response <= 399);
+               if (redirect) {
+                   String loc = conn.getHeaderField("Location");
+                   if (loc.startsWith("http", 0)) {
+                       url = new URL(loc);
+                   } else {
+                       url = new URL(url, loc);
+                   }
+                   conn = (HttpURLConnection) url.openConnection();
+               }
+           }
+           if (conn instanceof HttpsURLConnection) {
+        	   HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+        	   SSLContext sc;
+        	   sc = SSLContext.getInstance("TLS");
+        	   sc.init(null, null, new java.security.SecureRandom());
+        	   httpsConn.setSSLSocketFactory(sc.getSocketFactory());
+           }
            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
            result = rd.readLine();
            while (( line = rd.readLine()) != null) {
