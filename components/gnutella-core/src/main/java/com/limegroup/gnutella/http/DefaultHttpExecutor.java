@@ -136,7 +136,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		
 		try {
 			SSLContext ctx;
-			ctx = SSLContext.getInstance("SSL");
+			ctx = SSLContext.getInstance("TLS");
 			
 	        X509TrustManager tm = new X509TrustManager() {
 	            public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {
