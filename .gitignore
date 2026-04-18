@@ -1,22 +1,48 @@
-all
-.project
-.classpath
-.metadata
-.cvsignore
-.ivy2
-.settings
-bin
-dist
-eclipse
-target
-build
-out.txt
-clover
-junit
-testData
-aggregate.jar
-/WireShare.jar
-/packWinJar.bat
-/Installer
+# macOS
+.DS_Store
 
-/ant.build.osx.bat
+# Logs
+log/
+*.log
+
+# Top-level build outputs
+/build/
+/WireShare.jar
+
+# Gradle / Java transient outputs
+.gradle/
+**/build/
+**/out/
+**/classes/
+**/tmp/
+
+# Archives / packaged artefacts
+*.jar
+!gradle/wrapper/*.jar
+
+# Flatpak build/cache output
+/org.team_hermes.WireShare/.flatpak-builder/
+/org.team_hermes.WireShare/build-dir/
+
+# Optional: generated Flatpak staging payload
+/org.team_hermes.WireShare/files/
+
+# Common editor / IDE noise
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Test / report artefacts
+coverage/
+reports/
+all

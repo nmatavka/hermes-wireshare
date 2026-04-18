@@ -1,5 +1,5 @@
 <!-- top level ant file -->
-<project name="limewire" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="limewire" default="compile" basedir="./main" xmlns:ivy="antlib:org.apache.ivy.ant">
     <echo>Java Version via Ant: ${ant.java.version}</echo> 
 
     <property name="limewire.home" location="${basedir}"/>
@@ -7,8 +7,11 @@
     
     <property name="aggregate.jar-jarname" value="WireShare.jar"/>
     <property name="aggregate.jar-includes" value="*/*/dist/main/*.jar"/>
+    <property name="jni.include" value="${java.home}/include"/>
+    <property name="jni.include.darwin" value="${java.home}/include/darwin"/>
 	
-    <import file="components/common/generic-multi-build.xml"/>
+    <import file="main/components/common/generic-multi-build.xml"/>
+
     
     <!-- BEGIN GETTEXT TASKS -->
 
@@ -106,6 +109,28 @@
         <!-- clean up -->
         <delete dir="lib/messagebundles/org"/>
     </target>
-    
+
+    <target name="build.jar" description="build xplat WireShare.jar" depends="aggregate.jar">
+      <jar destfile="./WireShare.jar" update="true" filesetmanifest="skip" compress="true" duplicate="preserve">
+        <fileset dir="lib/resources/linux"/>
+        <fileset dir="lib/resources/osx"/>
+        <fileset dir="lib/resources/windows"/>
+			<archives>
+				<zips>
+					<fileset dir="lib/jars" includes="*.jar"/>
+		      <fileset dir="lib/jars/linux" includes="*.jar"/>
+          <fileset dir="lib/jars/osx" includes="*.jar"/>
+          <fileset dir="lib/jars/windows" includes="*.jar"/>
+				</zips>
+			</archives>
+			<manifest>
+		    	<attribute name="Main-Class" value="org.limewire.ui.swing.Main"/>
+				<attribute name="SplashScreen-Image" value="org/limewire/ui/swing/mainframe/resources/splash.png"/>
+		    </manifest>
+		</jar>
+	</target>
+
+
+
     <!-- END GETTEXT TASKS -->
 </project>
