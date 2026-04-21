@@ -1,0 +1,80 @@
+Compiling and Packaging the JAR
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The wireshare source is huge, so we use apache ant to automate stuff.  You must of course have both a Java Development Kit (Oracle, OpenJDK, or Zulu) as well as Apache Ant installed on your system.
+
+There's only really two commands you need to know (as well as the fact that source is located in /main, and that you NEED to be in that directory when invoking Ant).  This one will automatically build and assemble the WireShare cross-platform Java Archive, leaving a compilation log in case of errors:
+
+$ ant build.jar > log
+
+Unfortunately, it leaves A LOT of shit behind.  Before committing to Hg, you MUST clear it away, like this:
+
+$ ant clean
+
+Otherwise we will be taking an hour or more to clone or even to push/pull!
+
+Creating the stripped-down JRE
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To create our modularised JRE, provided the WireShare JAR file has already been generated, we need to establish a list of those modules the latter requires that are satisfied by the Java Runtime Environment, filtering out those that are satisfied by itself.
+
+Academically, if one runs [ java --list-modules ], one can see that all "system modules" begin with "java.", "jdk.", (on ancient Java versions) "javafx.", and (possibly) "oracle."  If the last of these four is included in the WireShare JAR's dependencies, though, let it be known that the developers ROYALLY screwed up.
+
+How the following commands are derived is left as an exercise for the reader.
+
+$ jdeps --list-deps WireShare/WireShare.jar | grep 'java.'
+$ jdeps --list-deps WireShare/WireShare.jar | grep 'jdk.'
+
+-- (for smoke-testing only) --
+$ jdeps --list-deps WireShare/WireShare.jar | grep 'oracle.'
+$ jdeps --list-deps WireShare/WireShare.jar | grep 'javafx.'
+-- (end) --
+
+The left-hand side output of these commands is what we're looking for.  For illustrative purposes, this is what we get for WireShare 6.0:
+
+-- begin list --
+java.base
+java.datatransfer
+java.desktop
+java.logging
+java.management
+java.naming
+java.net.http
+java.prefs
+java.security.jgss
+java.security.sasl
+java.sql
+java.xml
+jdk.xml.dom
+-- end --
+
+We now plug the comma-separated output into jlink, like so:
+
+$ jlink --no-header-files --no-man-pages --compress=2 --strip-debug --add-modules java.base,java.datatransfer,java.desktop,java.logging,java.management,java.naming,java.net.http,java.prefs,java.security.jgss,java.security.sasl,java.sql,java.xml,jdk.xml.dom --output ./MyJava
+
+That should produce the appropriate files.
+
+# Creating the Java Package
+
+## Arch-alikes
+
+Arch and its child distributions (such as Manjaro) generate packages on the basis of a "tape archive" of the source code, rather than binaries.  For obvious reasons, such a file does not (and must not) exist in the repository; it is to be created locally by the maintainer during the production of its "daughter" package.  Additionally, the cryptographic hash of the new source tarball needs appended to the PKGBUILD file, and the version or release number needs incremented as appropriate.
+
+At this time, this process is in great part automated.
+
+
+
+
+
+## Solus
+
+## Windows
+
+Pre-reqs:
+OpenJDK 14 (because it has jpackager) - https://jdk.java.net/14/
+WiX toolkit - https://github.com/wixtoolset/wix3/releases/tag/wix3112rtm
+Enable Net framework 3.5 - follow "Control Panel" instructions here - https://docs.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows-10
+
+You'll need to put the OpenJDK on your %PATH% and %JAVA_HOME%.  
+
+After that it's a matter of plugging in the right jpackager command, with the appropriate Java modules (see above) included on the line.

@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Nedavno</string>
+  <string name="page_artists">Umjetnici</string>
+  <string name="page_albums">Albumi</string>
+  <string name="page_songs">Pjesme</string>
+  <string name="page_playlists">Playliste</string>
+  <string name="page_genres">Žanrovi</string>
+    <string name="menu_search">Pretraga</string>
+  <string name="menu_shuffle">Miješaj sve</string>
+  <string name="menu_play_all">Sviraj sve</string>
+  <string name="menu_sort_by">Sortiraj po</string>
+  <string name="menu_clear_queue">Očisti red</string>
+  <string name="menu_save_queue">Spremi red</string>
+  <string name="menu_share">Dijeli</string>
+  <string name="menu_add_to_homescreen">Pribodi na home screen</string>
+  <string name="menu_equalizer">Ekvalizer</string>
+  <string name="menu_simple">Jednostavno</string>
+  <string name="menu_detailed">Detaljno</string>
+  <string name="menu_grid">Mreža</string>
+  <string name="menu_view_as">Vidi kao</string>
+  <string name="add_to_playlist">Dodaj u playlistu</string>
+  <string name="add_to_favorites">Dodaj u favorite</string>
+  <string name="add_to_queue">Dodaj u red</string>
+  <string name="remove_from_favorites">Ukloni iz favorita</string>
+    <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">Umjetnik</string>
+  <string name="sort_order_entry_album">Album</string>
+  <string name="sort_order_entry_year">Godina</string>
+  <string name="sort_order_entry_duration">Dužina</string>
+  <string name="sort_order_entry_date_added">Datum dodano</string>
+  <string name="sort_order_entry_track_list">Popis pjesama</string>
+  <string name="sort_order_entry_number_of_songs">Broj pjesama</string>
+  <string name="sort_order_entry_number_of_albums">Broj albuma</string>
+  <string name="sort_order_entry_filename">Naziv datoteke</string>
+  <string name="playlist_favorite">Favorit</string>
+  <string name="playlist_favorites">Favoriti</string>
+  <string name="playlist_last_added">Aktualna</string>
+  <string name="new_empty_playlist">Nova playlista</string>
+  <string name="save">Spremi</string>
+  <string name="cancel">Odbaci</string>
+  <string name="overwrite">Prepiši</string>
+  <string name="new_playlist_name_template">Playlista <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Ime playliste</string>
+  <string name="delete_dialog_title">Izbriši <xliff:g id="item" example="album">%s</xliff:g>?</string>
+    <string name="context_menu_play_selection">Sviraj</string>
+  <string name="context_menu_play_next">Sviraj sljedeću</string>
+  <string name="context_menu_more_by_artist">Više od umjetnika</string>
+  <string name="context_menu_rename_playlist">Preimenuj</string>
+  <string name="context_menu_delete">Obriši</string>
+    <string name="context_menu_remove_from_recent">Izbriši iz nedavnih</string>
+  <string name="context_menu_use_as_ringtone">Koristi kao melodiju zvona</string>
+  <string name="context_menu_remove_from_playlist">Obriši iz playliste</string>
+  <string name="accessibility_play">Sviraj</string>
+  <string name="accessibility_pause">Pauziraj</string>
+  <string name="accessibility_next">Sljedeći</string>
+  <string name="accessibility_prev">Prethodni</string>
+  <string name="accessibility_shuffle">Miješaj</string>
+  <string name="accessibility_shuffle_all">Miješaj sve</string>
+  <string name="accessibility_repeat">Ponovi</string>
+  <string name="accessibility_repeat_all">Ponovi sve</string>
+  <string name="accessibility_repeat_one">Ponovi jedan</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> pribodeno na vaš home screen</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ne može biti pribodeno na vaš home screen</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' postavi kao melodiju zvona</string>
+    <string name="now_listening_to">#Izvođenje <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #WireShare</string>
+  <string name="share_track_using">Dijeli pjesmu preko:</string>
+    <string name="no_effects_for_you">Ekvalizer se ne može otvoriti.</string>
+  <string name="empty_music">Za kopiranje glazbe s računala na uređaj, koristite USB kabel.</string>
+  <string name="empty_last_added">Pjesme koje ste dodali u posljednjih mjesec dana biti će prikazane ovdje.</string>
+  <string name="empty_search">Nema rezultata pretraživanja</string>
+    <string name="empty_recent">Albumi koje ste slušali će se pojaviti ovdje. Pokušajte svirati neku glazbu.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" na #WireShare</string>
+  <string name="delete_files_title">Obriši datoteke</string>
+  <string name="page_last_added">Zadnje dodano</string>
+  <string name="empty_playlist">Popis za reprodukciju je prazan.\n\nKliknite ovdje da biste saznali kako dodati pjesme.</string>
+  <string name="are_you_sure_delete_files_text">Jeste li sigurni da želite trajno izbrisati odabrane datoteke s uređaja?</string>
+  <string name="frostwire_player">WireShare igrač mediji</string>
+</resources>

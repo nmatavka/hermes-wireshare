@@ -1,0 +1,38 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <plurals name="Nalbums">
+    <item quantity="other"><xliff:g id="count">%d</xliff:g>개의 앨범</item>
+  </plurals>
+  <plurals name="Nsongs">
+    <item quantity="other"><xliff:g id="count">%d</xliff:g>개의 노래</item>
+  </plurals>
+  <plurals name="NNNtrackstoplaylist">
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>개의 노래가 재생목록에 추가되었습니다.</item>
+  </plurals>
+  <plurals name="NNNtracksfromplaylist">
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>개의 노래가 재생목록에서 제거되었습니다.</item>
+  </plurals>
+  <plurals name="NNNtrackstoqueue">
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g>개의 노래가 대기목록에 추가되었습니다.</item>
+  </plurals>
+  <plurals name="NNNtracksdeleted">
+    <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g>개의 노래가 삭제되었습니다.</item>
+  </plurals>
+</resources>

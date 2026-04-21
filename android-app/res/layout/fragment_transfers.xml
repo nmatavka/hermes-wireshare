@@ -1,0 +1,224 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml),
+ *            Marcelina Knitter (@marcelinkaaa)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:wireshare="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <org.team_hermes.wireshare.android.offers.HeaderBanner
+            android:id="@+id/fragment_header_banner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/basic_color"
+        android:orientation="vertical">
+
+        <View
+            style="@style/divider_line_dark"
+            android:layout_width="match_parent"
+            android:layout_height="1dp" />
+
+        <!-- Dummy item to prevent EditText from receiving focus at startup -->
+        <LinearLayout
+            android:layout_width="0px"
+            android:layout_height="0px"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal" />
+
+        <org.team_hermes.wireshare.android.gui.views.ClearableEditTextView
+            android:id="@+id/fragment_transfers_add_transfer_text_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="6dp"
+            android:focusableInTouchMode="true"
+            android:visibility="gone"
+            wireshare:clearable_hint="@string/add_transfer_label" />
+    </LinearLayout>
+
+    <com.google.android.material.tabs.TabLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/fragment_transfers_layout_tab_layout"
+        style="@style/AppTabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/basic_color"
+        app:tabMode="scrollable">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/transfers_select_all" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/transfers_select_downloading" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/transfers_select_seeding" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/transfers_select_completed" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/app_background_main">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <org.team_hermes.wireshare.android.gui.views.TransfersNoSeedsView
+                android:id="@+id/fragment_transfers_no_seeds_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="@dimen/transfers_seeding_notification_top_padding"
+                android:visibility="gone" />
+
+        </ScrollView>
+
+        <org.team_hermes.wireshare.android.gui.views.SwipeLayout
+            android:id="@+id/fragment_transfers_swipe"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_transfers_list"
+                style="@style/scrollbar_default_style"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:childDivider="#00000000"
+                android:divider="@color/transparent"
+                android:dividerHeight="0dp"
+                android:groupIndicator="@null" />
+
+        </org.team_hermes.wireshare.android.gui.views.SwipeLayout>
+
+        <TextView
+            android:id="@+id/fragment_transfers_vpn_notification"
+            style="@style/GetVPNToastNotification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/toast_vpn_status_bgd"
+            android:text="@string/vpn_off_toast_notification" />
+    </RelativeLayout>
+
+    <View
+        style="@style/divider_line_dark"
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/transfers_indicators_background">
+
+        <!-- VPN status icon -->
+        <ImageView
+            android:id="@+id/fragment_transfers_status_vpn_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="start|center_vertical"
+            android:layout_margin="10dp"
+            android:background="@color/transparent"
+            android:contentDescription="@null"
+            android:scaleType="fitXY"
+            android:src="@drawable/notification_vpn_off" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/black" />
+
+        <!-- DHT peers -->
+        <TextView
+            android:id="@+id/fragment_transfers_dht_peers"
+            style="@style/TransfersIndicator"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1.0"
+            android:text="@string/dht_contacts"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical">
+
+            <TextView
+                android:id="@+id/fragment_transfers_text_downloads"
+                style="@style/TransfersIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/transfers_triangle_downward"
+                android:paddingEnd="8dp"
+                android:paddingStart="0dp"
+                android:text="@string/dummy_downloads_indicator" />
+
+            <TextView
+                android:id="@+id/fragment_transfers_text_uploads"
+                style="@style/TransfersIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/transfers_triangle_upward"
+                android:paddingEnd="8dp"
+                android:paddingStart="0dp"
+                android:text="@string/dummy_uploads_indicator" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        style="@style/divider_line_dark"
+        android:layout_width="match_parent"
+        android:layout_height="1dp" />
+
+    <org.team_hermes.wireshare.android.offers.FWBannerView
+        android:id="@+id/fragment_transfers_support_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone" />
+
+</LinearLayout>

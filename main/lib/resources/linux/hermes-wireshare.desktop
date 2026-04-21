@@ -1,0 +1,10 @@
+[Desktop Entry]
+#Exec=/usr/bin/WireShare.sh
+Categories=Network
+Encoding=UTF-8
+Exec=/usr/share/java/WireShare/jre-linux/bin/java -jar "/usr/share/java/WireShare/WireShare.jar"
+Icon=hermes-wireshare
+Name=WireShare
+Terminal=false
+Type=Application
+Version=6.0

@@ -1,0 +1,91 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">මෑත</string>
+  <string name="page_artists">කලාකරුවන්</string>
+  <string name="page_albums">ඇල්බම</string>
+  <string name="page_songs">සින්දු</string>
+  <string name="page_playlists">ධාවනලැයිස්තු</string>
+  <string name="page_genres">ප්‍රභේද</string>
+    <string name="menu_search">සොයන්න</string>
+  <string name="menu_shuffle">සියල්ල කලවම් කරන්න</string>
+  <string name="menu_play_all">සියල්ල ධාවනය කරන්න</string>
+  <string name="menu_sort_by">මඟින් සුබෙදන්න</string>
+    <string name="menu_clear_queue">පෝලිම හිස් කරන්න</string>
+  <string name="menu_save_queue">පෝලිම සුරකින්න</string>
+  <string name="menu_share">බෙදාහදාගන්න</string>
+  <string name="menu_add_to_homescreen">මුල් තිරයට ගසා අමුණන්න</string>
+  <string name="menu_equalizer">සමකරකය</string>
+  <string name="menu_simple">සරල</string>
+  <string name="menu_detailed">සවිස්තර</string>
+  <string name="menu_grid">කොටු සැලැස්ම</string>
+  <string name="menu_view_as">ලෙස බලන්න</string>
+  <string name="add_to_playlist">ධාවනලැයිස්තුවට එක් කරන්න</string>
+  <string name="add_to_favorites">ප්‍රියතමයන්ට එක් කරන්න</string>
+  <string name="add_to_queue">පෝලිමට එක් කරන්න</string>
+  <string name="remove_from_favorites">ප්‍රියතමයන්ගෙන් ඉවත්කරන්න</string>
+    <string name="sort_order_entry_az">අ-ළ A-Z</string>
+  <string name="sort_order_entry_za">Z-A ළ-අ</string>
+  <string name="sort_order_entry_artist">කලාකරුවා</string>
+  <string name="sort_order_entry_album">ඇල්බමය</string>
+  <string name="sort_order_entry_year">වර්ෂය</string>
+  <string name="sort_order_entry_duration">කාලමාත්‍රාව</string>
+  <string name="sort_order_entry_date_added">එක් කල දිනය</string>
+  <string name="sort_order_entry_track_list">ඛණ්ඩ ලැයිස්තුව</string>
+  <string name="sort_order_entry_number_of_songs">සින්දු ගණන</string>
+  <string name="sort_order_entry_number_of_albums">ඇල්බම ගණන</string>
+  <string name="sort_order_entry_filename">ගොනුවේ නම</string>
+  <string name="playlist_favorite">ප්‍රියතමය</string>
+  <string name="playlist_favorites">ප්‍රියතමයන්</string>
+  <string name="playlist_last_added">අන්තිමට එක් කල</string>
+  <string name="new_empty_playlist">අලුත් ධාවනලැයිස්තුවක්</string>
+  <string name="save">සුරකින්න</string>
+  <string name="cancel">අවලංගුයි</string>
+  <string name="overwrite">උඩින්ලියන්න</string>
+  <string name="new_playlist_name_template">ධාවනලැයිස්තුව <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">ධාවනලැයිස්තුවේ නම</string>
+  <string name="delete_dialog_title"><xliff:g id="item" example="album">%s</xliff:g> මකන්නද?</string>
+    <string name="context_menu_play_selection">ධාවනය</string>
+  <string name="context_menu_play_next">ඊළඟ ධාවනය</string>
+  <string name="context_menu_more_by_artist">කලාකරු වෙතින් තවත්</string>
+  <string name="context_menu_rename_playlist">යලි නම් තබන්න</string>
+  <string name="context_menu_delete">මකන්න</string>
+    <string name="context_menu_remove_from_recent">මෑතවූ දෙයින් ඉවත්කරන්න</string>
+  <string name="context_menu_use_as_ringtone">රින්ග්ටෝනය ලෙස භාවිතාකරන්න</string>
+  <string name="context_menu_remove_from_playlist">ධාවනලැයිස්තුවෙන් ඉවත්කරන්න</string>
+  <string name="accessibility_play">ධාවනය</string>
+  <string name="accessibility_pause">විරාමය</string>
+  <string name="accessibility_next">ඊළඟ</string>
+  <string name="accessibility_prev">පෙර</string>
+  <string name="accessibility_shuffle">කලවම්</string>
+  <string name="accessibility_shuffle_all">සියල්ල කලවම්</string>
+  <string name="accessibility_repeat">නැවත කරන්න</string>
+  <string name="accessibility_repeat_all">සියල්ල නැවත කරන්න</string>
+  <string name="accessibility_repeat_one">ඒකක් නැවත කරන්න</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ඔබගේ මුල් තිරයට ගසා අමුණා ඇත</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ඔබගේ මුල් තිරයට ගසා ඇමිණීමට නොහැක</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' රින්ග්ටෝනය ලෙස සකසන්න</string>
+    <string name="now_listening_to">#<xliff:g id="artist">%2$s</xliff:g> විසින් <xliff:g id="title">%1$s</xliff:g> දැන් ධාවනයවේ #WireShare</string>
+  <string name="share_track_using">ඛණ්ඩ භාවිතය බෙදාගැනීම:</string>
+    <string name="no_effects_for_you">සමකරකය විවෘත කල නොහැක.</string>
+  <string name="empty_music">ඔබගේ පරිගණකයේ සිට ඔබගේ උපාංගයට සිංදු පිටපත් කිරීමට USB කේබලයක් භාවිතාකරන්න.</string>
+  <string name="empty_last_added">පසුගිය මාසය පුරාවට ඔබ එක් කල සිංදු මෙහි දිස්වනු ඇත.</string>
+  <string name="empty_search">සෙවීම් ප්‍රතිඵල කිසිවක් නැත</string>
+  <string name="empty_recent">ඔබ සවන්දී ඇති ඇල්බම මෙහි දිස්වනු ඇත. යම් සංගීතයක් ධාවනය කර අත්හදා බලන්න.</string>
+</resources>

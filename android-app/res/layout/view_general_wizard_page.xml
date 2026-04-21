@@ -1,0 +1,102 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/view_general_wizard_page_welcome_to_frostwire"
+            style="@style/WizardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome_to_frostwire" />
+
+        <TextView
+            android:id="@+id/view_general_wizard_page_title_horizontal_break"
+            style="@style/WizardDivider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/view_general_wizard_page_storage_path_title"
+            style="@style/WizardSubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/storage_path" />
+
+        <TextView
+            android:id="@+id/view_general_wizard_page_storage_path_textview"
+            style="@style/WizardText.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:key="frostwire.prefs.storage.path_asf"
+            android:text="/storage/emulated/0" />
+
+        <TextView
+            style="@style/WizardDivider.Bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/WizardText.Header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/basic_color_dark"
+            android:paddingBottom="7dp"
+            android:paddingTop="7dp"
+            android:text="@string/seeding_settings" />
+
+        <CheckBox
+            android:id="@+id/view_general_wizard_page_check_seed_finished_torrents"
+            style="@style/WizardSubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/seed_finished_torrents" />
+
+        <TextView
+            style="@style/WizardText.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/seeding_settings_explanation" />
+
+        <CheckBox
+            android:id="@+id/view_general_wizard_page_check_seed_finished_torrents_wifi_only"
+            style="@style/WizardSubTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:text="@string/seed_finished_torrents_wifi_only" />
+
+        <TextView
+            android:id="@+id/view_general_wizard_page_wifi_only_text"
+            style="@style/WizardText.Sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="35dp"
+            android:text="@string/seeding_wifi_settings_explanation"
+            android:textColor="@color/app_text_wizard_dark" />
+    </LinearLayout>
+</ScrollView>

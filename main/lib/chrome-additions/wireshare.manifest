@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+content wireshare jar:wireshare.jar!/content/wireshare/ xpcnativewrappers=yes contentaccessible=yes
+override chrome://global/content/netError.xhtml chrome://wireshare/content/netError.xhtml
+

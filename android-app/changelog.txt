@@ -1,0 +1,2913 @@
+FrostWire 3.0.17 build 771 <UNRELEASED>
+ - improvement:All app preferences migrated from deprecated SharedPreferences to Jetpack DataStore with in-memory ConcurrentHashMap cache - eliminates data corruption risk, provides atomic writes, and enables reactive observation
+ - improvement:Music player migrated from deprecated MediaPlayer to ExoPlayer/Media3 (Jetpack Media3 1.10.0) - fixes race conditions, adds standard media notification with output device selector
+ - improvement:Music player migrated from deprecated RemoteControlClient to MediaSession API via MediaSessionService
+ - improvement:Music player uses standard YouTube Music/Spotify-style notification with output device selector (Cast, Bluetooth)
+ - improvement:AudioPlayerActivity UI now updates immediately - eliminated 6 async handler roundtrips that caused visible lag on song title, controls, and playback state
+ - improvement:Play/Pause, Repeat, and Shuffle buttons now update synchronously on UI thread - no more MISC→UI handler roundtrip delay
+ - improvement:PreferenceFragmentCompat settings screens now use custom PreferenceDataStore bridge (FrostwirePreferenceDataStore) instead of SharedPreferences
+ - improvement:ConfigurationRepository provides single source of truth for all ~50 preference defaults, volatile key resets, and ClassCastException-safe migration from pre-3.0.17 installs
+ - improvement:TransferManager preference observation uses ConfigurationRepository.OnPreferenceChangeListener callback instead of SharedPreferences.OnSharedPreferenceChangeListener
+ - improvement:OkHttpClientWrapper now sends Accept, Accept-Language, and Sec-Fetch-Mode headers by default - matches what YouTube expects from browser clients
+ - improvement:Added periodic VPN/WiFi protection state monitoring to detect VPN disconnections immediately
+ - improvement:Performance optimized periodic checks run on background thread to keep UI responsive
+ - improvement:Added visual status indicators in transfers screen when protections pause downloads
+ - fix:YouTube downloaded audio files now show album art - thumbnail URL saved as sidecar art file next to the audio and used as fallback when no embedded ID3 artwork exists
+ - fix:Album art fallback uses MediaMetadataRetriever directly instead of deprecated ALBUM_ART column (always null on Android 10+)
+ - fix:WiFi-Only protection and VPN Guard were broken due to deprecated network API changes
+ - fix:Migrated network monitoring from deprecated CONNECTIVITY_ACTION broadcasts to modern NetworkCallback API
+ - fix:WiFi-Only protection now correctly pauses torrent downloads on mobile data when setting is enabled
+ - fix:VPN Guard protection now correctly stops torrents when VPN is required but not connected
+ - fix:YouTube download 403 errors resolved - yt-dlp per-format http_headers (User-Agent, Accept, Referer, etc.) are now threaded through the entire download pipeline and sent with every request
+ - fix:YouTube downloads no longer produce 0-byte files - OkHttpClientWrapper now throws IOException on non-2xx HTTP responses and deletes the orphaned empty file
+ - fix:yt-dlp/Chaquopy SIGSEGV crash during app startup - _posixsubprocess (C extension) calls fork()/posix_spawn() which crashes on Android's JVM; now mocked in sys.modules before yt_dlp import; all Chaquopy JNI calls wrapped in try-catch with null-checks; CountDownLatch.await() now has 30s timeout; volatile statics for thread safety
+ - fix:deleteTracks() NPE crash when deleting songs from Recent/Songs list - DeleteDialog.getActivity() returns null after activity destroyed; now uses getApplicationContext() with null guard
+ - fix:Deleted songs persisting in Recent/Favorites lists - DeleteDialog cleaned stores asynchronously after UI callback already reloaded the list; now cleans RecentStore/FavoritesStore synchronously before posting async deleteTracks()
+ - fix:My Music > Recent list ghost entries from 0-byte broken downloads - RecentLoader.removeOrphanedEntries() now rejects MediaStore entries with null/0 duration (0-byte files exist in MediaStore but have no audio); also cleans entries not found in MediaStore at all; deleteTracks() now always cleans RecentStore/FavoritesStore for ALL given IDs even when not found in MediaStore cursor
+ - fix:YouTube downloads no longer silently drop headers after a malformed value - addCustomHeaders() try/catch moved inside the loop so bad headers are skipped individually instead of aborting all remaining headers (prevents 403 errors caused by missing User-Agent/Referer)
+ - fix:SoundCloud search restored - SoundCloudConfigFetcher now validates fetched credentials against the API before caching; falls back to built-in defaults when update server returns stale/expired client_id (prevents 401 errors and empty search results)
+ - fix:SoundCloud search results restored - isValidSearchResult() no longer requires downloadable=true; SoundCloud API now returns downloadable=false for virtually all tracks even when they have streamable progressive URLs; updated to only require a progressive stream URL
+ - fix:Settings preferences no longer freeze the UI - persistAsync() switched from runBlocking to Dispatchers.IO coroutine, eliminating ANR risk when writing to DataStore on the main thread
+ - fix:Music player notification lost on Android 12+ - replaced custom RemoteViews notification with MediaSessionService auto-managed notification
+ - fix:Music service no longer crashes on OS-initiated restarts - reloadQueue() now guards against null serviceDataStore, matching the existing null check in saveQueue()
+ - fix:Freshly downloaded audio files play instantly instead of waiting 45+ seconds for MediaStore indexer - direct file path fallback bypasses MediaStore query
+ - fix:AudioPlayerActivity metadata not loading - getIntent() is never null, now checks intent.getData() to distinguish file-intent vs show-player intent
+ - fix:Play/pause button UI not reacting - MusicPlaybackService.pause() now always broadcasts PLAYSTATE_CHANGED
+ - fix:Torrent notification deduplication now survives app reinstalls - NotifiedStorage performs a one-time migration of the bloom filter from DefaultSharedPreferences to DataStore on first run
+ - fix:ConfigurationManager.getString() now catches ClassCastException for Integer prefs stored by pre-3.0.17 builds
+ - fix:Long-press stop on play/pause button now works - calls stop synchronously before finishing activity
+ - fix:Album art fallback uses MediaMetadataRetriever when MediaStore thumbnail is unavailable (e.g. freshly downloaded files)
+ - fix:I2P config type mismatch crash - port and tunnel values now stored as Strings
+ - fix:EngineIntentService migrated from deprecated JobIntentService to plain Service (L2)
+ - fix:Desktop compilation restored - SearchMediator.java passes tsr.getHttpHeaders() as the required 10th argument to TellurideSearchResult constructor; was missing after httpHeaders param was added to the YouTube headers pipeline, breaking all desktop builds
+ - fix:StrictMode DiskReadViolation when opening files - all file I/O moved off UI thread
+ - fix:StrictMode DiskRead violation in TorrentPreferenceFragment resolved
+ - fix:StrictMode CustomViolation in SuggestionsAdapter resolved - OkHttpClient now lazily initialized
+ - fix:All deprecated Fragment API migrations (onAttachFragment→FragmentLifecycleCallbacks, onAttach(Activity)→onAttach(Context), getFragmentManager→getParentFragmentManager, startActivityForResult→ActivityResultLauncher, setTargetFragment→FragmentResultListener, android.app.Fragment→androidx.fragment.app.Fragment, onBackPressed→OnBackPressedDispatcher)
+ - fix:All deprecated View/API migrations (Html.fromHtml(String)→fromHtml(String,flag), Resources.getColor→ContextCompat.getColor, Resources.getDrawable→ContextCompat.getDrawable, getDefaultDisplay→WindowMetrics, Canvas.ALL_SAVE_FLAG→0, getSerializable→typed API 33+ variant, Notification.vibrate→NotificationCompat.Builder.setVibrate, setOnPageChangeListener→addOnPageChangeListener, EXTRA_SHORTCUT→ShortcutManager.requestPinShortcut, stopForeground(boolean)→stopForeground(STOP_FOREGROUND_REMOVE))
+ - fix:TransfersFragment, TransferDetailFragment, QueueFragment, MusicBrowserPhoneFragment migrated from deprecated Fragment menu callbacks to MenuProvider API
+ - fix:switch(case R.*) replaced with if/else chains to allow nonFinalResIds=true
+ - new:I2P configuration and UI settings - users can now configure I2P preferences in Settings > Advanced
+ - new:I2P network integration for anonymous proxy support
+ - maintenance:Updated yt-dlp from 2025.12.08 to 2026.3.17 - eliminates Android-client URL mismatch that caused 403 errors on some videos
+ - maintenance:Updated Chaquopy to 17.0.0 with Python 3.13 - dropped 32-bit ABIs (armeabi-v7a, x86) incompatible with Python 3.13+; Python 3.14 blocked by missing brotli/pycryptodomex wheels in Chaquopy mirror
+ - maintenance:Added foojay toolchain resolver plugin; AGP updated to 9.0.1
+ - maintenance:Updated com.google.firebase:firebase-bom 34.8.0 → 34.12.0
+ - maintenance:Updated io.coil-kt.coil3:coil 3.3.0 → 3.4.0
+ - maintenance:Updated androidx.core:core 1.17.0 → 1.18.0
+ - maintenance:Updated androidx.browser:browser 1.9.0 → 1.10.0
+ - maintenance:Updated androidx.datastore:datastore-preferences 1.1.4 → 1.2.1
+ - maintenance:Updated androidx.work:work-runtime-ktx 2.11.0 → 2.11.2
+ - maintenance:Updated org.jetbrains:annotations 26.0.2-1 → 26.1.0
+ - maintenance:Updated com.google.firebase:firebase-crashlytics plugin 3.0.6 → 3.0.7
+ - maintenance:Updated org.apache.groovy:groovy-swing 5.0.3 → 5.0.5
+ - maintenance:Updated test dependencies: robolectric 4.13 → 4.16.1, androidx.test:core 1.6.1 → 1.7.0, androidx.test.ext:junit 1.2.1 → 1.3.0
+ - maintenance:Removed multidex library and MultiDexApplication - minSdk=26 has built-in multidex support
+ - maintenance:Dropped jlibtorrent-android-arm and jlibtorrent-android-x86 dependencies (32-bit ABIs no longer targeted)
+ - maintenance:Updated CI workflow to use Python 3.13
+ - maintenance:build.gradle migrated from apply plugin to plugins DSL block; removed builtInKotlin and newDsl flags
+ - maintenance:Removed 5 deprecated AGP gradle.properties flags now that all blockers are resolved
+ - maintenance:Removed MediaButtonIntentReceiver - Media3 MediaSession handles media button routing automatically
+ - maintenance:Removed NotificationHelper - replaced by Media3 DefaultMediaNotificationProvider
+ - maintenance:Removed custom RemoteViews notification layouts (notification_template_base.xml, notification_template_expanded_base.xml)
+ - maintenance:Removed ConfigurationDefaults.java - defaults consolidated into ConfigurationRepository.kt single source of truth
+ - maintenance:Removed ConfigurationManagerGetStringTest - migration logic now handled by ConfigurationRepository.migrateFromSharedPreferences()
+ - maintenance:Removed unused settingsDataStore from DataStoreManager (replaced by FrostwirePreferences)
+ - maintenance:CustomSeekBarPreference and ApplicationPreferencesFragment no longer call getSharedPreferences() directly - use ConfigurationManager instead
+ - maintenance:Extracted resolveUri() string logic to MusicUriUtils.resolveUriString() (pure Java, no Android deps) - production MultiPlayer delegates to it; MultiPlayerResolveUriTest now tests real production code instead of a local copy
+ - maintenance:All Robolectric tests converted to pure JVM tests - eliminates ExoPlayer/Looper hang on static init
+ - fix:YouTube audio downloads now play in FrostWire player instead of launching a third-party app - .mp4/.webm/.opus files were incorrectly identified as non-audio by MIME type check
+ - fix:YouTube audio playback now starts immediately instead of 30-second delay - removed slow LIKE '%filename%' MediaStore full-table scan and fixed ServiceConnectionListener race condition that silently dropped the play callback
+ - fix:Album art ImageView no longer shows blank during load - placeholder drawable is now set immediately before Coil request is enqueued
+ - fix:Album art now loads for YouTube downloads with no MediaStore album ID - loadCurrentArtwork() attempts MediaMetadataRetriever+sidecar fallback when albumId==0 but file path is available
+ - fix:getPath() in MusicPlaybackService now returns file path for tracks opened directly from storage (e.g. fresh YouTube downloads not yet indexed by MediaStore)
+ - fix:Eliminated 38 ContentResolver.query() calls from UI thread across MusicUtils, adapters, fragments, activities - prevents ANRs
+ - fix:Eliminated 12 disk I/O operations from UI thread - file.exists/mkdirs/renameTo, FileOutputStream/FileInputStream, readFileToByteArray all posted to MISC handler
+ - fix:Eliminated 9 unnecessary async roundtrips for in-memory reads - isStopped/isPlaying/getAlbumName posted to MISC handler when reading volatile cached values
+ - fix:ARTIST_THUMBNAILS_URI typo fixed - content//: corrected to content:// (artist art was silently failing)
+ - maintenance:Removed GloTorrents search engine - domain gtso.cc is parked and no longer functional
+ - maintenance:MultiPlayer.mIsInitialized marked volatile for JMM correctness - ensures HandlerThread writes are visible to Binder-thread readers
+ - maintenance:Removed unused java.io.File import from MusicPlaybackService
+ - new:YouTube playlist URL search - query_playlist() added to telluride.py, TellurideCourier.queryPlaylist() with full pipeline, TelluridePlaylistPartialUISearchResult displays partial results with play-in-browser and re-resolve on download
+ - new:frostwire_launcher.py TUI - build/install/run FrostWire Android without Android Studio
+ - new:frostwire_launcher.py live logcat viewer - debug app output directly in terminal
+ - fix:StrictMode violation in showTransfersOnDownloadStart - use getApplicationContext() with NEW_TASK flag on background thread
+ - fix:HandpickedTorrentDownloadDialog now appears non-empty - fixed TORRENT_DATA_CACHE and StrictMode dismissDropDown issues
+ - fix:TransfersFragment list height changed from wrap_content to match_parent - prevents dialog appearing empty on open
+ - fix:ApolloFragment.songClickTask unchecked cast suppressed
+ - maintenance:fix unchecked/deprecation warnings in gui/dialogs, fragments, views, and adapters
+ - maintenance:fix generics bounds in TellurideCourier, TellurideCourierCallback, SearchPerformer for playlist result types
+
+FrostWire 3.0.16 build 770 JAN/28/2026
+ - crash:RecyclerView IllegalStateException when calling notifyDataSetChanged() during layout/scroll - deferred notifications with retry logic until RecyclerView ready
+ - fix:Removed transfers reappearing after deletion - track removed transfer IDs and filter from every update until confirmed gone from TransferManager
+ - maintenance:Added .grok/ directory to .gitignore
+ - Update Android Gradle plugin from 8.13.2 to 9.0.0
+ - Update Gradle wrapper from 8.14.3 to 9.1.0
+ - Replace groovy-all with groovy-swing dependency
+ - Add Gradle 9 compatibility flags to gradle.properties
+ - com.google.firebase:firebase-bom:34.8.0
+
+FrostWire 3.0.15 build 769 JAN/02/2026
+ - fix:Transfer removal now disappears immediately from UI without reappearing - removed from adapter instantly and manager synchronously before refresh cycle can re-add it
+ - fix:Transfers list UI responsiveness improved for stop/cancel/delete operations - adapter updates now use targeted item removal instead of full list rebuilds
+ - fix:HexHiveView rendering now responsive - added dedicated 2-threaded executor to prevent blocking sequential handler queue when drawing large hexagon grids
+ - improvement:Parallel execution for independent background tasks - file I/O, icon loading, and search operations now run concurrently instead of sequentially
+ - com.chaquo.python:gradle:17.0.0
+
+FrostWire 3.0.14 build 768 DEC/30/2025
+ - crash:Race condition in BTEngine initialization - ConfigurationManager wasn't fully initialized before BTEngineInitializer read port preferences, causing port 0 binding failures
+ - crash:Session failed to initialize when BTEngineInitializer started without waiting for ConfigurationManager to load preferences
+ - crash:Torrent downloads never started despite successful session initialization - AsyncStartDownload was checking for old TorrentSearchResult interface but new search architecture returns CompositeFileSearchResult
+ - crash:Search results from torrent sources (TPB, 1337X, MagnetDL, etc.) weren't recognized as torrents after V2 architecture consolidation
+ - fix:Added support for both old TorrentSearchResult interface and new CompositeFileSearchResult.isTorrent() in AsyncStartDownload
+ - fix:Call ConfigurationManager.instance() to block until preferences are fully loaded before starting BTEngineInitializer
+ - fix:BTEngine now properly listens on configured port ranges instead of failing with port 0
+ - fix:Transfer status showing "Error" for newly started torrents - invalidated status cache now fetches fresh status instead of returning ERROR
+ - maintenance:Updated gradle plugin to 8.13.2
+ - maintenance:Updated yt_dlp to 2025.12.08
+ - maintenance:Updated androidx.exifinterface:exifinterface to 1.4.2
+ - maintenance:Updated androidx.swiperefreshlayout:swiperefreshlayout to 1.2.0
+ - maintenance:Updated com.google.firebase:firebase-bom to 34.7.0
+
+FrostWire 3.0.12 build 766 DEC/02/2025
+ - new:Powered by jlibtorrent 2.0.12.7 with bittorrent v2 protocol support with hundreds of bug fixes and performance improvements
+ - new:No more third party ads or advertising tracking of any kind. Only frostwire support requests, vpn suggestions and promotional free downloads.
+ - new:Knaben search performer, a new torrent search source
+ - new:TorrentCSV search performer, a new torrent search source
+ - new:Settings > Torrent Settings > Incoming Connection Port Range selection
+ - new:Seed finished HTTP transfers if seeding is enabled (automatically creates torrent of finished download like on desktop)
+ - new:Dynamic SoundCloud client ID and app version fetching from remote server for uninterrupted service
+ - new:YT search results now handled via details URL detection (youtube.com)
+ - new:SearchResultUtils utility class for reusable search result utilities
+ - new:Telluride dialog now works with generic SearchResult instead of YTSearchResult
+ - new:Distraction free search now on by default, much better experience
+ - performance:Search architecture optimizations - 25-50% reduction in memory allocations
+ - performance:SizeParser utility consolidates duplicate implementations, 200+ lines of code eliminated
+ - performance:SearchMatcher memory optimization reduces garbage collection pressure by 25%
+ - performance:YT pattern static initialization and string operation optimization
+ - performance:PerformersHelper.sanitize() 8.8x speed gains in title normalization by not using a regex and instead simple string replacements
+ - performance:Optimize stackBlur() with array pooling to reduce allocations
+ - performance:Added periodic VPN/WiFi protection state monitoring to detect VPN disconnections immediately
+ - performance:Performance optimized periodic checks run on background thread to keep UI responsive
+ - performance:Added visual status indicators in transfers screen when protections pause downloads
+ - performance:Optimize search sorting from O(n² log n) to O(n log n)
+ - performance:reuse OkHttpClient instances to unlock connection pooling and reduce GC pressure
+ - performance:Replace global Hashtable throttling with lock-free ConcurrentHashMap in TaskThrottle
+ - performance:Cache torrent-search date parsers to eliminate per-result SimpleDateFormat allocations
+ - performance:Use buffered I/O for large transfers in OkHttpClientWrapper.save and ZipUtils.unzip. Up to 96% CPU savings in sys write calls, 30-50% reduction in CPU during I/O operations, search results should come out a lot faster
+ - performance:Optimize Levenshtein distance allocation footprint in PerformersHelper fuzzy matching
+ - performance:Optimize hot paths for string sanitizers - eliminate regex compilation overhead in search and scrapes (UrlUtils and StringUtils)
+ - performance:Optimize hot paths for Logger, ThreadPool, and collection sizing
+ - performance:Optimize MainApplication startup by deferring heavy initialization
+ - performance:Optimize RecyclerView onBindViewHolder() hot paths
+ - crash:ANR crashes in Transfers list when updating transfer state due to blocking JNI calls
+ - crash:ANR crash in menu preparation - menu visibility now cached on background thread
+ - crash:ANR crash during transfer list adapter initialization - UI state capture moved to background thread
+ - crash:ANR crash in transfer detail fragment - download/upload speeds cached on background thread
+ - crash:ANR crash in onCheckDHT - DHT status updates cached on background thread
+ - crash:ANR crash in BasePlaylistDialog - removed blocking CountDownLatch.await() on main thread
+ - crash:ANR crash in transfer list adapter - DiffUtil calculations moved to background thread
+ - crash:NullPointerException in AbstractConfirmListDialog when "select all" clicked with empty list
+ - crash:logic bug in PerformersHelper.countMatchedTokens(), matched tokens were not counted correctly
+ - crash:ForegroundServiceStartNotAllowedException by adding foreground check and error handling
+ - crash:Android 14+ ForegroundServiceStartNotAllowedException in MusicPlaybackService
+ - crash:Android JobScheduler alarm limit exceeded crashes by configuring WorkManager
+ - crash:ClassCastException in SearchResultListAdapter OnLinkClickListener
+ - crash:HandlerDispatcher NullPointerException crashes in Picasso image loading (removed on build 760)
+ - crash:NPE in ImageFetcher.loadCurrentArtwork()
+ - crash:WiFi-Only protection and VPN Guard were broken due to deprecated network API changes
+ - crash:Migrated network monitoring from deprecated CONNECTIVITY_ACTION broadcasts to modern NetworkCallback API
+ - crash:WiFi-Only protection now correctly pauses torrent downloads on mobile data when setting is enabled
+ - crash:VPN Guard protection now correctly stops torrents when VPN is required but not connected
+ - crash:NullPointerException in BasePlaylistDialog when fragment is detached from activity
+ - crash:NullPointerException in MusicUtils.getIdForPlaylist() with defensive null check
+ - crash:NameError in telluride.py query_video() - undefined qjs_path variable
+ - crash:ConcurrentModificationException in Ssl$FWHostnameVerifier
+ - crash:Picasso HandlerDispatcher NullPointerException on network state changes when app is backgrounded by keeping Picasso alive instead of shutting down (removed on build 760)
+ - crash:thread leak and data race in UrlUtils.getFastestMirrorDomain
+ - freeze:ensure MusicUtils.removeFromPlaylist ContentResolver activity is in the background
+ - freeze:sorting through too many results could cause an ANR when cleaning up titles
+ - freeze:ANR in MusicPlaybackService.setDataSource
+ - freeze:ANR in MusicPlaybackService.playFDs
+ - freeze:in playFDs
+ - freeze:in MusicPlaybackService.setDataSource
+ - crash:NPE in ImageFetcher.loadCurrentArtwork()
+ - improvement:PerformersHelper.sanitize() 8.8x speed gains in title normalization by not using a regex and instead simple string replacements
+ - improvement:Optimize stackBlur() with array pooling to reduce allocations
+ - fix:WiFi-Only protection and VPN Guard were broken due to deprecated network API changes
+ - fix:Migrated network monitoring from deprecated CONNECTIVITY_ACTION broadcasts to modern NetworkCallback API
+ - fix:WiFi-Only protection now correctly pauses torrent downloads on mobile data when setting is enabled
+ - fix:VPN Guard protection now correctly stops torrents when VPN is required but not connected
+ - improvement:Added periodic VPN/WiFi protection state monitoring to detect VPN disconnections immediately
+ - improvement:Performance optimized periodic checks run on background thread to keep UI responsive
+ - improvement:Added visual status indicators in transfers screen when protections pause downloads
+ - maintenance:Guard favorites toast when fragment detached
+ - maintenance:ProGuard now uses proguard-android-optimize.txt for better code optimization and APK size reduction
+ - maintenance:Updated gradle plugin to 8.13.1
+ - maintenance:Updated okhttp3 to 5.3.2
+ - maintenance:Updated androidx.lifecycle:lifecycle-viewmodel-ktx to 2.10.0
+ - maintenance:Updated Kotlin to 2.2.21
+ - maintenance:Updated com.google.gms:google-services to 4.4.4
+ - maintenance:Updated com.google.android.ump:user-messaging-platform to 4.0.0
+ - maintenance:SearchTimeoutException provides better diagnostics with performer and domain context
+ - maintenance:Search package hierarchy flattened, V2 package consolidated
+ - maintenance:Removed commented imports and debug code
+ - maintenance:Fixed typo in PREF_KEY_NETWORK_ENABLE_DHT constant (froswire -> frostwire)
+ - maintenance:Avoid possible context leak on EngineBroadcastReceiver
+ - maintenance:all license headers are GPL 3.0
+ - maintenance:archive.org search fixed
+ - maintenance:ArchiveorgSearchPerformer -> InternetArchiveSearchPerformer
+ - maintenance:glotorrents search fixed
+ - maintenance:idope search fixed
+ - maintenance:magnetdl search fixed
+ - maintenance:add BitmapFactory.inSampleSize to prevent OOM crashes
+ - maintenance:Add Bitmap.recycle() to prevent native memory leaks
+ - maintenance:Replace deprecated setDrawingCacheEnabled() with Canvas API
+ - refactor:SearchManager tasks to Runnable and remove Thread.yield() from hot path
+ - removed:TorrentDownloads search performer (site offline permanently)
+ - removed:BTDigg search performer (protected by Cloudflare, unable to reliably parse search results)
+ - removed:Torlock search performer (old site is down, new site is malicious)
+ - removed:LimeTorrents search performer
+ - replaced:Picasso for Coil image loading library
+ - yt_dlp-2025.11.12
+ - org.jetbrains:annotations:26.0.2-1
+ - androidx.appcompat:appcompat:1.7.1
+ - androidx.browser:browser:1.9.0
+ - com.chaquo.python:gradle:16.1.0, now with linked 16KB mode compatible with android compile sdk 36
+ - org.codehaus.groovy:groovy-all:3.0.25
+ - com.squareup.picasso3:picasso:3.0.0-alpha06 and refactor of ImageLoader to use it (removed on build 760)
+ - new: io.coil-kt.coil3:coil:3.0.4 and io.coil-kt.coil3:coil-network-okhttp:3.0.4
+ - com.google.gms:google-services:4.4.4
+ - com.google.firebase:firebase-crashlytics-gradle:3.0.6
+ - androidx.core:core:1.17.0
+ - androidx.exifinterface:exifinterface:1.4.1
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0
+ - com.google.android.material:material:1.13.0
+ - com.google.code.gson:gson:2.13.2
+ - com.google.re2j:re2j:1.8
+ - com.squareup.okhttp3:okhttp:5.3.2
+ - androidx.work:work-runtime-ktx:2.11.0
+ - com.google.firebase:firebase-bom:34.6.0
+ - com.google.android.ump:user-messaging-platform:4.0.0
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21
+ - io.coil-kt.coil3:coil:3.3.0
+ - io.coil-kt.coil3:coil-network-okhttp:3.3.0
+ - removed: com.applovin:applovin-sdk
+ - removed: com.applovin.mediation:unityads-adapter
+ - Maintenance:all license headers are consistent with GPL 3.0
+ - jlibtorrent:libraries are now compiled with C++20 (ming/windows with C++2a which is the same)
+ - jlibtorrent:g++-9 upgraded to g++-11 for linux build
+ - jlibtorrent:new Sha256Hash::swig()
+ - jlibtorrent:new SessionManager::find(Sha256Hash) and SessionManager::find(TorrentInfo) methods
+ - jlibtorrent:built with android NDK r28c with 16K page size support
+ - Android 64-bit binaries are compiled to have 16KB max-page-size
+ - jlibtorrent:New com.frostwire:jlibtorrent- maven packages for easier integration with gradle/maven
+ - jlibtorrent:new torrent_handle::get_resume_data() : add_torrent_params
+ - jlibtorrent:new torrent_handle::get_resume_data(resume_data_flags_t flags) : add_torrent_params
+ - jlibtorrent:new settings_pack.int_types i2p_inbound_length_variance
+ - jlibtorrent:new settings_pack.int_types i2p_outbound_length_variance
+ - jlibtorrent:Jar built with JDK 17 - JAVA_17 compatibility
+ - jlibtorrentBoost 1.88.0 upgrade
+ - jlibtorrent:OpenSSL 3.5.2 upgrade (from 1.1.1t)
+ - jlibtorrent:Upgraded SWIG to 4.3.1
+ - jlibtorrent:Gradle 9.0.0
+ - dev: junit upgraded from 4.13.1 -> 4.13.2
+ - lt:add option to send host header in HTTP proxy CONNECT command
+ - lt:cache DNS failures for a shorter time
+ - lt:file_renamed_alert is always posted, regardless of alert mask
+ - lt:add feature to request resume data synchronously
+ - lt:don't leak file descriptors to child processes (O_CLOEXEC)
+ - lt:optimize the utp resend
+ - lt:optimize tracker announcements
+ - fix handling of invalid filenames
+ - add support for I2CP inbound.lengthVariance and outbound.lengthVariance tunnel settings
+ - lt: validate add_torrent_params::save_path at run-time
+ - lt: use stricter rules for what filenames are valid on Android
+ - lt: fix applying IP filter to DHT traffic (HanabishiRecca)
+ - lt: fix race condition when cancelling requests after becoming a seed
+ - lt: fix performance bug in the file pool, evicting MRU instead of LRU (HanabishiRecca)
+ - lt: fix bug where file_progress could sometimes be reported as >100%
+ - jlibtorrent:BDecodeNode: hasList, hasDict, hasString, hasInt, getList, getDict, getString, getInt
+ - lt:limit piece size in torrent creator
+ - lt:don't hint FADV_RANDOM on posix systems. May improve seeding performance
+ - lt:allow boost connect while checking resume data if no_verify_files flag is set
+ - lt:fix BEP-40 peer priority for IPv6
+ - lt:fix file pre-allocation when changing file priority (HanabishiRecca)
+ - jlibtorrent:SWIG interface files have been modularized for better maintainability and readability
+ - jlibtorrent:Added missing alert types
+ - jlibtorrent:Introduced typed_bitfield template
+ - jlibtorrent:Operator renaming for Java compatibility
+ - jlibtorrent:Included boost_system_error_code.i
+ - jlibtorrent:Added prepare-macos.sh script
+ - jlibtorrent:Updated run-swig.sh script
+ - jlibtorrent:Set TORRENT_ABI_VERSION=4
+ - jlibtorrent:Libtorrent updated to RC_2_0 (rev:2ab8fedabb7716947edc77958da6d0b5e1040df9)
+ - jlibtorrent:Android NDK r26d (LTS) upgrade (from r25c)
+ - jlibtorrent:Added `--swig-only` and `--build-only` options to swig/build scripts
+ - jlibtorrent:Added `prepare-macos.sh` script for macOS build setup
+ - jlibtorrent:Updated `run-swig.sh` script for improved SWIG processing
+ - jlibtorrent:Enhanced exception handling in SWIG interfaces
+ - jlibtorrent:Fixed issues in file_storage.hpp and ip_filter.hpp
+ - jlibtorrent:Adjusted build flags and macros for Boost and libtorrent compatibility
+ - jlibtorrent:Enabled SWIG directors for specific classes
+ - lt:fix uTP issue where closing the connection could corrupt the payload
+ - lt:apply DSCP/TOS to sockets before initiating the TCP connection
+ - lt:assume copy_file_range() exists on linux (unless old glibc)
+ - lt:fix issue where set_piece_deadline() did not correctly post read_piece_alert
+ - lt:fix integer overflow in piece picker
+ - lt:torrent_status::num_pieces counts pieces passed hash check, as documented
+ - lt:check settings_pack::max_out_request_queue before performance alert
+ - lt:allow on_unknown_torrent method in the absence of active torrents (new plugin feature added)
+ - lt:add feature to async_move_storage() to not move files
+ - lt:fix reject resume data if it contains mismatching info hashes
+ - lt:fix clear the candidate_cache when clear peer_list
+ - lt:fix missing python converter for dht::announce_flags_t
+ - lt:fix issue with web seed connections when they close and re-open
+ - lt:fallocate() not supported is not a fatal error
+ - lt:fix proxying of IPv6 connections via IPv4 proxy
+ - lt:treat CGNAT address range as local IPs
+ - lt:add stricter checking of piece layers when loading torrents
+ - lt:add stricter checking of v1 and v2 hashes being consistent
+ - lt:cache failed DNS lookups as well as successful ones
+ - lt:add an i2p torrent state to control interactions with clear swarms
+ - lt:fix i2p SAM protocol parsing of quoted messages
+ - lt:expose i2p peer destination in peer_info
+ - lt:fix i2p tracker announces
+ - lt:fix issue with read_piece() stopping torrent on pieces not yet downloaded
+ - lt:improve handling of allow_i2p_mixed setting to work for magnet links
+ - lt:fix web seed request for renamed single-file torrents
+ - lt:fix issue where web seeds could disappear from resume data
+ - lt:extend save_resume with additional conditional flags
+ - lt:fix issue with retrying trackers in tiers > 0
+ - lt:fix last_upload and last_download resume data fields to use posix time
+ - lt:improve error messages for no_connect_privileged_ports, by untangle it from the port filter
+ - lt:fix I2P issue introduced in 2.0.0
+ - lt:add async tracker status query, post_trackers()
+ - lt:add async torrent status query, post_status()
+ - lt:support loading version 2 of resume data format
+ - lt:fix issue with odd piece sizes
+ - lt:add async piece availability query, post_piece_availability()
+ - lt:add async download queue query, post_download_queue()
+ - lt:add async file_progress query, post_file_progress()
+ - lt:add async peer_info query, post_peer_info()
+ - lt:fix uTP streams timing out instead of closing cleanly
+ - lt:add write_torrent_file_buf() overload for generating .torrent files
+ - lt:add create_torrent::generate_buf() function to generate into a buffer
+ - lt:fix copy_file when the file ends with a sparse region
+ - lt:uTP performance, fix packet loss when sending is stalled
+ - lt:fix trackers being stuck after session pause/resume
+ - lt:fix bug in hash_picker with empty files
+ - lt:uTP performance, prevent premature timeouts/resends
+ - lt:add option to not memory map files below a certain size
+ - lt:settings_pack now returns default values when queried for missing settings
+ - lt:fix copy_file fall-back when SEEK_HOL/SEEK_DATA is not supported
+ - lt:improve error reporting from file copy and move
+ - lt:tweak pad file placement to match reference implementation (tail-padding)
+ - lt:uTP performance, more lenient nagle's algorithm to always allow one outstanding undersized packet
+ - lt:uTP performance, piggy-back held back undersized packet with ACKs
+ - lt:uTP performance, don't send redundant deferred ACKs
+ - lt:support incoming SOCKS5 packets with hostnames as source address, for UDP trackers
+ - lt:ignore duplicate network interface change notifications on linux
+ - lt:fix total_want/want accounting when forcing a recheck
+ - lt:fix merging metadata with magnet links added on top of existing torrents
+ - lt:add torrent_flag to default all file priorities to dont_download
+ - lt:fix &so= feature in magnet links
+ - lt:improve compatibility of SOCKS5 UDP ASSOCIATE
+ - lt:fix madvise range for flushing cache in mmap_storage
+ - lt:open files with no_cache set in O_SYNC mode~
+ - lt:fix issue in use of copy_file_range() on linux
+ - lt:avoid open-file race in the file_view_pool
+ - lt:fix issue where stop-when-ready would not close files
+ - lt:fix issue with duplicate hybrid torrent via separate v1 and v2 magnet links
+ - lt:added new function to load torrent files, load_torrent_*()
+ - lt:support sync_file_range() on linux
+ - lt:fix issue in write_torrent_file() when file size is exactly piece size
+ - lt:fix file_num_blocks() and file_num_pieces() for empty files
+ - lt:add new overload to make_magnet_uri()
+ - lt:add missing protocol version to tracker_reply_alert and tracker_error_alert
+ - lt:fix privilege issue with SetFileValidData()
+ - lt:add asynchronous overload of torrent_handle::add_piece()
+ - lt:default to a single hashing thread, for full checks
+ - lt:Fix bug when checking files and the first piece is invalid
+ - lt:fix issue creating a v2 torrent from torrent_info containing an empty file
+ - lt:make recheck files also update which files use partfile
+ - lt:add write_through disk_io_write_mode, which flushes pieces to disk immediately
+ - lt:improve copy file function to preserve sparse regions (when supported)
+ - lt:add function to truncate over-sized files part of a torrent
+ - lt:fix directory creation on windows shared folders
+ - lt:add flag to make add_files() not record file attributes
+ - lt:deprecate (unused) allow_partial_disk_writes settings
+ - lt:fix disk-full error reporting in mmap_disk_io
+ - lt:fixed similar-torrents feature for v2 torrents
+ - lt:fix potential unbounded recursion in add_completed_job, in disk I/O
+ - lt:deprecated (unused) volatile_read_cache setting
+ - lt:fix part files being marked as hidden on window
+ - lt:on windows, explicitly flush memory mapped files periodically
+ - lt:fix build with WolfSSL
+ - lt:fix issue where incoming uTP connections were not accepted over SOCKS5
+ - lt:fix several issues in handling of checking files of v2 torrents, esp. from magnet links
+ - lt:make the token limit when parsing metadata from magnet files configurable
+ - lt:fix issue with stalled pieces on disk full errors
+ - lt:fix missing python binding for file_progress_flags
+ - lt:fix torrent_file_with_hashes() to fail when we don't have the piece layers
+ - lt:restore path character encoding conversion for non UTF-8 locales on linux
+ - lt:fix use-after-free bug in make_magnet_uri
+ - lt:add write_torrent_file() to produce a .torrent file from add_torrent_params
+ - lt:allow loading v2 .torrent files without piece layer
+ - lt:fix issue with adding v2 torrents with invalid file root hash
+ - lt:fix piece picker bug causing double-picks with prefer-contiguous enabled
+ - lt:expose session_params in python bindings
+ - lt:fix (deprecated) use of add_torrent_params::info_hash
+ - lt:fix issue creating and loading v2 torrents with empty files. Improves conformance to BEP52 reference implementation
+ - lt:add new torrent_file_with_hashes() which includes piece layers for creating .torrent files
+ - lt:add file_prio_alert, posted when file priorities are updated
+ - lt:fix issue where set_piece_hashes() would not propagate file errors
+ - lt:add missing python binding for event_t
+ - lt:add work-around for systems without fseeko() (such as Android)
+ - lt:add convenience header libtorrent/libtorrent.hpp
+ - lt:increase default max_allowed_in_request_queue
+ - lt:fix loading non-ascii filenames on windows with torrent_info constructor (2.0 regression)
+ - lt:add std::hash<> specialization for info_hash_t
+ - lt:fix integer overflow in hash_picker and properly restrict max file sizes in torrents
+ - lt:strengthen SSRF mitigation for web seeds
+ - lt:add v1() and v2() functions to torrent_info
+ - lt:fix piece_layers() to work for single-piece files
+ - lt:fix python binding regression in session constructor flags
+ - lt:fix unaligned piece requests in mmap_storage
+ - lt:improve client_data_t ergonomics
+ - lt:fix issue with concurrent access to part files
+ - lt:fix attribute in single-file v2 torrent creation
+ - lt:fix padding for empty files in v2 torrent creation
+ - lt:add function to ask a file_storage whether it's v2 or not
+ - lt:fix mtime field when creating single-file v2 torrents
+ - lt:fix performance regression in checking files
+ - lt:disable use of SetFileValidData() by default (windows). A new setting allows enabling it
+ - lt:dropped dependency on iconv
+ - lt:deprecate set_file_hash() in torrent creator, as it's superceded by v2 torrents
+ - lt:deprecate mutable access to info_section in torrent_info
+ - lt:removed deprecated lazy_entry/lazy_bdecode
+ - lt:stats_alert deprecated
+ - lt:remove bittyrant choking algorithm
+ - lt:update userdata in add_torrent_params to be type-safe and add to torrent_handle
+ - lt:add ip_filter to session_params
+ - lt:added support for wolfSSL for SHA-1 hash and HTTPS (no Torrents over SSL)
+ - lt:requires OpenSSL minimum version 1.0.0 with SNI support
+ - lt:deprecated save_state() and load_state() on session in favour of new
+ - lt:write_session_params() and read_session_params()
+ - lt:added support for BitTorrent v2 (see docs/upgrade_to_2.0.html)
+ - lt:create_torrent() pad_file_limit parameter removed
+ - lt:create_torrent() merkle- and optimize-alignment flags removed
+ - lt:merkle_tree removed from add_torrent_params
+ - lt:announce_entry expose information per v1 and v2 info-hash announces
+ - lt:deprecated sha1_hash info_hash members on torrent_removed_alert,
+ - lt:torrent_deleted_alert, torrent_delete_failed_alert and add_torrent_params
+ - lt:undeprecate error_file_metadata for torrent errors related to its metadata
+ - lt:remove support for adding a torrent under a UUID (used for previous RSS support)
+ - lt:remove deprecated feature to add torrents by file:// URL
+ - lt:remove deprecated feature to download .torrent file from URL
+ - lt:requires boost >= 1.66 to build
+ - lt:update networking API to networking TS compatible boost.asio
+ - lt:overhauled disk I/O subsystem to use memory mapped files (where available)
+ - lt:libtorrent now requires C++14 to build
+ - lt:added support for GnuTLS for HTTPS and torrents over SSL
+ - lt:fix issue where stop-when-ready would not close files
+ - lt:uTP performance, fix packet loss when sending is stalled
+ - lt:uTP performance, prevent premature timeouts/resends
+ - lt:uTP performance, more lenient nagle's algorithm to always allow one outstanding undersized packet
+ - lt:uTP performance, piggy-back held back undersized packet with ACKs
+ - lt:uTP performance, don't send redundant deferred ACKs
+ - lt:fix wanted_done/done accounting when force-rechecking
+ - lt:expose userdata via torrent_handle (back-port from 2.0)
+ - lt:fix renaming of filenames that are too long for the filesystem
+ - lt:made UPnP and LSD code avoid using select_reactor (to work around an issue on windows in boost.asio < 1.80)
+
+FrostWire 2.9.7 build 752 APR/24/2025
+ - crash: Fix NPE in PerformersHelper.sortByRelevance when currentQuery is null or empty
+ - crash: Guard against showing UI after activity paused in LocalBroadcastReceiver
+ - crash: Move startForeground call from onCreate to onStartCommand in MusicPlaybackService
+ - crash: Centralize NotificationUpdateDaemon start in MainApplication and remove redundant scheduling from EngineIntentService
+ - crash: Replace DrawerLayout with SafeDrawerLayout to prevent measure‑spec crashes
+ - crash: Avoid TransactionTooLargeException by caching torrent metadata in temporary file, not passing it through an Intent Bundle
+ - crash: Chaquopy marshall data too short fix. Ensure chaquopy packages python code from src/main/python
+ - crash: Protect from race condition registering media button in MusicPlaybackService
+ - freeze: StringUtils.fromHTML() method to prevent freezing when parsing large HTML strings
+
+FrostWire 2.9.6 build 748 APR/11/2025
+ - Fix: Avoid possible freeze sorting too many search results
+ - yt_dlp-2025.03.31
+ - gradle-8.11.1
+ - com.android.tools.build:gradle:8.8.2
+ - androidx.core:core:1.16.0
+ - com.google.android.ump:user-messaging-platform:3.2.0
+ - org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+ - com.google.firebase:firebase-bom:33.12.0
+ - com.applovin:applovin-sdk:13.2.0
+ - com.applovin.mediation:unityads-adapter:4.14.1.0
+
+FrostWire 2.9.5 build 747 MAR/09/2025
+ - Search works much better
+ - Filter out search results with no keyword matches
+ - yt_dlp-2025.2.19
+ - com.google.firebase:firebase-crashlytics-gradle:3.0.3
+ - com.google.firebase:firebase-bom:33.10.0
+ - com.applovin:applovin-sdk:13.1.0
+ - com.applovin.mediation:unityads-adapter:4.13.1.1
+ - com.applovin.mediation:unityads-adapter:4.14.1.0
+
+FrostWire 2.9.4 build 746 DEC/26/2024
+ - Upgraded targetSdkVersion to 34 (Android 14).
+ - Upgraded compileSdk to 35 (Android 15).
+ - Increased minSdkVersion to 26 (Android 8.0 Oreo).
+ - Updated Java source and target compatibility to Java 17.
+ - androidx.core:core:1.15.0
+ - com.google.firebase:firebase-bom:33.7.0
+ - com.google.android.ump:user-messaging-platform:3.1.0
+ - Removed deprecated dependencies:
+ - com.google.android.gms:play-services-location:21.3.0
+ - com.google.android.gms:play-services-ads-identifier:18.1.0
+ - Improved handling of POST_NOTIFICATIONS permission for Android 13 and 14 compliance.
+ - Migrated background services to Android's Workers API for improved performance and maintainability.
+ - Added CountDownLatch for thread-safe initialization of services.
+ - Improved thread safety by introducing AtomicReference for state management.
+ - Enhanced strict mode policy handling for Android 14, including updates to RunStrict.
+ - Refactored MusicPlaybackService to modernize notification handling
+ - Added buildBasicNotification() for creating notifications.
+ - Fixed MediaPlayer issues to comply with Android 14’s stricter policies.
+ - Introduced defensive checks to improve error handling and logging across services.
+ - Updated EngineForegroundService:
+ - Refactored state management for better lifecycle handling.
+ - Improved notification updates and shutdown logic.
+ - Refactored ApplicationPreferencesFragment for null safety and consistent logging.
+ - Streamlined dependency management by removing unused imports and redundant code.
+ - Prepared codebase for compliance with Android 14, leveraging newer APIs for permissions and notifications.
+ - Fixed "Add to Playlist" action not displaying user-created playlists.
+ - Unified playlist fetching logic using MusicUtils.getPlaylists().
+ - Refactored PlaylistLoader to simplify playlist loading and improve code maintainability.
+ - Removed redundant permission checks in PlaylistLoader for cleaner permission handling.
+ - Improved loader restarts and logging in ApolloFragment and PlaylistFragment.
+ - Fixed permission management in HomeActivity to include rationale dialogs and settings redirection.
+ - Enhanced error handling and logging across the app, particularly in playlist management.
+ - Fixed debounce issues with ad loading in HeaderBanner to prevent excessive reloads.
+ - Refactored CreateNewPlaylistMenuAction for thread safety and UI responsiveness.
+ - Improved menu preparation logic in ProfileActivity for better thread handling.
+ - Fixed Rename Playlist issue.
+ - Context menu "Play" and "Play Next" actions now work.
+
+FrostWire 2.8.2 build 740 NOV/28/2024
+ - yt_dlp-2024.11.18
+ - Python runtime upgraded from 3.8 to 3.11
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7
+ - com.applovin.mediation:unityads-adapter:4.12.4.0
+ - Removed 'Rate us' rich notification, no longer on Google Play
+
+FrostWire 2.8.1 build 739 OCT/27/2024
+ - yt_dlp-2024.10.22
+ - Update Chaquopy plugin to 16.0.0
+ - crash: Fix IllegalStateException by making DrawerLayout the root view in activity_main.xml
+ - dev: com.google.firebase:firebase-bom:33.5.1
+ - dev: com.android.tools.build:gradle:8.7.1
+
+FrostWire 2.8.0 build 738 OCT/18/2024
+ - New: Dark Mode Theme
+ - Removed Google Playstore Billing integration and libraries
+ - yt_dlp-2024.10.07
+ - androidx.core:core:1.13.1
+ - com.android.tools.build:gradle:8.7.0
+ - androidx.appcompat:appcompat:1.7.0
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6
+ - com.google.firebase:firebase-bom:33.4.0
+
+
+FrostWire 2.7.9 build 736 AUG/24/2024
+ - Enhanced SSL/TLS validation with improved domain and certificate handling in Ssl.java
+ - Added "frostwire.com" to the list of valid SSL certificate domains
+ - Implemented dynamic validation for subdomains
+ - Updated NullTrustManager to manage and log SSL certificates more effectively
+ - Simplified item access methods in TellurideSearchResultDownloadDialog
+ - Removed unnecessary casting to improve code readability and efficiency
+ - Corrected iswindows function in common.sh for proper integer comparison
+ - Updated function’s usage in configure_update.sh for correct return status handling
+ - Adjusted YTSearchPerformer for more memory-efficient handling of search results
+ - Improved placement of FrostClick search within the Android UI
+ - Fixed potential NullPointerException in TellurideSearchResultDownloadDialog
+ - Fix potential NullPointerException in SearchFragment by ensuring valid FragmentManager
+ - Fix ClassCastException in TellurideCourierCallback by adding type check for adapter instance
+ - Enhanced URL opening method to handle cases where no default browser is found
+ - Updated Gradle wrapper to use version 8.9
+ - yt_dlp 2024.08.06
+ - com.google.firebase:firebase-bom:33.2.0
+ - com.google.gms:google-services:4.4.2
+ - com.google.firebase:firebase-crashlytics-gradle:3.0.2
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.20
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4
+
+FrostWire 2.7.8 build 733 MAY/25/2024
+ - Fixes X Video Download issue where video file names were too long
+ - Search fixes
+ - EZTV search removed
+ - Yify search removed
+ - Updated Gradle to version 8.6
+ - Updated Android Gradle plugin to 8.2.1 and 8.3.2
+ - Updated Python integration with com.chaquo.python:gradle:15.0.1
+ - Fixed null pointer exceptions in AbstractConfirmListDialog and TellurideCourierCallback
+ - Improved null checks for miniPlayer and coverImage
+ - Miscellaneous Play Store compliance enhancements
+ - Python version updated to 3.8
+ - Python: yt-dlp-2024.4.9
+ - androidx.browser:browser:1.8.0 update
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0 update
+ - androidx.media2:media2-player:1.3.0 update
+ - androidx.media2:media2-session:1.3.0 update
+ - androidx.media2:media2-widget:1.3.0 update
+ - androidx.vectordrawable:vectordrawable-animated:1.2.0 update
+ - com.android.billingclient:billing:7.0.0 update
+ - com.applovin:applovin-sdk:12.4.3 update
+ - com.google.android.material:material:1.12.0 update
+ - com.google.firebase:firebase-crashlytics-gradle:3.0.1 update
+ - com.google.gms:google-services:4.4.1 update
+ - com.google.firebase:firebase-bom:33.0.0 update
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24 update
+
+FrostWire 2.7.7 build 730 - JAN/01/2024
+ - Subscription page improvements
+ - Plus users with Google Play can also buy Ad-Removal subscription
+ - com.google.android.material:material:1.11.0
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22
+ - androidx.exifinterface:exifinterface:1.3.7
+ - com.applovin:applovin-sdk:12.1.0
+ - com.applovin.mediation:unityads-adapter:4.9.2.1
+ - python: yt_dlp 2023.12.30
+ - dev: com.google.firebase:firebase-bom:32.7.0
+ - dev: com.android.tools.build:gradle:8.2.0
+
+FrostWire 2.7.4 build 724 - DEC/05/2023
+ - com.android.billingclient:billing:6.1.0
+ - androidx.browser:browser:1.7.0
+ - com.android.tools.build:gradle:8.1.4
+
+FrostWire 2.7.3 build 723 - OCT/17/2023
+ - Fixed bug where Play Store Ad-removal subscriptions weren't updating locally.
+ - com.google.code.gson:gson:2.10.1
+ - com.google.gms:google-services:4.4.0
+ - com.google.firebase:firebase-crashlytics-gradle:2.9.9
+ - com.google.android.material:material:1.10.0
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2
+ - com.applovin:applovin-sdk:11.11.3
+ - com.applovin.mediation:unityads-adapter:4.9.1.0
+ - python: yt_dlp 2023.10.13
+ - dev: gradle build script deprecation fixes, cleanup
+ - dev: com.android.tools.build:gradle:8.1.2
+ - dev: gradle-8.4-bin.zip
+ - dev: com.google.firebase:firebase-bom:32.3.1
+
+FrostWire 2.7.2 build 722 - AUG/19/2023
+ - Google Play Billing Library 4.1.0 to 6.0.1 migration
+ - python: yt_dlp 2023.07.06
+ - androidx.browser:browser:1.6.0
+ - androidx.preference:preference:1.2.1
+ - dev: compileSdk 34
+ - dev: com.android.tools.build:gradle:8.1.0
+ - dev: gradle-8.3-bin.zip
+ - dev: com.google.firebase:firebase-crashlytics-gradle:2.9.8
+
+FrostWire 2.7.1 build 721 - JUN/28/2023
+ - crash fix loading rewarded video
+ - ANR fix during folder cleanup after a download finishes
+
+FrostWire 2.7.0 build 720 - JUN/01/2023
+ - jlibtorrent 1.2.19.0 upgrade
+ - boost 1.82 upgrade
+ - openssl 1.1.1t upgrade
+ - gradle 8.1.1 upgrade
+ - jar built with jdk20
+ - libtorrent update to RC_1_2 adac0d0843c7fb2180f43d20bd5bee0e380e4673
+ - android NDK r25c (LTS) (from r25b)
+ - more robust initialization of Python runtime
+ - fixed race condition issues starting the Python runtime
+ - fixed SC search
+ - lt:back-port load_torrent_*() functions
+ - lt:fix issue with odd piece sizes
+ - lt:fix issue where stop-when-ready would not close files
+ - lt:uTP performance, fix packet loss when sending is stalled
+ - lt:uTP performance, prevent premature timeouts/resends
+ - lt:uTP performance, more lenient nagle's algorithm to always allow one outstanding undersized packet
+ - lt:uTP performance, piggy-back held back undersized packet with ACKs
+ - lt:uTP performance, don't send redundant deferred ACKs
+ - lt:fix wanted_done/done accounting when force-rechecking
+ - lt:expose userdata via torrent_handle (back-port from 2.0)
+ - lt:fix renaming of filenames that are too long for the filesystem
+ - lt:made UPnP and LSD code avoid using select_reactor (to work around an issue on windows in boost.asio < 1.80)
+ - com.applovin:applovin-sdk:11.9.0
+ - com.google.android.material:material:1.9.0
+ - com.applovin.mediation:unityads-adapter:4.7.1.0
+ - org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21
+
+FrostWire 2.6.7 build 718 - APR/29/2023
+ - Improved YT search for spanish, french, german, italian
+ - python:websockets-11.0.2
+ - androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1
+ - removed androidx.lifecycle:lifecycle-viewmodel
+ - com.google.firebase:firebase-crashlytics-gradle:2.9.5
+
+FrostWire 2.6.6 build 717 - MAR/31/2023
+ - PLUS-ONLY: New video search source
+ - SoundCloud search fixed
+
+FrostWire 2.6.5 build 716 - MAR/17/2023
+ - Filters out irrelevant search results from EZTV search performer
+ - Removed all landscape layouts, app works only in vertical mode now
+ - python:yt_dlp-2023.3.4
+ - androidx.annotation:annotation:1.6.0
+ - Fixes weird crash getting fastest TPB mirror
+ - dev:com.android.tools.build:gradle:7.4.0
+
+FrostWire 2.6.4 build 713 - MAR/09/2023
+ - 100x faster search results
+ - Targets Android 13 (targetSdkVersion 33)
+ - SearchManager optimizations, much faster search results
+ - New BTDigg search engine
+ - Less aggressive okhttpclient thread pools to not exhaust http connections
+ - Zooqle search removed, service defunct
+ - python:yt_dlp-2023.2.17
+ - dev:com.google.firebase:firebase-crashlytics-gradle:2.9.4
+ - com.google.gms:google-services:4.3.15
+ - com.google.android.material:material:1.8.0
+ - androidx.exifinterface:exifinterface:1.3.6
+ - androidx.browser:browser:1.5.0
+ - com.applovin:applovin-sdk:11.7.1
+ - com.applovin.mediation:unityads-adapter:4.6.0.0
+
+FrostWire 2.6.3 build 711 - JAN/31/2023
+ - com.chaquo.python:gradle:14.0.2
+ - python:yt_dlp-2023.1.6
+ - python:Brotli-1.0.7
+ - python: pycryptodomex-3.9.4
+ - python: websockets-10.4
+ - com.google.android.material:material:1.7.0
+ - com.android.tools.build:gradle:7.4.0
+ - explicit declared androidx.lifecycle:lifecycle-viewmodel:2.5.1 to avoid conflicts
+ - explicit declared androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1 to avoid conflicts
+ - androidx.exifinterface:exifinterface:1.3.5
+ - MainApplication onCreate logs yt_dlp version
+
+FrostWire 2.6.2 build 708 - OCT/19/2022
+ - removed MobileFuse adapter
+ - telluride build 23
+ - supports downloads of IG Reels, YT Stories and TikToks
+ - basic uses update dialog when OTA message available
+ - com.google.re2j:re2j:1.7
+ - com.google.code.gson:gson:2.9.0
+ - androidx.exifinterface:exifinterface:1.3.4
+ - com.google.gms:google-services:4.3.14
+ - com.google.firebase:firebase-crashlytics-gradle:2.9.2
+ - androidx.annotation:annotation:1.5.0
+ - com.android.tools.build:gradle:7.3.1
+
+FrostWire 2.6.1 build 706 - SEP/11/2022
+ - jlibtorrent 1.2.17.0 upgrade
+ - Android NDK r25b
+ - jlt:boost 1.80 upgrade
+ - jlt:openssl 1.1.1q upgrade
+ - jlt:gradle 7.5.1 upgrade
+ - libtorrent update to RC_1_2 b5873f23b40ef9054b2bd6a4db2a2d327a56d4b1
+ - lt:fix wanted_done/done accounting when force-rechecking
+ - lt:expose userdata via torrent_handle (back-port from 2.0)
+ - lt:fix renaming of filenames that are too long for the filesystem
+ - lt:made UPnP and LSD code avoid using select_reactor (to work around an issue on windows in boost.asio < 1.80)
+ - lt:fixed tracker connections spinning when hostname lookups stall
+ - lt:fixed error in pkg-config file generation in Jamfile
+ - lt:improve backwards compatibility with loading magnet link resume files
+ - lt:fix bind-to-device for tracker announces and UPnP
+ - lt:rename peer_tos setting to peer_dscp
+ - lt:fix bdecode support for large strings (>= 100 MB)
+
+FrostWire 2.6.0 build 705 - SEP/09/2022
+ - Telluride Video Page Search is here.
+ - Faster more responsive keyword search.
+ - 703: Simpler, more robust Python runtime startup
+ - 703: Better handling of no search results on video url
+ - 704: com.applovin:applovin-sdk:11.4.2
+ - 704: com.mobilefuse.sdk:mobilefuse-adapter-applovin:1.2.5.0 (new)
+ - 704: removed some unity dependencies lowering installer size by almost 3mb
+ - 704: slightly faster app startup
+
+FrostWire 2.5.0 build 701 - AUG/14/2022
+ - LESS IS MORE. The FrostWire we'd like to use is here.
+ - Removal of annoying Interstitial ad display logic, video ads are only shown when user wants to remove ads for 30 minutes
+ - Removal of "My Files", it's impossible to maintain across so many android versions and devices with the file management quicksand on android
+ - "Downloads" opens the user's favorite Android File Explorer
+ - Fixes issues where finished downloads would get re-inserted into the MediaStore
+   giving users the impression the file had been downloaded multiple times
+ - FrostWire will correctly handle opening music files from different file explorers as long as
+   the music files have been scanned by the Android Media Store
+ - Major code cleanup after removal of "My Files" fragments and activities
+ - Finished download scanning issues solved for Android 10, 11 and 12.
+ - Easy access to Google Play Subscriptions management.
+ - Fixed soundcloud search performer.
+ - com.android.tools.build:gradle:7.2.2
+ - com.google.android.material:material:1.6.1
+ - com.google.firebase:firebase-crashlytics-gradle:2.9.1
+ - com.google.gms:google-services:4.3.13
+ - androidx.annotation:annotation:1.4.0
+ - com.unity3d.ads:unity-ads:4.2.1
+
+
+FrostWire 2.4.8 build 691 - APR/20/2022
+ - TorLock search fixed
+ - Removed torrent-paradise.ml, moved to IPFS, no longer works with JSON api
+ - com.android.billingclient:billing:4.1.0
+ - Expose settings_pack.validate_https_trackers with SettingsPack::validateHttpsTrackers methods
+ - Privacy improvement: App no longer requires asking user for location
+ - lt:upgrade to boost 1.79
+ - lt:openssl 1.1.1n upgrade
+ - lt:fix bdecode support for large strings (>= 100 MB)
+ - lt:send User-Agent field in anonymous mode
+ - lt:fix python binding for settings_pack conversion
+ - lt:fix DHT announce timer issue
+ - lt:use DSCP_TRAFFIC_TYPE socket option on windows
+ - lt:update default ToS setting according to RFC 8622
+ - lt:keep trying to announce to trackers even when all fail
+ - lt:don't disable announcing from local endpoints because of temporary failures
+ - lt:fix issue in parsing UPnP XML response with multiple forwarding services
+
+FrostWire 2.4.7 build 690 - FEB/18/2022
+ - fixes a crash on audio player screen when rotating to landscape
+ - libtorrent: turn off tracker certificate validation on jlibtorrent to increase
+   data availability on network until issues in libtorrent finding correct
+   location of root certs is solved
+ - removed mopub third party library
+ - AppLovin Max 11.1.2 integration
+ - androidx.media2:media2-*:1.2.1
+
+FrostWire 2.4.6 build 689 - FEB/02/2022
+ - Fixes issue with duplicate file entries in My Files
+ - jlibtorrent 1.2.15.2
+ - compileSdkVersion 31
+ - com.google.android.material:material:1.5.0
+ - androidx.browser:browser:1.4.0
+ - com.google.firebase:firebase-crashlytics-gradle:2.8.1
+ - com.google.firebase:firebase-bom:29.0.4
+ - androidx.appcompat:appcompat:1.4.1
+ - androidx.core:core-ktx:1.7.0
+ - androidx.media2:media2-session:1.2.0
+ - androidx.media2:media2-widget:1.2.0
+ - androidx.media2:media2-player:1.2.0
+ - com.google.android.gms:play-services-ads:20.4.0
+ - com.applovin:applovin-sdk:10.3.5
+ - com.mopub.mediation:applovin:10.3.4.0
+ - com.android.tools.build:gradle:7.1.0
+ - androidx.preference:preference:1.2.0
+ - Chinese translation update by TheJokerW
+
+FrostWire 2.4.5 build 688 - JAN/07/2022
+ - jlibtorrent 1.2.15.1 (boost 1.78, openssl 1.1.1m)
+ - lt:don't disable announcing from local endpoints because of temporary failures
+ - lt:fix issue in parsing UPnP XML response with multiple forwarding services
+ - lt:cache DNS lookups for SOCKS5 proxy
+ - lt:fix stalled pieces on disk-full errors
+ - lt:fix build configuration issue on NetBSD, OpenBSD and DragonFly
+ - lt:make UTF-8 sanitization a bit stricter. This will re-write invalid UTF-8 code points encoding surrogate pairs
+ - lt:fix restoring last_seen_complete from resume data
+ - lt:fix issue on MacOS where the DHT was not restarted on a network-up notification
+ - lt:make remove_torrent flags be treated as flags (instead of an enum)
+
+FrostWire 2.4.4 build 687 - NOV/23/2021
+ - jlibtorrent 1.2.14.2 (rebuild with boost 1.77)
+ - smaller installer size
+ - androidx.annotation:annotation:1.3.0
+ - com.google.firebase:firebase-crashlytics-gradle:2.8.0
+
+FrostWire 2.4.3 build 686 - OCT/22/2021
+ - Fixes search bug that would occur after exiting and reopening app
+ - Better search http connection management
+ - androidx.media2:media2-*:1.2.0 update
+ - targetSdkVersion 31 (Android 12)
+ - com.applovin:applovin-sdk:10.3.4
+ - com.mopub.mediation:applovin:10.3.3.0
+ - com.android.tools.build:gradle:7.0.3
+
+FrostWire 2.4.2 build 684 - SEP/21/2021
+ - Search screen rewritten, considerably faster search results
+ - WRITE_EXTERNAL and WRITE_SETTINGS permissions no longer required
+ - Android 11+ compatibility updates in the way the app interacts with the Android Media Store API
+ - After Android 10, files can no longer be deleted from "My Files", this has been delegated to
+   the OS's File Manager, less is more.
+ - gradle:4.1.0 -> 4.2.2 -> 7.0.2
+ - Java 11 language support, common/ and android/ codebased will be modernized through future updates
+ - Storage location selection feature dropped, the application will use external shared storage where available by default
+ - minSdkVersion 24 (Android 7.0)
+ - targetSdkVersion 30 (Android 11)
+ - New jlibtorrent 1.2.14.1 (no more netlink sockets, ifaddr sockets)
+ - Set as Ringtone action removed (needed WRITE_SETTINGS) permission
+ - Soundcloud search fixed
+ - lt:fix issue on MacOS where the DHT was not restarted on a network-up notification
+ - lt:make remove_torrent flags be treated as flags (instead of an enum)
+ - lt:improve handling of seed flag in PEX messages
+ - lt:fix issue of accruing unlimited DHT node candidates when DHT is disabled
+ - lt:fix bug in parsing chunked encoding
+ - lt:fix incorrect reporting of active_duration when entering graceful-pause
+ - com.google.gms:google-services:4.3.10
+ - com.google.firebase:firebase-crashlytics-gradle:2.7.1
+ - com.google.android.flexbox:flexbox:3.0.0
+ - com.mopub:mopub-sdk:5.18.0
+ - com.mopub.mediation:unityads:3.7.5.0
+ - com.mopub.mediation:applovin:10.3.3.0
+ - com.unity3d.ads:unity-ads:3.7.5
+ - com.applovin:applovin-sdk:10.3.2
+ - com.google.android.material:material:1.4.0
+ - androidx.exifinterface:exifinterface:1.3.3
+ - androidx.appcompat:appcompat:1.3.1
+ - androidx.recyclerview:recyclerview:1.2.1
+ - androidx.core:core-ktx:1.6.0
+ - com.google.android.gms:play-services-ads:20.2.0
+ - com.android.billingclient:billing:4.0.0
+ - com.google.android.gms:play-services-ads:20.3.0
+ - com.google.code.gson:gson:2.8.8
+ - com.google.re2j:re2j:1.6
+ - com.squareup.okhttp3:okhttp:5.0.0-alpha.2
+ - com.android.tools.build:gradle:7.0.2
+
+FrostWire 2.3.2 build 679 (experimental/very unstable) - JUN/18/2021
+ - We're submitting this to Google Play so they don't remove the app but it's broken
+ - Android 11 - first pass of compatibility fixes
+ - FrostWire no longer needs writes access to external storage
+ - FrostWire writes only to its internal directory and make downloaded files
+ - Multiple fixes related to media player startup which could cause
+   the player to enter illegal states or crash the application
+ - For Android 10+ devices, we'll temporarily disable storage selection from settings
+   until we make sure we can integrate it for Android 10+ devices
+   without external writing permissions
+ - File deletion action not available for external media files not downloaded by FrostWire
+ - remove ignoreHardwareMenu logic, physical menu key a thing of the past
+ - minSdkVersion 23 (Android Marshmallow 6.0)
+ - targetSdkVersion 30 (Android 11)
+ - com.google.gms:google-services:4.3.8
+ - com.google.firebase:firebase-crashlytics-gradle:2.7.0
+
+FrostWire 2.3.1 build 678 - APR/23/2021
+ - SoundCloud search & downloads fixed
+ - androidx.media2:media2:1.1.3
+ - androidx.recyclerview:recyclerview:1.2.0
+ - com.google.android.gms:play-services-ads:20.0.0
+ - com.google.firebase:firebase-crashlytics-gradle:2.5.2
+ - com.applovin:applovin-sdk:10.1.2
+ - com.unity3d.ads:unity-ads:3.6.2
+ - don't crash on removeFromPlaylist error
+
+FrostWire 2.3.0 build 677 - MAR/24/2021
+ - New jlibtorent 1.2.13.0
+ - com.google.firebase:firebase-bom:26.7.0
+ - com.android.billingclient:billing:3.0.3
+ - com.google.android.gms:play-services-ads:19.8.0
+ - androidx.annotation:annotation:1.2.0
+ - com.mopub:mopub-sdk-banner:5.16.3
+ - dev: com.android.tools.build:gradle:4.1.3
+ - com.applovin:applovin-sdk:10.0.1
+ - com.mopub.mediation:applovin:10.0.1.0
+ - lt:fix incoming TCP connections when using tracker-only proxy
+ - lt:fix issue with paths starting with ./
+ - lt:fix integer overflow when setting a high DHT upload rate limit
+ - lt:improve Path MTU discovery logic in uTP
+ - lt:fix overflow issue when rlimit_nofile is set to infinity
+ - lt:Fix cxxflags and linkflags injection via environment variables
+
+FrostWire 2.2.9 build 675 - FEB/16/2021
+ - New jlibtorrent 1.2.12.0
+ - Mopub 5.16.0: s/RewardedVideo/RewardedAd/g refactor
+ - lt:fix loading of DHT node ID from previous session on startup
+ - lt:use getrandom(), when available, and fall back to /dev/urandom
+ - lt:fix uTP issue acking FIN packets
+ - lt:validate HTTPS certificates by default (trackers and web seeds)
+ - lt:load SSL certificates from windows system certificate store, to authenticate trackers
+ - lt:introduce mitigation for Server Side Request Forgery in tracker and web seed URLs
+ - lt:fix error handling for pool allocation failure
+ - dev:com.android.tools.build:gradle:4.1.2
+ - com.google.android.material:material:1.3.0
+ - com.google.android.gms:play-services-ads:19.7.0
+ - androidx.media2:media2-widget:1.1.2
+ - androidx.media2:media2-player:1.1.2
+ - com.mopub:mopub-sdk-*:5.16.0
+
+FrostWire 2.2.8 build 672 - JAN/18/2021
+ - Plus: SoundCloud search fixes
+ - com.google.android.material:material:1.3.0-rc01 update
+ - androidx.browser:browser:1.3.0 update
+ - androidx.exifinterface:exifinterface:1.3.2 update
+ - com.google.android.gms:play-services-ads:19.6.0 update
+ - com.android.billingclient:billing:3.0.2 update
+ - com.applovin:applovin-sdk:9.14.12 update
+
+FrostWire 2.2.7 build 670 - DEC/23/2020
+ - New jlibtorrent 1.2.11.0
+ - libtorrent 1.2.11.0 update (471e772cb7038f1bf5f44c32a09eb42fbb80ee99)
+ - lt: upgraded to openssl 1.1.1l
+ - lt: fix issue with moving the session object
+ - lt: deprecate torrent_status::allocating. This state is no longer used
+ - TorrentStatus::State::ALLOCATING enum removed
+ - lt: fix bug creating torrents with symbolic links
+ - lt: remove special case to save metadata in resume data unconditionally when added throught magnet link
+ - lt: fix bugs in mutable-torrent support (reusing identical files from different torrents)
+ - lt: fix incorrectly inlined move-assignment of file_storage
+ - lt: add session::paused flag, and the ability to construct a session in paused mode
+ - lt: fix session-pause causing tracker announces to fail
+ - lt: fix peer-exchange flags bug
+ - lt: allow saving resume data before metadata has been downloaded (for magnet links)
+ - lt: record blocks in the disk queue as downloaded in the resume data
+ - lt: fix bug in set_piece_deadline() when set in a zero-priority piece
+ - lt: fix issue in URL parser, causing issues with certain tracker URLs
+ - lt: use a different error code than host-unreachable, when skipping tracker announces
+ - Playlist removal crash fix
+
+FrostWire 2.2.6 build 668 - DEC/04/2020
+ - Fixes Soundcloud search
+ - Fixes GloTorrents search
+ - Fixes crash when previewing stream and internet connection is dropped
+ - Fixes crash on MusicPlaybackService
+ - com.mopub:mopub-sdk*:5.14.0 -> 5.15.0
+ - com.mopub.mediation:applovin:9.14.3.0 -> 9.14.8.0
+ - com.unity3d.ads:unity-ads:3.4.6 -> 3.5.1
+ - androidx.browser:browser: 1.3.0-alpha06 -> 1.3.0-rc01
+ - dev:com.android.tools.build:gradle:4.1.0 -> 4.1.1
+ - dev:com.google.firebase:firebase-crashlytics-gradle:2.3.0 -> 2.4.1
+
+FrostWire 2.2.5 build 665 - NOV/18/2020
+ - New: TorrentParadise search source
+ - New: GloTorrents search source
+ - New: Firebase Crash Analytics support
+ - Yify search fixed
+ - Torrentz2 search fixed
+ - MagnetDL search fixed
+ - Soundcloud search fixed
+ - EZTV search fixed
+ - Fixed archive.org connection dropped/timeout error
+ - Privacy updates
+ - com.google.android.gms:play-services-ads 19.4.0 -> 19.5.0
+ - com.mopub:mopub-sdk-banner:5.12.0 -> 5.14.0
+ - com.applovin:applovin-sdk:9.13.1 -> 9.14.5
+ - com.mopub.mediation:applovin:9.13.1.0 -> 9.14.3.0
+ - material 1.3.0-alpha02 -> 1.3.0-alpha03
+ - browser 1.3.0-alpha05 -> 1.3.0->alpha06
+ - exifinterface 1.2.0 -> 1.3.1
+ - play-services 19.3.0 -> 19.4.0
+ - core-ktx 1.3.1 -> 1.3.2
+ - com.android.tools.build:gradle:4.0.1 -> 4.1.0
+ - gradle wrapper update 6.1.1->6.6.1
+
+FrostWire 2.2.4 build 654 - SEP/24/2020
+ - New jlibtorrent 1.2.10.0 update
+ - Fixes bug where frostclick promo slide would render twice
+ - dev: buildToolsVersion '29.0.2' -> '29.0.3' (@TacoTheDank)
+ - Archive search Json parsing deprecation fix (@TacoTheDank)
+ - com.squareup.okhttp3:okhttp:4.8.1 -> 4.9.0
+ - lt: improve stat_file() performance on Windows
+ - lt: fix issue with loading invalid torrents with only 0-sized files
+ - lt: fix to avoid large stack allocations
+ - lt: add macro TORRENT_CXX11_ABI for clients building with C++14 against
+   libtorrent build with C++11
+ - lt: removed deprecated wstring overloads on non-windows systems
+ - lt: drop dependency on Unicode's ConvertUTF code (which had a license
+   incompatible with Debian)
+ - lt: fix bugs exposed on big-endian systems`
+ - lt: fix detection of hard-links not being supported by filesystem
+ - lt: fixed resume data regression for seeds with prio 0 files
+ - binaries: compiler upgraded from g++-5 to g++-7
+ - reverted to com.mopub:mopub-sdk-banner:5.12.0 (mopub 5.13.1 very unstable)
+
+FrostWire 2.2.3 build 649 - AUG/23/2020
+ - jlibtorrent 1.2.7.0 -> 1.2.8.0 update
+ - com.squareup.okhttp3:okhttp:4.4.1 -> 4.8.1
+ - com.mopub:mopub-sdk-banner:5.12.0 -> 5.13.1
+ - androidx.browser:browser:1.3.0-alpha04 -> 1.3.0-alpha05
+ - com.google.re2j:re2j:1.3 -> 1.4
+ - com.google.android.material:material:1.3.0-alpha01 -> 1.3.0-alpha02
+ - com.google.android.gms:play-services-ads:19.2.0 -> 19.3.0
+ - com.applovin:applovin-sdk:9.12.6 -> 9.13.1
+ - com.unity3d.ads:unity-ads:3.4.2 -> 3.4.6
+ - 1337 search fixed
+ - SC search fixed
+
+FrostWire 2.2.2 build 646 - AUG/01/2020
+ - Considerably faster app startup
+ - .apk size reduced 2.1MB
+ - New 1337x (LeetX) search (thanks to @HimanshuSharma789 for his contribution)
+ - New iDope search (thanks to @HimanshuSharma789 for his contribution)
+ - Fixed Torrentz2 search dates (thanks to @HimanshuSharma789 for his contribution)
+ - Multiple crash fixes on My Music (Player)
+ - Settings screen now includes links to official reddit, twitter, facebook, discord chat, blog, rate us
+ - jlibtorrent 1.2.7.0 recompiled with Android NDK r21d
+ - com.google.android.material:material:1.2.0-alpha06 -> 1.3.0-alpha01
+ - com.android.tools.build:gradle:3.6.3 -> 4.0.1
+ - gradle-5.6.4 -> gradle-6.1.1
+ - androidx.browser:browser:1.3.0-alpha01 -> 1.3.0-alpha04
+ - com.google.android.gms:play-services-ads:19.1.0 -> 19.2.0
+ - com.android.billingclient:billing:2.2.0 -> 3.0.0
+
+FrostWire 2.2.1 build 642 - JUN/17/2020
+ - jlibtorrent/libtorrent 1.2.7.0 update
+ - OpenSSL 1.1.1g update
+ - dev: jlibtorrent build with boost 1.73.0
+ - Fixes bug getting source URL from TPB search result
+ - lt: fix incorrect filename truncation at multi-byte character
+ - lt: always announce listen port 1 when using a proxy
+ - lt: add set_alert_fd in python binding, to supersede set_alert_notify
+ - lt: fix bug in part files > 2 GiB
+ - lt: add function to clear the peer list for a torrent
+ - lt: fix resume data functions to save/restore more torrent flags
+ - lt: limit number of concurrent HTTP announces
+ - lt: fix queue position for force_rechecking a torrent that is not auto-managed
+ - lt: improve rate-based choker documentation, and minor tweak
+ - lt: undeprecate upnp_ignore_nonrouters (but refering to devices on our subnet)
+ - lt: increase default tracker timeout
+ - lt: retry failed socks5 server connections
+ - lt: allow UPnP lease duration to be changed after device discovery
+ - lt: fix IPv6 address change detection on Windows
+ - lt: fix peer timeout logic
+ - lt: simplify proxy handling. A proxy now overrides listen_interfaces
+ - lt: fix issues when configured to use a non-default choking algorithm
+ - lt: fix issue in reading resume data
+ - lt: revert NXDOMAIN change from 1.2.4
+ - lt: don't open any listen sockets if listen_interfaces is empty or misconfigured
+ - lt: fix bug in auto disk cache size logic
+ - lt: fix issue with outgoing_interfaces setting, where bind() would be called twice
+ - lt: add build option to disable share-mode
+ - lt: support validation of HTTPS trackers
+ - lt: deprecate strict super seeding mode
+ - lt: make UPnP port-mapping lease duration configurable
+ - lt: deprecate the bittyrant choking algorithm
+ - lt: add build option to disable streaming
+
+FrostWire 2.1.10 build 640 - JUN/04/2020
+ - Less interstitial ads
+ - Fixes Torrentz2 search
+ - Fixes music playback bug on Android 5.x (Lollypop)
+ - Fixes bug where playing a Unity Video Reward didn't pause ads
+ - Fixes bug getting source URL from TPB search result
+ - com.squareup.okhttp3:okhttp:3.14.0 -> 4.4.1
+ - com.google.android.gms:play-services-ads:18.3.0 -> 19.1.0
+ - com.android.billingclient:billing:2.1.0 -> 2.2.0
+ - dev: com.android.tools.build:gradle:3.6.1->3.6.3
+ - androidx.preference:preference:1.1.1
+ - com.google.android.material:material:1.2.0-alpha06
+ - androidx.exifinterface:exifinterface:1.2.0
+ - com.applovin:applovin-sdk:9.12.6
+ - com.mopub.mediation:applovin:9.12.5.0
+ - com.mopub:mopub-sdk-*:5.12.0
+
+FrostWire 2.1.9 build 637 - MAR/05/2020
+ - Album art display bug fixed
+ - No more annoying 300x250 ad over album art on Music Player
+ - New MagnetDL search
+ - Issues with search results not being displayed fixed
+ - MusicPlaybackService rewritten
+ - Continuous playback issues fixed
+ - Repeat mode and shuffle mode issues fixed
+ - Save to Playlist issue fixed
+ - New Global Sequential Downloads Torrent Setting. Disabled by default
+ - Transfer details file list and peer list no longer flicker when updated
+ - New jlibtorrent 1.2.3
+ - libtorrent 1.2.3.0 update
+ - com.google.android.material:material:1.2.0-alpha04->1.2.0-alpha05 update
+ - com.google.code.gson:gson:2.8.5 -> 2.8.6 update
+ - boost 1.72.0 build
+ - openssl 1.1.1d
+ - Android NDK 21
+ - R8 code minification enabled to build .apk
+ - UX: New 'Retry Download' action for failed magnet downloads
+ - UX: No more annoying ever-present Android notification, only during active transfers or music playback
+ - UX: Torrent search results now show how old they are
+ - EngineService and MusicPlaybackService are no longer ran as foreground services following newer android guidelines
+ - Considerable CPU usage reduction through thread invocation throttling frees resources for better search and download experience
+ - Removed experimental haptic feedback feature
+ - Multiple crashes fixed
+ - Music player and notifications framework update
+ - MusicPlaybackService lifecycle rewrite
+ - SoundCloud search/downloads fixed
+ - LimeTorrents search/downloads fixed
+ - Fixes crash searching for music in My Music screens
+ - Fixes issue media scanning finished download files
+ - androidx browser 1.3.0-alpha01
+ - applovin and mopub mediation 9.11.4
+ - mopub 5.11.0 update
+ - com.unity3d.ads:unity-ads:3.4.2 update
+ - lt:fix erroneous event=completed tracker announce when checking files
+ - lt:promote errors in parsing listen_interfaces to post listen_failed_alert
+ - lt:fix bug in protocol encryption/obfuscation
+ - lt:fix buffer overflow in SOCKS5 UDP logic
+ - lt:fix issue of rapid calls to file_priority() clobbering each other
+ - lt:clear tracker errors on success
+ - lt:optimize setting with unlimited unchoke slots
+ - lt:fixed restoring of trackers, comment, creation date and created-by in resume data
+ - lt:fix handling of torrents with too large pieces
+ - lt:fixed division by zero in anti-leech choker
+ - lt:fixed bug in torrent_info::swap
+
+FrostWire 2.1.8 build 610 - DEC/25/2019
+ - TPB picks fastest mirror available
+ - SoundCloud search/downloads fixed
+ - Ads can be temporarily removed by playing a rewarded video ad
+ - androidx.browser:browser:1.2.0-rc01 update
+ - androidx.exifinterface:exifinterface:1.1.0 update
+ - com.applovin:applovin-sdk:9.10.5 update
+ - com.unity3d.ads:unity-ads:3.4.0 new
+ - com.android.billingclient:billing:2.1.0 update
+ - dev: com.android.tools.build:gradle:3.5.3
+ - cleanups and optimizations
+
+FrostWire 2.1.7 build 605 - NOV/20/2019
+ - Android 10 compatibility updates
+ - Android 4.4 support dropped, minimum compatible version is Android 5.0 Lollypop
+ - OKHttp 3.14.0 update
+ - androidx components update
+ - billingclient:billing:2.0.3 update
+ - re2j:1.3 update
+ - flexbox:1.1.1 update
+ - applovin-sdk:9.9.2 update
+ - buildToolsVersion '29.0.2' update
+ - play-services-ads:18.3.0 update
+ - mopub-sdk 5.10.0 update
+ - com.google.android.material:material:1.2.0-alpha0
+ - vungle-sdk removed
+ - ANR and crash fixes
+
+FrostWire 2.1.6 build 599 - AUG/30/2019
+ - Fixes bug where sequential downloads couldn't be turned off
+ - Archive.org .torrent download errors fixed
+ - TorLock and Torrentz2 search results are magnet based to reduce fetching errors
+ - material:1.1.0-alpha09 update
+ - play-services-ads:18.1.1 update
+ - com.applovin:applovin-sdk:9.8.4 update
+ - mopub-sdk:5.8.0 update
+ - com.android.tools.build:gradle:3.5.0 update
+ - com.android.support:design:29.0.0 update
+ - com.android.support:animated-vector-drawable:29.0.0 update
+ - com.android.support:customtabs:29.0.0 update
+ - com.android.support:exifinterface:29.0.0 update
+ - com.android.support:preference-v7:29.0.0 update
+ - com.android.support:preference-v14:29.0.0 update
+ - gradle wrapper distributionUrl=https\://services.gradle.org/distributions/gradle-5.6-all.zip
+ - crash fixes and optimizations
+ - New jlibtorrent 1.2.2.0 update
+ - jlibtorrent updated to boost 1.71.0
+ - jlibtorrent upgraded openssl to 1.1.1c
+ - jlibtorrent compiled with std=c++14 (up from c++11)
+ - lt:pick contiguous pieces from peers with high download rate
+ - lt:fix error handling of moving storage to a drive letter that isn't mounted
+ - lt:fix integer overflow in http parser
+ - lt:fix integer overflow in chunked http parser
+ - lt:factor out and unit test parts of the DHT routing table logic
+ - lt:improve sanitation of symlinks, to support more complex link targets (file_storage::sanitize_symlinks)
+ - lt:avoid empty dht routing table buckets
+ - lt:fix dht_stats_alert routing table stats for multi-homed clients
+ - lt:fix entry assignment from bdecode_node and lazy_entry
+ - lt:fix use-after-free issue in socket_type
+ - lt:fix error code messages when building without deprecated functions
+ - lt:feature to disable DHT, PEX and LSD per torrent
+ - lt:fix seeding of random number generator on mingw
+ - lt:fix issue where trackers from magnet links were not included in create_torrent()
+ - lt:extend the whole_pieces_threshold setting to also request contiguous pieces from fast peers
+ - lt:fix error handling of moving storage to a drive letter that isn't mounted
+ - lt:don't leak exceptions out of handler callbacks in resolver
+ - lt:ensure headers build independently
+ - lt:fix unit template's mutating operators to give them proper ref qualifiers
+
+FrostWire 2.1.5 build 596 - JUL/13/2019
+ - AndroidX API migration update
+ - TPB search censorship improvements
+ - fixes, cleanups, optimizations
+ - applovin 9.7.2, play-services-ads 18.1.0
+
+FrostWire 2.1.4 build 593 - JUN/01/2019
+ - Nyaa search fixed
+ - New Torrentz2 search
+ - Thousands of code cleanups
+ - applovin 9.7.0, play-services-ads 17.2.1, mopub-sdk 5.7.0
+
+FrostWire 2.1.3 build 592 - MAY/16/2019
+ - New jlibtorrent 1.2.1.0 with latest libtorrent release
+ - play-services-ads 17.2.0, applovin 9.6.0, okhttp 3.12.2
+ - Plus: Soundcloud search/downloads fixed
+ - TorLock search fixes
+ - Archive.org search fixes
+ - gradle 4.10.1 -> 5.1.1 update (dev)
+ - com.android.tools.build:gradle 3.2.1 -> 3.4.0 (dev)
+ - More efficient build with D8
+ - using android NDK r19c (released January 2019)
+ - updated to boost 1.70.0
+ - frostwire.com is opened in case apk update can't be launched (Android 9 issue mostly)
+ - libtorrent: make sure session cleanup releases all its references to torrents
+ - libtorrent: track the mapped port for each NAT mapping transport
+ - libtorrent: optimize resolve_duplicate_filenames_slow()
+ - libtorrent: use a more restrictive limit on number of pieces allowed in a torrent
+ - libtorrent: improve disk I/O logging
+ - libtorrent: always flush disk I/O job queue before shutdown
+ - libtorrent: fix typo in validation of reject messages. Make on_choke a bit more defensive
+ - libtorrent: tighten up validation of dont-have messages
+ - libtorrent: tighten up validation of reject messages, to ensure consistency of stats counters
+ - libtorrent: tighten up message size checks
+ - libtorrent: update symlinks to conform to BEP 47
+ - libtorrent: source code cleanup, performance and stability
+
+FrostWire 2.1.2 build 581 - FEB/07/2019
+ - Library okhttp 3.12.1,  applovin 9.2.1, play-services-ads 17.1.3
+
+FrostWire 2.1.1 build 579 - JAN/16/2019
+ - New jlibtorrent 1.2.0.19 with libtorrent 1.2.0
+ - Memory freed by removing hundreds of unused resource ids and resources
+ - Library updates mopub 5.4.1, applovin 9.1.3, okhttp 3.12.0, com.h2database 1.4.197,
+   com.android.support 28.0.0, play-services-ads:17.1.2
+ - Search: New Nyaa engine
+ - Fix ANR introduced by mopub 5.4.1
+ - Min sdk bumped to 19 (Android 4.4)
+
+FrostWire 2.1.0 build 568 - NOV/18/2018
+ - Android Oreo/Pie compatibility updates
+ - Clearing finished transfers also clears errored transfers
+ - EZTV search fixed, other search fixes
+ - Library updates: mopub 5.4.0, applovin 8.1.4, play-services 17.1.1, com.google.code.gson:gson 2.8.5
+ - compileSdkVersion 28, targetSdkVersion 26, buildToolsVersion 28.0.3
+ - ogury/presage removed
+ - UX anonymous stats tracking removed
+ - Optimization and fixes
+
+FrostWire 2.0.9 build 565 - SEP/24/2018
+ - New jlibtorrent 1.2.0.18
+ - YT search removed
+ - Bug fix on connection drop and transfer state loss
+ - Bug fix where a "Saving to Internal Memory" rich notification would linger after picking an SD Card location
+ - Translations updated: Chinese, Hebrew
+ - Library updates: applovin 8.1.2, presage-moat-3.0.26-3.0.14, okhttp 3.11.0, gradle 3.2.0 (dev)
+ - Google Ads removal
+ - Unused resources and translations cleanup, over 1Mb size reduction in .apk installer
+ - Optimizations and fixes
+
+FrostWire 2.0.8 build 562 - SEP/08/2018
+ - YT search fixed
+ - Archive.org search fixed
+ - Translations updated: Hebrew, Japanese, Dutch, Romanian, Russian,
+   Slovak, Serbian, Dutch, Lithuanian, Turkish, Bulgarian
+   Afrikaans, Ukranian, Estonian, Luxembourgish
+ - New user agent and peer finger print for tracker announcement
+œ - Exit, Restart optimizations
+ - Possible crash upon fast restart fixed
+ - New jlibtorrent 1.2.0.18-RC12
+ - Library updates: openssl-1.1.1-pre9, presage-moat-3.0.23-3.0.14,
+   mopub 5.3.0, (dev) gradle 4.10
+ - Library removal: prebid
+
+FrostWire 2.0.7 build 556 - AUG/09/2018
+ - Crash on Audio Player equalizer menu
+ - Translations updated: Croatian, Thai, Indonesian, Polish, Italian,
+   French, Afrikaans, Arabic, Czech, Danish, Finnish, Hungarian
+ - Library updates: applovin 8.1.0, (dev) gradle 4.9,
+   gms:play-services-base:15.0.1
+ - Fixes bug on banner dismissal button behavior
+ - Fixes bug displaying short file names in My Files
+ - New GDPR consent dialog for European users
+ - Freeze fixes
+
+FrostWire 2.0.6 build 546 - JUL/10/2018
+ - Yify search fixed
+ - EZTV search fixed
+ - TorrentDownloads search fixed, now magnet based
+ - LimeTorrents search fixed
+ - New jlibtorrent 1.2.0.18-RC9
+ - Translations updated: Malay, Slovak, Vietnamese, Chinese
+ - Library updates: prebid 0.4, (dev) buildtools 28.0.1, (dev) gradle 4.8.1
+   mopub 5.2.0, applovin 8.0.2
+
+FrostWire 2.0.5 build 541 - JUN/17/2018
+ - No more intrusive interstitial ads when resuming app
+ - New jlibtorrent 1.2.0.18-RC6
+ - Android billing client 1.1 update
+ - Music Player: Shuffle mode now remembers songs played, back works as expected
+ - Music Player: Shuffle and Repeat mode preferences are remembered across sessions
+ - Music Player: Shuffle mode respects Repeat mode
+ - Music Player: Add song to playlist shows mini-player in My Music
+ - Music Player: Repeat All is the default playback mode for playlists
+ - Music Player: Empty playlist message makes sense now
+ - New: Telugu translation available for 75 million speakers
+ - New: Marathi translation available for 73 million speakers
+ - Translations updated: Romanian, Turkish, Finnish, Serbian, Norwegian, Ukranian
+ - Library updates: (GDPR) applovin 8.0.1, prebid 0.3, mopub 5.1.0, flexbox 1.0.0, presage 3.0.17/3.0.11
+ - Library updates: (dev) gradle 4.8
+ - Fixes bug on which music playback was stopped when a video interstitial ad was shown
+ - Memory leak fixed on SearchHeaderBanner
+
+FrostWire 2.0.4 build 526 - MAY/01/2018
+ - New jlibtorrent 1.2.0.18-RC4
+ - jlibtorrent: updated to boost 1.67.0
+ - jlibtorrent: updated to OpenSSL 1.1.0h
+ - jlibtorrent: fix storage initialization
+ - jlibtorrent: don't perform DNS lookups for the DHT bootstrap unless DHT is enabled
+ - jlibtorrent: stat files in the disk thread
+ - jlibtorrent: source code cleanup, performance and stability
+ - jlibtorrent: issue query block size from torrent before metadata has been received
+ - jlibtorrent: source code cleanup, performance and stability
+ - jlibtorrent: honor torrent abort even on file check error
+ - Library updates: gms 15.0.0, re2j 1.2, applovin 8.0.0, prebid
+ - Translations updated, Hungarian, Hindi
+ - Music player clean up, crashes and optimizations
+ - Advanced Transfer Piece viewer rendering optimizations
+ - Search Filtering optimizations
+ - Bug where Creative Commons features would dissapear on Plus fixed
+
+FrostWire 2.0.3 build 521 - APR/12/2018
+ - Search: Yify fixed
+ - Issues with Android 8.0 notifications fixed
+ - Fixes a title refresh issue on My Files when switching file types
+ - Fixes a bug deleting a picture from the picture viewer screen
+ - Library updates: applovin 7.8.6, gms 12.0.1
+ - Translations updated: Czech, Greek, Danish
+ - Performance upgrades
+
+FrostWire 2.0.2 build 515 - MAR/26/2018
+ - Application startup is faster
+ - Faster YT downloads
+ - Zooqle search fixes
+ - TorrentDownloads search fixes
+ - LimeTorrents search fixes
+ - Library updates: jlibtorrent 1.2.0.17, applovin 7.8.5, ogury 2.2.8, mopub 4.20.0, okhttp 3.10.0, gson 2.8.2, gradle 4.6, gradle plugin 3.1.0, support libraries 27.1.0, gms 12.0.0
+ - When audio files are deleted from "My Files" they're now cleared from "Recents" in "My Music"
+ - Bug where deleted .torrent files would reappear fixed
+ - Translations updated, Urdu update
+ - Loads of Crash and Freeze fixes
+ - VPN detection and offering updates
+ - Notifications work again on Android 8.0
+
+FrostWire 2.0.1 build 490 - FEB/06/2018
+ - Archive.org search fixes
+ - SoundCloud search fixes
+ - Music Player 'Recent' tab fixes, thanks @votaguz
+ - Updated Japanese, Korean, Russian, Vietnamese, Belarusian, Bulgarian, Czech translations
+ - New jlibtorrent 1.2.0.16, fixes possible crash on application update, performance
+ - Library updates: build tools 27.0.3, gradle 4.5, flexbox 0.3.2
+ - Crash fixes, performance upgrades
+
+FrostWire 2.0.0 build 485 - DEC/25/2017
+ - New Transfer Detail screens for BitTorrent transfers.
+ - New Share current track with FrostWire Player screenshot attachment
+ - Faster startup
+ - Library updates: jlibtorrent 1.2.0.15, gms 11.6.2, mopub 4.19.0, flexbox 0.3.1, applovin 7.6.2, presage 2.2.7
+ - Translations update
+
+FrostWire 1.9.9 build 478 - DEC/13/2017
+ - App Startup is faster
+ - Multiple freezes fixed, memory leaks fixed, crashes fixed
+ - Android Jelly-Bean (<4.4) support dropped, minSdkVersion=19
+ - Library updates: jlibtorrent 1.2.0.15, gms 11.6.2, mopub 4.19.0, flexbox 0.3.1, applovin 7.6.0, presage 2.2.4
+ - Image viewer can now go to next and previous pictures with fling gesture
+ - Update system refactor, cleanup, updates shown on nav menu
+ - New Afrikaans translation
+ - Transfer screen on rotation would not keep last tab selected
+ - Java 8 usage, gradle 4.3.1
+ - compileSDKVersion 27, support libraries 27.0.2, kotlin plugin 1.1.51
+ - Material design dialog update
+ - TPB domain update
+
+FrostWire 1.9.9 - OCT/05/2017
+ - Search: More search results when not in WiFi
+ - Search: New Pixabay image search
+ - Search: YT, SC, EZTV, Torlock, Yify, Zooqle fixed
+ - Search: BTJunkie removed
+ - Transfers: New 'Seeding' tab
+ - Transfers: Shows 'Downloading Torrent' transfer when a magnet download starts
+ - Download: Yify magnets can now be found in DHT
+ - Creative Commons Features removed for Google Play users, available on FrostWire Plus
+ - BitTorrent and DHT IPv6 connectivity improvements
+ - New jlibtorrent 1.2.0.13-RC4
+ - Improved SSL compatibility
+ - Filtering bug fixes
+ - Audio Player 'Clear Queue' fix
+ - Crash fixes, performance upgrades
+ - ogury 2.2.1,  applovin-sdk 7.3.2, mopub 4.16.1
+ - compileSDK 26, gms 11.2.2, gradle 4.1, android support 26.0.2, okhttp 3.9.0
+ - Update in VPN offering
+ - Fixes freeze copying magnets to clipboard
+ - Less ads
+ - Music player has all horizontal layouts
+ - Warn user about Internet Connection dropped
+
+FrostWire 1.9.8 - JUL/26/2017
+ - More robust app startup
+ - New search filtering tools
+ - New jlibtorrent 1.2.0.11-RC2
+ - Improved VPN detection
+ - BitTorrent connection recovers when VPN service goes off and VPN protection off
+ - Library updates: kotlin 1.1.3, gms 11.0.2, MoPub 4.15
+ - UI-refresh: Transfer list items, drawable cleanup, My Music list items,
+   removed double divider in search result list item, added missing new line
+   to grid base
+ - Fixed memory leaks and runnaway threadpools causing out of memory errors
+ - Translations updated (Finnish, Greek, Danish, Czech, Italian, Arabic, French,
+   Portuguese, Spanish, Hindi, Croatian, Indonesian, Hebrew, Korean, Japanese,
+   Russian, Slovak, Romanian, Serbian, Swedish, Thai, Turkish, Ukranian, Polish,
+   Norwegian, Malay)
+ - ogury 2.1.11
+ - Music player 'Last Added' now shows album cover art for each song
+ - Fixes possible music player freezes
+ - YT search fixed
+ - Less ads
+
+FrostWire 1.9.7 - JUN/22/2017
+ - New jlibtorrent 1.2.0.11-RC1
+ - Stopped tracks don't come back on mini player after restart
+ - Playlist screen has 'New empty playlist' action as first list item
+ - Player playlist layout and font updates for UI consistency
+ - Fixed Thread pool max size issue
+ - Fixed possible app shutdown issues
+ - Fixed seeding enablement issue
+ - Ogury 2.1.8
+ - Fixed possible freeze refreshing file count in My Files
+ - Fixed possible crash browsing images
+ - Fixed possible freeze shutting down audio service
+ - New Kotlin support
+ - gradle 4.0, gms 11.0.1
+
+FrostWire 1.9.6 - JUN/09/2017
+ - Performance and stability improvements
+ - New jlibtorrent 1.2.0.9
+ - GSON 2.8.1
+ - Google Play Libraries 11.0.0
+ - Ogury 2.1.6
+ - AppLovin 7.2.0
+ - Fixes Seeding setting bug
+ - Improves and fixes bugs in Transfer's action bar menu options
+ - Fixes issue with documents query filter
+
+FrostWire 1.9.5 - JUN/06/2017
+ - BTJunkie search resurrected
+ - Monova, Torlock search fixed
+ - ExtraTorrent search discontinued, RIP
+ - ImageLoader memory/performance optimizations
+ - Update issue on Android 7 devices fixed
+ - UX-fix: Navigation menu was hard coded in English
+
+FrostWire 1.9.4 - MAY/18/2017
+ - New Gridview for Pictures and Videos in My Files
+ - New image viewer screen in My Files
+ - UX-Bug: Fixes Wizard Page layout so users with very small screens can finish initial setup
+ - Fixed bug where song queue was showing behind ad
+ - Fixes bug detecting VPN connection on some Android 7 devices
+ - Switch Queue and Playlist tile icons updated, color updates, layout code cleanup
+ - UX look/Performance upgrade of file type selection controls on Search and My Files
+ - Fixes bug on video file quality selection dialog
+ - Picasso 3.0.0-SNAPSHOT update
+ - Migration from OkHttp2 to OkHttp3
+
+FrostWire 1.9.3 - APR/28/2017
+ - Fixes YT search
+ - Optimizations and crash fixes
+ - Ogury 2.1.1
+
+FrostWire 1.9.2 - APR/20/2017
+ - New jlibtorrent 1.2.0.9-RC1
+ - New Zooqle search
+ - Monova, Torlock, YT search updates and fixes
+ - Mininova search discontinued
+ - All menus now show icons to visually identify actions
+ - Fixes issues preventing FrostWire to cleanly shutdown its services on Exit
+ - Hides Android top status bar when previewing videos in full screen mode
+ - Fixes video preview bug that would overlay ad and download button
+   over video if user went to full screenmode too soon
+ - Mopub/Ogury integration
+
+FrostWire 1.9.1 - APR/06/2017
+ - Video/Audio search preview screen material design updates
+ - My Files checkbox selection mode has a new action toolbar
+ - My Files checkbox selection mode can be started by long pressing on
+   a file (as long as it's not a ringtone)
+ - Fixes issues opening Pictures, Videos, Docs with My Files after SDK 24
+   on some devices
+ - Updated android support library to 25.3.1 and gms to 10.2.1
+ - MoPub 4.13.0 update and optimizations, less bandwidth usage
+ - New jlibtorrent 1.2.0.7-RC3
+ - BitSnoop search removed
+
+FrostWire 1.9.0 - MAR/10/2017
+ - New material-design navigation menu
+ - Full featured miniplayer available outside My Music
+ - Fixes bug where equalizer window would not open
+ - Music player cleanup
+ - InMobi network removed
+ - All translations up to date
+ - BTJunkie.eu search discontinued
+ - New jlibtorrent 1.2.0.6 (final release) fixes BitTorrent bugs
+ - Colors and theme update, major icons cleanup
+ - Fixes issue on music player when screen was rotated
+ - Fixes issues with SoundCloud search
+
+FrostWire 1.8.9 - FEB/13/2017
+ - New privacy enhancing setting to automatically disable all bittorrent activity if a VPN
+   connection is not present
+ - New privacy enhancing setting to not keep .torrent files when starting torrent transfers
+ - Use 3G/4G for Bittorrent setting renamed to "Wi-Fi Only"
+ - New jlibtorrent 1.2.0.6 fixes BitTorrent connectivity issues
+ - Applovin update (6.4.2)
+ - Android support library update to 25.1.1
+ - Upgrades to video preview screen
+ - Free distraction search can now be activated without restarting the app
+ - Material design upgrades
+ - Optimization and crash fixes
+
+FrostWire 1.8.8 - JAN/31/2017
+ - Initial makeover of Settings screens with material design
+ - Fixes issues with YouTube search
+ - Fixes bug where resumed transfers would ignore the data savings setting
+ - Multiple design fixes and additions
+ - Misc stability and performance updates
+
+FrostWire 1.8.7 - JAN/15/2017
+ - jlibtorrent 1.2.0.5
+ - Fixes issues with YouTube search
+ - Fixes issues with ExtraTorrent search
+ - New Bulgarian, Belarusian, Slovak, Thai, Malaysian, Norwegian, Swedish, Finnish, Hebrew and Serbian translations
+ - Every existing translation synced to 100%, Croatian and Urdu benefit the most
+ - About screen make over with material design
+ - Fixes bug where main navigation menu wouldn't close on back pressed
+
+FrostWire 1.8.6 - DEC/06/2016
+ - [Experimental] Distraction Free Search: Hide title bar and search box when scrolling down search results
+ - Ukranian, Romanian, Hungarian translations
+ - Fixes Archive.org, SoundCloud search
+ - Fixes checkbox/menu selection options bug on My files
+ - Fixes possible crash when browsing albums in My Music
+ - New [+|-]:keyword:<fooKeyword> keyword filter support on search
+ - Transfer action bar hides menu button if no transfers present
+ - Image loading/caching optimizations
+ - gson JSON parsing library upgraded to 2.8.0
+ - library updates
+
+FrostWire 1.8.5 - NOV/21/2016
+ - Search engines updates
+ - http updates
+ - Music Player controls available on lock screen notification for Android 5.0 and above
+ - Normalized look of scrollbars on music player
+ - UI updates on expanded player notification, play button available, expanded form has white background
+ - Translation updates: Indonesian, Arabic, Czech, Danish, Greek, Japanese, Korean, Turkish, Vietnamese
+ - jlibtorrent 1.2.0.4
+ - jlibtorrent upgrades to openssl-1.1.0c
+ - Crash fixes
+
+FrostWire 1.8.4 - NOV/09/2016
+ - Fixed YT search
+ - Improved Featured Downloads on welcome screen
+ - Translation updates: Italian
+
+FrostWire 1.8.3 - NOV/07/2016
+ - Improved feature download display on welcome screen
+ - Fixes crash that occurred on some transfers larger than 6Gb
+ - Fixes bug that would cause torrent connections to be choked unnecessarily
+ - Fixes issues with ringtone playback and management
+ - New jlibtorrent 1.2.0.2
+ - update to android ndk-r13b
+ - fixes bug that would fetch magnet if torrent was in the session
+ - inmobi 6.0.2
+ - fixes issue with gap between playlist list content and header
+ - stability and optimization improvements
+
+FrostWire 1.8.2 - OCT/18/2016
+ - New haptic feedback on most important actions
+ - Settings: New 'Select All' checkbox to select/unselect active search engines
+ - Music player notification background is now white
+ - New Send Feedback button from About screen
+ - Improved transfer progress calculation
+ - jlibtorrent 1.2.0.0
+ - applovin 6.3.2 update
+ - inmobi 6.0.0 update
+ - Translation updates for Spanish, Portuguese, French, German, Polish, Chinese, Hindi and Dutch
+ - Crash fixes
+
+FrostWire 1.8.1 - SEP/15/2016
+ - New Search Engine: LimeTorrents
+ - New jlibtorrent 1.1.1.38 (with libtorrent 1.1.1)
+ - Fixes shutdown and auto-restart bug
+ - Music Player will not bring back last song played paused on the next session
+ - FrostWire is cleared from the android task list on Exit on Android 21+
+ - Fixes Monova search
+ - android support v4.23.4.0
+
+FrostWire 1.8.0 - AUG/19/2016
+ - New jlibtorrent 1.1.0.37
+ - Speed and stability improvements
+ - Fixes download issues with BitSnoop search results
+ - Improved swipe gesture detection
+ - Replaced Terms of Use dialog for checkbox on final wizard screen
+ - Bug fix: ringtones can be set as ringtones
+
+FrostWire 1.7.9 - JUL/30/2016
+ - Faster app shutdown
+ - Use audio as ringtone fixed for Android 6 devices
+ - Optimizations, cleanup, crash fixes
+ - Fixes bug where app wouldn't shutdown
+
+FrostWire 1.7.8 - JUL/23/2016
+ - Removes KAT search
+ - Refactoring, cleanup, optimizations
+ - Remove Ads (Basic only)
+ - Crash fixes
+
+FrostWire 1.7.7 - JUL/19/2016
+ - Fixes YT search issues
+ - More descriptive error when cloud transfers are timed out
+ - Upgraded google play services (9.2.1), gson (2.7)
+ - Fonts and styles updates
+
+FrostWire 1.7.6 - JUN/29/2016
+ - Fixes YT search issues
+ - New jlibtorrent 1.1.0.35
+ - Fixes bug where torrent picker dialog would keep reappearing
+ - Improves shutdown and ad display logic
+ - Crash fixes
+ - applovin 6.2.4
+
+FrostWire 1.7.5 - JUN/14/2016
+ - Power saving improvements in notifications and screen refreshing
+ - (Plus-only) Fixes bug on update dialog where buttons would
+   disappear if too many bullets were shown
+ - Shutdown improvements
+ - Dialog fixes
+ - Crash fixes
+ - New jlibtorrent 1.1.0.34
+ - jlibtorrent: fixed logging bug related to add_torrent_params::flags
+ - jlibtorrent: fixed crash on invalid input in http_parser
+ - jlibtorrent: early resume data reset when fatal_disk_error
+ - jlibtorrent: revert handshake round-trip optimization
+ - Eztv search improvements
+ - Http client initialization improvements
+
+
+FrostWire 1.7.4 - JUN/02/2016
+ - Greatly improved first seed connectivity. Share magnets!
+ - Issues saving to SD card on multiple devices fixed.
+ - New 'Seed' action available on 'My files'. Create and seed
+   a torrent of a file or many in one touch.
+ - New handpicked file selection on .torrent downloads.
+ - Search improvements and refactors.
+ - New jlibtorrent 1.1.0.31
+ - Re-engineering and simplification of transfers architecture.
+ - Fixes bug where a playlist could not be created out of the
+   'More by artist' song list.
+ - New horizontal swipe gesture based tab switching for transfers, my files.
+ - Improved overscrolling and refreshing interaction on list views.
+ - Updated inmobi library to 5.3.0.
+ - No more repeated YouTube video search results. Results are now grouped, when
+   touched the user can select the video format/quality to download.
+ - Dialogs make over. All dialogs have uniform look and re-appear on device rotation.
+ - Fixes issue with playlist song drag-n-drop reordering. Thanks @grzesiekrzaca!
+ - Improved shutdown.
+ - Fixes Torlock search.
+ - EZTV no longer returns irrelevant results.
+ - New Search Engine: TorrentDownloads.me
+
+FrostWire 1.7.3 - APR/15/2016
+ - Soundcloud search results include estimated file size.
+ - Spanish Translation Update
+ - Fixes issue where player lock image would remain after playback was stopped.
+   Thanks @X-NicON.
+ - New jlibtorrent 1.1.0.24 with SSL security updates and libtorrent 1.1 release.
+ - jlibtorrent: multithreaded disk i/o and hashing.
+ - jlibtorrent: more efficient alert allocation.
+ - jlibtorrent: experimental support for mutable torrents (BEP 38).
+ - jlibtorrent: 5x faster torrent bcoder/bdecoder.
+ - jlibtorrent: improved shutdown.
+ - jlibtorrent: SSL over uTP supported.
+ - jlibtorrent: countless scalability updates, seed tens of thousands of torrents,
+   if not hundreds of thousands of torrents in a single jlibtorrent instance.
+ - YouTube search fixed.
+ - Monova search fixed.
+ - EZTV search fixed.
+ - Crash on search fixed.
+
+FrostWire 1.7.2 - APR/05/2016
+ - Instant demuxing. New (insanely) fast mp4 demuxer library by FrostWire.
+ - Demuxer progress is reported in the user interface.
+ - Improved connection status display on Transfers screen.
+ - My Files file count is updated when files are deleted.
+ - Updated libraries: gson v2.6.2, okhttp v2.7.5, android support v4.23.2.0.
+ - New jlibtorrent 1.1.0.23 (with openssl 1.0.2g)
+ - Music player bug fixes and major code cleanup.
+ - Song hand picker soundcloud playlist downloading confirmation dialog.
+ - Enhancement: Shows descriptive error on transfers when Internet connection is lost.
+ - Clears errored cloud transfers that were not considered completed.
+ - jlibtorrent: fix issue in checking outgoing interfaces
+ - jlibtorrent: optimize enumeration of network interfaces on windows
+ - jlibtorrent: improve reliability of binding listen sockets
+ - jlibtorrent: support SNI in https web seeds and trackers
+ - jlibtorrent: fix unhandled exception in DHT when receiving a DHT packet over IPv6
+ - Dropped rxjava library. KISS.
+
+FrostWire 1.7.1 - FEBRUARY/24/2016
+ - New "Experimental Features" option available. In order to move at a
+   faster pace and keep up with Android's endless architectural changes
+   and fragmentation issues, we're rolling out experimental features
+   with a switch you can turn on to help us test and fix faster.
+ - On Android 6.0 it's no longer needed to restart the app after
+   special permissions have been granted.
+ - YT audio search fixes.
+ - [Experimental] Integration of Android's new Storage Access Framework.
+   Android 5.x and up users are now able to save files on your SD Card
+   and not use up your internal memory once again.
+ - Upgraded to new jlibtorrent 1.1.0.22.
+ - Greatly improved Spanish translation.
+ - Improved track sharing on social networks.
+ - Fixes broken transfer progress bar for SoundCloud downloads.
+ - Crash fixes.
+
+FrostWire 1.7.0 - JANUARY/12/2016
+ - Updated to new jlibtorrent 1.1.0.19.
+ - Torrent transfers are now shown immediatly after they start.
+ - "Stop and Delete Data" now also deletes corresponding .torrent.
+ - Downloading two partial files from the same .torrent no longer
+   downloads the entire torrent.
+ - Lots of icons updated, unused ones pruned.
+ - Improved update notification for FrostWire plus users.
+
+FrostWire 1.6.9 - JANUARY/05/2016
+ - Crash fix.
+ - Updated to new jlibtorrent 1.1.0.16.
+ - Updated to new okhttp 2.7.1.
+ - Fixes on torrenting settings that were not being correctly applied.
+ - TPB fixed.
+ - YT search fixed.
+
+FrostWire 1.6.8 - DECEMBER/22/2015
+ - Plus: Fixes YouTube search/download issues.
+ - Updates to new jlibtorrent 1.1.0.15. Better connectivity, crash fixes.
+ - Misc User Interfaces upgrades/adjustments.
+ - Fixes multiple crashes.
+ - Fixes bug where after using the android notification, every time
+   the device was rotated, user would be taken to Transfer's screen
+   from Search or My Files.
+ - Upgrades to okhttp, JSON parser, regex engine, rxjava.
+ - Japanese translation update by @naofum.
+
+FrostWire 1.6.7 - DECEMBER/03/2015
+ - New: Select storage location. Down to the folder where you want
+   your FrostWire download folders to be.
+ - New: Exit/Shutdown button replaces VPN button on FrostWire status
+   notification.
+ - YouTube search improvements.
+ - Library updates (support-v4, rxjava, gradle plugin)
+ - Fixes bug where invalid names could be used to rename files.
+ - Spanish translation update.
+ - Fixes issues with archive.org search, download. Thanks @X-NicON.
+ - Fixes back to home arrow dissapearing bug on My Music screens.
+
+FrostWire 1.6.6 - NOVEMBER/13/2015
+ - Fixes YouTube search.
+ - Transfer screen's status bar now shows number of DHT hosts known
+ - New permanent notification lets you know FrostWire is running, how much bandwidth
+   it's using and whether or not your connection is encrypted with a VPN to protect
+   your fundamental human right to privacy.
+ - jlibtorrent engine upgraded to version 1.1.0.10
+
+FrostWire 1.6.5 - OCTOBER/28/2015
+ - Fixes bug where search results that have finished didn't refresh
+   user interface and users would think FrostWire was searching forever.
+ - Compatible with Android 6 (Marshmallow) new permissions framework.
+ - Won't crash on Android 6.
+ - Apk search results icon is now an Android head.
+ - Fixes SoundCloud search.
+ - Multiple crash fixes.
+ - New Keep In Touch dialog after the installation wizard.
+ - New Copy Magnet action on transfers.
+ - New Copy Infohash action on transfers.
+ - New "Help" menu entry.
+ - Updated Spanish, Polish, Croatian translations.
+ - Fixes bug where it wouldn't open finished .apk files from transfers screens.
+ - Fixes TPB search.
+ - Fixes BTjunkie search.
+ - Fixes Torlock search.
+ - Simpler versionCode based update check will allow us to roll out incremental/hotfix
+   builds to users running same version with older builds.
+
+FrostWire 1.6.4 - SEPTEMBER/24/2015
+ - New http engine based on okhttp, uses pooled connections, less threads, less memory.
+ - Visited previews also marked as visited and remembered during session.
+ - Fixes SoundCloud.
+ - Fixes KAT search.
+ - Fixes BitSnoop search.
+ - Browse and manage your .torrent files.
+ - Browsing document files now reveals all saved .apk files.
+ - Multiple crash fixes on audio player.
+ - No more annoying yellow notification messages when removing tracks.
+ - UX: My files won't forget your search filter if you overscroll for a refresh.
+
+FrostWire 1.6.3 - SEPTEMBER/06/2015
+ - Upgraded Picasso library for image caching.
+ - Code/library cleanup.
+ - New 'Remove Torrent and Data' action on finished torrent transfers.
+ - Clicked search results are marked as visited and remembered during session.
+ - jlibtorrent update 1.1.0.7, rebuilt with new swig library, memory optimizations, crashes fixed.
+ - Fixes EZTV, BtJunkie search.
+ - Fixes issue where torrent downloads would start on 3g/4g disregarding setting.
+ - Multiple crash fixes on audio player.
+
+FrostWire 1.6.2 - AUGUST/14/2015
+ - Multiple crash fixes on audio player.
+ - Updated jlibtorrent library to version 1.1.0.5.
+ - Improvement of file type selector look, better layouts for tablets.
+ - FrostWire Plus YouTube search fixed.
+
+FrostWire 1.6.1 - AUGUST/10/2015
+ - Fixes TorLock search.
+ - Crash fixes on libtorrent/jlibtorrent.
+ - Considerably faster search source processing.
+ - Search engines maintenance fix high cpu usage.
+ - Brings back "Send to/Upload" feature. Deleted by mistake.
+
+FrostWire 1.6.0 - AUGUST/03/2015
+ - Streaming Previews on search results before download. (FrostWire Plus only)
+ - Play .torrent media files while downloading.
+ - Upgrade bittorrent engine to jlibtorrent 1.0
+ - Updated SoundCloud search & download api.
+ - Improved search suggestions.
+ - Improved transition between My Music and Home screens.
+ - Multiple crash fixes in music player.
+
+FrostWire 1.5.8 - JUNE/16/2015
+ - Search performance improvements.
+ - Issues where subsequent searches would stop working fixed.
+ - TorLock search fixed.
+ - Added SSL (https) support for torrent web seeds.
+ - Icons/graphics update.
+ - New 'Rate us' reminder notification.
+ - WiFi sharing functionality removed. Less than 0.2% of the user
+   base making use of this, despite multiple rewrites we never
+   managed to get it to work 100% of the time.
+ - frostwire-jlibtorrent library updates.
+
+FrostWire 1.5.7 - MAY/15/2015
+ - KAT search fixed.
+ - Monova search fixed.
+ - EZTV search fixed.
+ - Bitsnoop downloads fixed.
+ - BTJunkie downloads fixed.
+
+FrostWire 1.5.6 - MAY/08/2015
+ - Further YouTube search fixes for non-english users.
+
+FrostWire 1.5.5 - MAY/07/2015
+ - YouTube search fixed. (FrostWire Plus only)
+ - Domain alias manager removed.
+
+FrostWire 1.5.4 - MAY/04/2015
+ - Crash fixes.
+ - Major icons make over. Crisp look on higher density screens.
+
+FrostWire 1.5.3 - APRIL/23/2015
+ - Crash fixes.
+ - Reduced installer size to 7.6 MB.
+ - Lollipop compatibility fixes.
+ - Bitsnoop search faster for individual files.
+ - Binary Optimizations.
+ - libtorrent updates.
+ - Spanish, Portuguese, Polish translation updates.
+
+FrostWire 1.5.2 - APRIL/17/2015
+ - Significant improvements in search results for individual files.
+ - Significant reduction of DHT queries, freeing up networking resources.
+ - Faster torrent download start.
+ - Fixes download error on some Archive.org search results.
+ - When no search results are found, search suggestions are calculated from search keywords.
+ - Fixes Yify search.
+ - Icon/buttons refresh on transfer screen.
+ - Fixes issues with SD Card storage on Android 5.0 (Lollipop)
+ - FrostWire notification icon now Lollipop compatible.
+
+FrostWire 1.5.1 - APRIL/07/2015
+ - Removed all notifications explaining why no more YouTube search results on Basic version.
+ - Updated about screen to denote what FrostWire distribution is installed.
+
+FrostWire 1.5.0 - APRIL/03/2015
+ - Upgraded frostwire-jlibtorrent to the latest code from libtorrent.
+ - Users can now donate to torrent creators, both Fiat and Bitcoin when available.
+ - TPB, BTJunkie, KAT, Monova searches fixed.
+ - New Bittorrent setting to enable/disable DHT connectivity.
+ - YouTube search disabled for Google Play distribution.
+ - Fixes annoying bug where user would be notified for old finished downloads.
+ - Fixes bug where songs that were deleted were not being cleared from playlists.
+ - Fixes bug where removing last song from Favorites playlist would not clear.
+ - Fixes bug where it would show "Play All" menu action on empty playlists.
+ - Fixes bug where sharing on WiFi from certain 3rd-party file explorers wouldn't work.
+ - Fixes bug where file descriptors fetched by content:// uris wouldn't have a disk path available.
+ - Fixes 2 crashes on music player.
+ - Chinese, Polish, Spanish translations update.
+
+FrostWire 1.4.9 - MARCH/03/2015
+ - New KAT search.
+ - Fixed BTJunkie search issues causing ANR crashes.
+ - Fixed Mininova search. Few results coming in due to low seed numbers.
+ - Removed Appia Search.
+ - Clean up: Removed Appia, RevMob, Google In-App purchasing libraries.
+ - Updated Croatian translation. Thanks @win32re.
+ - Refactors, cleanup, misc fixes.
+
+FrostWire 1.4.8 - FEBRUARY/25/2015
+ - Fixes YT file save issue.
+
+FrostWire 1.4.7 - FEBRUARY/23/2015
+ - TPB search fixed.
+ - Monova search fixed.
+ - Removed Support FrostWire controls.
+ - SoundCloud download issue fixed.
+ - RevMob integration.
+ - Crashes and bug fixes.
+ - Croatian translation update.
+
+FrostWire 1.4.6 - FEBRUARY/09/2015
+ - Fixes issue where finished torrents would re-download the last pieces on startup.
+ - Updated Picasso image caching library.
+
+FrostWire 1.4.5 - FEBRUARY/06/2015
+ - Youtube search improvements.
+ - Removed Torrents.fm search, service was shutdown.
+ - Fixes issue when removing last song on a playlist.
+
+FrostWire 1.4.4 - JANUARY/29/2015
+ - Finished transfers no longer should show as paused.
+ - Fixes issue adding a whole torrent after having added a single
+   file belonging to that same torrent to transfers. Now the whole
+   torrent will be downloaded as expected.
+ - Fixes Out of memory errors on MobileCore library.
+ - Fixes possible crash when exiting the app right after launching it.
+ - If storage location has ran out of space available FrostWire
+   will show a descriptive error message explaining why the download
+   has failed.
+ - Removes free apps ads from home page and sticky ads on transfer screens.
+ - Fixes issue where toast about shared file would not go away.
+ - Fixes settings screen issue where some android devices would automatically
+   toggle the BitTorrent connection.
+ - Fixes issues with YouTube search.
+ - Urdu translation started.
+
+FrostWire 1.4.3 - JANUARY/05/2015
+ - Player un/favorites current track on double tap. Thanks @votaguz.
+ - Music Player database errors reported fixed.
+ - MobileCore ads integration. Ads can be turned off under settings.
+
+FrostWire 1.4.2 - DECEMBER/22/2014
+ - New: Music Player (forked out of Apollo Player).
+ - New: Playlist support.
+ - New: Browse music by Recent, Artists, Albums, Songs, Genres.
+ - New: Change cover art on Playlists, Songs.
+ - New: Shuffle All music.
+ - Torrent/Magnet caching improvements reduce the number of DHT
+   requests when searching, which makes search result parsing faster
+   in most cases.
+ - When sharing files from 3rd party apps with FrostWire, the file
+   shared will be displayed by FrostWire as available via Wi-Fi sharing.
+   If the file is a .torrent the torrent transfer will start.
+ - Not using wifi multicast lock for energy savings.
+ - 'Preferences' renamed to 'Settings'
+ - About activity moved out of navigation menu and into Settings screen.
+ - Audio files can now be set as ringtones from My Files > Audio.
+ - Settings screen rearrangement.
+
+FrostWire 1.4.1 - DECEMBER/02/2014
+ - Updated jlibtorrent binaries.
+ - Resilience to file disk permission errors causing the app to
+   not start in some environments.
+ - Improved disk I/O when persisting states of torrent transfers.
+ - Refactors, Cleanups and other misc. bug fixes.
+ - Improved user experience on transfer list actions.
+ - Preferences screen won't automatically kick user to search screen
+   when BitTorrent connectivity changes.
+
+FrostWire 1.4.0 - NOVEMBER/08/2014
+ - Replaced Vuze Bittorrent engine for frostwire-jlibtorrent,
+   a java wrapper to the native libtorrent BitTorrent library.
+ - Peak memory usage dropped 50% when searching.
+ - Peak memory usage dropped 16% when downloading torrents.
+ - Number of threads dropped 41% when searching.
+ - Number of threads dropped 60% when downloading torrents.
+ - Peak CPU usage dropped 66% when searching.
+ - Peak CPU usage dropped 44% when downloading torrents.
+ - Got rid of over 2,000 classes.
+ - New Shutdown feature, stops all services and activities,
+   FrostWire process ends gracefully.
+ - Upgraded Picasso library to 2.4.0.
+ - More responsive and stable torrent state handling experience.
+ - Torrent downloads start faster.
+ - Torrent downloads connect to more peers.
+ - Updated German translation.
+ - Updated Croatian translation.
+ - Updated Polish translation.
+ - Updated Spanish translation.
+ - Updated Russian translation.
+ - Gets rid of Transcommu.
+ - Project is now built using gradle script.
+ - Updated Preferences screen BitTorrent connection status button.
+ - Fixes severe startup crash on Samsung Galaxy Mini devices.
+ - Multiple bug fixes and crashes.
+
+
+FrostWire 1.3.8 - SEPTEMBER/18/2014
+ - Fixes issue where FrostWire would think a Wi-Fi shared file belonged
+   to a removed SD card.
+
+FrostWire 1.3.7 - AUGUST/23/2014
+ - Japanese translation update. Thank you @naofum!
+ - Fixes on cloud search/download.
+
+FrostWire 1.3.6 - AUGUST/12/2014
+ - Improved cloud search results.
+ - Transcommu community based translation tool integrated.
+ - Chinese translation update.
+
+FrostWire 1.3.5 - AUGUST/08/2014
+ - Major updates to mp4 parsing code.
+ - Updated image cache Picasso library to 2.3.3.
+ - Fixes possible crash when browsing files on device.
+ - Fixes crash when playing a ringtone (Kindle Fire HD, Android 4.0.3 devices)
+ - Fixes Transfer screen rendering issue on startup.
+ - Fixes soundcloud track/sets download by url.
+
+FrostWire 1.3.4 - JULY/20/2014
+ - Large torrent downloads start a lot faster. Prevents possible
+   freezing (ANR) on some devices.
+ - Restored SD Card writing capabilities under new Android rules.
+   WARNING: All files stored to the application's SD Card folder
+   will be lost in the event of uninstalling. This is a problem
+   for every application on Android, not by our design.
+   Make sure to backup or sync files saved to the SD Card.
+ - Doesn't prefer external storage as the app install path.
+ - Opens Music Player window when playing a song from My Music.
+ - Moved vuze settings files to primary external private folder.
+ - Updated Preferences screen, setting groups now in separate sub-screens.
+ - Cleans up empty .torrent placeholder files when single torrent file download complete.
+ - Translation updates for Spanish, French, Polish, Portuguese.
+
+FrostWire 1.3.3 - JUNE/27/2014
+ - Improvements in memory consumption and performance for image caching.
+ - Download Soundcloud Tracks and Playlists by entering URL on search box.
+ - Download Soundcloud Tracks and Playlists by entering URL on Transfer "+" control.
+ - Search YouTube videos by pasting YouTube URL on search box.
+ - Fixes YouTube download error.
+ - Fixes issue with Connect/Disconnect preferences button.
+ - Fixes issues with Torrents.fm search.
+ - Transparent use of ViewHolder pattern in ListViews.
+ - GSON library update.
+ - Picasso library update.
+
+FrostWire 1.3.2 - MAY/29/2014
+ - Fixes audio player crash.
+
+FrostWire 1.3.1 - MAY/15/2014
+ - Fixes issue where torrent transfers would start even after user disconnected
+   in the preferences screen.
+ - Fixes ConcurrentModificationException crash on transfer manager.
+ - Fixes Unable to Pause Activity on MediaPlayer screen.
+ - Fixes reported crash starting a transfer.
+ - Fixes issues with EZTV search.
+
+FrostWire 1.3.0 - APR/30/2014
+ - Upgraded BitTorrent engine with latest code from Azureus project.
+ - Added uTP packet congestion support.
+ - Added Canonical Peer Priority support. (BEP40)
+ - Upgraded Android SDK target to Ice Cream Sandwich's API (15 - Android 4.0.3).
+   Users on Android devices running older versions will have to use FrostWire 1.2.3
+   or upgrade their operating system to +4.0.3 to receive further updates.
+ - Removed cling library for Local peer discovery, switched to JmDNS compatible with
+   frostwire for desktop 5.7.1.
+ - Considerable memory handling improvements, lots of leaks fixed which should lead
+   to very little out of memory errors from crashing the app.
+ - Added optional sponsored search results by Appia.
+ - Minor upgrades to audio player and Frostclick.com's free promotional downloads.
+ - Added TPB, Torrents.fm, Monova and Yify search. Search results available only when on a Wi-Fi connection.
+ - Magnet URI support when touching a magnet link on a web site.
+ - Paste a magnet or .torrent URI on the Transfers screen to start a download.
+ - Some search results now have image thumbnails. More coming.
+ - When internet connection is dropped, ongoing transfers are automatically paused and
+   restored when internet connection comes back.
+ - Corrected file sizes on SoundCloud search results.
+ - Multiple bug fixes.
+
+FrostWire 1.2.3 - DEC/10/2013
+ - Fixes crash when stopping a 1080p video transfer from cloud service.
+ - Player status bar removes words 'Playing' and 'Paused' instead uses icons.
+ - Number of search results under file type is now the same color as the file type icon.
+
+FrostWire 1.2.2 - DEC/02/2013
+ - Insanely faster cloud search results.
+ - Significant memory optimizations on search result parsing and display.
+ - Major update in cloud downloading architecture, Dynamic Adaptative Streaming over HTTP downloads supported.
+ - Removed jDownloader libraries, less complexity, lighter app.
+ - Fixes bug where transfer progress bar would fill up before download was complete.
+ - Throttles down CPU consumption when updating the audio player timers during playback.
+ - Fixes issue where search file type selector would hide after an orientation change
+   upon no results on the selected file type.
+
+FrostWire 1.2.1 - NOV/04/2013
+ - Fixes focus annoyance on search box after orientation change.
+ - Fixes CPU usage issues with Monova search.
+ - New search engine Eztv.
+ - Fixed crashes and NPEs.
+
+FrostWire 1.2.0 - NOV/01/2013
+ - New Flat Skin makes screens rendering faster.
+ - New, more stable, slide in navigation menu.
+ - Considerable memory usage optimizations.
+ - Fixed skip-song gesture on top of player seek bar.
+ - New icons.
+ - After opening one of My Files, FrostWire will now remember the position of the list of files, no more scrolling down to continue browsing your own files.
+ - Current song being played now is displayed at the bottom of the navigation menu.
+ - Current song being played now shows "Stop" icon when browsing your own audio files.
+ - Updated turkish translation, thanks @Serrae.
+ - New BitSnoop metasearch.
+ - New TorLock metasearch.
+ - Removed ISOHunt metasearch.
+ - Fixed Monova metasearch.
+ - French translation updated.
+
+FrostWire 1.1.4 - OCT/11/2013
+ - Audio player shows correct android notification when paused.
+ - Fixes ExtraTorrent meta search.
+ - Removed Vertor meta search. No longer serving .torrents without captcha.
+ - Updated arabic translation, thanks @nisrmasr.
+ - Updated spanish translation, thanks @muckachina.
+ - Updated portuguese translation, thanks @tati110.
+ - Updated french translation.
+ - Updated turkish translation.
+ - Updated polish translation.
+ - New anonymous usage stats.
+ - Fixed crashes and NPEs.
+
+FrostWire 1.1.3 - SEP/30/2013
+ - Upgrades to SoundCloud meta search.
+ - Kindle Fire and OUYA users can now support FrostWire with donations.
+
+FrostWire 1.1.2 - SEP/03/2013
+ - Removed offers during installation to comply with new Google Play guidelines.
+ - New: Stop music playback completely by long pressing the play/pause button.
+ - New: Audio Player menu now has "Delete this track" feature, get rid of songs
+   you don't like on your device next time you come across them and keep playing.
+ - New: Turn on/off wifi sharing from Wi-Fi sharing screen. Turning off Wi-Fi
+   sharing results in considerable battery savings since the radio is not being
+   used constantly to discover and announce to other peers on the local network.
+ - Sources on search results are now underlined to hint user of sourc checking feature.
+ - Fixes issues parsing some YouTube urls.
+ - Fixes soundcloud search.
+ - Improved memory usage and multiple memory leaks fixes will avoid a multiple
+   number of crashes due to out of memory errors, specially on older devices
+   with limited memory availability.
+ - Fixes issue with double memory allocation related to
+   first creen's grid view.
+ - Fixed some memory leaks related to picasso bitmap
+    allocations.
+
+FrostWire 1.1.1 - JUN/26/2013
+ - Fixes "Error: Inconsistent download state" bug when connectivity is lost and resumed.
+
+FrostWire 1.1.0 - JUN/10/2013
+ - Upgrades to HTTP client.
+ - Upgrades to Cloud search.
+ - Disables Google Play donations for Kindle Devices.
+
+FrostWire 1.0.9 - JUN/04/2013
+ - Fixed crashes on devices with little memory when trying to load high resolution bitmaps.
+ - Fixed Bug where files with invalid characters would not be transfered via Wi-Fi.
+
+FrostWire 1.0.8 - MAY/31/2013
+ - New main menu entry to launch "FrostWire TV" app.
+ - Search algorithm improvement brings better quality and missing search results.
+ - Local audio files now show album art making local music browsing friendlier.
+ - Fixes bug where audio player would stop instead of pausing when removing headphones.
+ - Updated Image caching based on Picasso, better frame rate overall, should see
+   less Out of memory error reports.
+ - Fixes bug where the search cache couldn't purge old entries nor it could be deleted.
+ - Fix for parsing torrents with minor mistakes in trackers list.
+ - Less intensive HTML detection during torrent parsing
+ - Added jdk14 logging library.
+ - Fixes bug where .torrent files and magnets would not open with some file/web browsers.
+ - Fixes crash reported when there is no access to the image cache folder.
+ - Fixes crash initializing donations Billing Service.
+ - Better description for mobile network data usage and bittorrent preferences.
+ - Removed Google AdMob.
+ - Added donations request component instead of ads.
+ - Integrates Offercast offers on installation.
+ - Experimental OUYA compatibility.
+
+FrostWire 1.0.7 - APR/10/2013
+ - 3 crashes fixed.
+ - Partial file torrent download bug fixed.
+
+FrostWire 1.0.6 - APR/08/2013
+ - Faster search results. Search architecture revised and improved.
+ - Includes search results from archive.org, which indexes millions
+   of public domain and creative commons works from all over the
+   internet.
+ - Reduces CPU and battery consumption up to 84%.
+ - FrostWire won't disable screen locking during audio playback.
+   It's now up to the user to set longer auto-locking timeouts if
+   they want to use FrostWire as an audio player in their vehicles.
+ - UI fix, media player screen is correctly updated if a song starts
+   while the screen was locked.
+ - Updated icons and graphics.
+ - Improved mime type detection.
+ - Supports WebM video search results.
+ - Updated UPnP cling libraries for better Wi-Fi sharing discovery.
+ - Multiple crashes and freezes fixed.
+ - Opens .torrent files from urls and from any file browser.
+ - Faster hashing and checking of ongoing and finished torrent downloads.
+ - Fixes a crash when sharing files from third party apps like FileKicker
+   which pass filepath uris instead of android provider uris.
+ - Fixes double audio playback issue with third party media playing apps.
+ - Fixes bug where the app would force close and restart on phones without SD cards.
+ - Fixes bug on Android 4.x where finished document downloads wouldn't appear under
+   documents.
+ - Avoids crash caused by AdMobSDK and WebView's cache being null.
+ - Fixes bug where sharing files from a third party app would open FrostWire
+   in a way that hitting the back button would take the user to the desktop and
+   not back into the third party app.
+ - Replaced navigation menu for a better one that presents itself with a smooth
+   brief zoom-in animation.
+ - Navigation menu and transfer screen looks properly on Motorola Razor
+ - More efficient use of Bitmaps should cut down on the number of Out of Memory errors on most devices.
+
+FrostWire 1.0.5
+ - Kindle Fire HD Compatible.
+ - UX fix, transfers window is shown after starting a peer download,
+   respecting the user setting for this behavior.
+ - Fixes reported crashes on 1.0.4.
+ - MediaPlayer uses Image Loader Cache in hopes to reduce Out of memory errors
+   on older devices.
+ - Updated sharing help images.
+
+FrostWire 1.0.4
+ - UX Improvement on internet search box, hints the user current
+   search context.
+ - UX Improvement, easier to read help on Wi-Fi sharing.
+ - UI fix, search on clearable textboxes no longer goes behind
+   clear icon.
+ - UI fix, avoids duplicated Wi-Fi ongoing downloads.
+ - UI fix, stops Http transfers (Cloud, Peer, Uploads)
+ - Fixes multiple NPEs reported by 1.0.3 users on Google Play.
+ - Updates sharing help imagery.
+
+FrostWire 1.0.3
+ - Multiple fixes upon transfer completion.
+ - Peer announcement/discovery now done using standard UPnP protocol.
+ - Fixes aac/mp4 audio demuxing/boxing incompatibilities
+   with some Samsung devices.
+ - Audio downloads from SoundCloud now include album art.
+ - Browsing a user sharing only one kind of files is
+   now done proactivey by showing that file type to the
+   user automatically.
+ - Lots of user experience upgrades.
+ - NPE fixes.
+
+FrostWire 1.0.2
+ - New FrostWire 1.0 skin by designer Marcelina Knitter.
+   Complete graphics and experience overhaul.
+ - New vertical navigation menu, solves fragmentation issues
+   on devices that had no way of bringing the preferences menu.
+ - Multiple optimizations for speed and battery life savings.
+ - New music player, still supports gestures to switch, pause,
+   resume songs. Stop button gone.
+ - Share files from the music player. No need to navigate
+   back to 'My Files' to share the song you are enjoying.
+ - Share files on the WiFi network from other applications.
+   FrostWire now will appear as a 'Send' or 'Share' option
+   on third party apps.
+ - Simplified Transfers screen (awesome updates coming)
+ - New design for Setup Wizard.
+
+FrostWire 0.9.14
+ - Search suggestions in Unicode.
+ - Now users can choose the default storage device.
+
+FrostWire 0.9.12
+ - Search performance improvements.
+ - Better international search thanks to improved special character support.
+ - Search status UI feedback improvemens.
+ - Search results remain on screen when the device is tilted.
+ - Search results remain after a transfer has been started.
+ - New animated media player status bar for easy access to media player.
+
+FrostWire 0.9.11
+ - Fixed caching policy.
+ - Fixed feedback while streaming or uploading files.
+ - UX upgrade on transfer manager.
+
+FrostWire 0.9.10
+ - Updated Tabbed interface with Swipey Tabs.
+ - UX upgrades to make local file browsing easier to find.
+ - Fixes issue with Motorola Droid's physical keyboard.
+ - Fixes several crashes.
+ - Fixes NPEs in Media Player.
+ - Fixes important bug on transfer from search result.
+ - WebView caching mode fixed for faster startup.
+ - Removed KAT.ph from search engines.
+
+FrostWire 0.9.9
+ - Fixes NPE in Media Player.
+ - Fixed important bug related to new downloads from search results.
+
+FrostWire 0.9.8
+ - Accepts uploads from FrostWire for Desktop.
+ - 24 Force close errors and freezes fixed.
+
+Frostwire 0.9.7
+ - Media Player is now car driver safe. Skip songs with swipe gestures,
+   pause and play songs by tapping the screen with two or more fingers.
+ - When a user makes or receives a call, if the Media player was active it
+   will pause and rewind two seconds so the user won't miss a beat.
+ - Media player will now create an automatic playlist using the files on the
+   same folder as the one the user started playing.
+ - Media player is always shown when the user starts playback. Users didn't
+   look at the notification toolbar icon and were getting lost.
+ - Media player has support for previous and next media item.
+ - Media player will pause if another player is started.
+ - Fixes freeze when stopping torrent transfer.
+
+FrostWire 0.9.6
+ - Supports installation on external storage.
+ - Sends date added, date modified data to FrostWire for desktop when browsed.
+ - Improvements in search performance.
+ - Improvements in search experience.
+ - FrostClick promotions can be downloaded via HTTP.
+ - Multiple UI fixes.
+ - Fixes NPE issues.
+
+FrostWire 0.9.5:
+ - Search box provides hints for less touch typing (powered by Google)
+ - Application translated to 16 languages: Chinese, Czech, Danish
+   Dutch, French, German, Hindi, Indonesian, Italian, Japanese, Korean,
+   Polish, Portuguese, Russian, Spanish, Turkish, Vietnamese
+ - Timeout adjustments for Wi-Fi browsing and compatibility enhancements
+   for FrostWire for Desktop.
+ - Removed support to defunct BTJunkie.org search, added KAT.ph search engine.
+ - When unmounting and mounting the SD card transfers work and shared states
+   are not reset.
+
+FrostWire 0.9.4:
+ - Fixes Issue #1 reported by @untaimed18.
+ - Upgrades to system update mechanism. Keeps backwards compatibility
+   with 0.6.x.
+
+FrostWire 0.9.2:
+ - FrostWire will now start downloading torrents if the user clicks
+   on a torrent URL or tries to open a .torrent file with other app.
+ - Fixed logic for back button press in Main activity.
+ - Added search button press logic to Main activity.
+ - Fixed logic error in http download handler.
+ - Minor refactor in stop media logic in engine service.
+ - Updated android-support-v4 library to revision 6.
+ - Adjustments in the button layout of the Transfer toolbar buttons.
+ - Fixed toast messages when connecting and disconnecting. Thanks untaimed18
+
+FrostWire 0.9.1:
+ - Fixed issues with local file sharing on the receiving end.
+ - Adjustments on list adapter layouts.
+ - New icons for "Library" and "padlocks".
+ - Added infographic to explain local file sharing.
+ - Made source code publicly available on GitHub.
+ - FrostClick promos are now hidden as soon as a search is started.
+
+FrostWire 0.9.0:
+ - Core-upgrades: BitTorrent support. Metafrost protocol dropped.
+ - Chat dropped.
+ - Local Network transfers now over HTTP.
+ - BitTorrent Smart Search. Searches
+
+FrostWire 0.6.3:
+ - Core-upgrade: Peer manager performance upgrades should allow faster peer
+   retrieval, peer list sharing, peer browsing.
+ - Core-upgrade: Metafrost cache reset on restart to avoid file transfer errors
+   due to previous miss calculations of metafrost files.
+ - Core-fix: Multiple crashes reported were fixed.
+
+FrostWire 0.6.2:
+ - Core-upgrade: Avoids connecting to too many peers.
+ - UI-upgrade: Shared finished downloads configuration is available on startup.
+ - UI-upgrade: Asks for confirmation before deleting files.
+
+FrostWire 0.6.1:
+ - UI-upgrade: Simpler sharing controls, categories cannot be disabled,
+   checkboxes are always shown when browsing yourself.
+ - UI-upgrade: New FrostWire application icon.
+ - UI-upgrade: New setting to automatically share finished downloads.
+ - UI-fix: Crash when trying to 'Show Love' from context menu.
+ - Core-fix: Crash trying to close an already removed communication channel.
+
+FrostWire 0.6.0:
+ - Core-Upgrade: Inspired by Twitter's Engineering blog http://goo.gl/bg5jk the protocol stack
+   was rewritten using NIO/Netty. Reducing the numbers of threads, memory and battery consumption
+   considerably. The Application should now be able to browse more peers and feel a lot snappier.
+ - UX-upgrade: See what files are being uploaded.
+ - UX-upgrade: The multiple selection checkboxes are now available for unshared files.
+ - UX-upgrade: Long pressing on an unshared file and sharing it will now ask
+   to enable sharing for the file type if it was disabled, just like on the padlock icon.
+   The current file type being browsed will also be reloaded to show the user this file type
+   is now available for sharing.
+ - Core-fix: Makes sure FrostWire won't go beyond the max number of peers.
+ - Bug-fix: Crash when trying to check all files when there are no files.
+
+FrostWire 0.5.9:
+ - UI-update: Updated language on initial settings dialog and how to share
+   dialog. Added scroll bars, which also help if the user is holding the
+   phone horizontally.
+ - UI-update: Touching files brings up the context menu. Most users are
+   probably not aware of these menus since they don't know about the long touch.
+ - UI-update: How to share dialog shows the icons related to sharing control
+   and file selection.
+ - UI-update: A new button is shown next to the user to open the How to
+   Share/Unshare dialog.
+
+FrostWire 0.5.8:
+ - UI-update: Update messages can now be customized depending on the update being released.
+
+FrostWire 0.5.7:
+ - Bug-fix: Force close on individual file deletion.
+
+FrostWire 0.5.6:
+ - UI-update: New feature to select/unselect all files of a type.
+ - UI-update: When a category is disabled for sharing, padlock icons appear gray.
+ - UI-update: Wording on sharing settings changed to reflect Category Sharing Enablement.
+ - UI-update: Users can only send up to 3 files at the time to the chat to avoid flooding.
+ - UI-policy-update: Users can only batch up to 30 files for downloading to
+   avoid too many download requests.
+ - Bug-fix: Long timeouts preventing 3G/4G connectivity fixed.
+
+FrostWire 0.5.5:
+ - Fixes several crashes.
+ - Revamped initial sharing dialog and instructions on how to share.
+   Users now have more control over what's being shared.
+ - Bug-fix: Peers removed from the Browse Peer list are correctly banned for the session.
+
+FrostWire 0.5.4:
+ - Better UI refresh when it comes to peers leaving.
+ - Bug-fix: Fixes bug that was breaking file downloads.
+ - Bug-fix: Says good bye to all peers when disconnecting.
+ - Fixes 2 crashes.
+
+FrostWire 0.5.3:
+ - Hotfix release. FrostWire was allowing too many peers in.
+
+FrostWire 0.5.2:
+ - UI-fix: Search box has round borders and shaded background.
+ - Bug-fix: Several reported crashes.
+ - Bug-fix: Fixes issue where peers would not send pings correctly and connections got stale
+   thus breaking Browseability and Connectivity on the network.
+
+FrostWire 0.5.1:
+ - Bug-fix: Possible NPE for peers not sending Geo-Location when exchanging Peer Lists.
+ - Bug-fix: Coloring issue on Search Results that hadn't been downloaded.
+
+FrostWire 0.5.0:
+ - New Feature: 3G/4G support. Use FrostWire outside your Wi-Fi network.
+ - New Feature: Send file(s) to chat. Long press on a file or select many, then send to the chatroom.
+ - UI-love: Updated look of Screen Headers. Tabs and Headers have new gradient looks and look well across all devices.
+   Better looking buttons on Transfers screen.
+ - UI-fix: Updated "Love FrostWire" section. No more donations until we integrate payment system.
+   Please rate us 5 stars on the Android Market if you like the app instead.
+ - UX-upgrade: Distances to peers now shown in both miles and kilometers (by popular demand)
+ - UX-upgrade: Peer Browsing is more frugal in screen real-state. Good for small screens.
+ - Drops support for Android 1.6 to favor health of the network with faster/better peers.
+ - Bug-fix: Fixes several reported (NPE) crashes.
+
+FrostWire 0.4.28:
+ - Bug-fix: 2 Force Closes that appeared since 0.4.25 finally fixed.
+
+FrostWire 0.4.27:
+ - Better Search Routing & Browsing connectivity.
+ - Bug-fix: Multiple force close issues fixed.
+ - Bug-fix: Fix for Samsung Galaxy Tab crashes.
+ - Bug-fix: Removed Peers will disappear right away from the list.
+
+FrostWire 0.4.26
+ - Core-Upgrade: Better p2p search algorithm and new peer management heuristics to find and keep closer peers.
+ - Bug-fix: workaround to WiFi lock/sleeping bug on some Android versions/devices.
+ - Bug-fix: multiple force close issues fixed.
+ - UX-Upgrade: Internationalization: Italian Support (i18n).
+ - UX-Upgrade: Remotely firewalled peers appear in light blue color.
+
+FrostWire 0.4.25
+ - Core-Upgrade: Improves WiFi network detection logic.
+ - UX-Upgrade: Connection Status now shows if user is firewalled or not, along the connection type.
+ - Bug-fix: fixes locking bootstrapping issues which caused connections to drop and affect search.
+
+FrostWire 0.4.24
+ - Core-Upgrade: Socket management rewritten to connect behind most firewall configurations (almost ready for 3G/4G support)
+ - Core-Upgrade: Rewrite of Application Provider.
+ - UX-Upgrade: Internationalization: French Support (i18n).
+ - UX-Upgrade: When browsing your own apps you now see their corresponding icons.
+ - UX-Upgrade: New setting to control vibration notifications upon finished downloads.
+ - Bug-fix: Crash when opening an old notification if the app wasn't running.
+ - Bug-fix: Copying .apk files from the phone to the desktop didn't work.
+ - Bug-fix: Possible search result filtering Exception fixed. Better search results for the network.
+ - Bug-Fix: Fixes obscure FC when starting a batch download then hitting the Back button right away.
+ - Bug-Fix: Fixes I/O bug that should result in less "Waiting..." cases when browsing peers.
+ - UI-Fix: Smoother scrolling and updating of Peer list.
+
+FrostWire 0.4.23
+ - UX-Upgrade: Internationalization: Spanish Support (i18n).
+ - Bug-Fix: Issue where apps were not being shared.
+ - Core-Upgrade: Support for file transfers to FrostWire for Desktop > 4.21.2
+ - UI-Fix: Search results you started downloading appear in blue without having to scroll.
+ - UI-Upgrade: Peers appear sorted by Geo-Distance if available, otherwise alphabetically by nickname.
+ - UI-Upgrade: Core message handling optimizations for faster UI response.
+ - Bug-Fix: 4 commonly reported crashes fixed.
+
+FrostWire 0.4.22
+ - UI-Fix: The Browse Peer List stops refreshing for 2 seconds after it receives a touch event.
+           Real time refreshes was making it too hard to perform long presses and even single presses.
+ - Core-Fix: Fixed bug on disconnect message.
+ - Core-Upgrade: Support for FrostWire for Desktop file transfers and streaming. Compatible with the upcoming FrostWire 4.21.2 for Desktop.
+
+FrostWire 0.4.21
+ - Core-Upgrade: More strict search results and huge bandwidth savings for the network as a whole.
+ - Bug-Fix: Android Core-UI Messaging Memory leak would kill the application after ~10 hours. Lower memory usage.
+
+FrostWire 0.4.20
+ - Core-Upgrade: Smarter search results. Ignores english conjunctions, prepositions, pronouns and articles whenever possible.
+ - Bug-Fix: Issue with fine grained shared states getting lost.
+ - Bug-Fix: Force close when changing nickname while disconnected.
+
+FrostWire 0.4.19
+ - UX-Upgrade: When Browsing a peer Long Pressing on it's name shows possible actions on the peer.
+ - UX-Upgrade: Fresh installs ask user about nickname and what files to share from the beginning to do away with any privacy issues.
+ - UX-Upgrade: Set Audio file as ringtone on Long Press.
+ - UX-Upgrade: Set Picture as wallpaper.
+ - UX-Upgrade: Clicking on the connection bars brings out the Preference Menu, for users that are not familiar with Android and looking to connect.
+ - UX-Fix: Copying and sharing finished downloads on the Chat now links to the copy on your phone.
+ - Bug-fix: Fixes issue with UDP broadcasts not being received correctly.
+ - Bug-fix: Fixes force close when changing nickname during application startup.
+ - Bug-fix: Fixes issue with negative number of shared files.
+ - Core-Upgrade: Faster counting of Shared/Unshared files.
+ - Core-Upgrade: Faster Browse responses.
+ - Core-Upgrade: Faster startup.
+ - Core-Upgrade: Faster scanning of local peers.
+ - Core-Upgrade: Faster shutdown.
+
+FrostWire 0.4.18
+ - Bug-fix: Issue with Menu and Search buttons on Browse Peers fixed.
+
+FrostWire 0.4.17
+ - UX-Upgrade: When user hits Back button, it's asked if they actually want to leave FrostWire.
+ - UX-Upgrade: When user tries the Android physical search button it's taken to the search screen.
+ - Core-Upgrade: Faster peer management.
+
+FrostWire 0.4.16
+ - UX-Upgrade: After typing a search for the wrong file type, changing the file type will start another search for the same keywords.
+   No need to bring up the keyboard out.
+ - Core-Upgrade: Revised time outs for persistent connections. Better maintenance and reuse of persistent connections.
+ - Core-Upgrade: Better management of unresponsive peers.
+ - Bug-Fix: Fixes core issue that was causing Chat messages to appear as coming from somebody else and browsing someone you didn't click on.
+ - Bug-Fix: Possible Force closes on application Shutdown and in other situations.
+
+FrostWire 0.4.15
+ - UX-Upgrade: New option to navigate to downloads from FrostWire Logo's Menu (only present if there are any Downloads [active or finished])
+ - UX-Upgrade: Hitting "Back" on Chat or Search tabs won't get you back to the Desktop, you'll be taken to the Browse screen. Too many users getting lost.
+ - UX-Fix: Tab heights should now look the same across all devices [slimmer] (Thanks Dan Jackson for screenshot)
+ - UX-Fix: When submitting a search, File Type selectors are automatically hidden to have more space for search results.
+ - UX-Fix: When typing a search with the virtual keyboard, hitting 'Return' now hides the virtual keyboard.
+ - UX-Fix: Focus bug when trying to long press on yourself in Browse Peer Screen.
+ - Core-Upgrade: Rewrote delivery mechanism of 'Browse Host' messages. Browsing now works 99% of the time.
+ - Core-Upgrade: FrostWire can now be _configured_ to send messages via TCP or UDP as need be.
+ - Bug-Fix: Possible Force Close when sea rch results arrived.
+
+FrostWire 0.4.12
+ - New Feature: Delete files from the "Downloads" screen. (featured invented by Travis Rhodes, thanks)
+ - New Feature: "Cancel all Downloads". Stops and removes ALL unfinished transfers, no matter what their state is.
+ - New Feature: The first time the application runs the user must accept the terms of use or else the application won't continue.
+ - UX-Upgrade: Search is now friendlier and more obvious to use for the new user.
+ - UX-Upgrade: When browsing a peer the last clicked file type button will appear selected (like in Search)
+ - UX-Upgrade: D-Pad can now be used to click on items.
+ - UX-Upgrade: Visual Feedback upon List Item Touch.
+ - UX-Upgrade: Pressing 'Done' on search virtual keyboard starts a search.
+ - UX-Fix: Manual Listening Port couldn't be set higher than 65000 (thanks votaguz)
+ - Core-Upgrade: Flood control mechanisms to reduce message forwarding.
+ - Core-Upgrade: Smarter search algorithm, improved result accuracy, reduces network load.
+ - Bug-Fix: Searches with single quotes would yield no results.
+ - Bug-Fix: Now the application shuts down properly.
+
+FrostWire 0.4.11
+ - Core-Upgrade: Revised Peer crawling strategy when FrostWire finds itself almost alone.
+ - Bug-Fix: A lagged Browse response from another peer could interfere when browsing a new peer.
+
+FrostWire 0.4.10
+ - Bug-Fix: Chat issues fixed.
+
+FrostWire 0.4.9
+ - Upgrade: FrostWire will find better quality peers based on both Geo Location and Network Distance. Better experience when browsing.
+ - Bug-Fix: FrostWire should not display chat messages from unknown peers (issue with empty chat messages)
+ - Bug-Fix: FrostWire would return negative numbers of shared files if users would delete Unshared files outside FrostWire.
+
+FrostWire 0.4.8
+ - New Feature: Remove Peer. It will remove the peer from your list and black list it during the session's lifetime.9
+ - UX-Upgrade: Typos and updates in the UI's text (thanks James W. Wilson)
+ - UX-Upgrade: Warning on disconnect if there are any active transfers.
+ - Bug-Fix: Issue with shared file count if user unshared all files one by one and then unshared all in bulk.
+ - Bug-Fix: Generic socket errors caused by older clients in the network.
+ - Bug-Fix: Issues with GPS and Network location providers. Location updates will only be requested every 5 minutes if location providers are available.
+
+FrostWire 0.4.7
+ - Installer size reduced to 357K
+ - New Feature: "/me" in the Chat room is replaced with your nickname. IRC old school 3rd person.
+ - UX-Upgrade: Peer list shows the version number. If your FrostWire is old, it will appear in red.
+ - UX-Upgrade: Search and Chat tabs are disabled when disconnected.
+ - UX-Upgrade: Context aware display of Go to: Home | My Files.
+ - UX-Upgrade: Offer to change nickname for first time users will re-appear if the user tilts the phone to use keyboard.
+ - Core-Upgrade: Improved port handling for LAN interaction.
+ - Core-Upgrade: Better maintenance of Peer List and revisited ping heuristics.
+ - Bug-Fix: Force Close when trying to browse yourself if disconnected.
+ - Bug-Fix: Force Closes when trying to manage incoming and outgoing candidate peer lists.
+
+FrostWire 0.4.6
+ - New Feature: Go to My Files
+ - New Feature: Clear Chat. Long press on the text box to make this appear.
+ - New Feature: Share your Documents,Pictures,Photos and Audio via email, android's bluetooth service, sms and via web services (e.g. twitter, facebook, flickr)
+ - New Feature: "Copy" search a result (to share it via private message or to everyone in the chat).
+ - Upgrade: Considerable optimization of object management when displaying peers, files, transfers and chat messages.
+ - Bug-fix: Deleting too many individually unshared files could cause a bug where no files of that type would be shared.
+ - Bug-fix: Cleans all temporary files on exit.
+ - Installer size reduced 16%.
+
+FrostWire 0.4.5
+ - Networking-Upgrade: Fixes in search routing algorithm to avoid redundant message forwarding.
+ - UX-Upgrade: Touching the FrostWire logo shows a menu to Go Home, See About or Show FrostWire some love.
+ - UX-Upgrade: Several optimizations for smoother scrolling and better resource management.
+ - UX-Upgrade: Tapping on someone's nickname on the Chat will autotype @Nickname on the text box.
+ - UX-Upgrade: New icons for Settings, Home and Love.
+ - UX-Fix: Private messages take you to the Chat tab, not the Chat Activity by itself.
+ - UX-Fix: When a file's shared state is changed using the padlod icon the number of shared files of its kind gets updated.
+ - UX-Fix: Padlock icons are not shown on search results.
+ - Bug-fix: Downloading the same file twice from the same peer would fail. Memory referencing issues fixed.
+
+FrostWire 0.4.4
+ - New Feature: Auto update.
+ - New Feature: Change your nickname by long pressing on your own name on the Browse Peers screen.
+ - New Feature: "Padlock" button when browsing your shared files to toggle sharing status without much hassle.
+ - Networking-Upgrade: New Peer Exchange policies result in considerable bandwidth.
+ - Search/Transfer-Upgrade: All peers involved in a file transfer are now keeping a metafrost file when finished, thus announcing themselves in search results as confirmed sources for that file. Metafrost files are now kept in folders by type to not put a strain on the file system as more and more files are shared.
+ - UX-Upgrade: Chat tab now shows the number of unread messages.
+ - UX-Upgrade: When starting up FrostWire will ask new users to change their nickname.
+ - UX-Upgrade: When disconnected you are taken to the home screen so you won't be confused by things not working.
+ - UX-Upgrade: Application search results now include version number.
+ - UX-Upgrade: Search Result Batch Downloads (using checkboxes)
+ - UX-Upgrade: Search results are cleared before new results are in.
+ - UX-Upgrade: Checkboxes auto-clear when you start a batch download.
+ - UX-Upgrade: Failed, Out of sources and Timed out transfers can now be individually deleted from the list of transfers.
+ - Bug Fix: Fixes SQLite 'where' clause bug with multiple keyword queries. Search will yield more results as everyone updates.
+ - Bug Fix: Incoming repeated Search responses are short circuited. Distinct results are forwarded only once. Traffic savings.
+ - Bug Fix: Fixes logic issues for optimal LAN packet delivery. You should feel faster peer browsing and discovery.
+ - Bug Fix: Audio player when browsing yourself works as expected.
+ - Bug Fix: Possible Force Close when pinging peer list and a peer says good bye.
+
+FrostWire 0.4.3
+ - UX-Upgrade: Chat window should receive messages even if you're not looking at it. Layout updates.
+ - UX-Upgrade: Transfer screen will autoscroll to the bottom to show the newest additions.
+ - UX-Upgrade: When files are downloaded file names are marked in a different color.
+ - UX-Upgrade: No more multiple FrostWire icons on the notification bar. A number will display how many finished transfers you have.
+ - UX-Upgrade: Download indicator now stays after all downloads are finished if transfers have not been cleared. It will display in orange the number of finished transfers so you can go back to your finished downloads even if disconnected.
+ - UX-Fix: Fixed size of "Delete" icon.
+ - Bug Fix: Internet Discovery toggle bug fix.
+ - Bug Fix: Force Close when starting a download of more than 15 checked files.
+ - Bug Fix: Force Close when setting Simultaneous Uploads to 0. (thanks Steven Peterson, Eric O'Brian)
+
+FrostWire 0.4.2
+ - New Feature: New Setting to discover (or not) peers over the internet. Limit your searching to your LAN only if you need to.
+ - UX-Upgrade: Thumbnails are shown when browsing your own pictures and videos.
+ - UX-Upgrade: New search controls.
+ - UX-Upgrade: Batched downloads start faster.
+ - UX-Bug Fix: Force close when changing manual listening port fixed.
+ - UX-Bug Fix: Clicking on the Active Downloads button won't reload the Transfer's screens if you're already standing on it.
+ - UX-Bug Fix: About screen can be scrolled down. Includes Thanks to alpha testers.
+ - Bug Fix: Search results outside local Wi-Fi network couldn't start a download.
+
+FrostWire 0.4.1
+ - Bug Fix: NPE when changing simultaneous upload setting.
+ - Bug Fix: Multiple NPEs when handling Search Requests and Search Responses.
+ - Bug Fix: Chat messages and Private Messages back to work.
+
+FrostWire 0.4.0
+ - New Feature: Search.
+ - Bug Fix: Completed,Failed,Cancelled,Timed Out file transfers won't change status to "Out of Sources" if peer leaves.
+
+FrostWire 0.3.10 (file transfer breaks backwards compatibility)
+ - New Feature: New Setting to limit the number of concurrent uploads.
+ - Upgrade: Better rendering of active download(s) progress.
+ - Upgrade: File transfer management optimizations (which break compatibility)
+ - Bug Fix: Correct display of concurrent uploads and downloads.
+ - Bug Fix: 'Application' Download bug fixed.
+ - Bug Fix: Multiple Force Close issues fixed.
+
+FrostWire 0.3.9 (breaks backwards compatibility):
+ - Upgrade: Rewrite File transfer. Considerably faster transfer startup, progressive file validation,
+   Minimizes Disk/IO and Garbage Collection. Swarming friendly algorithm.
+ - Upgrade: New File Transfer state: 'Waiting...' at start of transfer. (Cancellable state)
+ - Upgrade: Improves robustness of Message delivery.
+ - Upgrade: Automatic Peer Browse retries, updates peer list when peer is unreachable.
+ - Upgrade: Faster internal messaging between network core and UI.
+ - Upgrade: Protocol Message Types re-arranged for new message queue management strategies.
+ - Upgrade: About page shows name of current Wi-Fi network
+ - Bug Fix: Peers leaving won't appear again on Peer List.
+ - Bug Fix: Multiple NPEs on Browse Peer when a responses would arrive too soon.
+
+FrostWire 0.3.8:
+ - Upgrade: Improved Peer Discovery and Peer List maintenance.
+ - Upgrade: Adds new 'failed' state to downloads. We were abusing the 'timeout' state.
+ - Upgrade: Smarter caching of file counts by kind should yield faster browsing responses.
+ - Upgrade: Fixes potential IO (Index Out of Bounds) errors when reading the last part of a file from the socket.
+ - Upgrade: When user is leaving it will also be asked if it's ok to leave while UPLOADs are going on.
+ - Bug Fix: When user is leaving now there's a negative option on the dialog. (thanks Phase3d)
+ - Bug Fix: Patches a NPE when fecthing Application info from .apks that have not been installed. Still to be fixed.
+
+FrostWire 0.3.7:
+ - Update: Longer TCP timeouts (20 seconds)
+ - Bug Fix: Found NPE when fetching Application info on some phones.
+ - Bug Fix: Misc. NPEs handled.
+
+FrostWire 0.3.6:
+ - New Feature: Sharing Android Package Files (.apk)
+ - New Feature: Configuring an arbitrary manual port when UPnP is not an option (between 1000 and 65535 inclusive)
+ - Bug Fix: Several force close issues fixed.
+
+FrostWire 0.3.5:
+ - New Feature: Show number of active Uploads.
+ - New Feature: Delete multiple (checked) files.
+ - Upgrade: Refactors on File Transfer, leaner code.
+ - Upgrade: Faster Ping message creation (battery savings)
+ - Bug Fix: Right text coloring, Numbering on Shared/Unshared files.
+ - Bug Fix: File transfer errors and time outs are displayed correctly.
+ - Bug Fix: Tilting the phone while browsing remote files recovers state as expected.
+ - Bug Fix: No more repeated files when browsing peer.
+
+FrostWire 0.3.4
+ - Bug Fix: Private messages and "Copy & Share" over the internet work
+
+FrostWire 0.3.3
+ - New Feature: Fine grained sharing.
+ - Upgrade: Faster retrieval of shared files.
+ - Upgrade: Faster browsing of your own files.
+ - Upgrade: P2P Peer List Exchange on 'handshake' and when you have few Peers available.
+ - Upgrade: Support for remote chat, remote private message, remote "copy & share" file.
+ - Upgrade: Audio playback is now done through a much simpler audio player inside the application (works for now)
+
+FrostWire 0.3.2
+ - Bug Fix: Internal and Visible Peer lists are cleared upon disconnection.
+ - Bug Fix: FrostWire says good bye properly to all peers and to altamira.
+ - Bug Fix: Memory Leaks fixed in Altamira.
+ - Upgrade: Altamira keeps track of the last time a peer received a peer list for smarter behaviour.
+ - Upgrade: FrostWire now says hello back to unknown peers (pong upon first encounter)
+
+FrostWire 0.3.1
+ - Bug Fix: Android XML Parsing patch for all phones running < Froyo. UPnP should work on all pre-Froyo phones.
+ - Bug Fix: Fixes issue where UPnP map attempt would happen only the first time FrostWire opened.
+ - Update: Distances between peers shown in meter,meters,Km.,Kms.
+ - Update: About screen now shows information about internal & external ports.
+
+FrostWire 0.3.0
+ - New Feature: NAT-UPnP support to connect to other FrostWire's over the Internet (via Wi-Fi only)
+ - New Feature: Ability to select multiple files and perform other actions on them.
+ - New Feature: Ability to rename files. This will make it easier to search images and videos taken with Android phones.
+ - Bug Fix: Fixes WiFi auto connect/disconnect issues.
+ - Bug Fix: Fixes WiFi connectivity issues when switching to other hotspots.
+ - Bug Fix: Fixes intermittent (double connected message) connection issues.
+ - Bug Fix: When disconnected FrostWire won't try to connect if you tilt the device.
+
+FrostWire 0.2.0
+ - Bug Fix: Fixes crash when sending a message to the chat if user is not connected (thanks adwin)
+ - Bug Fix: When the phone was tilted during file browsing the current list of files got lost.
+ - Upgrade: Avoids possible situation where FrostWire cannot know about itself. Faster startup.
+ - Upgrade: Custom looking checkboxes. (FrostWire.Theme in place)
+ - Upgrade: Multiple UI/Text corrections.
+ - New Feature: Select multiple files from another user to perform batched downloads. (download enquement pending, so take it easy)
+
+FrostWire 0.1.0 - code name "Von Neumann"
+ - New Feature: Peer auto discovery on the Wi-Fi network.
+ - New Feature: Wi-Fi network availability awareness.
+ - New Feature: Introducing MetaFrost Mobile P2P protocol version 1
+ - New Feature: Setting to send Geo-Location information to other peers.
+ - New Feature: Displays distance to other peers if available.
+ - New Feature: Settings to Share/Unshare files by file type.
+ - New Feature: Users can be identified by nickname.
+ - New Feature: Community Chatroom over Wi-Fi.
+ - New Feature: Sends private chatroom message to another user.
+ - New Feature: "Copy & Share" your own files in the Community Chatroom to all participants.
+ - New Feature: "Copy & Share" other user's files in the Community Chatroom to all participants.
+ - New Feature: "Copy & Share" files with another user via Private Message.
+ - New Feature: Community Chatroom has 'history' support if user presses D-pad up or down.
+ - New Feature: Community Chatroom has 'history' support if user gestures up or down on the text field.
+ - New Feature: Community Chatroom messages can be cleaned with commands "/cls","/clear" and "clear screen".
+ - New Feature: Browse, Filter, Open and Delete your own shared files.
+ - New Feature: Browse, Filter and Open other user's files.
+ - New Feature: Download other user's files when browsing.
+ - New Feature: Download shared files from chat.
+ - New Feature: Download multiple files at the same time.
+ - New Feature: Open downloaded files.
+ - New Feature: Context menues are available upon Long Click on almost every user interface element.
+ - New Feature: Screen orientation awareness on every screen.
+ - New Feature: FrostWire Status bar indicates number of ongoing downloads.
+ - New Feature: Share picture files.
+ - New Feature: Share video files.
+ - New Feature: Share document files.
+ - New Feature: Share audio files.
+ - New Feature: Connect/Disconnect from local p2p network.
+ - New Feature: "Love FrostWire?" Tip/Donation support to development team.
+ - Pending Feature: Share application files (.apk)

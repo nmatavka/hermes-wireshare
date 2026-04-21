@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Πρόσφατα</string>
+  <string name="page_artists">Καλλιτέχνες</string>
+  <string name="page_albums">Άλμπουμ</string>
+  <string name="page_songs">Τραγούδια</string>
+  <string name="page_playlists">Λίστες αναπαραγωγής</string>
+  <string name="page_genres">Είδη</string>
+  <string name="menu_search">Αναζήτηση</string>
+  <string name="menu_shuffle">Τυχαία αναπαραγωγή όλων</string>
+  <string name="menu_play_all">Αναπαραγωγή όλων</string>
+  <string name="menu_sort_by">Ταξινόμηση κατά</string>
+    <string name="menu_clear_queue">Εκκαθάριση ουράς</string>
+  <string name="menu_save_queue">Αποθήκευση ουράς</string>
+  <string name="menu_share">Κοινή χρήση</string>
+  <string name="menu_add_to_homescreen">Καρφίτσωμα στην αρχική οθόνη</string>
+  <string name="menu_equalizer">Ισοσταθμιστής</string>
+  <string name="menu_simple">Απλό</string>
+  <string name="menu_detailed">Λεπτομερές</string>
+  <string name="menu_grid">Πλέγμα</string>
+  <string name="menu_view_as">Προβολή ως</string>
+  <string name="add_to_playlist">Προσθήκη στη λίστα αναπαραγωγής</string>
+  <string name="add_to_favorites">Προσθήκη στα αγαπημένα</string>
+  <string name="add_to_queue">Προσθήκη στην ουρά</string>
+  <string name="remove_from_favorites">Αφαίρεση από τα αγαπημένα</string>
+    <string name="sort_order_entry_az">Α-Ω</string>
+  <string name="sort_order_entry_za">Ω-Α</string>
+  <string name="sort_order_entry_artist">Καλλιτέχνης</string>
+  <string name="sort_order_entry_album">Άλμπουμ</string>
+  <string name="sort_order_entry_year">Έτος</string>
+  <string name="sort_order_entry_duration">Διάρκεια</string>
+  <string name="sort_order_entry_date_added">Ημερομηνία προσθήκης</string>
+  <string name="sort_order_entry_track_list">Λίστα κομματιών</string>
+  <string name="sort_order_entry_number_of_songs">Αριθμός τραγουδιών</string>
+  <string name="sort_order_entry_number_of_albums">Αριθμός άλμπουμ</string>
+  <string name="sort_order_entry_filename">Όνομα αρχείου</string>
+  <string name="playlist_favorite">Αγαπημένο</string>
+  <string name="playlist_favorites">Αγαπημένα</string>
+  <string name="playlist_last_added">Προστέθηκαν πρόσφατα</string>
+  <string name="new_empty_playlist">Νέα λίστα αναπαραγωγής</string>
+  <string name="save">Αποθήκευση</string>
+  <string name="cancel">Ακύρωση</string>
+  <string name="overwrite">Αντικατάσταση</string>
+  <string name="new_playlist_name_template">Λίστα αναπαραγωγής <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Όνομα λίστας</string>
+  <string name="delete_dialog_title">Διαγραφή <xliff:g id="item" example="album">%s</xliff:g>;</string>
+    <string name="context_menu_play_selection">Αναπαραγωγή</string>
+  <string name="context_menu_play_next">Αναπαραγωγή επόμενου</string>
+  <string name="context_menu_more_by_artist">Περισσότερα από τον καλλιτέχνη</string>
+  <string name="context_menu_rename_playlist">Μετονομασία</string>
+  <string name="context_menu_delete">Διαγραφή</string>
+    <string name="context_menu_remove_from_recent">Αφαίρεση από πρόσφατα</string>
+  <string name="context_menu_use_as_ringtone">Χρήση ως ήχος κλήσης</string>
+  <string name="context_menu_remove_from_playlist">Αφαίρεση από τη λίστα</string>
+  <string name="accessibility_play">Αναπαραγωγή</string>
+  <string name="accessibility_pause">Παύση</string>
+  <string name="accessibility_next">Επόμενο</string>
+  <string name="accessibility_prev">Προηγούμενο</string>
+  <string name="accessibility_shuffle">Τυχαία αναπαραγωγή</string>
+  <string name="accessibility_shuffle_all">Τυχαία αναπαραγωγή όλων</string>
+  <string name="accessibility_repeat">Επανάληψη</string>
+  <string name="accessibility_repeat_all">Επανάληψη όλων</string>
+  <string name="accessibility_repeat_one">Επανάληψη ενός</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> καρφιτσώθηκε στην αρχική οθόνη σας</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> δεν μπορεί να καρφιτσωθεί στην αρχική οθόνη σας</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' ορίστηκε ως ήχος κλήσης</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #WireShare</string>
+  <string name="share_track_using">Κοινή χρήση κομματιού με τη χρήση:</string>
+    <string name="no_effects_for_you">Δεν ήταν δυνατό το άνοιγμα του ισοσταθμιστή.</string>
+  <string name="empty_music">Για να αντιγράψετε μουσική από τον υπολογιστή στη συσκευή σας, χρησιμοποιήστε ένα καλώδιο USB.</string>
+  <string name="empty_last_added">Τραγούδια που έχετε προσθέσει τον τελευταίο μήνα θα εμφανιστούν εδώ.</string>
+  <string name="empty_search">Δεν βρέθηκαν αποτελέσματα αναζήτησης</string>
+    <string name="empty_recent">Άλμπουμ που έχετε ακούσει θα εμφανιστούν εδώ. Δοκιμάστε να παίξετε κάποια μουσική.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" στο #WireShare</string>
+  <string name="delete_files_title">Διαγραφή αρχείων</string>
+  <string name="page_last_added">Τελευταία προσθήκη</string>
+  <string name="empty_playlist">Αυτή η λίστα αναπαραγωγής είναι κενή.\n\nΚάντε κλικ εδώ για να μάθετε πώς μπορείτε να προσθέσετε τραγούδια.</string>
+  <string name="are_you_sure_delete_files_text">Είστε βέβαιοι ότι θέλετε να διαγράψετε οριστικά τα επιλεγμένα αρχεία από τη συσκευή σας;</string>
+  <string name="frostwire_player">WireShare αναπαραγωγής πολυμέσων</string>
+</resources>

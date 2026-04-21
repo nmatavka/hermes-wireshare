@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">אחרונים</string>
+  <string name="page_artists">אמנים</string>
+  <string name="page_albums">אלבומים</string>
+  <string name="page_songs">שירים</string>
+  <string name="page_playlists">רשימות השמעה</string>
+  <string name="page_genres">ז\'אנרים</string>
+  <string name="menu_search">חיפוש</string>
+  <string name="menu_shuffle">ערבב את כולם</string>
+  <string name="menu_play_all">נגן את כולם</string>
+  <string name="menu_sort_by">מיין על פי</string>
+    <string name="menu_clear_queue">נקה תור השמעה</string>
+  <string name="menu_save_queue">שמור תור השמעה</string>
+  <string name="menu_share">שתף</string>
+  <string name="menu_add_to_homescreen">הצמד למסך הבית</string>
+  <string name="menu_equalizer">Equalizer</string>
+  <string name="menu_simple">פשוט</string>
+  <string name="menu_detailed">מפורט</string>
+  <string name="menu_grid">טבלה</string>
+  <string name="menu_view_as">צפה כ</string>
+  <string name="add_to_playlist">הוסף לרשימת השמעה</string>
+  <string name="add_to_favorites">הוסף למועדפים</string>
+  <string name="add_to_queue">הוסף לתור השמעה</string>
+  <string name="remove_from_favorites">הסר מרשימת מועדפים</string>
+    <string name="sort_order_entry_az">א-ת</string>
+  <string name="sort_order_entry_za">ת-א</string>
+  <string name="sort_order_entry_artist">אומן</string>
+  <string name="sort_order_entry_album">אלבום</string>
+  <string name="sort_order_entry_year">שנה</string>
+  <string name="sort_order_entry_duration">אורך</string>
+  <string name="sort_order_entry_date_added">תאריך הוספה</string>
+  <string name="sort_order_entry_track_list">רשימת שירים</string>
+  <string name="sort_order_entry_number_of_songs">מספר שירים</string>
+  <string name="sort_order_entry_number_of_albums">מספר האלבומים</string>
+  <string name="sort_order_entry_filename">שם קובץ</string>
+  <string name="playlist_favorite">מועדף</string>
+  <string name="playlist_favorites">מועדפים</string>
+  <string name="playlist_last_added">הוספו לאחרונה</string>
+  <string name="new_empty_playlist">רשימת השמעה חדשה</string>
+  <string name="save">שמור</string>
+  <string name="cancel">בטל</string>
+  <string name="overwrite">לדרוס</string>
+  <string name="new_playlist_name_template">רשימת השמעה <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">שם רשימת ההשמעה</string>
+  <string name="delete_dialog_title">למחוק <xliff:g id="item" example="album">%s</xliff:g>?</string>
+    <string name="context_menu_play_selection">נגן</string>
+  <string name="context_menu_play_next">נגן את הבא</string>
+  <string name="context_menu_more_by_artist">עוד מהאומן</string>
+  <string name="context_menu_rename_playlist">שנה שם</string>
+  <string name="context_menu_delete">מחק</string>
+    <string name="context_menu_remove_from_recent">הסר מרשימת אחרונים</string>
+  <string name="context_menu_use_as_ringtone">השתמש כצלצול</string>
+  <string name="context_menu_remove_from_playlist">הסר מרשימת השמעה</string>
+  <string name="accessibility_play">נגן</string>
+  <string name="accessibility_pause">השהה</string>
+  <string name="accessibility_next">הבא</string>
+  <string name="accessibility_prev">הקודם</string>
+  <string name="accessibility_shuffle">ערבב</string>
+  <string name="accessibility_shuffle_all">ערבב הכל</string>
+  <string name="accessibility_repeat">חזור</string>
+  <string name="accessibility_repeat_all">חזור על הכל</string>
+  <string name="accessibility_repeat_one">חזור על נוכחי</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> הוצמד למסך הבית</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> לא הצליח להיצמד למסך הבית</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g> נקבע כצלצול</string>
+    <string name="now_listening_to">#מנגן כעט <xliff:g id="title">%1$s</xliff:g> על ידי <xliff:g id="artist">%2$s</xliff:g> #אפולו</string>
+  <string name="share_track_using">שתף שיר בעזרת:</string>
+    <string name="no_effects_for_you">ה-equalizer לא הצליח להיפתח.</string>
+  <string name="empty_music">כדי להעתיק מוזיקה מהמחשב למכשיר השתמש בכבל USB.</string>
+  <string name="empty_last_added">שירים שנוספו בחודש האחרון יראו כאן.</string>
+  <string name="empty_search">לא נמצאו תוצאות חיפוש</string>
+    <string name="empty_recent">אלבומים שנוגנו יופיעו כאן. נסה לנגן מוזיקה.</string>
+  <string name="delete_files_title">מחק קבצים</string>
+  <string name="page_last_added">נוסף לאחרונה</string>
+  <string name="empty_playlist">הפלייליסט הזה ריק.\n\nלחץ כאן כדי ללמוד כיצד להוסיף שירים.</string>
+  <string name="are_you_sure_delete_files_text">האם אתה בטוח שברצונך למחוק תמיד את הקבצים שנבחרו מהמכשיר?</string>
+  <string name="frostwire_player">נגן המדיה WireShare</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" ב- #WireShare</string>
+</resources>

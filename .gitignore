@@ -46,3 +46,7 @@ __pycache__/
 coverage/
 reports/
 all
+
+# jlibtorrent native build output
+/jlibtorrent/swig/bin/
+/jlibtorrent/build/

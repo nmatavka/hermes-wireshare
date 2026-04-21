@@ -1,0 +1,80 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.preference_category.select_all"
+        android:layout="@layout/view_preference_search_select_all"
+        android:title="@string/select_all" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_archiveorg"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_archiveorg" />
+    <CheckBoxPreference
+            android:key="frostwire.prefs.search.use_bt_digg"
+            android:layout="@layout/view_preference_search_engine"
+            android:title="@string/use_btdigg" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_torrentscsv"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_torrentscsv" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_frostclick"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_frostclick" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_soundcloud"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_soundcloud" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_tpb"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_tpb" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_torrentdownloads"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_torrentdownloads" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_torrentz2"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_torrentz2" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_magnetdl"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_magnetdl" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_nyaa"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_nyaa" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_one337x"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_one337x" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_idope"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_idope" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_knaben"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_knaben" />
+    <CheckBoxPreference
+        android:key="frostwire.prefs.search.use_yt"
+        android:layout="@layout/view_preference_search_engine"
+        android:title="@string/use_yt" />
+</PreferenceScreen>

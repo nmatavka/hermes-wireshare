@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="generic-multi-build" basedir="." default="compile-src" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <import file="ant-macros.xml"/>
+    
+    <property name="excludes" value=""/>
+    <property name="includes" value="*/build.xml"/>
+    
+    <property name="aggregate.jar-jarname" value="aggregate.jar"/>
+    <property name="aggregate.jar-includes" value="*/dist/main/*.jar"/>
+    <property name="aggregate.jar-excludes" value="${excludes}"/>
+    <property name="aggregate.jar-ivyfilepath" value="../../ivy.xml"/>
+    
+    <!-- the location where antcontrib is at, for use with the 'if' task. -->
+    <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${limewire.lib.jars.ant}/ant-contrib-1.0b3.jar"/>
+    
+    <!-- must ensure that ivy is loaded. -->
+    <target name="initialize" depends="ivy-load"/>
+    
+    <!-- publish-dependencies makes sure that all required classes are published, reducing the time spent needlessly publishing. -->
+    <target name="publish-dependencies" depends="initialize" unless="ivy.dependencies.published">
+        <property name="ivy.dependencies.published" value="true"/>
+        <do.multi-ant target="publish"/>
+    </target>
+    
+    <!-- publishes all dependencies. -->
+    <target name="publish" depends="publish-dependencies"/>
+    
+    <target name="clean" depends="initialize, clean-local-ivy">
+        <delete>
+            <fileset dir="${basedir}" includes="**/build/**/*.class"/>
+        </delete>
+        <do.multi-ant target="clean"/>
+    </target>
+    
+    <target name="compile" depends="publish-dependencies">
+        <do.multi-ant target="compile"/>
+    </target>
+    
+    <target name="compile-src" depends="publish-dependencies">
+        <do.multi-ant target="compile-src"/>
+    </target>
+    
+    <target name="clean-src" depends="initialize">
+        <do.multi-ant target="clean-src"/>
+    </target>
+    
+    <target name="jar" depends="publish-dependencies">
+        <do.multi-ant target="jar"/> 
+    </target>
+    
+    <target name="aggregate.jar" depends="jar">
+        <ivy:buildlist reference="jar-path" onMissingDescriptor="skip" root="" ivyfilepath="${aggregate.jar-ivyfilepath}" excluderoot="true">
+            <fileset dir="${basedir}" excludes="${aggregate.jar-excludes}" includes="${aggregate.jar-includes}"/>
+        </ivy:buildlist>
+        
+        <delete file="${aggregate.jar-jarname}"/>
+        
+        <for param="jar">
+            <path refid="jar-path"/>
+            <sequential>
+                <jar destfile="${aggregate.jar-jarname}" update="true" filesetmanifest="skip" compress="false" duplicate="fail">
+                    <zipfileset src="@{jar}" excludes="META-INF/**"/>
+                </jar>
+          </sequential>
+        </for>
+    </target>
+    
+    <target name="javadoc" depends="publish-dependencies">
+        <do.multi-ant target="javadoc"/> 
+        <!-- TODO: build one big javadoc. -->
+    </target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.multi-ant target="clean-dist"/>
+    </target>
+    
+    <target name="clean-local-ivy">
+        <delete dir="${ivy.cache.resolution}"/>
+        <delete dir="${ivy.local.default.root}"/>
+    </target>
+    
+    <!-- executes a subant. -->
+    <macrodef name="do.multi-ant">
+        <attribute name="target"/>
+        <attribute name="basedir" default="${basedir}"/>
+        <attribute name="excludes" default="${excludes}"/>
+        <attribute name="includes" default="${includes}"/>
+        <attribute name="root" default=""/>
+        <element name="more-elements" optional="true"/>
+        <sequential>
+            <do.subant dir="@{basedir}" excludes="@{excludes}" includes="@{includes}" root="@{root}" target="@{target}">
+                <more-elements/>
+            </do.subant>                    
+        </sequential>
+    </macrodef>
+    
+</project>
