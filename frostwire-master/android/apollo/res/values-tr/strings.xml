@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">En son</string>
+  <string name="page_artists">Sanatçılar</string>
+  <string name="page_albums">Albümler</string>
+  <string name="page_songs">Şarkılar</string>
+  <string name="page_playlists">Çalma Listeleri</string>
+  <string name="page_genres">Türler</string>
+  <string name="menu_search">Arama</string>
+  <string name="menu_shuffle">Hepsini karıştır</string>
+  <string name="menu_play_all">Hepsini oynat</string>
+  <string name="menu_sort_by">Sırala...</string>
+    <string name="menu_clear_queue">Kuyruğu temizle</string>
+  <string name="menu_save_queue">Kuyruğu kaydet</string>
+  <string name="menu_share">Paylaş</string>
+  <string name="menu_add_to_homescreen">Ana ekrana tuttur</string>
+  <string name="menu_equalizer">Equalizer</string>
+  <string name="menu_simple">Basit</string>
+  <string name="menu_detailed">Detaylı</string>
+  <string name="menu_grid">Izgara</string>
+  <string name="menu_view_as">Olarak görüntüle...</string>
+  <string name="add_to_playlist">Çalma listesine ekle</string>
+  <string name="add_to_favorites">Favorilere ekle</string>
+  <string name="add_to_queue">Kuyruğa ekle</string>
+  <string name="remove_from_favorites">Favorilerden kaldır</string>
+    <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">Sanatçı</string>
+  <string name="sort_order_entry_album">Albüm</string>
+  <string name="sort_order_entry_year">Yıl</string>
+  <string name="sort_order_entry_duration">Süre</string>
+  <string name="sort_order_entry_date_added">Eklendiği tarih</string>
+  <string name="sort_order_entry_track_list">Parça listesi</string>
+  <string name="sort_order_entry_number_of_songs">Şarkı sayısı</string>
+  <string name="sort_order_entry_number_of_albums">Albüm sayısı</string>
+  <string name="sort_order_entry_filename">Dosya adı</string>
+  <string name="playlist_favorite">Favori</string>
+  <string name="playlist_favorites">Favoriler</string>
+  <string name="playlist_last_added">En son eklenen</string>
+  <string name="new_empty_playlist">Yeni çalma listesi</string>
+  <string name="save">Kaydet</string>
+  <string name="cancel">İptal</string>
+  <string name="overwrite">Üzerine yaz</string>
+  <string name="new_playlist_name_template">Çalma listesi <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Çalma listesi adı</string>
+  <string name="delete_dialog_title"><xliff:g id="item" example="album">%s</xliff:g> silinsin mi?</string>
+    <string name="context_menu_play_selection">Oynat</string>
+  <string name="context_menu_play_next">Sonrakini oynat</string>
+  <string name="context_menu_more_by_artist">Sanatçıdan daha fazlası</string>
+  <string name="context_menu_rename_playlist">Yeniden adlandır</string>
+  <string name="context_menu_delete">Sil</string>
+    <string name="context_menu_remove_from_recent">En son listesinden kaldır</string>
+  <string name="context_menu_use_as_ringtone">Zil sesi olarak kullan</string>
+  <string name="context_menu_remove_from_playlist">Çalma listesinden sil</string>
+  <string name="accessibility_play">Oynat</string>
+  <string name="accessibility_pause">Duraklat</string>
+  <string name="accessibility_next">Sonraki</string>
+  <string name="accessibility_prev">Önceki</string>
+  <string name="accessibility_shuffle">Karıştır</string>
+  <string name="accessibility_shuffle_all">Hepsini karıştır</string>
+  <string name="accessibility_repeat">Tekrarla</string>
+  <string name="accessibility_repeat_all">Hepsini tekrarla</string>
+  <string name="accessibility_repeat_one">Birini tekrarla</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ana ekranınıza tutturuldu</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> ana ekranınıza tutturalamadı</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' zil sesi olarak ayarlandı</string>
+    <string name="now_listening_to">#ŞimdiÇalınıyor <xliff:g id="title">%1$s</xliff:g>, Sanatçı: <xliff:g id="artist">%2$s</xliff:g> #FrostWire</string>
+  <string name="share_track_using">Parçayı şunu kullanarak paylaş:</string>
+    <string name="no_effects_for_you">Equalizer açılamadı</string>
+  <string name="empty_music">Bilgisayarınızdan cihazınıza müzik kopyalamak için bir USB kablosu kullanın.</string>
+  <string name="empty_last_added">Geçen ay boyunca eklediğiniz şarkılar burada gösterilecek.</string>
+  <string name="empty_search">Arama sonucu bulunamadı</string>
+    <string name="empty_recent">Dinlediğiniz albümler burada gözükecek. Biraz müzik çalmayı deneyin.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" #FrostWire\'da</string>
+  <string name="delete_files_title">Dosyaları sil</string>
+  <string name="page_last_added">En son eklenmiş</string>
+  <string name="empty_playlist">Bu oynatma listesi boş.\n\nŞarkı eklemeyi öğrenmek için buraya tıklayın.</string>
+  <string name="are_you_sure_delete_files_text">Seçilen dosyaları cihazınızdan kalıcı olarak silmek istediğinizden emin misiniz?</string>
+  <string name="frostwire_player">FrostWire medya oynatıcı</string>
+</resources>

@@ -1,0 +1,339 @@
+import groovy.swing.SwingBuilder
+import groovy.xml.Namespace
+import groovy.xml.XmlParser
+
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2025, FrostWire(R). All rights reserved.
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// groovy-swing is required at build-script evaluation time for SignatureRequester (SwingBuilder).
+// It cannot be declared in the plugins {} block (not a Gradle plugin), so it stays here.
+// Note: buildscript {} must precede plugins {} per Gradle rules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = "https://chaquo.com/maven" }
+        maven { url = "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "org.apache.groovy:groovy-swing:5.0.5"
+    }
+}
+
+plugins {
+    id 'com.android.application' version '9.0.1'
+    id 'com.google.gms.google-services' version '4.4.4'
+    id 'com.google.firebase.crashlytics' version '3.0.7'
+    id 'com.chaquo.python' version '17.0.0'
+    // org.jetbrains.kotlin.android is no longer needed: AGP 9.0+ has built-in Kotlin support.
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven {
+        url "https://dl.frostwire.com/maven"
+        content {
+            includeGroup "com.frostwire"
+        }
+    }
+}
+
+def manifestVersionCode() {
+    def manifestFile = new File(project.projectDir.absolutePath + '/AndroidManifest.xml')
+    def ns = new Namespace("http://schemas.android.com/apk/res/android", "android")
+    def xml = new XmlParser().parse(manifestFile)
+    //System.out.println("manifestVersionCode: xml.attributes()[ns.versionCode].toString()=" + xml.attributes()[ns.versionCode].toString())
+    return Integer.parseInt(xml.attributes()[ns.versionCode].toString())
+}
+
+def manifestVersionName() {
+    def manifestFile = file(project.projectDir.absolutePath + '/AndroidManifest.xml')
+    def ns = new Namespace("http://schemas.android.com/apk/res/android", "android")
+    def xml = new groovy.xml.XmlParser().parse(manifestFile)
+    //System.out.println("manifestVersionName: " + xml.attributes()[ns.versionName].toString())
+    return xml.attributes()[ns.versionName].toString()
+}
+
+// APK output renaming is wired up via androidComponents.onVariants after android {} block.
+
+project.ext.versionCode = manifestVersionCode()
+project.ext.versionName = manifestVersionName()
+
+boolean isAssembleRelease = gradle.startParameter.taskNames.contains("assembleRelease") || gradle.startParameter.taskNames.contains("assemblePlus1Release")
+
+android {
+    namespace "com.frostwire.android"
+
+    compileSdk = 36  // Android 15 SnowCone
+
+    defaultConfig {
+        applicationId "com.frostwire.android"
+        versionName project.ext.versionName
+        minSdkVersion 26 // Android 8.0 Oreo
+        targetSdkVersion 34 // Android 14 (more involved upgrade, crashes on targetsdkversion 35)
+        multiDexEnabled true
+
+        ndk {
+            abiFilters "arm64-v8a", "x86_64"
+        }
+
+        python {
+            def brewPython = "/opt/homebrew/bin/python3.13"
+            if (new File(brewPython).exists()) {
+                buildPython brewPython
+            }
+            chaquopy {
+                defaultConfig {
+                    version "3.13"
+                }
+            }
+            pip {
+                install "yt_dlp[default]==2026.3.17"
+                // helps a lot with debugging
+                //options "--verbose"
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs << "-Xlint:deprecation"
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            res.srcDirs = ['res', 'apollo/res']
+            aidl.srcDirs = ['src', 'apollo/src']
+            assets.srcDirs = ['assets']
+            java {
+                srcDir '../common/src/main/java'
+                srcDir 'apollo/src'
+                srcDir 'src/main/java'
+                exclude 'test/**'
+            }
+            jniLibs.srcDirs = ['libs']
+            // Ensure Chaquopy packages our Python code from src/main/python
+            python {
+                srcDir 'src/main/python'
+            }
+        }
+        test {
+            java.srcDirs = ['src/test/java']
+        }
+    }
+
+
+    signingConfigs {
+        release {
+            if (isAssembleRelease) {
+                storeFile file("../../frostwire-tools/certs/android.keystore/frostwire.keystore")
+                def sigRequester = new SignatureRequester()
+                sigRequester.ask()
+                storePassword sigRequester.keyPassword()
+                keyAlias sigRequester.keyAlias()
+                keyPassword sigRequester.keyPassword()
+            } else {
+                storePassword ''
+                keyAlias ''
+                keyPassword ''
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            multiDexKeepFile file('multidex-config.txt')
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+            multiDexKeepFile file('multidex-config.txt')
+        }
+    }
+
+    flavorDimensions "classicApp"
+
+    productFlavors {
+        plus1 {
+            // OLD PLUS CODE VERSION SUFFIX 9070000
+            dimension "classicApp"
+            versionCode 9090000 + project.ext.versionCode
+            resValue "string", "application_label", "FrostWire Plus"
+        }
+    }
+    lint {
+        abortOnError false
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                jvmArgs '-Djava.awt.headless=true'
+                jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
+            }
+        }
+    }
+
+    configurations {
+        configureEach {
+            exclude group: "com.google.android.gms.common", module: "play-services-measurement"
+            exclude group: 'com.google.android.gms.common', module: 'play-services-base'
+        }
+    }
+    buildFeatures {
+        aidl true
+        buildConfig true
+        resValues true
+    }
+}
+
+// Replaces the old applicationVariants.configureEach { changeApkOutput(variant) } call.
+// AGP new DSL: use androidComponents.onVariants to rename APK output.
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def flavor = 'plus'
+        def suffix = project.ext.versionName + '-b' + project.ext.versionCode + '-' + flavor
+        def apkName = "frostwire-android-" + variant.buildType + '-' + suffix + '.apk'
+        variant.outputs.each { output ->
+            output.outputFileName.set(apkName)
+        }
+    }
+}
+
+dependencies {
+    // @Nullable cross-os annotation
+    implementation 'org.jetbrains:annotations:26.1.0'
+
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.browser:browser:1.10.0'
+    implementation 'androidx.core:core:1.18.0'
+    implementation 'androidx.exifinterface:exifinterface:1.4.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
+    implementation 'androidx.vectordrawable:vectordrawable-animated:1.2.0'
+    implementation 'com.google.android.ump:user-messaging-platform:4.0.0'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.google.re2j:re2j:1.8'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+    implementation 'io.coil-kt.coil3:coil:3.4.0'
+    implementation 'io.coil-kt.coil3:coil-network-okhttp:3.4.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21'
+    implementation 'androidx.work:work-runtime-ktx:2.11.2'
+    implementation 'androidx.datastore:datastore-preferences:1.2.1'
+
+    // Firebase Crashlytics
+    implementation platform('com.google.firebase:firebase-bom:34.12.0')
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    implementation 'androidx.media3:media3-exoplayer:1.10.0'
+    implementation 'androidx.media3:media3-session:1.10.0'
+    implementation 'androidx.media3:media3-ui:1.10.0'
+    implementation 'androidx.media3:media3-common:1.10.0'
+
+    def jlibtorrent_version = '2.0.12.7'
+    implementation 'com.frostwire:jlibtorrent:' + jlibtorrent_version
+    implementation 'com.frostwire:jlibtorrent-android-arm64:' + jlibtorrent_version
+    implementation 'com.frostwire:jlibtorrent-android-x86_64:' + jlibtorrent_version
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.16.1'
+    testImplementation 'androidx.test:core:1.7.0'
+    testImplementation 'androidx.test.ext:junit:1.3.0'
+    testImplementation 'androidx.media3:media3-test-utils:1.10.0'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:5.3.2'
+}
+
+afterEvaluate {
+    def uploadTask = tasks.findByName('uploadCrashlyticsMappingFilePlus1Release')
+    if (uploadTask != null) {
+        uploadTask.dependsOn ':processPlus1ReleaseGoogleServices'
+    }
+}
+
+class SignatureRequester {
+    String myKeyAlias = ""
+    String myKeyPassword = ""
+
+    void ask() {
+        System.setProperty('java.awt.headless', 'false')
+        boolean useSwingDialog = true  // Force use of Swing dialog
+
+        System.out.println("System.console()=" + System.console())
+
+        if (useSwingDialog || System.console() == null) {
+            // Force the Swing dialog to be used by always setting useSwingDialog to true
+            new SwingBuilder().edt {
+                dialog(modal: true,
+                        title: 'Enter keystore data',
+                        alwaysOnTop: true,
+                        resizable: true,
+                        locationRelativeTo: null,
+                        show: true,
+                        size: [215, 147]
+                ) {
+                    vbox {
+                        label(text: "Key Alias:")
+                        inputAlias = textField()
+                        label(text: "Key Password:")
+                        inputPassword = passwordField()
+                        button(defaultButton: true, text: 'OK', actionPerformed: {
+                            this.myKeyAlias = inputAlias.text
+                            this.myKeyPassword = new String(inputPassword.password)
+                            dispose()
+                        })
+                    }
+                }
+            }
+        } else {
+            this.myKeyAlias = new String(System.console().readPassword("\nKey Alias: "))
+            this.myKeyPassword = new String(System.console().readPassword("\nKey Password: "))
+        }
+    }
+
+    String keyAlias() {
+        this.myKeyAlias
+    }
+
+    String keyPassword() {
+        this.myKeyPassword
+    }
+}

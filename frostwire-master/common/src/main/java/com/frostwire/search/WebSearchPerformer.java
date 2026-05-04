@@ -1,0 +1,137 @@
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.frostwire.search;
+
+import com.frostwire.util.HttpClientFactory;
+import com.frostwire.util.Logger;
+import com.frostwire.util.UrlUtils;
+import com.frostwire.util.UserAgentGenerator;
+import com.frostwire.util.http.HttpClient;
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author gubatron
+ * @author aldenml
+ */
+public abstract class WebSearchPerformer extends AbstractSearchPerformer {
+    private static final Logger LOG = Logger.getLogger(WebSearchPerformer.class);
+    private static final String DEFAULT_USER_AGENT = UserAgentGenerator.getUserAgent();
+    private static final String[] STREAMABLE_EXTENSIONS = new String[]{"mp3", "ogg", "wma", "wmv", "m4a", "aac", "flac", "mp4", "flv", "mov", "mpg", "mpeg", "3gp", "m4v", "webm"};
+    private final String domainName;
+    private final String keywords;
+
+    private final List<String> keywordsList;
+    private final String encodedKeywords;
+    private final int timeout;
+    private final HttpClient client;
+
+    WebSearchPerformer(String domainName, long token, String keywords, int timeoutInMilliseconds) {
+        super(token);
+        if (domainName == null) {
+            throw new IllegalArgumentException("domainName can't be null");
+        }
+        this.domainName = domainName;
+        this.keywords = keywords;
+        this.keywordsList = PerformersHelper.tokenizeSearchKeywords(keywords);
+        this.encodedKeywords = UrlUtils.encode(keywords);
+        this.timeout = timeoutInMilliseconds;
+        this.client = HttpClientFactory.getInstance(HttpClientFactory.HttpContext.SEARCH);
+    }
+
+    public static boolean isStreamable(String filename) {
+        return Arrays.asList(STREAMABLE_EXTENSIONS).contains(FilenameUtils.getExtension(filename));
+    }
+
+    public String getEncodedKeywords() {
+        return encodedKeywords;
+    }
+
+    @Override
+    public void crawl(CrawlableSearchResult sr) {
+        LOG.warn("Review your logic, calling deep search without implementation for: " + sr);
+    }
+
+    /**
+     * Allow to perform the HTTP operation using the same internal http client.
+     *
+     * @param url
+     * @return the web page (html)
+     */
+    public String fetch(String url) throws IOException {
+        return fetch(url, null, null);
+    }
+
+    public String fetch(String url, String cookie, Map<String, String> customHeaders) throws IOException {
+        return client.get(url, timeout, DEFAULT_USER_AGENT, null, cookie, customHeaders);
+    }
+
+    public String post(String url, Map<String, String> formData) {
+        try {
+            return client.post(url, timeout, DEFAULT_USER_AGENT, formData);
+        } catch (IOException throwable) {
+            LOG.error(throwable.getMessage(), throwable);
+            return null;
+        }
+    }
+
+    public String postJson(String url, String jsonContent) {
+        try {
+            return client.post(url, timeout, DEFAULT_USER_AGENT, jsonContent, "application/json", false);
+        } catch (IOException throwable) {
+            LOG.error(throwable.getMessage(), throwable);
+            return null;
+        }
+    }
+
+    /**
+     * Allow to perform the HTTP operation using the same internal http client.
+     *
+     * @param url
+     * @return the raw bytes from the http connection
+     */
+    public final byte[] fetchBytes(String url) {
+        return fetchBytes(url, null, timeout);
+    }
+
+    protected final byte[] fetchBytes(String url, String referrer, int timeout) {
+        if (url.startsWith("htt")) { // http(s)
+            return client.getBytes(url, timeout, DEFAULT_USER_AGENT, referrer);
+        } else {
+            return null;
+        }
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+
+    public List<String> getKeywords() {
+        return keywordsList;
+    }
+
+    public String getKeywordsString() {
+        return keywords;
+    }
+}

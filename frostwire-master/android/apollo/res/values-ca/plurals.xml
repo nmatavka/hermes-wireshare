@@ -1,0 +1,44 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <plurals name="Nalbums">
+    <item quantity="one"><xliff:g id="count">%d</xliff:g> àlbum</item>
+    <item quantity="other"><xliff:g id="count">%d</xliff:g> àlbums</item>
+  </plurals>
+  <plurals name="Nsongs">
+    <item quantity="one"><xliff:g id="count">%d</xliff:g> cançó</item>
+    <item quantity="other"><xliff:g id="count">%d</xliff:g> cançons</item>
+  </plurals>
+  <plurals name="NNNtrackstoplaylist">
+    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> cançó s\'ha afegit a la llista de reproducció.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> cançons s\'han afegit a la llista de reproducció.</item>
+  </plurals>
+  <plurals name="NNNtracksfromplaylist">
+    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> cançó s\'ha tret de la llista de reproducció.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> cançons s\'han tret de la llista de reproducció.</item>
+  </plurals>
+  <plurals name="NNNtrackstoqueue">
+    <item quantity="one"><xliff:g id="number" example="1">%d</xliff:g> cançó s\'ha afegit a la cua.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> cançons s\'han afegit a la cua.</item>
+  </plurals>
+  <plurals name="NNNtracksdeleted">
+    <item quantity="one"><xliff:g id="songs_to_delete" example="1">%d</xliff:g> cançó s\'ha esborrat.</item>
+    <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> cançons s\'han esborrat.</item>
+  </plurals>
+</resources>

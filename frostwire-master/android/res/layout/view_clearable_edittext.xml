@@ -1,0 +1,67 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/clearable_edittext_background">
+
+    <com.frostwire.android.gui.views.FWAutoCompleteTextView
+        android:id="@+id/view_clearable_edit_text_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:dropDownVerticalOffset="11dp"
+        android:background="@android:color/transparent"
+        android:hint="@null"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingLeft="12dp"
+        android:paddingRight="38dp"
+        android:textColor="@color/app_text_primary"
+        android:textColorHint="@color/app_text_light"
+        android:textSize="15sp" />
+
+    <ImageView
+        android:id="@+id/view_clearable_edit_text_image_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="6dp"
+        android:contentDescription="@null"
+        android:src="@drawable/clearable_edittext_search_icon" />
+
+    <ImageButton
+        android:id="@+id/view_clearable_edit_text_button_clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_marginTop="6dp"
+        android:background="@null"
+        android:contentDescription="@null"
+        android:src="@drawable/clearable_edittext_clear_icon"
+        android:foregroundTint="@color/basic_yellow"/>
+
+</RelativeLayout>

@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">الحديثة</string>
+  <string name="page_artists">فنانون</string>
+  <string name="page_albums">ألبومات</string>
+  <string name="page_songs">أغاني</string>
+  <string name="page_playlists">قوائم تشغيل</string>
+  <string name="page_genres">أنواع</string>
+    <string name="menu_search">بحث</string>
+  <string name="menu_shuffle">خلْط الكل</string>
+  <string name="menu_play_all">تشغيل الكل</string>
+  <string name="menu_sort_by">الترتيب حسب</string>
+    <string name="menu_clear_queue">مسح قائمة انتظار</string>
+  <string name="menu_save_queue">حفظ قائمة الانتظار</string>
+  <string name="menu_share">مشاركة</string>
+  <string name="menu_add_to_homescreen">دبوس للشاشة الرئيسية</string>
+  <string name="menu_equalizer">التعادل</string>
+  <string name="menu_simple">بسيط</string>
+  <string name="menu_detailed">مفصّل</string>
+  <string name="menu_grid">شبكة</string>
+  <string name="menu_view_as">عرض حسب</string>
+  <string name="add_to_playlist">إضافة إلى قائمة التشغيل</string>
+  <string name="add_to_favorites">إضافة إلى المفضلة</string>
+  <string name="add_to_queue">إضافة إلى قائمة الانتظار</string>
+  <string name="remove_from_favorites">إزالة من المفضلة</string>
+    <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">فنان</string>
+  <string name="sort_order_entry_album">ألبوم</string>
+  <string name="sort_order_entry_year">السنة</string>
+  <string name="sort_order_entry_duration">مدة</string>
+  <string name="sort_order_entry_date_added">التاريخ المضاف</string>
+  <string name="sort_order_entry_track_list">قائمة المسار</string>
+  <string name="sort_order_entry_number_of_songs">عدد من الأغاني</string>
+  <string name="sort_order_entry_number_of_albums">عدد الألبومات</string>
+  <string name="sort_order_entry_filename">اختر ملف</string>
+  <string name="playlist_favorite">المفضلة</string>
+  <string name="playlist_favorites">المفضلة</string>
+  <string name="playlist_last_added">أخر ما .أضاف</string>
+  <string name="new_empty_playlist">قائمة تشغيل جديدة</string>
+  <string name="save">حفظ</string>
+  <string name="cancel">الغاء</string>
+  <string name="overwrite">استبدال</string>
+  <string name="new_playlist_name_template">قائمة التشغيل <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">اسم قائمة التشغيل</string>
+  <string name="delete_dialog_title">حذف <xliff:g id="item" example="album">%s</xliff:g>؟</string>
+    <string name="context_menu_play_selection">تشغيل</string>
+  <string name="context_menu_play_next">تشغيل التالي</string>
+  <string name="context_menu_more_by_artist">أكثر من الفنان</string>
+  <string name="context_menu_rename_playlist">إعادة تسمية</string>
+  <string name="context_menu_delete">حذف</string>
+    <string name="context_menu_remove_from_recent">إزالة من الأخيرة</string>
+  <string name="context_menu_use_as_ringtone">استخدام كنغمة رنين</string>
+  <string name="context_menu_remove_from_playlist">إزالة من قائمة التشغيل</string>
+  <string name="accessibility_play">تشغيل</string>
+  <string name="accessibility_pause">توقف</string>
+  <string name="accessibility_next">القادم</string>
+  <string name="accessibility_prev">سابق</string>
+  <string name="accessibility_shuffle">خلْط</string>
+  <string name="accessibility_shuffle_all">خلْط الكل</string>
+  <string name="accessibility_repeat">تكرار</string>
+  <string name="accessibility_repeat_all">كرر كل</string>
+  <string name="accessibility_repeat_one">كرّر مره</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> مثبت على الشاشة الرئيسية</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> لا يمكن أن تكون معلقة للشاشة الرئيسية</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' تعيين كنغمة رنين</string>
+    <string name="now_listening_to">#تشغيل جديد <xliff:g id="title">%1$s</xliff:g> بي <xliff:g id="artist">%2$s</xliff:g> #FrostWire</string>
+  <string name="share_track_using">مشاركة المسار ااستخدام:</string>
+    <string name="no_effects_for_you">المساوي لم يستطع الفتح.</string>
+  <string name="empty_music">لنسخ ملفات الموسيقى من الكمبيوتر إلى الجهاز الخاص بك، استخدم كبل USB.</string>
+  <string name="empty_last_added">هنا ستظهر الأغاني التي قمت بإضافتها خلال الشهر الماضي.</string>
+  <string name="empty_search">لم يتم العثور على نتائج البحث</string>
+    <string name="empty_recent">ألبوم قمت بلإستماع عليه  سوف تظهر هنا. حاول تشغيل بعض الموسيقى.</string>
+  <string name="now_listening_to_no_artist_available">الان نلعب او نعرض \"<xliff:g id="title">%1$s</xliff:g>\" على #FrostWire</string>
+  <string name="delete_files_title">حذف الملفات</string>
+  <string name="page_last_added">آخر يضاف</string>
+  <string name="empty_playlist">قائمة التشغيل هذه فارغة.\n\nانقر هنا لمعرفة كيفية إضافة الأغاني.</string>
+  <string name="are_you_sure_delete_files_text">هل أنت متأكد أنك تريد دائمًا حذف الملفات المحددة من جهازك؟</string>
+  <string name="frostwire_player">FrostWire مشغل الوسائطr</string>
+</resources>

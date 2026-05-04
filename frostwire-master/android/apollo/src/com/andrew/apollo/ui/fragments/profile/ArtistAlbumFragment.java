@@ -1,0 +1,106 @@
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.andrew.apollo.ui.fragments.profile;
+
+import androidx.loader.content.Loader;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+
+import com.andrew.apollo.Config;
+import com.andrew.apollo.adapters.ArtistAlbumAdapter;
+import com.andrew.apollo.loaders.ArtistAlbumLoader;
+import com.andrew.apollo.model.Album;
+import com.andrew.apollo.ui.fragments.Fragments;
+import com.andrew.apollo.utils.MusicUtils;
+import com.andrew.apollo.utils.NavUtils;
+import com.andrew.apollo.utils.PreferenceUtils;
+import com.andrew.apollo.widgets.VerticalScrollListener;
+import com.frostwire.android.R;
+
+import java.util.List;
+
+/**
+ * This class is used to display all of the albums from a particular artist.
+ *
+ * @author Andrew Neal (andrewdneal@gmail.com)
+ * @author Angel Leon (@gubatron)
+ * @author Alden Torres (@aldenml)
+ */
+public final class ArtistAlbumFragment extends ApolloFragment<ArtistAlbumAdapter, Album> {
+
+    public ArtistAlbumFragment() {
+        super(Fragments.ARTIST_ALBUM_PROFILE_FRAGMENT_GROUP_ID, Fragments.ARTIST_ALBUM_PROFILE_FRAGMENT_LOADER_ID);
+    }
+
+    /**
+     * We override because the old implementation would put the VerticalScrollListener on column 1
+     * this might go away after tests.
+     */
+    @Override
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
+        View rootView = super.onCreateView(inflater, container, savedInstanceState);
+
+        if (mListView != null && mProfileTabCarousel != null) {
+            // To help make scrolling smooth
+            mListView.setOnScrollListener(new VerticalScrollListener(mScrollableHeader,
+                    mProfileTabCarousel, 1));
+        }
+
+        return rootView;
+    }
+
+    @Override
+    protected ArtistAlbumAdapter createAdapter() {
+        return new ArtistAlbumAdapter(getActivity(), R.layout.list_item_detailed_no_background);
+    }
+
+    @Override
+    protected String getLayoutTypeName() {
+        return PreferenceUtils.SIMPLE_LAYOUT;
+    }
+
+    @Override
+    public Loader<List<Album>> onCreateLoader(final int id, final Bundle args) {
+        return new ArtistAlbumLoader(getActivity(), args.getLong(Config.ID));
+    }
+
+    @Override
+    public void onItemClick(final AdapterView<?> parent,
+                            final View view,
+                            final int position,
+                            final long id) {
+        mItem = mAdapter.getItem(position - mAdapter.getOffset());
+        if (mItem != null) {
+            com.frostwire.android.util.SystemUtils.postToHandler(
+                com.frostwire.android.util.SystemUtils.HandlerThreadName.MISC,
+                () -> {
+                    NavUtils.openAlbumProfile(getActivity(),
+                        mItem.mAlbumName,
+                        mItem.mArtistName,
+                        mItem.mAlbumId,
+                        MusicUtils.getSongListForAlbum(getActivity(), mItem.mAlbumId));
+                    getActivity().finish();
+                });
+        }
+    }
+}

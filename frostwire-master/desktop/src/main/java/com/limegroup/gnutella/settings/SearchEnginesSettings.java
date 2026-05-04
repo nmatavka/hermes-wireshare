@@ -1,0 +1,44 @@
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.limegroup.gnutella.settings;
+
+import org.limewire.setting.BooleanSetting;
+
+/**
+ * @author gubatron
+ * @author aldenml
+ */
+public class SearchEnginesSettings extends LimeProps {
+    // In the near future, we will refactor this code to allow a configurable amount of
+    // search providers.
+    public static final BooleanSetting TPB_SEARCH_ENABLED = FACTORY.createBooleanSetting("TPB_SEARCH2_ENABLED", true);
+    public static final BooleanSetting SOUNDCLOUD_SEARCH_ENABLED = FACTORY.createBooleanSetting("SOUNDCLOUD_SEARCH2_ENABLED", true);
+    public static final BooleanSetting INTERNET_ARCHIVE_SEARCH_ENABLED = FACTORY.createBooleanSetting("ARCHIVEORG_SEARCH2_ENABLED", true);
+    public static final BooleanSetting FROSTCLICK_SEARCH_ENABLED = FACTORY.createBooleanSetting("FROSTCLICK_SEARCH_ENABLED", true);
+    public static final BooleanSetting TORRENTDOWNLOADS_SEARCH_ENABLED = FACTORY.createBooleanSetting("TORRENTDOWNLOADS_SEARCH_ENABLED", true);
+    public static final BooleanSetting ONE337X_SEARCH_ENABLED = FACTORY.createBooleanSetting("ONE337X_SEARCH_ENABLED", true);
+    public static final BooleanSetting IDOPE_SEARCH_ENABLED = FACTORY.createBooleanSetting("IDOPE_SEARCH_ENABLED", true);
+    public static final BooleanSetting TORRENTZ2_SEARCH_ENABLED = FACTORY.createBooleanSetting("TORRENTZ2_SEARCH_ENABLED", true);
+    public static final BooleanSetting NYAA_SEARCH_ENABLED = FACTORY.createBooleanSetting("NYAA_SEARCH_ENABLED", true);
+    public static final BooleanSetting MAGNETDL_ENABLED = FACTORY.createBooleanSetting("MAGNETDL_ENABLED", true);
+    public static final BooleanSetting TELLURIDE_ENABLED = (BooleanSetting) FACTORY.createBooleanSetting("TELLURIDE_ENABLED", true).setAlwaysSave(true);
+    public static final BooleanSetting YT_SEARCH_ENABLED = FACTORY.createBooleanSetting("YT_SEARCH_ENABLED", true);
+    public static final BooleanSetting TORRENTSCSV_SEARCH_ENABLED = FACTORY.createBooleanSetting("TORRENTSCSV_SEARCH_ENABLED", true);
+    public static final BooleanSetting KNABEN_SEARCH_ENABLED = FACTORY.createBooleanSetting("KNABEN_SEARCH_ENABLED", false);
+}

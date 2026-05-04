@@ -1,0 +1,26 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="menu_equalizer">Equaliser</string>
+    <string name="add_to_favorites">Add to favourites</string>
+    <string name="remove_from_favorites">Remove from favourites</string>
+    <string name="playlist_favorite">Favourite</string>
+    <string name="playlist_favorites">Favourites</string>
+    <string name="no_effects_for_you">The equaliser could not be opened.</string>
+</resources>

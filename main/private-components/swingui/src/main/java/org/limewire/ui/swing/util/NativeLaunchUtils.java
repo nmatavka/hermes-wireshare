@@ -70,26 +70,33 @@ public final class NativeLaunchUtils {
         ManagedThread managedThread = new ManagedThread( new Runnable() {
             @Override
             public void run() {
-                try {
-                    if (OSUtils.isWindows()) {
-                        openURLWindows(url);
-                    } else if (OSUtils.isMacOSX()) {
-                        openURLMac(url);
-                    } else {
-                        openURLLinux(url);
-                    }
-                } catch (IOException iox) {
-                    // Desktop.browse has various problems on different OSs. Trying
-                    // native calls and falling back to this if an error occurs.
-                    try {
-                        Desktop.getDesktop().browse(new URI(url));
-                    } catch (Throwable t) {
-                        logException(I18n.tr("Unable to open URL"), I18n.tr("Open URL"), new Exception(t));
-                    } 
+                LaunchResult result = openURLSilently(url);
+                if (!result.successful()) {
+                    logException(result.userMessage(), result.userTitle(), result.causeOrDefault());
                 }
             }
         });
         managedThread.start();
+    }
+
+    public static LaunchResult openURLSilently(String url) {
+        try {
+            if (OSUtils.isWindows()) {
+                openURLWindows(url);
+            } else if (OSUtils.isMacOSX()) {
+                openURLMac(url);
+            } else {
+                openURLLinux(url);
+            }
+            return LaunchResult.success();
+        } catch (IOException iox) {
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+                return LaunchResult.success();
+            } catch (Throwable t) {
+                return LaunchResult.failure(I18n.tr("Open URL"), I18n.tr("Unable to open URL"), new Exception(t));
+            }
+        }
     }
 
     /**
@@ -137,12 +144,18 @@ public final class NativeLaunchUtils {
      * <code>launchExplorer(file)</code>
      */
     public static void safeLaunchFile(File file, CategoryManager categoryManager){
+        LaunchResult result = safeLaunchFileSilently(file, categoryManager);
+        if (!result.successful()) {
+            logException(result.userMessage(), result.userTitle(), result.causeOrDefault());
+        }
+    }
+
+    public static LaunchResult safeLaunchFileSilently(File file, CategoryManager categoryManager){
         Category category = categoryManager.getCategoryForFile(file);
         if(category == Category.PROGRAM || category == Category.OTHER){
-            launchExplorer(file);
-        } else {
-            launchFile(file);
+            return launchExplorerSilently(file);
         }
+        return launchFileSilently(file);
     }
 
     /**
@@ -162,22 +175,41 @@ public final class NativeLaunchUtils {
         ManagedThread managedThread = new ManagedThread( new Runnable() {
             @Override
             public void run() {
-                try {
-                    launchFileImpl(file);
-                } catch (LaunchException lex) {
-                    logException(I18n.tr("Unable to open file: {0}", file.getName()),
-                            I18n.tr("Open File"), lex);
-                } catch (IOException iox) {
-                    logException(I18n.tr("Unable to open file: {0}", file.getName()),
-                            I18n.tr("Open File"), iox);
-                } catch (SecurityException ex) {
-                    logException(I18n.tr("Unable to open file: {0}", file.getName()),
-                            I18n.tr("Open File"), ex);
+                LaunchResult result = launchFileSilently(file);
+                if (!result.successful()) {
+                    logException(result.userMessage(), result.userTitle(), result.causeOrDefault());
                 }
             }
         });
         managedThread.start();
         
+    }
+
+    public static LaunchResult launchFileSilently(File file) {
+        try {
+            launchFileImpl(file);
+            return LaunchResult.success();
+        } catch (NoAssociatedHandlerException noHandler) {
+            return LaunchResult.failure(
+                    I18n.tr("Error"),
+                    I18n.tr("The file {0} could not be opened because no application is associated with this file type.", file.getName()),
+                    noHandler);
+        } catch (LaunchException lex) {
+            return LaunchResult.failure(
+                    I18n.tr("Open File"),
+                    I18n.tr("Unable to open file: {0}", file.getName()),
+                    lex);
+        } catch (IOException iox) {
+            return LaunchResult.failure(
+                    I18n.tr("Open File"),
+                    I18n.tr("Unable to open file: {0}", file.getName()),
+                    iox);
+        } catch (SecurityException ex) {
+            return LaunchResult.failure(
+                    I18n.tr("Open File"),
+                    I18n.tr("Unable to open file: {0}", file.getName()),
+                    ex);
+        }
     }
     
     private static void launchFileImpl(File file) throws IOException, SecurityException {
@@ -226,20 +258,25 @@ public final class NativeLaunchUtils {
      * @see #safeLaunchFile(File)
      */
     public static Process launchExplorer(File file) {
+        LaunchResult result = launchExplorerSilently(file);
+        if (!result.successful()) {
+            logException(result.userMessage(), result.userTitle(), result.causeOrDefault());
+        }
+        return result.process();
+    }
+    
+    public static LaunchResult launchExplorerSilently(File file) {
         try {
-            return launchExplorerImpl(file);
+            return LaunchResult.success(launchExplorerImpl(file));
         } catch (LaunchException lex) {
-            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
-                    I18n.tr("Locate File"), lex);
-            return null;
+            return LaunchResult.failure(I18n.tr("Locate File"),
+                    I18n.tr("Unable to locate file: {0}", file.getName()), lex);
         } catch (SecurityException ex) {
-            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
-                    I18n.tr("Locate File"), ex);
-            return null;
+            return LaunchResult.failure(I18n.tr("Locate File"),
+                    I18n.tr("Unable to locate file: {0}", file.getName()), ex);
         } catch (IOException iox) {
-            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
-                    I18n.tr("Locate File"), iox);
-            return null;
+            return LaunchResult.failure(I18n.tr("Locate File"),
+                    I18n.tr("Unable to locate file: {0}", file.getName()), iox);
         }
     }
     
@@ -322,14 +359,11 @@ public final class NativeLaunchUtils {
         Process process = exec(new String[]{"open", filename});
         try {
             process.waitFor();
-            // If the exit value is 1, then no handler could be found for the given file.
-            // Let's show a pop-up explaining that the file could not be opened.
             if (process.exitValue() == 1) {
-                String message = I18n.tr("The file ") + new File(filename).getName() + I18n.tr(" could not be opened because no application is associated with this file type.");
-                String title = I18n.tr("Error");
-                JOptionPane.showMessageDialog(GuiUtils.getMainFrame(), message, title, JOptionPane.ERROR_MESSAGE); 
+                throw new NoAssociatedHandlerException(filename);
             }
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
         return process;
@@ -409,6 +443,60 @@ public final class NativeLaunchUtils {
 
         public String[] getCommand() {
             return command;
+        }
+    }
+
+    private static class NoAssociatedHandlerException extends IOException {
+        NoAssociatedHandlerException(String fileName) {
+            super(fileName);
+        }
+    }
+
+    public static class LaunchResult {
+        private final boolean success;
+        private final String userTitle;
+        private final String userMessage;
+        private final Exception cause;
+        private final Process process;
+
+        private LaunchResult(boolean success, String userTitle, String userMessage, Exception cause, Process process) {
+            this.success = success;
+            this.userTitle = userTitle;
+            this.userMessage = userMessage;
+            this.cause = cause;
+            this.process = process;
+        }
+
+        public static LaunchResult success() {
+            return new LaunchResult(true, null, null, null, null);
+        }
+
+        public static LaunchResult success(Process process) {
+            return new LaunchResult(true, null, null, null, process);
+        }
+
+        public static LaunchResult failure(String userTitle, String userMessage, Exception cause) {
+            return new LaunchResult(false, userTitle, userMessage, cause, null);
+        }
+
+        public boolean successful() {
+            return success;
+        }
+
+        public String userTitle() {
+            return userTitle;
+        }
+
+        public String userMessage() {
+            return userMessage;
+        }
+
+        public Process process() {
+            return process;
+        }
+
+        public Exception causeOrDefault() {
+            return cause != null ? cause : new Exception(userMessage);
         }
     }
     

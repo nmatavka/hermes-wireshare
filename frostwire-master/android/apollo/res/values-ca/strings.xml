@@ -1,0 +1,91 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Recent</string>
+  <string name="page_artists">Artistes</string>
+  <string name="page_albums">Àlbums</string>
+  <string name="page_songs">Cançons</string>
+  <string name="page_playlists">Llistes de reproducció</string>
+  <string name="page_genres">Gèneres</string>
+    <string name="menu_search">Cerca</string>
+  <string name="menu_shuffle">Barreja-ho tot</string>
+  <string name="menu_play_all">Reprodueix tot</string>
+  <string name="menu_sort_by">Ordena per</string>
+    <string name="menu_clear_queue">Neteja la cua</string>
+  <string name="menu_save_queue">Desa la cua</string>
+  <string name="menu_share">Comparteix</string>
+  <string name="menu_add_to_homescreen">Fixa-ho a la pantalla d\'inici</string>
+  <string name="menu_equalizer">Equalitzador</string>
+  <string name="menu_simple">Simple</string>
+  <string name="menu_detailed">Detallat</string>
+  <string name="menu_grid">Graella</string>
+  <string name="menu_view_as">Veure com</string>
+  <string name="add_to_playlist">Afegeix a la llista de reproducció</string>
+  <string name="add_to_favorites">Afegeix als preferits</string>
+  <string name="add_to_queue">Afegeix a la cua</string>
+  <string name="remove_from_favorites">Treu dels preferits</string>
+  <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">Artista</string>
+  <string name="sort_order_entry_album">Àlbum</string>
+  <string name="sort_order_entry_year">Any</string>
+  <string name="sort_order_entry_duration">Duració</string>
+  <string name="sort_order_entry_date_added">Data d\'addició</string>
+  <string name="sort_order_entry_track_list">Llista de pistes</string>
+  <string name="sort_order_entry_number_of_songs">Nombre de cançons</string>
+  <string name="sort_order_entry_number_of_albums">Nombre d\'àlbums</string>
+  <string name="sort_order_entry_filename">Nom del fitxer</string>
+  <string name="playlist_favorite">Preferit</string>
+  <string name="playlist_favorites">Preferits</string>
+  <string name="playlist_last_added">Darrer afegit</string>
+  <string name="new_empty_playlist">Nova llista de reproducció</string>
+  <string name="save">Desa</string>
+  <string name="cancel">Cancel·la</string>
+  <string name="overwrite">Sobreescriu</string>
+  <string name="new_playlist_name_template">Llista de reproducció <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Nom de la llista de reproducció</string>
+  <string name="delete_dialog_title">Esborra <xliff:g id="item" example="album">%s</xliff:g>?</string>
+    <string name="context_menu_play_selection">Reprodueix</string>
+  <string name="context_menu_play_next">Reprodueix el següent</string>
+  <string name="context_menu_more_by_artist">Més de l\'artista</string>
+  <string name="context_menu_rename_playlist">Reanomena</string>
+  <string name="context_menu_delete">Esborra</string>
+    <string name="context_menu_remove_from_recent">Treu dels recents</string>
+  <string name="context_menu_use_as_ringtone">Utilitza com a to de trucada</string>
+  <string name="context_menu_remove_from_playlist">Treu de la llista de reproducció</string>
+  <string name="accessibility_play">Reprodueix</string>
+  <string name="accessibility_pause">Pausa</string>
+  <string name="accessibility_next">Següent</string>
+  <string name="accessibility_prev">Anterior</string>
+  <string name="accessibility_shuffle">Barreja</string>
+  <string name="accessibility_shuffle_all">Barreja-ho tot</string>
+  <string name="accessibility_repeat">Repeteix</string>
+  <string name="accessibility_repeat_all">Repeteix tot</string>
+  <string name="accessibility_repeat_one">Repeteix un</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fixat a la teva pantalla d\'inici</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> no s\'ha pogut fixar a la teva pantalla d\'inici</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' fixat com a to de trucada</string>
+    <string name="now_listening_to">#AraReproduint <xliff:g id="title">%1$s</xliff:g> de <xliff:g id="artist">%2$s</xliff:g> #FrostWire</string>
+  <string name="share_track_using">Comparteix la pista utilitzant:</string>
+    <string name="no_effects_for_you">L\'equalitzador no s\'ha pogut obrir.</string>
+  <string name="empty_music">Per copiar música del teu ordenador al teu dispositiu, utilitza un cable USB.</string>
+  <string name="empty_last_added">Les cançons que has afegit durant el darrer mes es mostraran aquí.</string>
+  <string name="empty_search">No s\'han trobat resultats</string>
+    <string name="empty_recent">Els Àlbums que hagis escoltat es mostraran aquí. Prova de reproduir una mica de música.</string>
+</resources>

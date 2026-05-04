@@ -1,0 +1,71 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_pause_resume_seed"
+        android:icon="@drawable/action_bar_pause"
+        android:orderInCategory="1"
+        android:title="@string/transfers_context_menu_pause_stop_all_transfers"
+        app:showAsAction="always"
+        app:iconTint="@color/action_bar_icon"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_clear"
+        android:icon="@drawable/action_bar_stop_transfer"
+        android:orderInCategory="2"
+        android:title="@string/cancel_transfer"
+        app:showAsAction="ifRoom"
+        app:iconTint="@color/action_bar_icon"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_delete"
+        android:icon="@drawable/contextmenu_icon_trash"
+        android:orderInCategory="3"
+        android:title="@string/remove_torrent_and_data"
+        app:showAsAction="never"
+        app:iconTint="@color/app_icon_primary"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_copy_magnet"
+        android:icon="@drawable/contextmenu_icon_magnet"
+        android:orderInCategory="4"
+        android:title="@string/transfers_context_menu_copy_magnet"
+        app:showAsAction="never"
+        app:iconTint="@color/app_icon_primary"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_copy_infohash"
+        android:icon="@drawable/contextmenu_icon_copy"
+        android:orderInCategory="5"
+        android:title="@string/transfers_context_menu_copy_infohash"
+        app:showAsAction="never"
+        app:iconTint="@color/app_icon_primary"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_donate_fiat"
+        android:icon="@drawable/contextmenu_icon_donation_fiat"
+        android:orderInCategory="6"
+        android:title="@string/send_tip_donation"
+        app:showAsAction="never"
+        app:iconTint="@color/app_icon_primary"/>
+    <item
+        android:id="@+id/fragment_transfer_detail_menu_donate_bitcoin"
+        android:icon="@drawable/contextmenu_icon_donation_bitcoin"
+        android:orderInCategory="7"
+        android:title="@string/send_bitcoin_tip"
+        app:showAsAction="never"
+        app:iconTint="@color/app_icon_primary"/>
+</menu>

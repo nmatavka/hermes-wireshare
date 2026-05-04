@@ -1,0 +1,216 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical">
+
+    <include layout="@layout/toolbar_main" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/app_background_body_light">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@android:id/progress"
+            android:layout_alignParentBottom="true" />
+
+        <LinearLayout
+            android:id="@+id/audio_player_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/audio_player_header_height"
+            android:layout_alignParentTop="true"
+            android:background="@color/basic_background"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/audio_player_header_padding_left"
+                android:paddingRight="@dimen/audio_player_header_padding_right">
+
+                <TextView
+                    android:id="@+id/audio_player_track_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/audio_player_line_one"
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/audio_player_artist_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/audio_player_line_two"
+                    android:textSize="@dimen/text_size_small" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/audio_player_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="@dimen/audio_player_switch_padding">
+
+                <com.andrew.apollo.widgets.SquareImageView
+                    android:id="@+id/audio_player_switch_queue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    app:tint="@color/app_icon_primary"/>
+
+                <com.andrew.apollo.widgets.SquareImageView
+                    android:id="@+id/audio_player_switch_album_art"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/btn_switch_queue"
+                    android:visibility="visible"
+                    app:tint="@color/app_icon_primary"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@android:id/progress"
+            android:layout_below="@+id/audio_player_header"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true">
+
+            <com.andrew.apollo.widgets.SquareImageView
+                    android:id="@+id/audio_player_album_art"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerHorizontal="true"
+                    android:padding="16dp"
+                    android:scaleType="fitXY"
+                    android:visibility="visible" />
+
+            <com.frostwire.android.offers.FWBannerView
+                    app:adUnitId="c902517bad27d4d7"
+                    app:showRemoveAdsTextView="true"
+                    android:id="@+id/audio_player_320x50_banner_view"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="-135dp"
+                    android:layout_height="150dp"
+                    android:layout_alignBottom="@+id/audio_player_album_art"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible" />
+
+            <FrameLayout
+                android:id="@+id/audio_player_pager_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/audio_player_album_art"
+                android:layout_marginBottom="16dp"
+                android:visibility="visible"
+                android:background="@drawable/audio_player_pager_container">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_gravity="top"
+                    android:background="@drawable/divider_line" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/divider_line" />
+
+                <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/audio_player_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </FrameLayout>
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/audio_player_current_time"
+            android:layout_width="@dimen/audio_player_time_width"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@android:id/progress"
+            android:layout_alignBottom="@android:id/progress"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:textColor="@color/audio_player_current_time"
+            android:textSize="@dimen/text_size_medium" />
+
+        <TextView
+            android:id="@+id/audio_player_total_time"
+            android:layout_width="@dimen/audio_player_time_width"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@android:id/progress"
+            android:layout_alignBottom="@android:id/progress"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:textColor="@color/audio_player_total_time"
+            android:textSize="@dimen/text_size_medium" />
+
+        <SeekBar
+            android:id="@android:id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/audio_player_controls"
+            android:layout_marginBottom="@dimen/audio_player_seek_bar_margin_bottom"
+            android:layout_toLeftOf="@+id/audio_player_total_time"
+            android:layout_toRightOf="@+id/audio_player_current_time"
+            android:background="@null"
+            android:max="1000"
+            android:progressDrawable="@drawable/audio_player_seekbar" />
+
+        <LinearLayout
+            android:id="@+id/audio_player_controls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/app_background_body_light"
+                android:orientation="horizontal">
+
+                <include layout="@layout/audio_player_controls" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

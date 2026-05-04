@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Onlangs</string>
+  <string name="page_artists">Kunstenaars</string>
+  <string name="page_albums">Albums</string>
+  <string name="page_songs">Liedjies</string>
+  <string name="page_playlists">Speellys</string>
+  <string name="page_genres">Genres</string>
+    <string name="menu_search">Soek</string>
+  <string name="menu_shuffle">Skommel almal</string>
+  <string name="menu_play_all">Speel almal</string>
+  <string name="menu_sort_by">Sorteer volgens</string>
+    <string name="menu_clear_queue">Vee lys uit</string>
+  <string name="menu_save_queue">Stoor speellys</string>
+  <string name="menu_share">Deel</string>
+  <string name="menu_add_to_homescreen">Plaas op tuis skerm</string>
+  <string name="menu_equalizer">Equalizer</string>
+  <string name="menu_simple">Eenvoudig</string>
+  <string name="menu_detailed">Gedetailleerde</string>
+  <string name="menu_grid">Rooster</string>
+  <string name="menu_view_as">Bekyk as</string>
+  <string name="add_to_playlist">Voeg by speellys</string>
+  <string name="add_to_favorites">Voeg by gunstellinge</string>
+  <string name="add_to_queue">Voeg by lys</string>
+  <string name="remove_from_favorites">Verwyder vanuit gunstellinge</string>
+    <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">Kunstenaar</string>
+  <string name="sort_order_entry_album">Album</string>
+  <string name="sort_order_entry_year">Jaar</string>
+  <string name="sort_order_entry_duration">Lente</string>
+  <string name="sort_order_entry_date_added">Datum bygevoeg</string>
+  <string name="sort_order_entry_track_list">Speellys</string>
+  <string name="sort_order_entry_number_of_songs">Aantal liedjies</string>
+  <string name="sort_order_entry_number_of_albums">Aantal albums</string>
+  <string name="sort_order_entry_filename">Leêrnaam</string>
+  <string name="playlist_favorite">Gunstelling</string>
+  <string name="playlist_favorites">Gunstellinge</string>
+  <string name="playlist_last_added">Laaste bygevoeg</string>
+  <string name="new_empty_playlist">Skep speellys</string>
+  <string name="save">Stoor</string>
+  <string name="cancel">Kanselleer</string>
+  <string name="overwrite">Oorskryf</string>
+  <string name="new_playlist_name_template">Speellys <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Speellys naam</string>
+  <string name="delete_dialog_title">Skrap <xliff:g id="item" example="album">%s</xliff:g>?</string>
+    <string name="context_menu_play_selection">Speel</string>
+  <string name="context_menu_play_next">Volgende</string>
+  <string name="context_menu_more_by_artist">Meer van kunstenaar</string>
+  <string name="context_menu_rename_playlist">Hernoem</string>
+  <string name="context_menu_delete">Verwyder</string>
+    <string name="context_menu_remove_from_recent">Verwyder van onlangse lys</string>
+  <string name="context_menu_use_as_ringtone">Gebruik as luitoon</string>
+  <string name="context_menu_remove_from_playlist">Verwyder van speellys</string>
+  <string name="accessibility_play">Speel</string>
+  <string name="accessibility_pause">Pouseer</string>
+  <string name="accessibility_next">Volgende</string>
+  <string name="accessibility_prev">Vorige</string>
+  <string name="accessibility_shuffle">Skommel</string>
+  <string name="accessibility_shuffle_all">Skommel almal</string>
+  <string name="accessibility_repeat">Herhaal</string>
+  <string name="accessibility_repeat_all">Herhaal almal</string>
+  <string name="accessibility_repeat_one">Herhaal eenkeer</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> vasgepen op tuisskerm</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> kon nie vasgepen word op tuisskerm nie</string>
+  <string name="set_as_ringtone">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" gestel as luitoon</string>
+    <string name="now_listening_to">#Speel nou <xliff:g id="title">%1$s</xliff:g> deur <xliff:g id="artist">%2$s</xliff:g> #FrostWire</string>
+  <string name="share_track_using">Deel liedtjie d.m.v.:</string>
+    <string name="no_effects_for_you">Die equalizer kon nie oopgemaak word nie.</string>
+  <string name="empty_music">Om musiek van jou rekenaar na jou toestel te kopieer, gebruik \'n USB-kabel.</string>
+  <string name="empty_last_added">Liedjies wat jy die afgelope maand bygevoeg het word hier vertoon.</string>
+  <string name="empty_search">Geen resultate gevind nie</string>
+    <string name="empty_recent">Albums wat jy na geluister het sal hier gelys word. Speel \'n bietjie musiek.</string>
+  <string name="now_listening_to_no_artist_available">#Speel \"<xliff:g id="title">%1$s</xliff:g>\" op #FrostWire</string>
+  <string name="delete_files_title">Vee lêers uit</string>
+  <string name="page_last_added">Laas bygevoeg</string>
+  <string name="empty_playlist">Hierdie snitlys is leeg.\n\nKlik hier om te leer hoe om liedjies by te voeg.</string>
+  <string name="are_you_sure_delete_files_text">Is jy seker jy wil die geselekteerde lêers permanent van die toestel verwyder?</string>
+  <string name="frostwire_player">FrostWire Mediaspeler</string>
+</resources>

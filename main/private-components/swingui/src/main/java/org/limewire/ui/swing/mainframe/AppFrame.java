@@ -41,7 +41,6 @@ import org.limewire.ui.swing.components.PlainMenuUI;
 import org.limewire.ui.swing.components.PlainWindowsCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainWindowsMenuItemUI;
 import org.limewire.ui.swing.components.PlainWindowsMenuUI;
-import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -96,8 +95,6 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
     @Inject private DelayedShutdownHandler delayedShutdownHandler;
-    @Inject private HomeMediator homeMediator;
-    
     private OptionsDialog lastOptionsDialog;
     
     /** Starts with the mock core. */
@@ -205,8 +202,6 @@ public class AppFrame extends SingleFrameApplication {
         } else {
             getMainFrame().setVisible(true);
         }
-     // Reset the browser page to blank before continuing.  Necessary here so that Mac won't freeze.
-        homeMediator.getComponent().loadBlank();
         started = true;
     }
     

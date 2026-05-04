@@ -1,0 +1,56 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Ən son</string>
+  <string name="page_artists">Müğənnilər</string>
+  <string name="page_albums">Albomlar</string>
+  <string name="page_songs">Mahnılar</string>
+  <string name="page_genres">Janrlar</string>
+  <string name="menu_search">Axtar</string>
+  <string name="menu_shuffle">Hamısını qarışdır</string>
+    <string name="menu_share">Paylaş</string>
+  <string name="menu_equalizer">Ekvalayzer</string>
+  <string name="menu_simple">Sadə</string>
+  <string name="menu_view_as">Görünüşü</string>
+  <string name="add_to_favorites">Seçilmişlərə əlavə et</string>
+  <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_album">Albom</string>
+  <string name="sort_order_entry_year">İl</string>
+  <string name="sort_order_entry_duration">Müddət</string>
+  <string name="sort_order_entry_date_added">Əlavə olunma tarixi</string>
+  <string name="sort_order_entry_track_list">Musiqi siyahısı</string>
+  <string name="sort_order_entry_number_of_songs">Mahnı sayı</string>
+  <string name="sort_order_entry_number_of_albums">Albom sayı</string>
+  <string name="sort_order_entry_filename">Fayl adı</string>
+  <string name="playlist_favorite">Seçilmiş</string>
+  <string name="playlist_favorites">Seçilmişlər</string>
+  <string name="playlist_last_added">Ən son əlavə olunan</string>
+  <string name="save">Saxla</string>
+  <string name="cancel">İmtina</string>
+  <string name="overwrite">Üzərinə yaz</string>
+  <string name="delete_dialog_title"><xliff:g id="item" example="album">%s</xliff:g> silinsin?</string>
+    <string name="context_menu_rename_playlist">Yenidən adlandır</string>
+  <string name="context_menu_delete">Sil</string>
+  <string name="accessibility_next">Sonrakı</string>
+  <string name="accessibility_prev">Əvvəlki</string>
+    <string name="share_track_using">Mahnını paylaş:</string>
+    <string name="no_effects_for_you">Ekvalayzer açıla bilmədi.</string>
+  <string name="empty_music">Kompüterinizdən cihazınıza musiqi kopyalamaq üçün USB kabelindən istifadə edin.</string>
+</resources>

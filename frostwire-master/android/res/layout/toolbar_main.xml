@@ -1,0 +1,44 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml),
+ *            Marcelina Knitter (@marcelinkaaa)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/toolbar_main"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/app_toolbar_background"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    app:popupTheme="@style/Theme.AppCompat.DayNight"
+    app:navigationContentDescription="@string/abc_action_bar_up_description"
+    app:navigationIcon="?attr/homeAsUpIndicator"
+    app:title="@string/application_label"
+    app:titleMarginStart="10dp"
+    app:titleTextColor="@color/action_bar_title"
+    tools:ignore="PrivateResource">
+
+    <FrameLayout
+        android:id="@+id/toolbar_main_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingStart="10dp"
+        android:visibility="gone" />
+
+</androidx.appcompat.widget.Toolbar>

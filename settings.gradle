@@ -14,6 +14,7 @@ plugins {
 rootProject.name = 'hermes-wireshare'
 
 def modules = [
+    'desktop-compose-app': 'desktop-compose-app',
     'bittorrent-api': 'main/components/bittorrent-api',
     'collection'    : 'main/components/collection',
     'common'        : 'main/components/common',

@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Seneste</string>
+  <string name="page_artists">Kunstnere</string>
+  <string name="page_albums">Albums</string>
+  <string name="page_songs">Sange</string>
+  <string name="page_playlists">Playlister</string>
+  <string name="page_genres">Genrer</string>
+    <string name="menu_search">Søg</string>
+  <string name="menu_shuffle">Bland alle</string>
+  <string name="menu_play_all">Afspil alle</string>
+  <string name="menu_sort_by">Sortér efter</string>
+    <string name="menu_clear_queue">Ryd kø</string>
+  <string name="menu_save_queue">Gem kø</string>
+  <string name="menu_share">Del</string>
+  <string name="menu_add_to_homescreen">Fastgør til startskærm</string>
+  <string name="menu_equalizer">Equalizer</string>
+  <string name="menu_simple">Simpel</string>
+  <string name="menu_detailed">Detaljeret</string>
+  <string name="menu_grid">Gitter</string>
+  <string name="menu_view_as">Vis som</string>
+  <string name="add_to_playlist">Tilføj til playliste</string>
+  <string name="add_to_favorites">Tilføj til favoritter</string>
+  <string name="add_to_queue">Tilføj til kø</string>
+  <string name="remove_from_favorites">Fjern fra favoritter</string>
+    <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_artist">Kunstner</string>
+  <string name="sort_order_entry_album">Album</string>
+  <string name="sort_order_entry_year">År</string>
+  <string name="sort_order_entry_duration">Varighed</string>
+  <string name="sort_order_entry_date_added">Dato tilføjet</string>
+  <string name="sort_order_entry_track_list">Trackliste</string>
+  <string name="sort_order_entry_number_of_songs">Antal sange</string>
+  <string name="sort_order_entry_number_of_albums">Antal albums</string>
+  <string name="sort_order_entry_filename">Filnavn</string>
+  <string name="playlist_favorite">Favorit</string>
+  <string name="playlist_favorites">Favoritter</string>
+  <string name="playlist_last_added">Sidst tilføjet</string>
+  <string name="new_empty_playlist">Ny playliste</string>
+  <string name="save">Gem</string>
+  <string name="cancel">Afbryd</string>
+  <string name="overwrite">Overskriv</string>
+  <string name="new_playlist_name_template">Playliste <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Playlistenavn</string>
+  <string name="delete_dialog_title">Slet <xliff:g id="item" example="album">%s</xliff:g>?</string>
+    <string name="context_menu_play_selection">Afspil</string>
+  <string name="context_menu_play_next">Afspil næste</string>
+  <string name="context_menu_more_by_artist">Mere af kunstner</string>
+  <string name="context_menu_rename_playlist">Omdøb</string>
+  <string name="context_menu_delete">Slet</string>
+    <string name="context_menu_remove_from_recent">Fjern fra seneste</string>
+  <string name="context_menu_use_as_ringtone">Brug som ringetone</string>
+  <string name="context_menu_remove_from_playlist">Fjern fra playliste</string>
+  <string name="accessibility_play">Afspil</string>
+  <string name="accessibility_pause">Pause</string>
+  <string name="accessibility_next">Næste</string>
+  <string name="accessibility_prev">Forrige</string>
+  <string name="accessibility_shuffle">Bland</string>
+  <string name="accessibility_shuffle_all">Bland alle</string>
+  <string name="accessibility_repeat">Gentag</string>
+  <string name="accessibility_repeat_all">Gentag alle</string>
+  <string name="accessibility_repeat_one">Gentag én</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> fastgjort til din startskærm</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> kunne ikke fastgøres til din startskærm</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' sat som ringetone</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> af <xliff:g id="artist">%2$s</xliff:g> #FrostWire</string>
+  <string name="share_track_using">Del sang vha.:</string>
+    <string name="no_effects_for_you">Equalizeren kunne ikke åbnes.</string>
+  <string name="empty_music">Brug et USB-kabel for at kopiere musik fra din computer til enheden.</string>
+  <string name="empty_last_added">Sange, som du har tilføjet i løbet af den sidste måned, vil blive vist her.</string>
+  <string name="empty_search">Ingen søgeresultater fundet</string>
+    <string name="empty_recent">Albums, som du har lyttet til, vil blive vist her. Prøv at spille noget musik.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" på #FrostWire</string>
+  <string name="delete_files_title">Slet filer</string>
+  <string name="page_last_added">Sidst tilføjet</string>
+  <string name="empty_playlist">Denne afspilningsliste er tom.\n\nKlik her for at lære at tilføje sange.</string>
+  <string name="are_you_sure_delete_files_text">Er du sikker på, at du vil slette de valgte filer permanent fra din enhed?</string>
+  <string name="frostwire_player">FrostWire Medieafspiller</string>
+</resources>

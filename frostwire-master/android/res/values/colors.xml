@@ -1,0 +1,81 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml), and
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources>
+
+    <!-- Basic colors -->
+    <color name="basic_background">@android:color/white</color>
+    <color name="basic_color">#38536a</color>
+    <color name="basic_color_transparent">#642889AC</color>
+    <color name="basic_color_dark">#264053</color>
+    <color name="basic_color_dark_highlight">#21313f</color>
+    <color name="basic_blue_highlight">#33b5e5</color>
+    <color name="basic_blue_highlight_dark">#278EB4</color>
+    <color name="basic_green">#0FC486</color>
+    <color name="basic_green_dark">#0DAF77</color>
+    <color name="basic_red">#ff0000</color>
+    <color name="basic_yellow">#ffe16a</color>
+    <color name="basic_gray_light">#F2F2F2</color>
+    <color name="basic_gray_medium">#e7e7e7</color>
+    <color name="basic_gray_dark">#b5b5b5</color>
+    <color name="basic_gray_text_dark">#2b2b2b</color>
+    <color name="basic_gray_text_medium">#686868</color>
+    <color name="basic_gray_text_light">#b5b5b5</color>
+
+    <!-- GENERAL APP COLORS -->
+    <!-- Background Colors -->
+    <color name="app_background_main">@color/basic_background</color>
+    <color name="app_background_color">@color/basic_color</color>
+    <color name="app_background_color_dark">@color/basic_color_dark</color>
+    <color name="app_background_color_dark_highlight">@color/basic_color_dark_highlight</color>
+    <color name="app_background_body_light">@color/basic_gray_light</color>
+    <color name="app_background_body_dark">@color/basic_gray_medium</color>
+    <color name="app_toolbar_background">@color/basic_color</color>
+    <color name="app_toolbar_background_bottom">@color/basic_color_dark_highlight</color>
+    <color name="app_selection_background">@color/basic_gray_light</color>
+    <color name="app_rich_notification_background">@color/basic_yellow</color>
+    <color name="app_browse_thumbnail_background">@color/basic_gray_medium</color>
+    <color name="app_grid_selected_background">@color/basic_color_transparent</color>
+
+    <!-- Text Colors -->
+    <color name="app_text_primary">@color/basic_gray_text_dark</color>
+    <color name="app_text_secondary">@color/basic_gray_text_medium</color>
+    <color name="app_text_disabled">@color/basic_gray_text_light</color>
+    <color name="app_text_white">@color/basic_background</color>
+    <color name="app_text_light">@color/basic_gray_text_light</color>
+    <color name="app_text_highlight">@color/basic_blue_highlight_dark</color>
+    <color name="app_text_wizard">#abb3bc</color>
+    <color name="app_text_wizard_dark">#ff6f7d88</color>
+
+    <!-- Other Colors -->
+    <color name="app_divider">#D3D3D3</color>
+    <color name="app_divider_dark">@color/basic_color_dark</color>
+    <color name="app_icon_primary">#555555</color>
+    <color name="action_bar_icon">#ffffff</color>
+    <color name="app_approval_green">@color/basic_green_dark</color>
+    <color name="app_warning_red">@color/basic_red</color>
+    <color name="app_search_input">@android:color/white</color>
+    <color name="app_dark_gray">#2B2B2B</color>
+
+    <!-- TODO: Below colors belong to no longer used player in nav drawer, remove with layouts -->
+
+    <!-- Other colors -->
+    <color name="tip_tag_blue">#5195ae</color>
+    <color name="my_files_listview_item_inactive_background">#ffeff0f1</color>
+    <color name="my_files_listview_item_inactive_foreground">@color/app_text_secondary</color>
+</resources>

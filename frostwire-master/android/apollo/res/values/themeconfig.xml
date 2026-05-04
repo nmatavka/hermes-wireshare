@@ -1,0 +1,45 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources>
+
+    <!-- action bar color -->
+    <color name="action_bar">@color/action_bar_color</color>
+
+    <!-- The action bar title color -->
+    <color name="action_bar_title">@color/app_text_white</color>
+
+    <!-- The action bar sub title color -->
+
+    <!-- Adpater lines -->
+    <color name="line_one">@color/app_text_primary</color>
+
+    <!-- Now playing -->
+    <color name="audio_player_current_time">@color/app_text_primary</color>
+    <color name="audio_player_total_time">@color/app_text_primary</color>
+    <color name="audio_player_line_one">@color/app_text_primary</color>
+    <color name="audio_player_line_two">@color/app_text_primary</color>
+
+    <!-- Bottom action bar -->
+    <color name="bottom_action_bar">@color/app_background_color_dark_highlight</color>
+    <color name="bab_line_one">@color/white</color>
+    <color name="bab_line_two">@color/transparent_white</color>
+
+    <!-- Action bar items -->
+
+</resources>

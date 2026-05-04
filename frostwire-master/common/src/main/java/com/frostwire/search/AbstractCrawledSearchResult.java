@@ -1,0 +1,58 @@
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.frostwire.search;
+
+import com.frostwire.licenses.License;
+
+/**
+ * @author gubatron
+ * @author aldenml
+ */
+public abstract class AbstractCrawledSearchResult<T extends CrawlableSearchResult> extends AbstractSearchResult implements CrawledSearchResult {
+    protected final T parent;
+
+    public AbstractCrawledSearchResult(T parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public T getParent() {
+        return parent;
+    }
+
+    @Override
+    public String getDetailsUrl() {
+        return parent.getDetailsUrl();
+    }
+
+    @Override
+    public String getSource() {
+        return parent.getSource();
+    }
+
+    @Override
+    public License getLicense() {
+        return parent.getLicense();
+    }
+
+    @Override
+    public long getCreationTime() {
+        return parent.getCreationTime();
+    }
+}

@@ -65,7 +65,9 @@ def hostJlibtorrentNativeTaskName = {
 
 allprojects {
     repositories {
+        google()
         mavenCentral()
+        maven { url = 'https://maven.pkg.jetbrains.space/public/p/compose/dev' }
     }
 }
 
@@ -77,7 +79,7 @@ def androidTaskRequested = gradle.startParameter.taskNames.any { taskName ->
         taskName.toLowerCase(Locale.ROOT).contains('android')
 }
 
-configure(subprojects.findAll { it.name != 'jlibtorrent' && it.name != 'android-app' }) {
+configure(subprojects.findAll { !['jlibtorrent', 'android-app', 'desktop-compose-app'].contains(it.name) }) {
     apply plugin: 'java-library'
 
     group = 'org.limewire'
@@ -266,9 +268,76 @@ project(':integrated-ui') {
     }
 }
 
+project(':desktop-compose-app') {
+    def nativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
+    def nativeJarFile = nativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
+
+    pluginManager.withPlugin('application') {
+        dependencies {
+            runtimeOnly(files(nativeJarFile) {
+                builtBy nativeJarTask
+            })
+        }
+
+        tasks.named('run', JavaExec).configure {
+            dependsOn nativeJarTask
+
+            if (hostOs.isMacOsX()) {
+                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
+                jvmArgs(
+                    "-Djava.library.path=${nativeOutputDir.get().asFile.absolutePath}:${rootDir.toPath().resolve('nativelibs/osx').toFile().absolutePath}"
+                )
+            }
+        }
+
+        if (hostOs.isMacOsX()) {
+            tasks.named('startScripts').configure {
+                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
+                doLast {
+                    unixScript.text = unixScript.text.replace(
+                        'DEFAULT_JVM_OPTS=""',
+                        'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
+                    )
+                }
+            }
+
+            ['distTar', 'distZip', 'installDist'].each { taskName ->
+                tasks.named(taskName).configure {
+                    dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                }
+            }
+        }
+
+        distributions {
+            main {
+                contents {
+                    from(nativeJarFile) {
+                        into 'lib'
+                    }
+                    if (hostOs.isMacOsX()) {
+                        from(nativeOutputDir) {
+                            into 'lib/native'
+                        }
+                    }
+                    from(rootDir.toPath().resolve('main/lib/resources/linux').toFile()) {
+                        into 'resources/linux'
+                    }
+                    from(rootDir.toPath().resolve('main/lib/resources/osx').toFile()) {
+                        into 'resources/osx'
+                    }
+                    from(rootDir.toPath().resolve('main/lib/resources/windows').toFile()) {
+                        into 'resources/windows'
+                    }
+                }
+            }
+        }
+    }
+}
+
 tasks.register('wireShareJar', Jar) {
-    dependsOn project(':integrated-ui').tasks.named('classes')
-    dependsOn project(':integrated-ui').configurations.runtimeClasspath
+    dependsOn project(':desktop-compose-app').tasks.named('classes')
+    dependsOn project(':desktop-compose-app').configurations.runtimeClasspath
     dependsOn project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
     if (hostOs.isMacOsX()) {
         dependsOn tasks.named('compileMacCompatibilityNatives')
@@ -281,14 +350,13 @@ tasks.register('wireShareJar', Jar) {
 
     manifest {
         attributes(
-            'Main-Class': 'org.limewire.ui.swing.Main',
-            'SplashScreen-Image': 'org/limewire/ui/swing/mainframe/resources/splash.png'
+            'Main-Class': 'org.limewire.ui.compose.Main'
         )
     }
 
-    from(project(':integrated-ui').sourceSets.main.output)
+    from(project(':desktop-compose-app').sourceSets.main.output)
     from({
-        project(':integrated-ui').configurations.runtimeClasspath
+        project(':desktop-compose-app').configurations.runtimeClasspath
             .filter { file -> file.exists() }
             .collect { file -> file.isDirectory() ? file : zipTree(file) }
     })
@@ -373,5 +441,11 @@ tasks.named('check') {
 }
 
 tasks.register('run') {
+    dependsOn project(':desktop-compose-app').tasks.named('run')
+}
+
+tasks.register('runSwing') {
+    group = 'application'
+    description = 'Runs the legacy Swing desktop application.'
     dependsOn project(':integrated-ui').tasks.named('run')
 }
