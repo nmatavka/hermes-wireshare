@@ -29,19 +29,15 @@ public class LimeMenuBar extends JMenuBar {
         menuListener = new MenuListener() {
             @Override
             public void menuCanceled(MenuEvent e) {
-                // Keep items installed until the next open. Removing them here
-                // can race the native macOS screen menu bar and swallow actions.
+                ((JMenu)e.getSource()).removeAll();
             }
             @Override
             public void menuDeselected(MenuEvent e) {
-                // Rebuild on selection instead of tearing down on deselect so
-                // menu item actions still fire reliably on macOS.
+                ((JMenu)e.getSource()).removeAll();                
             }
             @Override
             public void menuSelected(MenuEvent e) {
-                JMenu menu = (JMenu) e.getSource();
-                menu.removeAll();
-                ((DelayedMenuItemCreator) menu).createMenuItems();
+                ((DelayedMenuItemCreator)e.getSource()).createMenuItems();
             }
         };
         

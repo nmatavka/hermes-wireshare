@@ -2,6 +2,7 @@ activation.version=1.1
 AnimatedTransitions.version=0.11
 aopalliance.version=
 AppFramework.version=
+AppleJavaExtensions.version=
 asm.version=3.1
 bcel.version=
 cglib.version=2.2

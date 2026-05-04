@@ -1,13 +1,12 @@
 package org.limewire.libtorrent;
 
-import com.sun.jna.Callback;
 import org.limewire.bittorrent.TorrentIpFilter;
 
 /**
  * Called by libtorrent C++ code in order to
  * use LW's IP blacklist.
  */
-public class IpFilterCallback implements Callback {
+public class IpFilterCallback {
     
     private final TorrentIpFilter torrentFilter;
 

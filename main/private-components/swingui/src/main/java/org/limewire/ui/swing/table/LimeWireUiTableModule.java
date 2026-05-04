@@ -1,13 +1,12 @@
 package org.limewire.ui.swing.table;
 
 import org.limewire.inject.AbstractModule;
-
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import org.limewire.inject.FactoryModules;
 
 public class LimeWireUiTableModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        install(new FactoryModuleBuilder().build(IconLabelRendererFactory.class));
+        install(FactoryModules.newFactory(IconLabelRendererFactory.class, IconLabelRenderer.class));
     }
 }

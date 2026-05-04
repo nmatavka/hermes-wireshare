@@ -38,7 +38,7 @@ public class PhraseFilter implements SpamFilter, ResponseFilter, SearchResultFil
     }
     
     PhraseFilter(String... phrases) {
-        ban = ImmutableList.copyOf(phrases);
+        ban = ImmutableList.of(phrases);
     }
     
     private List<String> createDefaultList() {

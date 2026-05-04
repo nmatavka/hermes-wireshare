@@ -119,14 +119,6 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting MAXIMIZE_WINDOW =
         FACTORY.createBooleanSetting("MAXIMIZE_WINDOW_V5", false);
 
-    /** Whether Compose Desktop should restore the previous window placement. */
-    public static final BooleanSetting COMPOSE_RESTORE_WINDOW_PLACEMENT =
-        FACTORY.createBooleanSetting("COMPOSE_RESTORE_WINDOW_PLACEMENT", true);
-
-    /** Persisted Compose Desktop appearance scheme. */
-    public static final StringSetting COMPOSE_APPEARANCE =
-        FACTORY.createStringSetting("COMPOSE_APPEARANCE", "SOLARIZED_LIGHT");
-
     /**
      * A flag for whether or not the application should be minimized
      * to the system tray on windows.
@@ -219,21 +211,6 @@ public final class SwingUiSettings extends LimeProps {
     /** Setting for whether or not to resolve host names in Advanced Tools. */
     public static final BooleanSetting RESOLVE_CONNECTION_HOSTNAMES =
         FACTORY.createBooleanSetting("RESOLVE_CONNECTION_HOSTNAMES", true);
-
-    /** Persisted Compose Desktop connection table columns. */
-    public static final StringSetting COMPOSE_CONNECTION_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting(
-            "COMPOSE_CONNECTION_VISIBLE_COLUMNS",
-            "HOST,STATUS,MESSAGES_IO,BANDWIDTH_IO,DROPPED_IO,PROTOCOL,VENDOR_VERSION,TIME"
-        );
-
-    /** Persisted Compose Desktop connection table sort key. */
-    public static final StringSetting COMPOSE_CONNECTION_SORT_KEY =
-        FACTORY.createStringSetting("COMPOSE_CONNECTION_SORT_KEY", "HOST");
-
-    /** Persisted Compose Desktop connection table sort direction. */
-    public static final BooleanSetting COMPOSE_CONNECTION_SORT_DESCENDING =
-        FACTORY.createBooleanSetting("COMPOSE_CONNECTION_SORT_DESCENDING", false);
     
     /** Saves the bottom tray size when the tray is resized. */
     public static final IntSetting BOTTOM_TRAY_SIZE = 
@@ -246,86 +223,6 @@ public final class SwingUiSettings extends LimeProps {
     /** Displays total bandwidth for transfers in bottom tray header. */
     public static final BooleanSetting SHOW_TOTAL_BANDWIDTH = 
         FACTORY.createBooleanSetting("SHOW_TOTAL_BANDWIDTH", false);
-
-    /** Persisted Compose Desktop search workspace columns. */
-    public static final StringSetting COMPOSE_SEARCH_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting("COMPOSE_SEARCH_VISIBLE_COLUMNS", "NAME,TYPE,SIZE,SOURCES,FRIENDS");
-
-    /** Persisted Compose Desktop search workspace sort key. */
-    public static final StringSetting COMPOSE_SEARCH_SORT_KEY =
-        FACTORY.createStringSetting("COMPOSE_SEARCH_SORT_KEY", "RELEVANCE");
-
-    /** Persisted Compose Desktop search workspace sort direction. */
-    public static final BooleanSetting COMPOSE_SEARCH_SORT_DESCENDING =
-        FACTORY.createBooleanSetting("COMPOSE_SEARCH_SORT_DESCENDING", false);
-
-    /** Persisted Compose Desktop search results/details split. */
-    public static final FloatSetting COMPOSE_SEARCH_RESULTS_SPLIT =
-        FACTORY.createFloatSetting("COMPOSE_SEARCH_RESULTS_SPLIT", 0.62f, 0.15f, 0.85f);
-
-    /** Persisted Compose Desktop search refinement rail visibility. */
-    public static final BooleanSetting COMPOSE_SEARCH_REFINEMENT_VISIBLE =
-        FACTORY.createBooleanSetting("COMPOSE_SEARCH_REFINEMENT_VISIBLE", true);
-
-    /** Persisted Compose Desktop search refinement rail split. */
-    public static final FloatSetting COMPOSE_SEARCH_REFINEMENT_SPLIT =
-        FACTORY.createFloatSetting("COMPOSE_SEARCH_REFINEMENT_SPLIT", 0.26f, 0.12f, 0.45f);
-
-    /** Persisted Compose Desktop library workspace columns. */
-    public static final StringSetting COMPOSE_LIBRARY_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting("COMPOSE_LIBRARY_VISIBLE_COLUMNS", "NAME,TYPE,SIZE,ACTIVITY,UPDATED");
-
-    /** Persisted Compose Desktop library workspace sort key. */
-    public static final StringSetting COMPOSE_LIBRARY_SORT_KEY =
-        FACTORY.createStringSetting("COMPOSE_LIBRARY_SORT_KEY", "NAME");
-
-    /** Persisted Compose Desktop library workspace sort direction. */
-    public static final BooleanSetting COMPOSE_LIBRARY_SORT_DESCENDING =
-        FACTORY.createBooleanSetting("COMPOSE_LIBRARY_SORT_DESCENDING", false);
-
-    /** Persisted Compose Desktop library navigator/workspace split. */
-    public static final FloatSetting COMPOSE_LIBRARY_NAVIGATOR_SPLIT =
-        FACTORY.createFloatSetting("COMPOSE_LIBRARY_NAVIGATOR_SPLIT", 0.24f, 0.12f, 0.55f);
-
-    /** Persisted Compose Desktop download workspace columns. */
-    public static final StringSetting COMPOSE_DOWNLOAD_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting("COMPOSE_DOWNLOAD_VISIBLE_COLUMNS", "NAME,STATUS,PROGRESS,RATE,SOURCES");
-
-    /** Persisted Compose Desktop download workspace sort key. */
-    public static final StringSetting COMPOSE_DOWNLOAD_SORT_KEY =
-        FACTORY.createStringSetting("COMPOSE_DOWNLOAD_SORT_KEY", "STATUS");
-
-    /** Persisted Compose Desktop download workspace sort direction. */
-    public static final BooleanSetting COMPOSE_DOWNLOAD_SORT_DESCENDING =
-        FACTORY.createBooleanSetting("COMPOSE_DOWNLOAD_SORT_DESCENDING", false);
-
-    /** Persisted Compose Desktop download workspace filter mode. */
-    public static final StringSetting COMPOSE_DOWNLOAD_FILTER_MODE =
-        FACTORY.createStringSetting("COMPOSE_DOWNLOAD_FILTER_MODE", "ALL");
-
-    /** Persisted Compose Desktop upload workspace columns. */
-    public static final StringSetting COMPOSE_UPLOAD_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting("COMPOSE_UPLOAD_VISIBLE_COLUMNS", "NAME,STATUS,UPLOADED,RATE,PEERS");
-
-    /** Persisted Compose Desktop upload workspace sort key. */
-    public static final StringSetting COMPOSE_UPLOAD_SORT_KEY =
-        FACTORY.createStringSetting("COMPOSE_UPLOAD_SORT_KEY", "STATUS");
-
-    /** Persisted Compose Desktop upload workspace sort direction. */
-    public static final BooleanSetting COMPOSE_UPLOAD_SORT_DESCENDING =
-        FACTORY.createBooleanSetting("COMPOSE_UPLOAD_SORT_DESCENDING", false);
-
-    /** Persisted Compose Desktop upload workspace filter mode. */
-    public static final StringSetting COMPOSE_UPLOAD_FILTER_MODE =
-        FACTORY.createStringSetting("COMPOSE_UPLOAD_FILTER_MODE", "ALL");
-
-    /** Persisted Compose Desktop friends roster/conversation split. */
-    public static final FloatSetting COMPOSE_FRIENDS_ROSTER_SPLIT =
-        FACTORY.createFloatSetting("COMPOSE_FRIENDS_ROSTER_SPLIT", 0.28f, 0.15f, 0.55f);
-
-    /** Persisted Compose Desktop main workspace/tray split. */
-    public static final FloatSetting COMPOSE_TRANSFER_TRAY_SPLIT =
-        FACTORY.createFloatSetting("COMPOSE_TRANSFER_TRAY_SPLIT", 0.72f, 0.4f, 0.9f);
     
     /**
      * Returns the default directory for the file chooser.

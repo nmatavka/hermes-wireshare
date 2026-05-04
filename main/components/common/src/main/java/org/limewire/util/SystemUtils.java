@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
  * Returns system information, where supported, for Windows and OSX. Most methods
  * in <code>SystemUtils</code> rely on native code and fail gracefully if the 
  * native code library isn't found. <code>SystemUtils</code> uses 
- * SystemUtilities.dll for Window environments and libSystemUtilities.jnilib 
+ * SystemUtilities.dll for Window environments and libSystemUtilities.dylib 
  * for OSX.
  */
 public class SystemUtils {
@@ -39,16 +39,11 @@ public class SystemUtils {
                 } else {
                     System.loadLibrary("SystemUtilitiesA");
                 }
-                canLoad = true;
             } else if (OSUtils.isMacOSX()) {
-                canLoad = NativeLibraryLoader.loadFirstAvailable(
-                        "SystemUtilities",
-                        "lib/native/libSystemUtilities.dylib",
-                        "nativelibs/osx/libSystemUtilities.dylib",
-                        "build/native/osx/libSystemUtilities.dylib");
-            } else {
-                canLoad = true;
+                System.loadLibrary("SystemUtilities");
             }
+            
+            canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
             canLoad = false;
         }

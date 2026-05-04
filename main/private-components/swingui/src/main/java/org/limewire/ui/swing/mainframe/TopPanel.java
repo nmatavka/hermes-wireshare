@@ -35,6 +35,7 @@ import org.limewire.ui.swing.components.SelectableJXButton;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.components.decorators.ButtonDecorator;
 import org.limewire.ui.swing.friends.refresh.AllFriendsRefreshManager;
+import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -75,8 +76,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     private final FlexibleTabList searchList;
     private final Navigator navigator;
+    private final NavItem homeNav;
     private final NavItem libraryNav;
     private final Provider<KeywordAssistedSearchBuilder> keywordAssistedSearchBuilder;
+    private final HomeMediator homeMediator;
 
     private final String repeatSearchTitle = I18n.tr("Repeat Search");
     private final String refreshBrowseTitle = I18n.tr("Refresh");
@@ -89,6 +92,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     @Inject
     public TopPanel(SearchHandler searchHandler,
                     Navigator navigator,
+                    final HomeMediator homeMediator,
                     SearchBar searchBar,
                     FlexibleTabListFactory tabListFactory,
                     BarPainterFactory barPainterFactory,
@@ -103,10 +107,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         this.navigator = navigator;
         this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         this.keywordAssistedSearchBuilder = keywordAssistedSearchBuilder;
+        this.homeMediator = homeMediator;
         this.allFriendsRefreshManager = allFriendsRefreshManager;        
         setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
+        
+        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomeMediator.NAME, homeMediator);
         
         libraryNav = navigator.createNavItem(NavCategory.LIBRARY, LibraryMediator.NAME, myLibraryMediator);
         JXButton libraryButton = new SelectableJXButton(NavigatorUtils.getNavAction(libraryNav));
@@ -202,7 +209,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
     }
 
     public void goHome() {
-        libraryNav.select();
+        homeNav.select();
+        homeMediator.getComponent().loadDefaultUrl();
     }
 
     private List<Action> createSearchActions(Search search, SearchResultsModel model){

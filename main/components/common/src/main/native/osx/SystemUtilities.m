@@ -14,7 +14,7 @@
 // compile with:
 // cc -c -dynamiclib -o libSystemUtilities.ppc -I/System/Library/Frameworks/JavaVM.framework/Headers SystemUtilities.m -arch ppc
 // cc -c -dynamiclib -o libSystemUtilities.i386 -I/System/Library/Frameworks/JavaVM.framework/Headers SystemUtilities.m -arch i386
-// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.ppc libSystemUtilities.i386 -framework JavaVM -framework Carbon -arch ppc -arch i386
+// clang -dynamiclib -o libSystemUtilities.dylib -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/darwin" -framework ApplicationServices SystemUtilities.m
 
 // or build two thin JNI libraries and merge them with lipo to an Universal Binary
 

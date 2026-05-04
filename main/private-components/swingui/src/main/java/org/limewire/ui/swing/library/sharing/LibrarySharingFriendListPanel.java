@@ -86,7 +86,6 @@ class LibrarySharingFriendListPanel {
         friendList.setShowGrid(false, false);
         friendList.setFocusable(false);
         friendList.setBackground(backgroundColor);
-        friendList.setRowHeight(36);
         
         scrollPane = new JScrollPane(friendList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setMinimumSize(new Dimension(0,0));

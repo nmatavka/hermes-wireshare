@@ -20,7 +20,7 @@ public class MoreScopes {
      * Returns the scope of the binding, or the scope of the linked binding if
      * it was linked.
      */
-    public static Scope getLinkedScope(Binding<?> binding, Injector injector) {
+    public static Scope getLinkedScope(Injector injector, Binding<?> binding) {
         BindingScopingVisitor<Scope> scoper = new BindingScopingVisitor<Scope>() {
             public Scope visitNoScoping() {
                 return Scopes.NO_SCOPE;
@@ -46,11 +46,10 @@ public class MoreScopes {
                 return scope;
             }
 
-            if (binding instanceof LinkedKeyBinding) {
-                Binding<?> linkedBinding = injector.getExistingBinding(
-                        ((LinkedKeyBinding<?>) binding).getLinkedKey());
-                if (linkedBinding != null) {
-                    binding = linkedBinding;
+            if (binding instanceof LinkedKeyBinding<?>) {
+                LinkedKeyBinding<?> linkedBinding = (LinkedKeyBinding<?>) binding;
+                if (injector != null) {
+                    binding = injector.getBinding(linkedBinding.getLinkedKey());
                     continue;
                 }
             }

@@ -9,8 +9,7 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.SharedFileListManager;
 import org.limewire.core.api.library.URNFactory;
 import org.limewire.inject.AbstractModule;
-
-import com.google.inject.assistedinject.FactoryModuleBuilder;
+import org.limewire.inject.FactoryModules;
 
 public class CoreGlueLibraryModule extends AbstractModule {
     
@@ -24,7 +23,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
         bind(PresenceLibraryBrowser.class);
         bind(FriendSearcher.class);
         
-        install(new FactoryModuleBuilder().build(CoreLocalFileItemFactory.class));
+        install(FactoryModules.newFactory(CoreLocalFileItemFactory.class, CoreLocalFileItem.class));
         bind(MetaDataManager.class).to(MetaDataManagerImpl.class);
         bind(FriendAutoCompleterFactory.class).to(FriendAutoCompleterFactoryImpl.class);
         bind(LibraryData.class).to(LibraryDataImpl.class);

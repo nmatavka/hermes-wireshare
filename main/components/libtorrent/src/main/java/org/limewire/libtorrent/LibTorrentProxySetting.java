@@ -3,9 +3,7 @@ package org.limewire.libtorrent;
 import org.limewire.bittorrent.ProxySetting;
 import org.limewire.bittorrent.ProxySettingType;
 
-import com.sun.jna.Structure;
-
-public class LibTorrentProxySetting extends Structure implements ProxySetting {
+public class LibTorrentProxySetting implements ProxySetting {
 
     public String hostname;
 

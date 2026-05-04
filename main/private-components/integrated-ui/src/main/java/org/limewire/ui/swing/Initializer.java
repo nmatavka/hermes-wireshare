@@ -247,8 +247,8 @@ final class Initializer {
             SystemUtils.setOpenFileLimit(1024);
             stopwatch.resetAndLog("Open file limit raise");     
 
-            MacEventHandler.instance().register();
-            stopwatch.resetAndLog("MacEventHandler register");
+            MacEventHandler.instance();
+            stopwatch.resetAndLog("MacEventHandler instance");
         }
     }
     
@@ -335,17 +335,13 @@ final class Initializer {
 
     /**
      * Initializes any code that is dependent on external controls.
-     * Specifically, GURLHandler & MacEventHandler on OS X,
+     * Specifically, MacEventHandler on OS X,
      * ensuring that multiple WireShares can't run at once,
      * and processing any arguments that were passed to WireShare.
      */ 
     private void runExternalChecks(String[] args, Injector injector) {        
         stopwatch.resetAndLog("Get externalControl");
         if(OSUtils.isMacOSX()) {
-            GURLHandler.getInstance().enable(externalControl.get());
-            stopwatch.resetAndLog("Enable GURL");
-            MacEventHandler.instance().register();
-            stopwatch.resetAndLog("Register macEventHandler");
             injector.injectMembers(MacEventHandler.instance());
             stopwatch.resetAndLog("Enable macEventHandler");
         }

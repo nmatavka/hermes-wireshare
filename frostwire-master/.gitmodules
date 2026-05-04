@@ -1,4 +1,0 @@
-[submodule "telluride"]
-	path = telluride
-	url = git@github.com:frostwire/telluride.git
-	branch = master

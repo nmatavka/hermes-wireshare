@@ -1,1 +1,0 @@
-%include "libtorrent/write_resume_data.hpp"

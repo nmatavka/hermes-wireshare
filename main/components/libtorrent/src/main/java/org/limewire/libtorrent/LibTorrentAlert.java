@@ -1,42 +1,30 @@
 package org.limewire.libtorrent;
 
-
 import org.limewire.bittorrent.TorrentAlert;
-
-import com.sun.jna.Pointer;
-import com.sun.jna.Structure;
+import com.frostwire.jlibtorrent.AddTorrentParams;
 
 /**
- * Structure mapping to the wrapper_alert_info structure in the
- * libtorrentwrapper library.
+ * Lightweight alert representation used by the compatibility wrapper.
  */
-public class LibTorrentAlert extends Structure implements TorrentAlert {
+public class LibTorrentAlert implements TorrentAlert {
 
-    /**
-     * Category of this alert
-     */
     public int category;
-
-    /**
-     * Sha1 of this alert, null or empty if not an alert on a specific torrent.
-     */
     public String sha1;
-
-    /**
-     * Message associated with this alert.
-     */
     public String message;
-    
-    /**
-     * Boolean whether or not the resume data exists.
-     */
-    public int has_data;
-    
-    /**
-     * Pointer to the resume data in memory.
-     */
-    public Pointer resume_data;
-    
+
+    private final AddTorrentParams resumeData;
+
+    public LibTorrentAlert(int category, String sha1, String message) {
+        this(category, sha1, message, null);
+    }
+
+    public LibTorrentAlert(int category, String sha1, String message, AddTorrentParams resumeData) {
+        this.category = category;
+        this.sha1 = sha1;
+        this.message = message;
+        this.resumeData = resumeData;
+    }
+
     @Override
     public int getCategory() {
         return category;
@@ -50,6 +38,14 @@ public class LibTorrentAlert extends Structure implements TorrentAlert {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    boolean hasResumeData() {
+        return resumeData != null;
+    }
+
+    AddTorrentParams getResumeData() {
+        return resumeData;
     }
 
     @Override

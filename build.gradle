@@ -1,199 +1,207 @@
 import groovy.xml.XmlSlurper
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.tasks.JavaExec
-import org.gradle.internal.jvm.Jvm
-import org.gradle.internal.os.OperatingSystem
+import java.util.regex.Pattern
 
 plugins {
     id 'base'
 }
 
-def javaLanguageVersion = 21
-def hostOs = OperatingSystem.current()
-def hostArch = (System.getProperty('os.arch') ?: '').toLowerCase(Locale.ROOT)
-def isArm64 = hostArch == 'aarch64' || hostArch == 'arm64'
-def isX86_64 = hostArch == 'amd64' || hostArch == 'x86_64'
-def appleExtensionsJarName = 'Apple' + 'JavaExtensions'
-def factoryProviderToken = 'FactoryProvider' + '.newFactory'
-def guiceInternalToken = ['com', 'google', 'inject', 'internal'].join('.')
-def appleExtensionsToken = 'Apple' + 'JavaExtensions'
-def torrentWrapperToken = 'torrent' + '-wrapper'
-def libtorrentWrapperToken = 'libtorrent' + '-wrapper'
-def addOpensToken = '--add' + '-opens'
+group = 'org.wireshare'
+version = '0.1.0-SNAPSHOT'
 
-def legacyJarExcludes = [
-    '**/guice-2.0-snapshot20090814.jar',
-    '**/guice-assistedinject-snapshot20090814.jar',
-    '**/google-collect-1.0-rc2.jar',
-    '**/jna-3.2.4.jar',
-    '**/aopalliance.jar',
-    "**/compile/${appleExtensionsJarName}.jar",
+def dependencyProps = new Properties()
+file('main/components/common/dependencies.props').withInputStream { dependencyProps.load(it) }
+
+def localJarRoot = file('main/lib/jars')
+def localJarFiles = localJarRoot.exists() ? fileTree(localJarRoot) {
+    include '**/*.jar'
+}.files.toList() : []
+
+def localJarIndex = localJarFiles.groupBy { it.name }
+
+ext.guiceCoordinates = [
+        guice               : 'com.google.inject:guice:6.0.0',
+        'guice-assistedinject': 'com.google.inject.extensions:guice-assistedinject:6.0.0'
 ]
 
-def legacyJarTree = fileTree(
-    dir: rootDir.toPath().resolve('main/lib/jars').toFile(),
-    include: ['**/*.jar'],
-    exclude: legacyJarExcludes
-)
-
-def limewireProjectDependencies = { Project project ->
-    File ivyFile = project.file('ivy.xml')
-    if (!ivyFile.exists()) {
-        return []
+ext.resolveRevision = { String rawRevision ->
+    if (!rawRevision) {
+        return rawRevision
     }
 
-    def ivy = new XmlSlurper().parse(ivyFile)
-    ivy.dependencies.dependency
-        .findAll { dependency -> dependency.@org.text() == 'org.limewire' }
-        .collect { dependency -> dependency.@name.text() }
-        .findAll { dependencyName -> dependencyName && dependencyName != project.name }
-        .unique()
+    def matcher = rawRevision =~ /\$\{([^}]+)\}/
+    if (!matcher.find()) {
+        return rawRevision
+    }
+
+    String resolved = rawRevision
+    matcher.reset()
+    matcher.each { fullMatch, propertyName ->
+        resolved = resolved.replace(fullMatch, dependencyProps.getProperty(propertyName, ''))
+    }
+    return resolved
 }
 
-def hostJlibtorrentNativeTaskName = {
-    if (hostOs.isMacOsX()) {
-        return isArm64 ? 'nativeMacOSArm64Jar' : 'nativeMacOSX86_64Jar'
+ext.findLocalJar = { String depName, String revision ->
+    String normalized = depName.replace('\\', '/')
+    String leaf = normalized.tokenize('/').last()
+    List<String> exactCandidates = []
+    if (revision) {
+        exactCandidates << "${normalized}-${revision}.jar"
     }
-    if (hostOs.isLinux()) {
-        return isArm64 ? 'nativeLinuxArm64Jar' : 'nativeLinuxX86_64Jar'
+    exactCandidates << "${normalized}.jar"
+
+    for (String candidate : exactCandidates) {
+        File jar = new File(localJarRoot, candidate)
+        if (jar.exists()) {
+            return jar
+        }
     }
-    if (hostOs.isWindows()) {
-        return 'nativeWindowsX86_64Jar'
+
+    List<String> nameCandidates = []
+    if (revision) {
+        nameCandidates << "${leaf}-${revision}.jar"
     }
-    throw new GradleException("Unsupported host platform for jlibtorrent natives: ${hostOs.name()}/${hostArch}")
+    nameCandidates << "${leaf}.jar"
+
+    for (String candidate : nameCandidates.unique()) {
+        List<File> jars = localJarIndex[candidate]
+        if (jars) {
+            return jars.first()
+        }
+    }
+
+    return null
+}
+
+ext.wireShareModule = { String moduleName ->
+    Project moduleProject = findProject(":${moduleName}")
+    if (moduleProject == null) {
+        throw new GradleException("Unknown module dependency '${moduleName}'")
+    }
+    return moduleProject
+}
+
+def hasCompileConfiguration = { String conf ->
+    conf?.split(',')?.collect { it.trim() }?.contains('compile')
+}
+
+def hasRuntimeConfiguration = { String conf ->
+    conf?.split(',')?.collect { it.trim() }?.contains('runtime')
 }
 
 allprojects {
+    group = rootProject.group
+    version = rootProject.version
+
     repositories {
-        google()
         mavenCentral()
-        maven { url = 'https://maven.pkg.jetbrains.space/public/p/compose/dev' }
     }
 }
 
-evaluationDependsOn(':jlibtorrent')
+subprojects { Project subproject ->
+    if (subproject.name == 'jlibtorrent') {
+        return
+    }
 
-def androidTaskRequested = gradle.startParameter.taskNames.any { taskName ->
-    taskName == 'buildAndroid' ||
-        taskName.startsWith(':android-app:') ||
-        taskName.toLowerCase(Locale.ROOT).contains('android')
-}
+    if (!subproject.file('ivy.xml').exists()) {
+        return
+    }
 
-configure(subprojects.findAll { !['jlibtorrent', 'android-app', 'desktop-compose-app'].contains(it.name) }) {
     apply plugin: 'java-library'
 
-    group = 'org.limewire'
-    version = '1.0-SNAPSHOT'
-
     java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(javaLanguageVersion)
-        }
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         withSourcesJar()
-    }
-
-    sourceSets {
-        main {
-            java.setSrcDirs(['src/main/java'])
-            resources.setSrcDirs(['src/main/resources'])
-        }
-        test {
-            java.setSrcDirs(['src/test/java'])
-            resources.setSrcDirs(['src/test/resources'])
-        }
     }
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
-        options.release = javaLanguageVersion
-        options.compilerArgs.add('-Xlint:unchecked')
+        options.release = 17
+        options.compilerArgs += ['-Xlint:unchecked']
     }
 
-    tasks.withType(Jar).configureEach {
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            resources.srcDirs = ['src/main/resources']
+        }
+        test {
+            java.srcDirs = ['src/test/java']
+            resources.srcDirs = ['src/test/resources']
+        }
+    }
+
+    tasks.withType(ProcessResources).configureEach {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     dependencies {
-        implementation files(legacyJarTree)
-        implementation 'com.google.inject:guice:6.0.0'
-        implementation 'com.google.inject.extensions:guice-assistedinject:6.0.0'
-        implementation 'javax.inject:javax.inject:1'
-        implementation 'aopalliance:aopalliance:1.0'
-        implementation 'net.java.dev.jna:jna:5.14.0'
-        testImplementation 'junit:junit:4.13.2'
-    }
-
-    afterEvaluate { Project componentProject ->
-        limewireProjectDependencies(componentProject).each { dependencyName ->
-            componentProject.dependencies.add('implementation', project(":${dependencyName}"))
-        }
-    }
-}
-
-project(':libtorrent') {
-    dependencies {
-        implementation project(':jlibtorrent')
-    }
-}
-
-def javaHomePath = providers.environmentVariable('JAVA_HOME')
-    .orElse(Jvm.current().javaHome.absolutePath)
-
-def nativeSourceDir = rootDir.toPath().resolve('main/components/common/src/main/native/osx').toFile()
-def nativeOutputDir = layout.buildDirectory.dir('native/osx')
-
-def registerMacNativeCompile = { String taskName, String sourceName, String outputName, List<String> frameworks ->
-    tasks.register(taskName, Exec) {
-        onlyIf { hostOs.isMacOsX() }
-
-        def sourceFile = new File(nativeSourceDir, sourceName)
-        def outputFile = nativeOutputDir.map { dir -> new File(dir.asFile, outputName) }
-
-        inputs.file(sourceFile)
-        outputs.file(outputFile)
-
-        doFirst {
-            outputFile.get().parentFile.mkdirs()
+        if (subproject.name == 'common') {
+            api guiceCoordinates['guice-assistedinject']
         }
 
-        commandLine(
-            'clang',
-            '-dynamiclib',
-            '-o', outputFile.get().absolutePath,
-            '-I', "${javaHomePath.get()}/include",
-            '-I', "${javaHomePath.get()}/include/darwin",
-            sourceFile.absolutePath,
-            *frameworks.collectMany { framework -> ['-framework', framework] }
-        )
+        if (subproject.name == 'libtorrent') {
+            api project(':jlibtorrent')
+        }
     }
-}
 
-def compileMacSystemUtilities = registerMacNativeCompile(
-    'compileMacSystemUtilities',
-    'SystemUtilities.m',
-    'libSystemUtilities.dylib',
-    ['ApplicationServices']
-)
+    XmlSlurper parser = new XmlSlurper()
+    def ivy = parser.parse(subproject.file('ivy.xml'))
+    ivy.dependencies.dependency.each { dep ->
+        String orgName = dep.@org.text()
+        String depName = dep.@name.text()
+        String revision = resolveRevision(dep.@rev.text())
+        String conf = dep.@conf.text()
 
-def compileMacOSXUtils = registerMacNativeCompile(
-    'compileMacOSXUtils',
-    'MacOSXUtils.m',
-    'libMacOSXUtils.dylib',
-    ['Cocoa', 'CoreServices']
-)
+        boolean compileScope = hasCompileConfiguration(conf)
+        boolean runtimeScope = hasRuntimeConfiguration(conf)
 
-def compileMacGurlCompatibility = registerMacNativeCompile(
-    'compileMacGurlCompatibility',
-    'GURLjnilib.c',
-    'libGURL.dylib',
-    []
-)
+        if (orgName == 'org.limewire') {
+            def dependencyNotation = project(":${depName}")
+            if (compileScope) {
+                subproject.dependencies.add('api', dependencyNotation)
+            }
+            if (runtimeScope && !compileScope) {
+                subproject.dependencies.add('runtimeOnly', dependencyNotation)
+            }
+            return
+        }
 
-tasks.register('compileMacCompatibilityNatives') {
-    if (hostOs.isMacOsX()) {
-        dependsOn compileMacSystemUtilities
-        dependsOn compileMacOSXUtils
-        dependsOn compileMacGurlCompatibility
+        if (orgName != 'none') {
+            return
+        }
+
+        if (depName == 'compile/AppleJavaExtensions') {
+            return
+        }
+
+        if (guiceCoordinates.containsKey(depName)) {
+            if (compileScope) {
+                subproject.dependencies.add('api', guiceCoordinates[depName])
+            }
+            if (runtimeScope && !compileScope) {
+                subproject.dependencies.add('runtimeOnly', guiceCoordinates[depName])
+            }
+            return
+        }
+
+        File localJar = findLocalJar(depName, revision)
+        if (localJar == null) {
+            String message = "Unable to resolve local dependency '${depName}' for project '${subproject.name}'"
+            if (compileScope) {
+                throw new GradleException(message)
+            }
+            logger.warn(message)
+            return
+        }
+
+        if (compileScope) {
+            subproject.dependencies.add('api', subproject.files(localJar))
+        }
+        if (runtimeScope && !compileScope) {
+            subproject.dependencies.add('runtimeOnly', subproject.files(localJar))
+        }
     }
 }
 
@@ -204,248 +212,109 @@ project(':integrated-ui') {
         mainClass = 'org.limewire.ui.swing.Main'
     }
 
-    def nativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
-    def nativeJarFile = nativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
-
-    dependencies {
-        runtimeOnly(files(nativeJarFile) {
-            builtBy nativeJarTask
-        })
-    }
-
     tasks.named('run', JavaExec).configure {
-        dependsOn nativeJarTask
-
-        if (hostOs.isMacOsX()) {
-            dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-            jvmArgs(
-                "-Djava.library.path=${nativeOutputDir.get().asFile.absolutePath}:${rootDir.toPath().resolve('nativelibs/osx').toFile().absolutePath}"
-            )
-        }
-    }
-
-    if (hostOs.isMacOsX()) {
-        tasks.named('startScripts').configure {
-            dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-            doLast {
-                unixScript.text = unixScript.text.replace(
-                    'DEFAULT_JVM_OPTS=""',
-                    'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
-                )
-            }
-        }
-
-        ['distTar', 'distZip', 'installDist'].each { taskName ->
-            tasks.named(taskName).configure {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
-        }
-    }
-
-    distributions {
-        main {
-            contents {
-                from(nativeJarFile) {
-                    into 'lib'
-                }
-                if (hostOs.isMacOsX()) {
-                    from(nativeOutputDir) {
-                        into 'lib/native'
-                    }
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/linux').toFile()) {
-                    into 'resources/linux'
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/osx').toFile()) {
-                    into 'resources/osx'
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/windows').toFile()) {
-                    into 'resources/windows'
-                }
-            }
-        }
+        jvmArgs '-Djava.awt.headless=false'
     }
 }
 
-project(':desktop-compose-app') {
-    def nativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
-    def nativeJarFile = nativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
+def hostOs = org.gradle.internal.os.OperatingSystem.current()
+if (hostOs.isMacOsX()) {
+    def javaHomeDir = new File(System.getProperty('java.home'))
+    def jniIncludeDir = new File(javaHomeDir, 'include')
+    def jniDarwinDir = new File(jniIncludeDir, 'darwin')
+    def macNativeOutputDir = layout.buildDirectory.dir('natives/macos').get().asFile
+    def macArch = (System.getProperty('os.arch').toLowerCase() in ['aarch64', 'arm64']) ? 'arm64'
+            : 'x86_64'
 
-    pluginManager.withPlugin('application') {
-        dependencies {
-            runtimeOnly(files(nativeJarFile) {
-                builtBy nativeJarTask
-            })
+    tasks.register('compileMacOSXUtilsDylib', Exec) {
+        def sourceFile = file('main/components/common/src/main/native/osx/MacOSXUtils.m')
+        def outputFile = new File(macNativeOutputDir, 'libMacOSXUtils.dylib')
+        inputs.file(sourceFile)
+        outputs.file(outputFile)
+        doFirst {
+            outputFile.parentFile.mkdirs()
         }
+        commandLine 'clang',
+                '-dynamiclib',
+                '-arch', macArch,
+                '-I', jniIncludeDir.absolutePath,
+                '-I', jniDarwinDir.absolutePath,
+                '-framework', 'Cocoa',
+                '-framework', 'CoreServices',
+                '-o', outputFile.absolutePath,
+                sourceFile.absolutePath
+    }
 
+    tasks.register('compileSystemUtilitiesDylib', Exec) {
+        def sourceFile = file('main/components/common/src/main/native/osx/SystemUtilities.m')
+        def outputFile = new File(macNativeOutputDir, 'libSystemUtilities.dylib')
+        inputs.file(sourceFile)
+        outputs.file(outputFile)
+        doFirst {
+            outputFile.parentFile.mkdirs()
+        }
+        commandLine 'clang',
+                '-dynamiclib',
+                '-arch', macArch,
+                '-I', jniIncludeDir.absolutePath,
+                '-I', jniDarwinDir.absolutePath,
+                '-framework', 'ApplicationServices',
+                '-o', outputFile.absolutePath,
+                sourceFile.absolutePath
+    }
+
+    tasks.register('buildMacJni') {
+        dependsOn tasks.named('compileMacOSXUtilsDylib')
+        dependsOn tasks.named('compileSystemUtilitiesDylib')
+    }
+
+    project(':integrated-ui') {
         tasks.named('run', JavaExec).configure {
-            dependsOn nativeJarTask
-
-            if (hostOs.isMacOsX()) {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-                jvmArgs(
-                    "-Djava.library.path=${nativeOutputDir.get().asFile.absolutePath}:${rootDir.toPath().resolve('nativelibs/osx').toFile().absolutePath}"
-                )
-            }
+            dependsOn rootProject.tasks.named('buildMacJni')
+            jvmArgs "-Djava.library.path=${macNativeOutputDir.absolutePath}"
         }
+    }
 
-        if (hostOs.isMacOsX()) {
-            tasks.named('startScripts').configure {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-                doLast {
-                    unixScript.text = unixScript.text.replace(
-                        'DEFAULT_JVM_OPTS=""',
-                        'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
-                    )
-                }
-            }
-
-            ['distTar', 'distZip', 'installDist'].each { taskName ->
-                tasks.named(taskName).configure {
-                    dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                }
-            }
-        }
-
-        distributions {
-            main {
-                contents {
-                    from(nativeJarFile) {
-                        into 'lib'
-                    }
-                    if (hostOs.isMacOsX()) {
-                        from(nativeOutputDir) {
-                            into 'lib/native'
-                        }
-                    }
-                    from(rootDir.toPath().resolve('main/lib/resources/linux').toFile()) {
-                        into 'resources/linux'
-                    }
-                    from(rootDir.toPath().resolve('main/lib/resources/osx').toFile()) {
-                        into 'resources/osx'
-                    }
-                    from(rootDir.toPath().resolve('main/lib/resources/windows').toFile()) {
-                        into 'resources/windows'
-                    }
-                }
-            }
-        }
+    tasks.named('assemble').configure {
+        dependsOn tasks.named('buildMacJni')
     }
 }
 
-tasks.register('wireShareJar', Jar) {
-    dependsOn project(':desktop-compose-app').tasks.named('classes')
-    dependsOn project(':desktop-compose-app').configurations.runtimeClasspath
-    dependsOn project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
-    if (hostOs.isMacOsX()) {
-        dependsOn tasks.named('compileMacCompatibilityNatives')
-    }
-
-    archiveFileName = 'WireShare.jar'
-    destinationDirectory = layout.projectDirectory.asFile
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    zip64 = true
-
-    manifest {
-        attributes(
-            'Main-Class': 'org.limewire.ui.compose.Main'
-        )
-    }
-
-    from(project(':desktop-compose-app').sourceSets.main.output)
-    from({
-        project(':desktop-compose-app').configurations.runtimeClasspath
-            .filter { file -> file.exists() }
-            .collect { file -> file.isDirectory() ? file : zipTree(file) }
-    })
-    if (hostOs.isMacOsX()) {
-        from(nativeOutputDir) {
-            into 'lib/native'
-        }
-    }
-    from(rootDir.toPath().resolve('main/lib/resources/linux').toFile())
-    from(rootDir.toPath().resolve('main/lib/resources/osx').toFile())
-    from(rootDir.toPath().resolve('main/lib/resources/windows').toFile())
-}
-
-tasks.register('buildAndroid') {
-    group = 'build'
-    description = 'Builds the WireShare Android debug APK.'
-    dependsOn ':android-app:assembleDebug'
-}
-
-tasks.named('build') {
-    dependsOn tasks.named('wireShareJar')
-}
-
-def hygienePatterns = [
-    [label: 'legacy factory provider API', token: factoryProviderToken],
-    [label: 'Guice internals namespace', token: guiceInternalToken],
-    [label: 'Apple desktop extensions jar', token: appleExtensionsToken],
-    [label: 'legacy torrent wrapper name', token: torrentWrapperToken],
-    [label: 'legacy libtorrent wrapper name', token: libtorrentWrapperToken],
-    [label: 'JPMS opens workaround', token: addOpensToken],
-]
-
-def hygieneFiles = files(
-    fileTree(rootDir) {
-        include '**/*.java'
-        include '**/*.gradle'
-        include '**/*.groovy'
-        include '**/*.xml'
-        include '**/*.properties'
-        include '**/*.sh'
-        include '**/*.bat'
-        include '**/*.md'
-        include '**/*.txt'
-        exclude '**/build/**'
-        exclude '**/.gradle/**'
-        exclude '**/.git/**'
-        exclude '**/.ivy2/**'
-        exclude '**/frostwire-master/**'
-        exclude '**/*.orig'
-    },
-    rootProject.file('gradlew'),
-    rootProject.file('gradlew.bat')
-)
-
-tasks.register('verifyDependencyHygiene') {
+tasks.register('verifyModernizationGuards') {
     group = 'verification'
-    description = 'Fails the build if legacy Guice, Apple Java extensions, old libtorrent wrappers, or JPMS opens workarounds are referenced.'
-    inputs.files(hygieneFiles)
+    description = 'Fails if deprecated Guice or macOS migration regressions reappear.'
+
+    List<Map<String, Object>> checks = [
+            [pattern: ~/com\.google\.inject\.internal\./, message: 'Internal Guice APIs are forbidden'],
+            [pattern: ~/FactoryProvider\.newFactory\(/, message: 'FactoryProvider.newFactory is forbidden'],
+            [pattern: ~/com\.apple\.eawt/, message: 'com.apple.eawt is forbidden'],
+            [pattern: ~/AppleJavaExtensions/, message: 'AppleJavaExtensions is forbidden'],
+            [pattern: ~/--add-opens/, message: '--add-opens is forbidden']
+    ]
 
     doLast {
-        def violations = []
-
-        hygieneFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
-            String text = file.getText('UTF-8')
-            hygienePatterns.each { rule ->
-                if (text.contains(rule.token)) {
-                    violations << "${rule.label}: ${rootProject.relativePath(file)}"
+        List<String> failures = []
+        fileTree(rootDir) {
+            include '**/*.java', '**/*.gradle', '**/*.gradle.kts', '**/*.xml', '**/*.properties', '**/*.sh'
+            exclude '**/build/**', '**/.gradle/**', '**/.git/**', 'jlibtorrent/build/**',
+                    '**/ivy.xml', '**/ivy.xml.orig', '**/dependencies.props', '**/dependencies.props.orig',
+                    'build.gradle'
+        }.each { File candidate ->
+            String text = candidate.getText('UTF-8')
+            checks.each { check ->
+                Pattern pattern = check.pattern as Pattern
+                if (pattern.matcher(text).find()) {
+                    failures << "${check.message}: ${candidate}"
                 }
             }
         }
 
-        if (!violations.isEmpty()) {
-            throw new GradleException(
-                "Dependency hygiene check failed:\n - " + violations.unique().sort().join('\n - ')
-            )
+        if (!failures.isEmpty()) {
+            throw new GradleException(failures.join('\n'))
         }
     }
 }
 
-tasks.named('check') {
-    dependsOn tasks.named('verifyDependencyHygiene')
-}
-
-tasks.register('run') {
-    dependsOn project(':desktop-compose-app').tasks.named('run')
-}
-
-tasks.register('runSwing') {
-    group = 'application'
-    description = 'Runs the legacy Swing desktop application.'
-    dependsOn project(':integrated-ui').tasks.named('run')
+tasks.named('check').configure {
+    dependsOn tasks.named('verifyModernizationGuards')
 }

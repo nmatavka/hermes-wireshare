@@ -1,52 +1,22 @@
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = 'https://chaquo.com/maven' }
-        gradlePluginPortal()
+rootProject.name = 'WireShare'
+
+def includeIvyModules = { File baseDir ->
+    if (!baseDir.exists()) {
+        return
+    }
+
+    baseDir.eachDir { File moduleDir ->
+        if (new File(moduleDir, 'ivy.xml').exists()) {
+            include(":${moduleDir.name}")
+            project(":${moduleDir.name}").projectDir = moduleDir
+        }
     }
 }
 
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
-}
+includeIvyModules(file('main/components'))
+includeIvyModules(file('main/private-components'))
 
-rootProject.name = 'hermes-wireshare'
-
-def modules = [
-    'desktop-compose-app': 'desktop-compose-app',
-    'bittorrent-api': 'main/components/bittorrent-api',
-    'collection'    : 'main/components/collection',
-    'common'        : 'main/components/common',
-    'core-api'      : 'main/components/core-api',
-    'core-glue'     : 'main/components/core-glue',
-    'core-settings' : 'main/components/core-settings',
-    'friend'        : 'main/components/friend',
-    'gnutella-core' : 'main/components/gnutella-core',
-    'http'          : 'main/components/http',
-    'io'            : 'main/components/io',
-    'libtorrent'    : 'main/components/libtorrent',
-    'mojito'        : 'main/components/mojito',
-    'mojito-ui'     : 'main/components/mojito-ui',
-    'net'           : 'main/components/net',
-    'nio'           : 'main/components/nio',
-    'player'        : 'main/components/player',
-    'player-api'    : 'main/components/player-api',
-    'rest'          : 'main/components/rest',
-    'rudp'          : 'main/components/rudp',
-    'security'      : 'main/components/security',
-    'setting'       : 'main/components/setting',
-    'statistic'     : 'main/components/statistic',
-    'swingui'       : 'main/private-components/swingui',
-    'integrated-ui' : 'main/private-components/integrated-ui',
-    'xmpp'          : 'main/components/xmpp',
-    'xmpp-api'      : 'main/components/xmpp-api',
-    'jlibtorrent'   : 'jlibtorrent',
-    'android-app'   : 'android-app',
-]
-
-include(*(modules.keySet() as List))
-
-modules.each { name, path ->
-    project(":${name}").projectDir = file(path)
+if (file('jlibtorrent/build.gradle').exists()) {
+    include(':jlibtorrent')
+    project(':jlibtorrent').projectDir = file('jlibtorrent')
 }

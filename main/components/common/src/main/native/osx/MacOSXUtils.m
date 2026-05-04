@@ -9,6 +9,7 @@
 #import <jni.h>
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
+#import <CoreServices/CoreServices.h>
 
 #ifdef __cplusplus
 extern "C" {

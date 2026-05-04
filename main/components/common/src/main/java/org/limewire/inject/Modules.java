@@ -31,7 +31,7 @@ public class Modules {
                 for(Map.Entry<Key<?>, Binding<?>> entry : parent.getAllBindings().entrySet()) {
                     Key key = entry.getKey();
                     Binding<?> binding = entry.getValue();
-                    Scope scope = MoreScopes.getLinkedScope(binding, parent);
+                    Scope scope = MoreScopes.getLinkedScope(parent, binding);
                     if(!key.equals(loggerKey) && !key.equals(injectorKey) && !key.equals(stageKey) && !key.getTypeLiteral().getRawType().equals(Provider.class)) {
                         binder.bind(key).toProvider(binding.getProvider()).in(scope) ;
                     }

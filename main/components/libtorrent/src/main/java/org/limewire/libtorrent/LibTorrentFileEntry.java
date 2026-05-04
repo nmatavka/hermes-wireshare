@@ -2,14 +2,10 @@ package org.limewire.libtorrent;
 
 import org.limewire.bittorrent.TorrentFileEntry;
 
-import com.sun.jna.Structure;
-import com.sun.jna.WString;
-
 /**
  * Represents a file in the torrent.
  */
-public class LibTorrentFileEntry extends Structure implements Structure.ByReference,
-        TorrentFileEntry {
+public class LibTorrentFileEntry implements TorrentFileEntry {
 
     /**
      * Index of file within the torrent.
@@ -19,7 +15,7 @@ public class LibTorrentFileEntry extends Structure implements Structure.ByRefere
     /**
      * Relative path of file within the torrent.
      */
-    public WString path;
+    public String path;
 
     /**
      * Total size of the file.
@@ -36,6 +32,17 @@ public class LibTorrentFileEntry extends Structure implements Structure.ByRefere
      */
     public int priority;
 
+    public LibTorrentFileEntry() {
+    }
+
+    public LibTorrentFileEntry(int index, String path, long size, long totalDone, int priority) {
+        this.index = index;
+        this.path = path;
+        this.size = size;
+        this.total_done = totalDone;
+        this.priority = priority;
+    }
+
     @Override
     public int getIndex() {
         return index;
@@ -43,7 +50,7 @@ public class LibTorrentFileEntry extends Structure implements Structure.ByRefere
 
     @Override
     public String getPath() {
-        return path.toString();
+        return path;
     }
 
     @Override

@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.friends.chat;
 
+import org.limewire.inject.FactoryModules;
+
 import com.google.inject.AbstractModule;
-import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 public class LimeWireUiFriendsChatModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        install(new FactoryModuleBuilder().build(ChatHyperlinkListenerFactory.class));
-        install(new FactoryModuleBuilder().build(ConversationPaneFactory.class));
+        install(FactoryModules.newFactory(ChatHyperlinkListenerFactory.class, ChatHyperlinkListener.class));        
+        install(FactoryModules.newFactory(ConversationPaneFactory.class, ConversationPane.class));
     }
 }

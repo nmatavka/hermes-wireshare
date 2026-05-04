@@ -33,7 +33,6 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     private static final Log LOG = LogFactory.getLog(SecureIdDatabaseStore.class);
     
     private volatile DbStore store;
-    private final Object storeLock = new Object();
     
     private final Map<GUID, byte[]> cache = new FixedsizeForgetfulHashMap<GUID, byte[]>(100);
 
@@ -79,38 +78,27 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
     @Asynchronous
     public void start() {
         try {
-            store = openStore(resetDatabase);
+            store = new DbStore(resetDatabase);
             long aYearAgo = clock.now() - TimeUnit.DAYS.toMillis(365);
-            synchronized (storeLock) {
-                if (store != null) {
-                    store.deleteOlderThan(aYearAgo);
-                }
+            synchronized (store) {
+                store.deleteOlderThan(aYearAgo);
             }
         } catch (SQLException e) {
-            LOG.warn("Unable to initialize secure id database store, continuing with in-memory cache only.", e);
-            store = null;
+            throw new RuntimeException(e);
         }
     }
     
     @Override
     public void stop() {
-        synchronized (storeLock) {
-            if (store != null) {
-                store.stop();
-                store = null;
-            }
-        }
+        store.stop();
     }
 
     @Override
     public byte[] get(GUID key) {
-        synchronized (storeLock) {
+        synchronized (store) {
             byte[] value = cache.get(key);
             if (value != null) {
                 return value;
-            }
-            if (store == null) {
-                return null;
             }
             value = store.get(key);
             if (value != null) {
@@ -125,41 +113,12 @@ public class SecureIdDatabaseStore implements SecureIdStore, Service {
 
     @Override
     public void put(GUID key, byte[] value) {
-        synchronized (storeLock) {
-            if (store == null) {
-                cache.put(key, value);
-                return;
-            }
+        synchronized (store) {
             boolean stored = store.put(key, value);
             if (stored) {
                 cache.put(key, value);
             }
         }
-    }
-
-    private DbStore openStore(boolean dropDb) throws SQLException {
-        try {
-            return new DbStore(dropDb);
-        } catch (SQLException firstFailure) {
-            if (isClearlyStaleLock(firstFailure) && deleteSecureIdLockFile()) {
-                LOG.warn("Deleted stale secure id database lock file and retrying startup.");
-                return new DbStore(dropDb);
-            }
-            throw firstFailure;
-        }
-    }
-
-    private boolean isClearlyStaleLock(SQLException failure) {
-        String message = failure.getMessage();
-        return message != null
-                && message.contains("The database is already in use by another process")
-                && message.contains("locked=false")
-                && message.contains("valid=false");
-    }
-
-    private boolean deleteSecureIdLockFile() {
-        File lockFile = new File(CommonUtils.getUserSettingsDir(), "secure-ids.lck");
-        return !lockFile.exists() || lockFile.delete();
     }
     
     class DbStore {
