@@ -1,0 +1,72 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+    }
+}
+
+dependencies {
+    implementation project(':desktop-compose-contracts')
+
+    implementation project(':bittorrent-api')
+    implementation project(':collection')
+    implementation project(':common')
+    implementation project(':core-api')
+    implementation project(':core-settings')
+    implementation project(':friend')
+    implementation project(':gnutella-core')
+    implementation project(':io')
+    implementation project(':mojito')
+    implementation project(':mojito-ui')
+    implementation project(':setting')
+    implementation project(':swingui')
+
+    implementation 'net.java.dev.glazedlists:glazedlists_java15:1.9.1'
+}
+
+def legacyCompatBoundaryFiles = fileTree(projectDir) {
+    include 'src/main/kotlin/**/*.kt'
+    include 'src/main/java/**/*.java'
+    exclude '**/build/**'
+}
+
+def forbiddenLegacyShellTokens = [
+    'AppFrame',
+    'SingleFrameApplication',
+    'org.limewire.ui.swing.Main',
+    'JOptionPane',
+]
+
+tasks.register('verifyLegacyCompatBoundary') {
+    group = 'verification'
+    description = 'Fails when the legacy compat module grows beyond the sanctioned non-shell compatibility boundary.'
+    inputs.files(legacyCompatBoundaryFiles)
+
+    doLast {
+        def violations = []
+        legacyCompatBoundaryFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            forbiddenLegacyShellTokens.each { token ->
+                if (text.contains(token)) {
+                    violations << "${token}: ${project.relativePath(file)}"
+                }
+            }
+        }
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "Legacy compat boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyLegacyCompatBoundary')
+}

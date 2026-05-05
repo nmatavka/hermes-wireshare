@@ -1,50 +1,54 @@
 package org.limewire.xmpp.client.impl.messages.library;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.provider.IQProvider;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import org.jivesoftware.smack.packet.IqData;
+import org.jivesoftware.smack.packet.SimpleIQ;
+import org.jivesoftware.smack.packet.XmlEnvironment;
+import org.jivesoftware.smack.provider.IqProvider;
+import org.jivesoftware.smack.xml.XmlPullParser;
+import org.jivesoftware.smack.xml.XmlPullParser.Event;
+import org.jivesoftware.smack.xml.XmlPullParserException;
+import org.jxmpp.JxmppContext;
 
-public class LibraryChangedIQ extends IQ {
+public class LibraryChangedIQ extends SimpleIQ {
 
-    public LibraryChangedIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
-        do {
-            int eventType = parser.getEventType();
-            if(eventType == XmlPullParser.START_TAG) {
-                if(parser.getName().equals("library-changed")) {
-
-                }
-            } else if(eventType == XmlPullParser.END_TAG) {
-                if(parser.getName().equals("library-changed")) {
-                    break;
-                }
-            }
-        } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-    }
+    public static final String ELEMENT = "library-changed";
+    public static final String NAMESPACE = "jabber:iq:lw-lib-change";
 
     public LibraryChangedIQ() {
+        super(ELEMENT, NAMESPACE);
     }
 
-    @Override
-    public String getChildElementXML() {
-        return "<library-changed xmlns='jabber:iq:lw-lib-change'/>";
+    static LibraryChangedIQ parse(XmlPullParser parser, int initialDepth) throws IOException, XmlPullParserException {
+        outer: while (true) {
+            Event event = parser.next();
+            switch (event) {
+            case END_ELEMENT:
+                if (parser.getDepth() == initialDepth) {
+                    break outer;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+        return new LibraryChangedIQ();
     }
 
-    public static IQProvider getIQProvider() {
+    public static IqProvider<LibraryChangedIQ> getIQProvider() {
         return new LibraryChangedIQProvider();
     }
 
-    private static class LibraryChangedIQProvider implements IQProvider {
+    private static class LibraryChangedIQProvider extends IqProvider<LibraryChangedIQ> {
 
-        public IQ parseIQ(XmlPullParser parser) throws Exception {
-            return new LibraryChangedIQ(parser);
+        @Override
+        public LibraryChangedIQ parse(XmlPullParser parser, int initialDepth, IqData iqData,
+                                      XmlEnvironment xmlEnvironment, JxmppContext jxmppContext)
+                throws XmlPullParserException, IOException, ParseException {
+            return LibraryChangedIQ.parse(parser, initialDepth);
         }
-    }
-    
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + " from: " + getFrom();
     }
 }

@@ -1,9 +1,13 @@
 package org.limewire.core.impl.search.torrentweb;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
@@ -11,6 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.nio.charset.StandardCharsets;
+
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.parser.ParserDelegator;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -20,8 +30,6 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -246,34 +254,46 @@ public class TorrentWebSearch implements Search {
      * elements and could be potential torrent uris.
      */
     List<URI> extractTorrentUriCandidates(File htmlFile, URI referrer) throws IOException {
-        HtmlCleaner cleaner = new HtmlCleaner();
-        TagNode tagNode = cleaner.clean(htmlFile);
-        @SuppressWarnings("unchecked")
-        List<TagNode> anchors = tagNode.getElementListHavingAttribute("href", true);
-        List<URI> candidates = new ArrayList<URI>(anchors.size());
-        for (TagNode node : anchors) {
-            if (!"a".equalsIgnoreCase(node.getName())) {
-                continue;
-            }
-            String href = node.getAttributeByName("href");
-            LOG.debugf("resolving: {0} with {1}", href, referrer);
-            try {
-                URI link = URIUtils.toURI(href);
-                if (canBeTorrentUri(link)) {
-                    candidates.add(link);
-                } else {
-                    link = org.apache.http.client.utils.URIUtils.resolve(referrer, link);
-                    if (canBeTorrentUri(link)) {
-                        candidates.add(link);
-                    } else {
-                        LOG.debugf("not a potential torrent link: {0}", link);
+        final List<URI> candidates = new ArrayList<URI>();
+        Reader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(htmlFile), StandardCharsets.UTF_8));
+            new ParserDelegator().parse(reader, new HTMLEditorKit.ParserCallback() {
+                @Override
+                public void handleStartTag(HTML.Tag tag, MutableAttributeSet attributes, int pos) {
+                    if (tag != HTML.Tag.A) {
+                        return;
+                    }
+
+                    Object hrefValue = attributes.getAttribute(HTML.Attribute.HREF);
+                    if (hrefValue == null) {
+                        return;
+                    }
+
+                    String href = hrefValue.toString();
+                    LOG.debugf("resolving: {0} with {1}", href, referrer);
+                    try {
+                        URI link = URIUtils.toURI(href);
+                        if (canBeTorrentUri(link)) {
+                            candidates.add(link);
+                            return;
+                        }
+
+                        URI resolved = org.apache.http.client.utils.URIUtils.resolve(referrer, link);
+                        if (canBeTorrentUri(resolved)) {
+                            candidates.add(resolved);
+                        } else {
+                            LOG.debugf("not a potential torrent link: {0}", resolved);
+                        }
+                    } catch (URISyntaxException e) {
+                        LOG.debug("error parsing", e);
                     }
                 }
-            } catch (URISyntaxException e) {
-                LOG.debug("error parsing", e);
-            }
+            }, true);
+            return candidates;
+        } finally {
+            IOUtils.close(reader);
         }
-        return candidates;
     }
     
     private void checkForTorrents(List<URI> candidates, TorrentUriPrioritizer prioritizer,

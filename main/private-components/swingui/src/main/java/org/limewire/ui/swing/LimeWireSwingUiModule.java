@@ -1,6 +1,5 @@
 package org.limewire.ui.swing;
 
-import org.limewire.ui.swing.browser.LimeWireUiBrowserModule;
 import org.limewire.ui.swing.callback.GuiCallbackImpl;
 import org.limewire.ui.swing.components.LimeWireUiComponentsModule;
 import org.limewire.ui.swing.dock.LimeWireUiDockModule;
@@ -30,7 +29,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(GuiCallbackImpl.class);
-        install(new LimeWireUiBrowserModule());
         install(new LimeWireUiComponentsModule());
         install(new LimeWireUiDockModule());
         install(new LimeWireUiDownloadsModule());

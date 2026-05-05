@@ -10,16 +10,24 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.provider.ProviderManager;
-import org.jivesoftware.smackx.ChatStateManager;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smack.roster.AbstractRosterListener;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
+import org.jivesoftware.smackx.chatstates.ChatStateManager;
+import org.jivesoftware.smackx.debugger.slf4j.SLF4JDebuggerFactory;
+import org.jivesoftware.smackx.disco.ServiceDiscoveryManager;
+import org.jxmpp.jid.Jid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.jid.parts.Resourcepart;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.friend.api.Friend;
@@ -55,9 +63,11 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.features.NoSaveFeatureInitializer;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQ;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
+import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQ;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListenerFactory;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
@@ -79,9 +89,6 @@ import com.google.inject.assistedinject.Assisted;
 
 /**
  * Implements a {@link FriendConnection} using XMPP.
- * <p>
- * It wraps a {@link XMPPConnection} and keeps track of all the listeners
- * created around that connection and the list of users that is online.
  */
 public class XMPPFriendConnectionImpl implements FriendConnection {
 
@@ -102,14 +109,16 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private volatile LibraryChangedIQListener libraryChangedIQListener;
     private volatile ConnectBackRequestIQListener connectRequestIQListener;
     private volatile FileTransferIQListener fileTransferIQListener;
+    private volatile SubscriptionListener subscriptionListener;
 
     private final EventListenerList<RosterEvent> rosterListeners;
     private final Map<String, XMPPFriendImpl> friends;
     private final SmackConnectionListener smackConnectionListener;
     private final AtomicBoolean loggedIn = new AtomicBoolean(false);
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
+    private final AtomicBoolean providersRegistered = new AtomicBoolean(false);
 
-    private volatile org.jivesoftware.smack.XMPPConnection connection;
+    private volatile XMPPTCPConnection connection;
     private volatile DiscoInfoListener discoInfoListener;
 
     private final ConnectBackRequestIQListenerFactory connectBackRequestIQListenerFactory;
@@ -120,7 +129,7 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     private final FeatureRegistry featureRegistry;
     private final IdleStatusMonitorFactory idleStatusMonitorFactory;
     private IdleStatusMonitor idleStatusMonitor;
-    
+
     private volatile NoSaveFeatureInitializer noSaveFeatureInitializer;
     private final JabberSettings jabberSettings;
     private final ListenerSupport<XmppActivityEvent> xmppActivitySupport;
@@ -163,16 +172,15 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         this.jabberSettings = jabberSettings;
         this.xmppActivitySupport = xmppActivitySupport;
         rosterListeners = new EventListenerList<RosterEvent>();
-        // FIXME: this is only used by tests
-        if(configuration.getRosterListener() != null) {
+        if (configuration.getRosterListener() != null) {
             rosterListeners.addListener(configuration.getRosterListener());
         }
         rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
         friends = new TreeMap<String, XMPPFriendImpl>(String.CASE_INSENSITIVE_ORDER);
-        
+
         smackConnectionListener = new SmackConnectionListener();
     }
-    
+
     @Override
     public String toString() {
         return org.limewire.util.StringUtils.toString(this, configuration, connection);
@@ -190,28 +198,26 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 setModeImpl(mode);
                 return null;
             }
-        });   
-    }    
+        });
+    }
 
     void setModeImpl(FriendPresence.Mode mode) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
-                connection.sendPacket(getPresenceForMode(mode));
-            } catch (org.jivesoftware.smack.XMPPException e) {
+                connection.sendStanza(getPresenceForMode(mode));
+            } catch (Exception e) {
                 throw new FriendException(e);
-            } 
+            }
         }
     }
 
-    private Packet getPresenceForMode(FriendPresence.Mode mode) {
-        org.jivesoftware.smack.packet.Presence presence = new org.jivesoftware.smack.packet.Presence(
-                org.jivesoftware.smack.packet.Presence.Type.available);
-        presence.setMode(org.jivesoftware.smack.packet.Presence.Mode.valueOf(mode.name()));
-        if (jabberSettings.advertiseLimeWireStatus()) {
-            presence.setStatus("on WireShare");
-        }
-        return presence;
+    private Presence getPresenceForMode(FriendPresence.Mode mode) {
+        return connection.getStanzaFactory().buildPresenceStanza()
+                .ofType(Presence.Type.available)
+                .setMode(Presence.Mode.valueOf(mode.name()))
+                .setStatus(jabberSettings.advertiseLimeWireStatus() ? "on WireShare" : null)
+                .build();
     }
 
     public FriendConnectionConfiguration getConfiguration() {
@@ -226,77 +232,156 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 loginImpl();
                 return null;
             }
-        });   
+        });
     }
 
     void loginImpl() throws FriendException {
         synchronized (this) {
             try {
                 loggingIn.set(true);
-                connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));        
-                org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
-                org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
+                connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTING));
+                configureDebugging();
+                registerProviders();
                 connect();
                 LOG.infof("connected.");
-                LOG.infof("logging in {0} with resource: {1} ...", configuration.getUserInputLocalID(), configuration.getResource());
-                connection.login(configuration.getUserInputLocalID(), configuration.getPassword(), configuration.getResource());
+                LOG.infof("logging in {0} with resource: {1} ...", configuration.getUserInputLocalID(),
+                        configuration.getResource());
+                connection.login(configuration.getUserInputLocalID(), configuration.getPassword(),
+                        Resourcepart.from(configuration.getResource()));
+                startSessionServices();
                 LOG.infof("logged in.");
                 loggedIn.set(true);
                 loggingIn.set(false);
                 connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECTED));
-            } catch (org.jivesoftware.smack.XMPPException e) {
+            } catch (Exception e) {
                 handleLoginError(e);
                 throw new FriendException(e);
-            } catch (RuntimeException e) {
-                handleLoginError(e);
-                throw e;
-            } 
+            }
         }
     }
-    
-    /**
-     * Unwind upon login error - broadcast login failed, remove conn creation
-     * listener from smack, set conn to null, disconnect if need be, etc
-     *
-     * @param e Exception which occurred during login
-     */
+
+    private void configureDebugging() {
+        SmackConfiguration.DEBUG = configuration.isDebugEnabled();
+        if (configuration.isDebugEnabled()) {
+            SmackConfiguration.setDefaultSmackDebuggerFactory(SLF4JDebuggerFactory.INSTANCE);
+        }
+    }
+
     private synchronized void handleLoginError(Exception e) {
         loggingIn.set(false);
         connectionMulticaster.broadcast(new FriendConnectionEvent(this, FriendConnectionEvent.Type.CONNECT_FAILED, e));
         if (connection != null && connection.isConnected()) {
             connection.disconnect();
         }
-        org.jivesoftware.smack.XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
+        cleanupSessionServices();
         connection = null;
     }
-    
-    private void connect() throws org.jivesoftware.smack.XMPPException {
-        for(ConnectionConfigurationFactory factory : connectionConfigurationFactories) {
+
+    private void connect() throws FriendException {
+        FriendException lastFailure = null;
+        for (ConnectionConfigurationFactory factory : connectionConfigurationFactories) {
             try {
                 connectUsingFactory(factory);
                 return;
             } catch (FriendException e) {
+                lastFailure = e;
                 LOG.debug(e.getMessage(), e);
             }
         }
+        if (lastFailure != null) {
+            throw lastFailure;
+        }
+        throw new FriendException("unable to connect");
     }
 
     private void connectUsingFactory(ConnectionConfigurationFactory factory) throws FriendException {
         ConnectionConfigurationFactory.RequestContext requestContext = new ConnectionConfigurationFactory.RequestContext();
-        while(factory.hasMore(configuration, requestContext)) {
-            ConnectionConfiguration connectionConfig = factory.getConnectionConfiguration(configuration, requestContext);
-            connection = new XMPPConnection(connectionConfig);
-            connection.addRosterListener(new RosterListenerImpl());
-            LOG.infof("connecting to {0} at {1}:{2} ...", connectionConfig.getServiceName(), connectionConfig.getHost(), connectionConfig.getPort());
+        while (factory.hasMore(configuration, requestContext)) {
+            XMPPTCPConnectionConfiguration connectionConfig =
+                    factory.getConnectionConfiguration(configuration, requestContext);
+            XMPPTCPConnection candidate = new XMPPTCPConnection(connectionConfig);
+            prepareConnection(candidate);
+            String host = connectionConfig.getHost() != null ? connectionConfig.getHost().toString()
+                    : connectionConfig.getXMPPServiceDomain().toString();
+            int port = connectionConfig.getPort() != null ? connectionConfig.getPort().intValue() : 5222;
+            LOG.infof("connecting to {0} at {1}:{2} ...", connectionConfig.getXMPPServiceDomain(), host, port);
             try {
-                connection.connect();
+                candidate.connect();
+                connection = candidate;
                 return;
-            } catch (org.jivesoftware.smack.XMPPException e) {
+            } catch (Exception e) {
                 LOG.debug(e.getMessage(), e);
+                candidate.disconnect();
                 requestContext.incrementRequests();
-            }            
+            }
         }
         throw new FriendException("couldn't connect using " + factory);
+    }
+
+    private void prepareConnection(XMPPTCPConnection candidate) {
+        connection = candidate;
+        candidate.addConnectionListener(smackConnectionListener);
+        Roster roster = Roster.getInstanceFor(candidate);
+        roster.addRosterListener(new RosterListenerImpl());
+        ChatStateManager.getInstance(candidate);
+
+        discoInfoListener = new DiscoInfoListener(this, candidate, featureRegistry);
+        discoInfoListener.addListeners(connectionMulticaster, friendPresenceSupport);
+
+        addressIQListener = addressIQListenerFactory.create(this, addressFactory);
+        candidate.addAsyncStanzaListener(addressIQListener, addressIQListener.getStanzaFilter());
+
+        fileTransferIQListener = fileTransferIQListenerFactory.create(this);
+        candidate.addAsyncStanzaListener(fileTransferIQListener, fileTransferIQListener.getStanzaFilter());
+
+        authTokenIQListener = authTokenIQListenerFactory.create(this);
+        candidate.addAsyncStanzaListener(authTokenIQListener, authTokenIQListener.getStanzaFilter());
+
+        libraryChangedIQListener = libraryChangedIQListenerFactory.create(this);
+        candidate.addAsyncStanzaListener(libraryChangedIQListener, libraryChangedIQListener.getStanzaFilter());
+
+        connectRequestIQListener = connectBackRequestIQListenerFactory.create(this);
+        candidate.addAsyncStanzaListener(connectRequestIQListener, connectRequestIQListener.getStanzaFilter());
+
+        new LimewireFeatureInitializer().register(featureRegistry);
+
+        noSaveFeatureInitializer = new NoSaveFeatureInitializer(candidate, this, rosterListeners, friendPresenceSupport);
+        noSaveFeatureInitializer.register(featureRegistry);
+
+        subscriptionListener = new SubscriptionListener(candidate, friendRequestBroadcaster);
+        candidate.addAsyncStanzaListener(subscriptionListener, subscriptionListener.getStanzaFilter());
+
+        for (URI feature : featureRegistry.getPublicFeatureUris()) {
+            ServiceDiscoveryManager.getInstanceFor(candidate).addFeature(feature.toASCIIString());
+        }
+    }
+
+    private void registerProviders() {
+        if (!providersRegistered.compareAndSet(false, true)) {
+            return;
+        }
+
+        synchronized (ProviderManager.class) {
+            if (ProviderManager.getIQProvider(AddressIQ.ELEMENT, AddressIQ.NAMESPACE) == null) {
+                ProviderManager.addIQProvider(AddressIQ.ELEMENT, AddressIQ.NAMESPACE, new AddressIQProvider(addressFactory));
+            }
+            if (ProviderManager.getIQProvider(FileTransferIQ.ELEMENT, FileTransferIQ.NAMESPACE) == null) {
+                ProviderManager.addIQProvider(FileTransferIQ.ELEMENT, FileTransferIQ.NAMESPACE, FileTransferIQ.getIQProvider());
+            }
+            if (ProviderManager.getIQProvider(AuthTokenIQ.ELEMENT, AuthTokenIQ.NAMESPACE) == null) {
+                ProviderManager.addIQProvider(AuthTokenIQ.ELEMENT, AuthTokenIQ.NAMESPACE, new AuthTokenIQProvider());
+            }
+            if (ProviderManager.getIQProvider(LibraryChangedIQ.ELEMENT, LibraryChangedIQ.NAMESPACE) == null) {
+                ProviderManager.addIQProvider(LibraryChangedIQ.ELEMENT, LibraryChangedIQ.NAMESPACE, LibraryChangedIQ.getIQProvider());
+            }
+            if (ProviderManager.getIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE) == null) {
+                ProviderManager.addIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE,
+                        new ConnectBackRequestIQProvider());
+            }
+            if (ProviderManager.getIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE) == null) {
+                ProviderManager.addIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE, NoSaveIQ.getIQProvider());
+            }
+        }
     }
 
     @Override
@@ -312,122 +397,137 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 logoutImpl(null);
                 return null;
             }
-        }); 
+        });
     }
 
-    /**
-     * 
-     * @param error null if connection is closed by user
-     */
     void logoutImpl(Exception error) {
         synchronized (this) {
-            if(isLoggedIn()) {
+            if (isLoggedIn()) {
                 loggedIn.set(false);
-                LOG.infof("disconnecting from {0} at {1}:{2} ...", connection.getServiceName(), connection.getHost(), connection.getPort());
-                connection.disconnect();
+                if (connection != null) {
+                    LOG.infof("disconnecting from {0} at {1}:{2} ...", connection.getXMPPServiceDomain(),
+                            connection.getHost(), connection.getPort());
+                    cleanupSessionServices();
+                    connection.disconnect();
+                }
                 synchronized (friends) {
                     friends.clear();
                 }
-                XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
                 connection = null;
                 LOG.info("disconnected.");
-                connectionMulticaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this, FriendConnectionEvent.Type.DISCONNECTED, error));
-                ChatStateManager.remove(connection);
-                if(discoInfoListener != null) {
-                    discoInfoListener.cleanup();
-                }
-                if (noSaveFeatureInitializer != null) {
-                    noSaveFeatureInitializer.cleanup();
-                }
-                if (idleStatusMonitor != null) {
-                    idleStatusMonitor.stop();
-                }
-                if (xmppActivityListener != null) {
-                    xmppActivitySupport.removeListener(xmppActivityListener);
-                }
+                connectionMulticaster.broadcast(new FriendConnectionEvent(XMPPFriendConnectionImpl.this,
+                        FriendConnectionEvent.Type.DISCONNECTED, error));
                 featureRegistry.deregisterInitializer(NoSaveFeature.ID);
-            } 
+            }
         }
     }
-    
+
+    private void startSessionServices() {
+        if (xmppActivityListener == null) {
+            xmppActivityListener = new XmppActivityEventListener();
+        }
+        xmppActivitySupport.addListener(xmppActivityListener);
+
+        if (idleStatusMonitor == null) {
+            idleStatusMonitor = idleStatusMonitorFactory.create();
+        }
+        idleStatusMonitor.start();
+    }
+
+    private void cleanupSessionServices() {
+        if (discoInfoListener != null) {
+            discoInfoListener.cleanup();
+            discoInfoListener = null;
+        }
+        if (noSaveFeatureInitializer != null) {
+            noSaveFeatureInitializer.cleanup();
+            noSaveFeatureInitializer = null;
+        }
+        if (xmppActivityListener != null) {
+            xmppActivitySupport.removeListener(xmppActivityListener);
+        }
+        if (idleStatusMonitor != null) {
+            idleStatusMonitor.stop();
+        }
+    }
+
     public boolean isLoggedIn() {
         return loggedIn.get();
     }
-    
+
     private void checkLoggedIn() throws FriendException {
         synchronized (this) {
-            if(!isLoggedIn()) {
+            if (!isLoggedIn()) {
                 throw new FriendException("not connected");
             }
         }
     }
 
-    private class RosterListenerImpl implements org.jivesoftware.smack.RosterListener {
+    private class RosterListenerImpl extends AbstractRosterListener {
 
-        public void entriesAdded(Collection<String> addedIds) {
+        @Override
+        public void entriesAdded(Collection<Jid> addedIds) {
             try {
                 synchronized (XMPPFriendConnectionImpl.this) {
                     checkLoggedIn();
                     synchronized (friends) {
-                        Roster roster = connection.getRoster();
-                        if(roster != null) {
-                            Map<String, XMPPFriendImpl> newFriends = new HashMap<String, XMPPFriendImpl>();
-                            for(String id : addedIds) {
-                                RosterEntry rosterEntry = roster.getEntry(id);
-                                XMPPFriendImpl friend = new XMPPFriendImpl(id, rosterEntry, configuration, connection, featureRegistry);
-                                LOG.debugf("user {0} added", friend);
-                                newFriends.put(id, friend);
-                            }
-                            friends.putAll(newFriends);
-                            rosterListeners.broadcast(new RosterEvent(new ArrayList<Friend>(newFriends.values()), RosterEvent.Type.FRIENDS_ADDED));
+                        Roster roster = Roster.getInstanceFor(connection);
+                        Map<String, XMPPFriendImpl> newFriends = new HashMap<String, XMPPFriendImpl>();
+                        for (Jid jid : addedIds) {
+                            String id = jid.asBareJid().toString();
+                            RosterEntry rosterEntry = roster.getEntry(jid.asBareJid());
+                            XMPPFriendImpl friend = new XMPPFriendImpl(id, rosterEntry, configuration, connection,
+                                    featureRegistry);
+                            LOG.debugf("user {0} added", friend);
+                            newFriends.put(id, friend);
                         }
+                        friends.putAll(newFriends);
+                        rosterListeners.broadcast(new RosterEvent(new ArrayList<Friend>(newFriends.values()),
+                                RosterEvent.Type.FRIENDS_ADDED));
                     }
                 }
-            } catch (org.jivesoftware.smack.XMPPException e) {
-                LOG.debugf(e, "error getting roster");    
             } catch (FriendException e) {
-                LOG.debugf(e, "error getting roster");    
+                LOG.debugf(e, "error getting roster");
             }
         }
 
-        public void entriesUpdated(Collection<String> updatedIds) {
+        @Override
+        public void entriesUpdated(Collection<Jid> updatedIds) {
             try {
                 synchronized (XMPPFriendConnectionImpl.this) {
                     checkLoggedIn();
-                    synchronized (friends) {                 
-                        Roster roster = connection.getRoster();
-                        if(roster != null) {
-                            List<Friend> updatedFriends = new ArrayList<Friend>();
-                            for(String id : updatedIds) {
-                                RosterEntry rosterEntry = roster.getEntry(id);
-                                XMPPFriendImpl friend = friends.get(id);
-                                if(friend == null) {
-                                    // should never happen ?
-                                    friend = new XMPPFriendImpl(id, rosterEntry, configuration, connection, featureRegistry);
-                                    friends.put(id, friend);
-                                } else {
-                                    friend.setRosterEntry(rosterEntry);
-                                }
-                                updatedFriends.add(friend);
-                                LOG.debugf("user {0} updated", friend);
+                    synchronized (friends) {
+                        Roster roster = Roster.getInstanceFor(connection);
+                        List<Friend> updatedFriends = new ArrayList<Friend>();
+                        for (Jid jid : updatedIds) {
+                            String id = jid.asBareJid().toString();
+                            RosterEntry rosterEntry = roster.getEntry(jid.asBareJid());
+                            XMPPFriendImpl friend = friends.get(id);
+                            if (friend == null) {
+                                friend = new XMPPFriendImpl(id, rosterEntry, configuration, connection, featureRegistry);
+                                friends.put(id, friend);
+                            } else {
+                                friend.setRosterEntry(rosterEntry);
                             }
-                            rosterListeners.broadcast(new RosterEvent(updatedFriends, RosterEvent.Type.FRIENDS_UPDATED));
+                            updatedFriends.add(friend);
+                            LOG.debugf("user {0} updated", friend);
                         }
+                        rosterListeners.broadcast(new RosterEvent(updatedFriends, RosterEvent.Type.FRIENDS_UPDATED));
                     }
                 }
-            } catch (org.jivesoftware.smack.XMPPException e) {
-                LOG.debugf(e, "error getting roster");    
             } catch (FriendException e) {
-                LOG.debugf(e, "error getting roster");    
+                LOG.debugf(e, "error getting roster");
             }
         }
 
-        public void entriesDeleted(Collection<String> removedIds) {
+        @Override
+        public void entriesDeleted(Collection<Jid> removedIds) {
             synchronized (friends) {
                 List<Friend> deletedFriends = new ArrayList<Friend>();
-                for(String id : removedIds) {
+                for (Jid jid : removedIds) {
+                    String id = jid.asBareJid().toString();
                     XMPPFriendImpl friend = friends.remove(id);
-                    if(friend != null) {
+                    if (friend != null) {
                         deletedFriends.add(friend);
                         LOG.debugf("user {0} removed", friend);
                     }
@@ -437,50 +537,48 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
         }
 
         @Override
-        public void presenceChanged(final org.jivesoftware.smack.packet.Presence presence) {
+        public void presenceChanged(final Presence presence) {
             String localJID;
             try {
                 localJID = getLocalJid();
             } catch (FriendException e) {
                 localJID = null;
             }
-            if(!presence.getFrom().equals(localJID)) {
-                XMPPFriendImpl friend = getFriend(presence);
-                if(friend != null) {
-                    LOG.debugf("presence from {0} changed to {1}", presence.getFrom(), presence.getType());
-                    // synchronize to avoid updates or presences from being lost
-                    // better to replace that with a lock object private to this
-                    // connection class
-                    synchronized (friend) {
-                        if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                            if(!friend.getPresences().containsKey(presence.getFrom())) {
-                                addNewPresence(friend, presence);
-                            } else {
-                                updatePresence(friend, presence);
-                            }
-                        } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                            PresenceImpl p = (PresenceImpl)friend.getPresence(presence.getFrom());
-                            if(p != null) {
-                                p.update(presence);
-                                friend.removePresense(p);
-                            }
+            String presenceFrom = presence.getFrom() != null ? presence.getFrom().toString() : null;
+            if (presenceFrom == null || presenceFrom.equals(localJID)) {
+                return;
+            }
+
+            XMPPFriendImpl friend = getFriend(presence);
+            if (friend != null) {
+                LOG.debugf("presence from {0} changed to {1}", presence.getFrom(), presence.getType());
+                synchronized (friend) {
+                    if (presence.getType() == Presence.Type.available) {
+                        if (!friend.getPresences().containsKey(presenceFrom)) {
+                            addNewPresence(friend, presence);
+                        } else {
+                            updatePresence(friend, presence);
+                        }
+                    } else if (presence.getType() == Presence.Type.unavailable) {
+                        PresenceImpl p = (PresenceImpl) friend.getPresence(presenceFrom);
+                        if (p != null) {
+                            p.update(presence);
+                            friend.removePresense(p);
                         }
                     }
-                } else {
-                    LOG.debugf("no friend for presence {0}", presence.getFrom());    
                 }
+            } else {
+                LOG.debugf("no friend for presence {0}", presence.getFrom());
             }
         }
 
-        private XMPPFriendImpl getFriend(org.jivesoftware.smack.packet.Presence presence) {
-            XMPPFriendImpl friend;
+        private XMPPFriendImpl getFriend(Presence presence) {
             synchronized (friends) {
-                friend = friends.get(PresenceUtils.parseBareAddress(presence.getFrom()));
+                return friends.get(PresenceUtils.parseBareAddress(presence.getFrom().toString()));
             }
-            return friend;
         }
 
-        private void addNewPresence(final XMPPFriendImpl friend, final org.jivesoftware.smack.packet.Presence presence) {
+        private void addNewPresence(final XMPPFriendImpl friend, final Presence presence) {
             final PresenceImpl presenceImpl = new PresenceImpl(presence, friend, featureSupport);
             presenceImpl.addTransport(AddressFeature.class, addressIQListener);
             presenceImpl.addTransport(AuthTokenFeature.class, authTokenIQListener);
@@ -490,8 +588,8 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             friend.addPresense(presenceImpl);
         }
 
-        private void updatePresence(XMPPFriendImpl friend, org.jivesoftware.smack.packet.Presence presence) {
-            PresenceImpl currentPresence = (PresenceImpl)friend.getPresences().get(presence.getFrom());
+        private void updatePresence(XMPPFriendImpl friend, Presence presence) {
+            PresenceImpl currentPresence = (PresenceImpl) friend.getPresences().get(presence.getFrom().toString());
             currentPresence.update(presence);
             friend.updatePresence(currentPresence);
         }
@@ -510,23 +608,17 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 addFriendImpl(id, name);
                 return null;
             }
-        }); 
+        });
     }
 
     void addFriendImpl(String id, String name) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
-                Roster roster = connection.getRoster();
-                if(roster != null) {
-                    // TODO smack enhancement
-                    // TODO to support notifications when
-                    // TODO the Roster is created
-                    roster.createEntry(id, name, null);
-                }
-            } catch (org.jivesoftware.smack.XMPPException e) {
+                Roster.getInstanceFor(connection).createItemAndRequestSubscription(JidCreate.bareFrom(id), name, null);
+            } catch (Exception e) {
                 throw new FriendException(e);
-            } 
+            }
         }
     }
 
@@ -538,25 +630,19 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
                 removeFriendImpl(id);
                 return null;
             }
-        }); 
+        });
     }
 
     private void removeFriendImpl(String id) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
-                Roster roster = connection.getRoster();
-                if(roster != null) {
-                    // TODO smack enhancement
-                    // TODO to support notifications when
-                    // TODO the Roster is created
-    
-                    RosterEntry entry = roster.getEntry(id);
-                    if(entry!= null) {
-                        roster.removeEntry(entry);    
-                    }
+                Roster roster = Roster.getInstanceFor(connection);
+                RosterEntry entry = roster.getEntry(JidCreate.bareFrom(id));
+                if (entry != null) {
+                    roster.removeEntry(entry);
                 }
-            } catch (org.jivesoftware.smack.XMPPException e) {
+            } catch (Exception e) {
                 throw new FriendException(e);
             }
         }
@@ -565,140 +651,66 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
     @Override
     public XMPPFriendImpl getFriend(String id) {
         id = PresenceUtils.parseBareAddress(id);
-        synchronized (friends) { 
+        synchronized (friends) {
             return friends.get(id);
         }
     }
 
     @Override
     public Collection<Friend> getFriends() {
-        synchronized (friends) { 
+        synchronized (friends) {
             return new ArrayList<Friend>(friends.values());
         }
     }
 
-    public void sendPacket(Packet packet) throws FriendException {
+    public void sendPacket(Stanza stanza) throws FriendException {
         synchronized (this) {
             try {
                 checkLoggedIn();
-                connection.sendPacket(packet);
-            } catch (org.jivesoftware.smack.XMPPException e) {
+                connection.sendStanza(stanza);
+            } catch (Exception e) {
                 throw new FriendException(e);
-            } 
+            }
         }
     }
 
     public String getLocalJid() throws FriendException {
         synchronized (this) {
             checkLoggedIn();
-            return connection.getUser();
+            if (connection.getUser() == null) {
+                throw new FriendException("not connected");
+            }
+            return connection.getUser().toString();
         }
     }
-    
-    /**
-     * Sets the connection mode to idle (extended away) after receiving activity
-     * events triggered by periods of inactivity.
-     */
+
     private class XmppActivityEventListener implements EventListener<XmppActivityEvent> {
 
         @Override
         public void handleEvent(XmppActivityEvent event) {
             switch (event.getSource()) {
-                case Idle:
-                    try {
-                        setModeImpl(FriendPresence.Mode.xa);
-                    } catch (FriendException e) {
-                        LOG.debugf(e, "couldn't set mode based on {0}", event);
-                    }
-                    break;
-                case Active:
-                    try {
-                        setModeImpl(jabberSettings.isDoNotDisturbSet() ? 
-                                FriendPresence.Mode.dnd : FriendPresence.Mode.available);
-                    } catch (FriendException e) {
-                        LOG.debugf(e, "couldn't set mode based on {0}", event);
-                    }
+            case Idle:
+                try {
+                    setModeImpl(FriendPresence.Mode.xa);
+                } catch (FriendException e) {
+                    LOG.debugf(e, "couldn't set mode based on {0}", event);
+                }
+                break;
+            case Active:
+                try {
+                    setModeImpl(jabberSettings.isDoNotDisturbSet()
+                            ? FriendPresence.Mode.dnd : FriendPresence.Mode.available);
+                } catch (FriendException e) {
+                    LOG.debugf(e, "couldn't set mode based on {0}", event);
+                }
+                break;
+            default:
+                break;
             }
         }
     }
-    
-    private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
-        @Override
-        public void connectionCreated(XMPPConnection connection) {
-            if(XMPPFriendConnectionImpl.this.connection != connection) {
-                return;
-            }
 
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("connection created for "+ connection.toString());
-            }
-            connection.addConnectionListener(this);
-
-            synchronized (ProviderManager.getInstance()) {
-                if(ProviderManager.getInstance().getIQProvider("address", "jabber:iq:lw-address") == null) {
-                    ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
-                }
-                if(ProviderManager.getInstance().getIQProvider("file-transfer", "jabber:iq:lw-file-transfer") == null) {
-                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
-                }
-                if(ProviderManager.getInstance().getIQProvider("auth-token", "jabber:iq:lw-auth-token") == null) {
-                    ProviderManager.getInstance().addIQProvider("auth-token", "jabber:iq:lw-auth-token", new AuthTokenIQProvider());
-                }
-                if(ProviderManager.getInstance().getIQProvider("library-changed", "jabber:iq:lw-lib-change") == null) {
-                    ProviderManager.getInstance().addIQProvider("library-changed", "jabber:iq:lw-lib-change", LibraryChangedIQ.getIQProvider());
-                }
-                if (ProviderManager.getInstance().getIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE) == null) {
-                    ProviderManager.getInstance().addIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE, new ConnectBackRequestIQProvider());
-                }
-                if (ProviderManager.getInstance().getIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE) == null) {
-                    ProviderManager.getInstance().addIQProvider(NoSaveIQ.ELEMENT_NAME, NoSaveIQ.NAME_SPACE, NoSaveIQ.getIQProvider());    
-                }
-            }
-
-            ChatStateManager.getInstance(connection);
-
-            discoInfoListener = new DiscoInfoListener(XMPPFriendConnectionImpl.this, connection, featureRegistry);
-            discoInfoListener.addListeners(connectionMulticaster, friendPresenceSupport);
-            
-            addressIQListener = addressIQListenerFactory.create(XMPPFriendConnectionImpl.this, addressFactory);
-            connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
-
-            fileTransferIQListener = fileTransferIQListenerFactory.create(XMPPFriendConnectionImpl.this);
-            connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());
-
-            authTokenIQListener = authTokenIQListenerFactory.create(XMPPFriendConnectionImpl.this);
-            connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
-
-            libraryChangedIQListener = libraryChangedIQListenerFactory.create(XMPPFriendConnectionImpl.this);
-            connection.addPacketListener(libraryChangedIQListener, libraryChangedIQListener.getPacketFilter());
-
-            connectRequestIQListener = connectBackRequestIQListenerFactory.create(XMPPFriendConnectionImpl.this);
-            connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
-            
-            new LimewireFeatureInitializer().register(featureRegistry);
-            
-            noSaveFeatureInitializer = new NoSaveFeatureInitializer(connection, XMPPFriendConnectionImpl.this, 
-                    rosterListeners, friendPresenceSupport);
-            noSaveFeatureInitializer.register(featureRegistry);
-            
-            SubscriptionListener sub = new SubscriptionListener(connection,
-                                                friendRequestBroadcaster);
-            connection.addPacketListener(sub, sub);
-            
-            for(URI feature : featureRegistry.getPublicFeatureUris()) {
-                ServiceDiscoveryManager.getInstanceFor(connection).addFeature(feature.toASCIIString());
-            }
-            if (xmppActivityListener == null) {
-                xmppActivityListener = new XmppActivityEventListener();
-            }
-            xmppActivitySupport.addListener(xmppActivityListener);
-            
-            if (idleStatusMonitor == null) {
-                idleStatusMonitor = idleStatusMonitorFactory.create();    
-            }
-            idleStatusMonitor.start();
-        }
-
+    private class SmackConnectionListener implements ConnectionListener {
         @Override
         public void connectionClosed() {
             LOG.debug("smack connection closed");
@@ -709,17 +721,5 @@ public class XMPPFriendConnectionImpl implements FriendConnection {
             LOG.debug("smack connection closed with error", e);
             logoutImpl(e);
         }
-
-        @Override
-        public void reconnectingIn(int seconds) {
-        }
-
-        @Override
-        public void reconnectionFailed(Exception e) {
-        }
-
-        @Override
-        public void reconnectionSuccessful() {
-        }
-     }
+    }
 }

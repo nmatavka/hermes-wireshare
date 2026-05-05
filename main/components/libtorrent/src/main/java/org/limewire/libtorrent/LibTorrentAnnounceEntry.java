@@ -6,17 +6,20 @@ import java.net.URISyntaxException;
 import org.limewire.bittorrent.TorrentTracker;
 import org.limewire.util.URIUtils;
 
-public class LibTorrentAnnounceEntry implements TorrentTracker {
+import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
+
+public class LibTorrentAnnounceEntry extends Structure implements TorrentTracker {
 
     public String uri;
     public int tier;
 
     public LibTorrentAnnounceEntry() {
+        super();
     }
 
-    public LibTorrentAnnounceEntry(String uri, int tier) {
-        this.uri = uri;
-        this.tier = tier;
+    public LibTorrentAnnounceEntry(Pointer p) {
+        super(p);
     }
 
     @Override

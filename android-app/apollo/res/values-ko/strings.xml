@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">최근 목록</string>
+  <string name="page_artists">아티스트</string>
+  <string name="page_albums">앨범</string>
+  <string name="page_songs">노래</string>
+  <string name="page_playlists">재생목록</string>
+  <string name="page_genres">장르</string>
+    <string name="menu_search">검색</string>
+  <string name="menu_shuffle">모두 임의 재생</string>
+  <string name="menu_play_all">모두 재생</string>
+  <string name="menu_sort_by">정렬</string>
+    <string name="menu_clear_queue">대기목록 비우기</string>
+  <string name="menu_save_queue">대기목록 저장</string>
+  <string name="menu_share">공유</string>
+  <string name="menu_add_to_homescreen">홈 화면에 추가</string>
+  <string name="menu_equalizer">이퀄라이저</string>
+  <string name="menu_simple">간단하게</string>
+  <string name="menu_detailed">자세히...</string>
+  <string name="menu_grid">격자</string>
+  <string name="menu_view_as">보기</string>
+  <string name="add_to_playlist">재생목록에 추가</string>
+  <string name="add_to_favorites">즐겨찾기에 추가</string>
+  <string name="add_to_queue">대기목록에 추가</string>
+  <string name="remove_from_favorites">즐겨찾기에서 제거</string>
+    <string name="sort_order_entry_az">오름차순</string>
+  <string name="sort_order_entry_za">내림차순</string>
+  <string name="sort_order_entry_artist">아티스트</string>
+  <string name="sort_order_entry_album">앨범</string>
+  <string name="sort_order_entry_year">연도</string>
+  <string name="sort_order_entry_duration">길이</string>
+  <string name="sort_order_entry_date_added">추가된 날짜</string>
+  <string name="sort_order_entry_track_list">트랙 목록</string>
+  <string name="sort_order_entry_number_of_songs">노래 수</string>
+  <string name="sort_order_entry_number_of_albums">앨범 수</string>
+  <string name="sort_order_entry_filename">파일명</string>
+  <string name="playlist_favorite">즐겨찾기</string>
+  <string name="playlist_favorites">즐겨찾기</string>
+  <string name="playlist_last_added">최근에 추가한 곡</string>
+  <string name="new_empty_playlist">새 재생목록</string>
+  <string name="save">저장</string>
+  <string name="cancel">취소</string>
+  <string name="overwrite">덮어쓰기</string>
+  <string name="new_playlist_name_template">재생목록 <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">재생목록 이름</string>
+  <string name="delete_dialog_title"><xliff:g id="item" example="album">%s</xliff:g> 을(를) 삭제할까요?</string>
+    <string name="context_menu_play_selection">재생</string>
+  <string name="context_menu_play_next">다음 곡 재생</string>
+  <string name="context_menu_more_by_artist">이 아티스트의 곡들</string>
+  <string name="context_menu_rename_playlist">이름 바꾸기</string>
+  <string name="context_menu_delete">삭제</string>
+    <string name="context_menu_remove_from_recent">최근 목록에서 제거</string>
+  <string name="context_menu_use_as_ringtone">벨소리로 지정</string>
+  <string name="context_menu_remove_from_playlist">재생목록에서 제거</string>
+  <string name="accessibility_play">재생</string>
+  <string name="accessibility_pause">일시 정지</string>
+  <string name="accessibility_next">다음</string>
+  <string name="accessibility_prev">이전</string>
+  <string name="accessibility_shuffle">임의 재생</string>
+  <string name="accessibility_shuffle_all">모두 임의재생</string>
+  <string name="accessibility_repeat">반복</string>
+  <string name="accessibility_repeat_all">모두 반복</string>
+  <string name="accessibility_repeat_one">한 곡 반복</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>을(를) 홈 화면에 추가했습니다</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g>을(를) 홈 화면에 추가하지 못했습니다</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\'을(를) 벨소리로 지정했습니다</string>
+    <string name="now_listening_to">#NowPlaying <xliff:g id="title">%1$s</xliff:g> by <xliff:g id="artist">%2$s</xliff:g> #WireShare</string>
+  <string name="share_track_using">이 트랙을 공유:</string>
+    <string name="no_effects_for_you">이퀄라이저를 열 수 없습니다.</string>
+  <string name="empty_music">컴퓨터에서 기기로 음악을 복사하려면 USB 케이블을 연결해주세요.</string>
+  <string name="empty_last_added">지난 한 달 동안 추가한 노래들이 여기에 표시됩니다.</string>
+  <string name="empty_search">검색 결과 없음</string>
+    <string name="empty_recent">최근에 재생했던 앨범들이 여기에 표시됩니다. 아무 음악이나 틀어보세요.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" #WireShare 에서</string>
+  <string name="delete_files_title">파일 삭제</string>
+  <string name="page_last_added">마지막으로 추가 된 항목</string>
+  <string name="empty_playlist">이 재생 목록은 비어 있습니다.\n\n노래를 추가하는 방법을 보려면 여기를 클릭하십시오.</string>
+  <string name="are_you_sure_delete_files_text">장치에서 선택한 파일을 영구적으로 삭제 하시겠습니까?</string>
+  <string name="frostwire_player">WireShare 미디어 플레이어...</string>
+</resources>

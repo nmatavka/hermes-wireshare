@@ -3,6 +3,7 @@ package org.limewire.xmpp.client.impl;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.jivesoftware.smack.packet.Presence;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.FeatureEvent;
 import org.limewire.friend.impl.AbstractFriend;
@@ -22,15 +23,15 @@ class PresenceImpl extends AbstractFriendPresence implements FriendPresence {
     private Mode mode;
     
 
-    PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
+    PresenceImpl(Presence presence,
                  AbstractFriend friend, EventBroadcaster<FeatureEvent> featureBroadcaster) {
         super(featureBroadcaster);
         this.friend = friend;
-        this.jid = presence.getFrom();
+        this.jid = presence.getFrom().toString();
         update(presence);
     }
 
-    public void update(org.jivesoftware.smack.packet.Presence presence) {
+    public void update(Presence presence) {
         rwLock.writeLock().lock();
         try {
             this.type = Type.valueOf(presence.getType().toString());

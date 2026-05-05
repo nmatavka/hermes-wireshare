@@ -1,11 +1,10 @@
 package org.limewire.xmpp.client.impl.messages.library;
 
-import java.io.IOException;
-
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.StanzaListener;
+import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.Stanza;
+import org.jxmpp.jid.impl.JidCreate;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.FeatureTransport;
@@ -13,13 +12,12 @@ import org.limewire.friend.api.feature.LibraryChangedNotifier;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
-import org.xmlpull.v1.XmlPullParserException;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-public class LibraryChangedIQListener implements PacketListener, FeatureTransport<LibraryChangedNotifier> {
-    
+public class LibraryChangedIQListener implements StanzaListener, FeatureTransport<LibraryChangedNotifier> {
+
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
     private final Handler<LibraryChangedNotifier> libChangedHandler;
@@ -32,59 +30,35 @@ public class LibraryChangedIQListener implements PacketListener, FeatureTranspor
         this.connection = connection;
     }
 
-    public void processPacket(Packet packet) {
-        LibraryChangedIQ iq = (LibraryChangedIQ)packet;
-        try {
-            if(iq.getType().equals(IQ.Type.GET)) {
-                //handleGet(iq);
-            } else if(iq.getType().equals(IQ.Type.RESULT)) {
-                //handleResult(iq);
-            } else if(iq.getType().equals(IQ.Type.SET)) {
-                LOG.debugf("received iq {0}", packet);
-                handleSet(iq);
-            } else if(iq.getType().equals(IQ.Type.ERROR)) {
-                //handleError(iq);
-            } else {
-                //sendError(packet);
+    @Override
+    public void processStanza(Stanza stanza) {
+        LibraryChangedIQ iq = (LibraryChangedIQ) stanza;
+        if (iq.getType() == IQ.Type.set && iq.getFrom() != null) {
+            LOG.debugf("received iq {0}", stanza);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("handling library changed set " + iq.getStanzaId());
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            //sendError(packet);
-        } catch (XmlPullParserException e) {
-            LOG.error(e.getMessage(), e);
-            //sendError(packet);
+            libChangedHandler.featureReceived(iq.getFrom().toString(), new LibraryChangedNotifier() {});
         }
-    }
-
-    private void handleSet(LibraryChangedIQ packet) throws IOException, XmlPullParserException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("handling library changed set " + packet.getPacketID());
-        }
-        libChangedHandler.featureReceived(packet.getFrom(), new LibraryChangedNotifier(){});
     }
 
     @Override
     public void sendFeature(FriendPresence presence, LibraryChangedNotifier localFeature) throws FriendException {
         LOG.debug("send library refresh");
-        if(connection.isLoggedIn()) {
-            final LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
-            libraryChangedIQ.setType(IQ.Type.SET);
-            libraryChangedIQ.setTo(presence.getPresenceId());
-            libraryChangedIQ.setPacketID(IQ.nextID());
+        if (connection.isLoggedIn()) {
             try {
+                LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
+                libraryChangedIQ.setType(IQ.Type.set);
+                libraryChangedIQ.setTo(JidCreate.from(presence.getPresenceId()));
                 LOG.debugf("sending refresh to {0}", presence.getPresenceId());
                 connection.sendPacket(libraryChangedIQ);
-            } catch (FriendException e) {
+            } catch (Exception e) {
                 LOG.debugf("library refresh failed", e);
             }
         }
     }
 
-    public PacketFilter getPacketFilter() {
-        return new PacketFilter(){
-            public boolean accept(Packet packet) {
-                return packet instanceof LibraryChangedIQ;
-            }
-        };
+    public StanzaFilter getStanzaFilter() {
+        return stanza -> stanza instanceof LibraryChangedIQ;
     }
 }

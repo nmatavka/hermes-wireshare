@@ -18,7 +18,6 @@ import org.limewire.core.impl.magnet.MagnetFactoryImpl;
 import org.limewire.core.impl.mojito.CoreGlueMojitoModule;
 import org.limewire.core.impl.monitor.CoreGlueMonitorModule;
 import org.limewire.core.impl.monitor.IncomingSearchListenerList;
-import org.limewire.core.impl.mozilla.CoreGlueMozillaModule;
 import org.limewire.core.impl.network.CoreGlueNetworkModule;
 import org.limewire.core.impl.player.CoreGluePlayerModule;
 import org.limewire.core.impl.properties.CoreGluePropertiesModule;
@@ -67,7 +66,6 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGlueXMPPModule());
         install(new CoreGluePlayerModule());
         install(new CoreGluePropertiesModule());
-        install(new CoreGlueMozillaModule());
         install(new CoreGlueRestModule());
         install(new CoreGlueSupportModule());
         install(new CoreGlueUploadModule());

@@ -17,7 +17,6 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
-import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.inject.GuiceUtils;
 import org.limewire.net.FirewallService;
 import org.limewire.nio.NIODispatcher;
@@ -27,7 +26,6 @@ import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
 import org.limewire.ui.support.FatalBugManager;
-import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
@@ -42,7 +40,6 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
-import org.mozilla.browser.MozillaPanel;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -84,8 +81,6 @@ final class Initializer {
     @Inject private Provider<LifecycleManager> lifecycleManager;
     @Inject private Provider<LimeCoreGlue> limeCoreGlue;
     @Inject private Provider<NIODispatcher> nioDispatcher;
-    @Inject private Provider<LimeMozillaOverrides> mozillaOverrides;
-    
     Initializer() {
         // If Log4J is available then remove the NoOpLog
         if (LogUtils.isLog4JAvailable()) {
@@ -197,8 +192,7 @@ final class Initializer {
 			public void run() {
                 String name = UIManager.getSystemLookAndFeelClassName();                
                 if(OSUtils.isLinux()) {
-                    //mozswing on linux is not compatible with the gtklook and feel in jvms less than 1.7
-                    //forcing cross platform look and feel for linux.
+                    // Keep the cross-platform fallback on Linux for predictable startup behavior.
                     name = UIManager.getCrossPlatformLookAndFeelClassName();
                 }           
                 try {
@@ -247,8 +241,8 @@ final class Initializer {
             SystemUtils.setOpenFileLimit(1024);
             stopwatch.resetAndLog("Open file limit raise");     
 
-            MacEventHandler.instance();
-            stopwatch.resetAndLog("MacEventHandler instance");
+            MacEventHandler.instance().register();
+            stopwatch.resetAndLog("MacEventHandler register");
         }
     }
     
@@ -335,13 +329,17 @@ final class Initializer {
 
     /**
      * Initializes any code that is dependent on external controls.
-     * Specifically, MacEventHandler on OS X,
+     * Specifically, GURLHandler & MacEventHandler on OS X,
      * ensuring that multiple WireShares can't run at once,
      * and processing any arguments that were passed to WireShare.
      */ 
     private void runExternalChecks(String[] args, Injector injector) {        
         stopwatch.resetAndLog("Get externalControl");
         if(OSUtils.isMacOSX()) {
+            GURLHandler.getInstance().enable(externalControl.get());
+            stopwatch.resetAndLog("Enable GURL");
+            MacEventHandler.instance().register();
+            stopwatch.resetAndLog("Register macEventHandler");
             injector.injectMembers(MacEventHandler.instance());
             stopwatch.resetAndLog("Enable macEventHandler");
         }
@@ -416,7 +414,7 @@ final class Initializer {
     }
     
     /**
-     * Initializes any early UI tasks, such as HTML loading & the Bug Manager.
+     * Initializes any early UI tasks, such as warming the HTML renderer.
      */
     private void initializeEarlyUI() {
         // Load up the HTML engine.
@@ -436,38 +434,6 @@ final class Initializer {
                 stopwatch.resetAndLog("create HTML view");
             }
         });
-        stopwatch.resetAndLog("return from evt queue");
-        
-        splashRef.get().setStatusText(I18n.tr("Loading browser..."));           //loading browser
-        // Not pretty but Mozilla initialization errors should not crash the
-        // program
-        if (LimeMozillaInitializer.shouldInitialize()) {
-            // See LWC-2860 for why we change Turkish -> English.
-            // If MozSwing ever fixes this for us, we can remove this workaround.
-            Locale locale = Locale.getDefault();
-            if(locale.getLanguage().equals("tr")) {
-                Locale.setDefault(Locale.ENGLISH);
-            }
-            try {
-                LimeMozillaInitializer.initialize();
-                mozillaOverrides.get().overrideMozillaDefaults();
-            } catch (Exception e) {
-                // If it failed, don't keep the wrong locale active.
-                Locale.setDefault(locale);
-                LOG.error("Mozilla initialization failed");
-            }
-            
-            stopwatch.resetAndLog("Load XUL Library Path");
-            SwingUtils.invokeNowOrWait(new Runnable() {
-                @Override
-				public void run() {
-                    stopwatch.resetAndLog("enter evt queue");
-                    new MozillaPanel();
-                    stopwatch.resetAndLog("Load MozillaPanel");
-                }
-            });
-        }
-        
         stopwatch.resetAndLog("return from evt queue");
     }
     

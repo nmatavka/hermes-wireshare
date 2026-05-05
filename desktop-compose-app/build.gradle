@@ -1,0 +1,122 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'org.jetbrains.compose'
+    id 'application'
+}
+
+def managedGuiceVersion = gradle.ext.has('managedGuiceVersion')
+    ? gradle.ext.managedGuiceVersion
+    : '6.0.0'
+
+group = 'org.limewire'
+version = '7.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withSourcesJar()
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+application {
+    mainClass = 'org.limewire.ui.compose.Main'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+dependencies {
+    implementation compose.desktop.currentOs
+    implementation compose.material3
+    implementation compose.materialIconsExtended
+
+    implementation "com.google.inject:guice:${managedGuiceVersion}"
+    implementation "com.google.inject.extensions:guice-assistedinject:${managedGuiceVersion}"
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'aopalliance:aopalliance:1.0'
+    implementation 'net.java.dev.jna:jna:5.14.0'
+    implementation 'net.java.dev.glazedlists:glazedlists_java15:1.9.1'
+    implementation 'log4j:log4j:1.2.17'
+
+    implementation project(':common')
+    implementation project(':collection')
+    implementation project(':bittorrent-api')
+    implementation project(':core-api')
+    implementation project(':core-glue')
+    implementation project(':core-settings')
+    implementation project(':desktop-compose-contracts')
+    implementation project(':desktop-compose-legacy-compat')
+    implementation project(':friend')
+    implementation project(':gnutella-core')
+    implementation project(':io')
+    implementation project(':mojito')
+    implementation project(':mojito-ui')
+    implementation project(':net')
+    implementation project(':nio')
+    implementation project(':player-api')
+    implementation project(':setting')
+
+    testImplementation 'junit:junit:4.13.2'
+}
+
+def composeDecouplingFiles = fileTree(projectDir) {
+    include 'src/main/kotlin/**/*.kt'
+    include 'src/main/java/**/*.java'
+    exclude '**/build/**'
+}
+
+def composeDecouplingAllowedSnippets = []
+
+def composeDecouplingRules = [
+    [label: 'Swing UI imports', token: 'org.limewire.ui.swing.'],
+    [label: 'Swing package usage', token: 'javax.swing.'],
+    [label: 'JOptionPane usage', token: 'JOptionPane'],
+    [label: 'JFileChooser usage', token: 'JFileChooser'],
+]
+
+tasks.register('verifyComposeDecoupling') {
+    group = 'verification'
+    description = 'Fails when Compose UI/controller code reaches back into Swing-era APIs outside the explicit integration boundary.'
+    inputs.files(composeDecouplingFiles)
+
+    doLast {
+        def violations = []
+
+        composeDecouplingFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            def normalizedPath = file.absolutePath.replace(File.separatorChar, '/' as char)
+            def allowed = composeDecouplingAllowedSnippets.any { normalizedPath.contains(it) }
+            if (allowed) {
+                return
+            }
+
+            String text = file.getText('UTF-8')
+            composeDecouplingRules.each { rule ->
+                if (text.contains(rule.token)) {
+                    violations << "${rule.label}: ${project.relativePath(file)}"
+                }
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "Compose decoupling check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyComposeDecoupling')
+}

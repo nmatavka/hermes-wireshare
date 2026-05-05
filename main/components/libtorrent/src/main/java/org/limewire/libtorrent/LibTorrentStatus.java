@@ -4,10 +4,13 @@ import org.limewire.bittorrent.TorrentState;
 import org.limewire.bittorrent.TorrentStatus;
 import org.limewire.util.StringUtils;
 
+import com.sun.jna.Structure;
+
 /**
- * Lightweight torrent status DTO used by the compatibility layer.
+ * Structure used to pass data from the native code regarding a torrents state
+ * back to java.
  */
-public class LibTorrentStatus implements TorrentStatus {
+public class LibTorrentStatus extends Structure implements TorrentStatus {
 
     /**
      * long containing the total amount of the torrent downloaded and verified.

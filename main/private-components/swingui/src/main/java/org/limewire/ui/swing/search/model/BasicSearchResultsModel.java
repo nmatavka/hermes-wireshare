@@ -552,18 +552,19 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
      * A matcher editor used to filter visible search results. 
      */
     private class VisibleMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
+        private final Matcher<VisualSearchResult> visibleMatcher = new Matcher<VisualSearchResult>() {
+            @Override
+            public boolean matches(VisualSearchResult item) {
+                // Determine whether item has parent, and parent is hidden
+                // due to filtering. If so, we treat the item as visible.
+                VisualSearchResult parent = item.getSimilarityParent();
+                boolean parentHidden = (parent != null) && !isFilterMatch(parent);
+                return item.isVisible() || parentHidden;
+            }
+        };
         
         public VisibleMatcherEditor() {
-            currentMatcher = new Matcher<VisualSearchResult>() {
-                @Override
-                public boolean matches(VisualSearchResult item) {
-                    // Determine whether item has parent, and parent is hidden
-                    // due to filtering.  If so, we treat the item as visible.
-                    VisualSearchResult parent = item.getSimilarityParent();
-                    boolean parentHidden = (parent != null) && !isFilterMatch(parent);
-                    return item.isVisible() || parentHidden;
-                }
-            };
+            fireChanged(visibleMatcher);
         }
         
         /**
@@ -571,8 +572,7 @@ class BasicSearchResultsModel implements SearchResultsModel, VisualSearchResultS
          * listeners.
          */
         public void update() {
-            fireChangedMatcher(new MatcherEditor.Event<VisualSearchResult>(
-                    this, Event.CHANGED, currentMatcher));
+            fireChanged(visibleMatcher);
         }
     }
 

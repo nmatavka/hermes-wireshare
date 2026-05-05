@@ -9,7 +9,6 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
@@ -51,17 +50,34 @@ public class GhostDragGlassPane extends JPanel {
         setOpaque(false);
         
         GuiUtils.assignResources(this);
-        this.dragIcon = dragIconAccept;
+        this.dragIcon = dragIconAccept != null ? dragIconAccept : dragIconReject;
         updateDragImage();
     }
 
     private void updateDragImage() {
-        dragged =  new BufferedImage(dragIcon.getIconWidth(), dragIcon.getIconHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics g = dragged.getGraphics();
-        g.drawImage(((ImageIcon)dragIcon).getImage(), 0, 0, null);
+        if (dragIcon == null) {
+            dragged = null;
+            width = 0;
+            height = 0;
+            return;
+        }
 
         width = dragIcon.getIconWidth();
         height = dragIcon.getIconHeight();
+        if (width <= 0 || height <= 0) {
+            dragged = null;
+            width = 0;
+            height = 0;
+            return;
+        }
+
+        dragged = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics g = dragged.getGraphics();
+        try {
+            dragIcon.paintIcon(this, g, 0, 0);
+        } finally {
+            g.dispose();
+        }
     }
     
     /**

@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search;
 
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
-import org.limewire.inject.FactoryModules;
 import org.limewire.inject.LazyBinder;
 import org.limewire.ui.swing.filter.AdvancedFilterPanelFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
@@ -23,6 +22,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 
 /**
@@ -36,25 +36,25 @@ public class LimeWireUiSearchModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AutoCompleteDictionary.class).annotatedWith(Names.named("searchHistory")).toInstance(new StringTrieSet(true));
-        install(FactoryModules.newFactory(SmartAutoCompleteFactory.class, SmartAutoCompleteDictionary.class));
+        install(new FactoryModuleBuilder().build(SmartAutoCompleteFactory.class));
         
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
         bind(SearchHandler.class).annotatedWith(Names.named("text")).to(TextSearchHandlerImpl.class);
         bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
         bind(VisualSearchResultFactory.class).to(VisualSearchResultFactoryImpl.class);
         
-        install(FactoryModules.newFactory(SearchResultsPanelFactory.class, SearchResultsPanel.class));
+        install(new FactoryModuleBuilder().build(SearchResultsPanelFactory.class));
         
-        install(FactoryModules.newFactory(ResultsContainerFactory.class, ResultsContainer.class));
+        install(new FactoryModuleBuilder().build(ResultsContainerFactory.class));
         
-        install(FactoryModules.newFactory(SortAndFilterPanelFactory.class, SortAndFilterPanel.class));
+        install(new FactoryModuleBuilder().build(SortAndFilterPanelFactory.class));
         
         bind(new TypeLiteral<AdvancedFilterPanelFactory<VisualSearchResult>>(){}).to(
                 SearchFilterPanelFactory.class);
         
-        install(FactoryModules.newFactory(BaseResultPanelFactory.class, BaseResultPanel.class));
+        install(new FactoryModuleBuilder().build(BaseResultPanelFactory.class));
         
-        install(FactoryModules.newFactory(ListViewTableEditorRendererFactory.class, ListViewTableEditorRenderer.class));       
+        install(new FactoryModuleBuilder().build(ListViewTableEditorRendererFactory.class));
         
         bind(FriendPresenceActions.class).toProvider(LazyBinder.newLazyProvider(
                 FriendPresenceActions.class, FriendPresenceActionsImpl.class));
@@ -66,6 +66,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
         bind(SearchResultTruncator.class).toProvider(LazyBinder.newLazyProvider(
                 SearchResultTruncator.class, SearchResultTruncatorImpl.class));
         
-        install(FactoryModules.newFactory(BrowseFailedMessagePanelFactory.class, BrowseFailedMessagePanel.class));
+
+        install(new FactoryModuleBuilder().build(BrowseFailedMessagePanelFactory.class));
     }
 }

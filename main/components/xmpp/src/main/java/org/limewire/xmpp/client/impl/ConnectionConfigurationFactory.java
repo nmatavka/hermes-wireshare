@@ -1,11 +1,11 @@
 package org.limewire.xmpp.client.impl;
 
-import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.limewire.friend.api.FriendConnectionConfiguration;
 
 /**
- * Creates ConnectionConfigurations for XMPPConnectionConfigurations.  Typically backed by a collection
- * of hosts and ports. 
+ * Creates connection configurations for XMPP friend connections. Typically backed by a
+ * collection of hosts and ports.
  */
 public interface ConnectionConfigurationFactory {
 
@@ -32,10 +32,11 @@ public interface ConnectionConfigurationFactory {
     boolean hasMore(FriendConnectionConfiguration connectionConfiguration, RequestContext requestContext);
     
     /**
-     * Lookups up ConnectionConfiguration for the given XMPPConnectionConfiguration.
-     * @return a ConnectionConfiguration; never null
+     * Looks up the next Smack TCP configuration for the given XMPP connection configuration.
+     * @return a connection configuration; never null
      * @throws IllegalStateException is hasMore returns false
      */
-    ConnectionConfiguration getConnectionConfiguration(FriendConnectionConfiguration connectionConfiguration,
-                                                       RequestContext requestContext);
+    XMPPTCPConnectionConfiguration getConnectionConfiguration(
+            FriendConnectionConfiguration connectionConfiguration,
+            RequestContext requestContext);
 }

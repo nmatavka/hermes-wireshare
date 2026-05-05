@@ -7,7 +7,6 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.core.api.library.FileProcessingEvent;
 import org.limewire.inject.AbstractModule;
-import org.limewire.inject.FactoryModules;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
@@ -20,6 +19,7 @@ import org.limewire.listener.EventListenerList.EventListenerListContext;
 
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 
 public class LimeWireLibraryModule extends AbstractModule {
@@ -37,7 +37,7 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(Library.class).to(LibraryImpl.class);
         bind(IncompleteFileCollection.class).to(IncompleteFileCollectionImpl.class);
         bind(FileView.class).annotatedWith(IncompleteFiles.class).to(IncompleteFileCollection.class);
-        install(FactoryModules.newFactory(SharedFileCollectionImplFactory.class, SharedFileCollectionImpl.class));
+        install(new FactoryModuleBuilder().build(SharedFileCollectionImplFactory.class));
         
         EventListenerListContext context = new EventListenerListContext();
         

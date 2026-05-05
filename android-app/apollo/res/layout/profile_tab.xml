@@ -1,0 +1,90 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<view xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    class="com.andrew.apollo.widgets.CarouselTab" >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <com.andrew.apollo.widgets.LayoutSuppressingImageView
+            android:id="@+id/profile_tab_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop" />
+
+        <com.andrew.apollo.widgets.SquareImageView
+            android:id="@+id/profile_tab_album_art"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@null"
+            android:scaleType="fitXY"
+            android:visibility="gone" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/profile_carousel_label_height"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@color/transparent_black" />
+
+        <View
+            android:id="@+id/profile_tab_colorstrip"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/profile_indicator_height"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:background="@color/holo_blue_light"/>
+
+        <View
+            android:id="@+id/profile_tab_alpha_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="@dimen/profile_carousel_label_height" />
+
+        <TextView
+            android:id="@+id/profile_tab_label"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/profile_carousel_label_height"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:gravity="left|center_vertical"
+            android:paddingLeft="@dimen/profile_label_padding"
+            android:paddingRight="@dimen/profile_label_padding"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_large" />
+    </RelativeLayout>
+
+</view>

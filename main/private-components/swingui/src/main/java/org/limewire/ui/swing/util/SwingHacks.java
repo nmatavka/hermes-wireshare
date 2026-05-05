@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -103,64 +100,20 @@ public class SwingHacks {
      *  resetting the internal state after the initial null pointer. 
      */
     public static void fixDnDforKDE(final JComponent c) {
-        
         // TODO: should be KDE only, but is safe for Gnome in the meantime.
         if (!OSUtils.isUnix()) {
             return;
         }
-        
-        final DropTarget originalTarget = c.getDropTarget();
-        
-        if (originalTarget == null || 
-                !originalTarget.getClass().getName()
-                    .equals("javax.swing.TransferHandler$SwingDropTarget")) {
+
+        DropTarget originalTarget = c.getDropTarget();
+        if (originalTarget == null) {
             return;
         }
-        
-        c.setDropTarget(new KdeSafeDropTarget(originalTarget));
-    }
 
-    private static final class KdeSafeDropTarget extends DropTarget {
-
-        private final DropTarget delegate;
-
-        KdeSafeDropTarget(DropTarget delegate) {
-            this.delegate = delegate;
-            setDefaultActions(delegate.getDefaultActions());
-            setActive(delegate.isActive());
-            setFlavorMap(delegate.getFlavorMap());
-        }
-
-        @Override
-        public synchronized void dragEnter(DropTargetDragEvent dtde) {
-            delegate.dragEnter(dtde);
-        }
-
-        @Override
-        public synchronized void dragOver(DropTargetDragEvent dtde) {
-            try {
-                delegate.dragOver(dtde);
-            } catch (NullPointerException ignored) {
-                delegate.dragExit(dtde);
-                delegate.dragEnter(dtde);
-                delegate.dragOver(dtde);
-            }
-        }
-
-        @Override
-        public synchronized void dropActionChanged(DropTargetDragEvent dtde) {
-            delegate.dropActionChanged(dtde);
-        }
-
-        @Override
-        public synchronized void dragExit(DropTargetEvent dte) {
-            delegate.dragExit(dte);
-        }
-
-        @Override
-        public synchronized void drop(DropTargetDropEvent dtde) {
-            delegate.drop(dtde);
-        }
+        // The old workaround depended on Guice's shaded cglib internals, which
+        // are no longer accessible on modern JPMS JDKs. Keeping Swing's default
+        // drop target is the safest Java 21 baseline until a public-API fix is
+        // needed again.
     }
 
 }

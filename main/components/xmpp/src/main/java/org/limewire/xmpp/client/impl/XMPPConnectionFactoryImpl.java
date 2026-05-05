@@ -2,7 +2,7 @@ package org.limewire.xmpp.client.impl;
 
 import java.util.concurrent.Callable;
 
-import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.roster.Roster;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;

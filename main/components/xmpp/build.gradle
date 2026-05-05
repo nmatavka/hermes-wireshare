@@ -1,0 +1,9 @@
+dependencies {
+    implementation "org.igniterealtime.smack:smack-core:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-im:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-tcp:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-extensions:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-resolver-minidns:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-debug-slf4j:${gradle.ext.managedSmackVersion}"
+    implementation "org.igniterealtime.smack:smack-xmlparser-stax:${gradle.ext.managedSmackVersion}"
+}

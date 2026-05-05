@@ -24,7 +24,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
-import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -50,7 +49,7 @@ public class LibraryNavigatorPanel extends JXPanel {
             LibraryNavTableEditor editor,
             LibraryNavPopupHandler popupHandler, 
             CreateListAction createAction,
-            SharedFileListManager sharedFileListManager, GhostDragGlassPane ghostGlassPane) {
+            SharedFileListManager sharedFileListManager) {
         super(new MigLayout("insets 0, gap 0, fillx", "[150!]", ""));
         
         this.table = table;
@@ -164,5 +163,4 @@ public class LibraryNavigatorPanel extends JXPanel {
         return table.getPrivateSharedLibraryCount();
     }
 }
-
 

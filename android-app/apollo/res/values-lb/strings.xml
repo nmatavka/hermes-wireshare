@@ -1,0 +1,97 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <string name="page_recent">Rezent</string>
+  <string name="page_albums">Alben</string>
+  <string name="page_playlists">Ofspilllëschten</string>
+  <string name="page_genres">Genren</string>
+  <string name="menu_search">Sichen</string>
+  <string name="menu_play_all">All ofspillen</string>
+  <string name="menu_save_queue">Waardeschlaang späicheren</string>
+  <string name="menu_share">Deelen</string>
+  <string name="menu_simple">Einfach</string>
+  <string name="menu_detailed">Detailléiert</string>
+  <string name="menu_view_as">Uweisen als</string>
+  <string name="sort_order_entry_az">A-Z</string>
+  <string name="sort_order_entry_za">Z-A</string>
+  <string name="sort_order_entry_album">Album</string>
+  <string name="sort_order_entry_year">Joer</string>
+  <string name="sort_order_entry_duration">Dauer</string>
+  <string name="playlist_favorite">Favorit</string>
+  <string name="playlist_favorites">Favoritten</string>
+  <string name="playlist_last_added">Fir d\'lescht dobäigesat</string>
+  <string name="new_empty_playlist">Nei Ofspilllëscht</string>
+  <string name="save">Späicheren</string>
+  <string name="cancel">Ofbriechen</string>
+  <string name="overwrite">Iwwerschreiwen</string>
+  <string name="new_playlist_name_template">Ofspilllëscht <xliff:g id="number">%d</xliff:g></string>
+  <string name="create_playlist_prompt">Numm vun der Ofspilllëscht</string>
+    <string name="context_menu_play_selection">Ofspillen</string>
+  <string name="context_menu_play_next">Als nächst ofspillen</string>
+  <string name="context_menu_rename_playlist">Ëmbenennen</string>
+  <string name="context_menu_delete">Läschen</string>
+  <string name="accessibility_play">Ofspillen</string>
+  <string name="accessibility_pause">Paus</string>
+  <string name="accessibility_next">Weider</string>
+  <string name="accessibility_shuffle">Mëschen</string>
+  <string name="accessibility_shuffle_all">All mëschen</string>
+  <string name="accessibility_repeat">Widderhuelen</string>
+    <string name="empty_search">Keng Sichresultater fonnt</string>
+    <string name="sort_order_entry_date_added">Datum hinzugefügt</string>
+  <string name="delete_dialog_title">Läschen <xliff:g id="item" example="album">%s</xliff:g>?</string>
+  <string name="menu_equalizer">Ausgläich</string>
+    <string name="context_menu_use_as_ringtone">Benotzt als Klingelton</string>
+  <string name="remove_from_favorites">Fuert aus Favoritten</string>
+  <string name="pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> op Ärer Heemechtsplaz gestréckt</string>
+  <string name="empty_recent">Lidder déi Dir héieren hutt wäert et hei weisen. Probéiert eng Musek ze spillen.</string>
+  <string name="now_listening_to_no_artist_available">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" op #WireShare</string>
+    <string name="context_menu_more_by_artist">Méi vun der Kënschtlerin</string>
+  <string name="add_to_queue">Fichier mat der Warteschléif</string>
+    <string name="sort_order_entry_track_list">Track Lëscht</string>
+  <string name="menu_add_to_homescreen">Pin op home screen</string>
+    <string name="add_to_favorites">Fannen op Favoritten</string>
+    <string name="delete_files_title">Läschen Dateien</string>
+  <string name="no_effects_for_you">Den Equalizer konnt net opgemaach ginn.</string>
+  <string name="accessibility_repeat_one">Wieder Wieder</string>
+  <string name="page_last_added">Lescht geäntwert</string>
+    <string name="context_menu_remove_from_recent">Entferne vun de läschten</string>
+  <string name="empty_playlist">Dës Playlist ass eidel.\n\nKlickt hei fir ze léieren wéi Dir Lidder u kënnt.</string>
+  <string name="empty_last_added">Lieder déi Dir am Laaf vum leschten Mount huet, ginn hei gewisen.</string>
+    <string name="now_listening_to">#NowPlaying \"<xliff:g id="title">%1$s</xliff:g>\" vum <xliff:g id="artist">%2$s</xliff:g> op #WireShare</string>
+  <string name="sort_order_entry_artist">Kënschtler</string>
+  <string name="empty_music">Nach keng Songs. Versucht e puer Inhalt ze lueden</string>
+  <string name="context_menu_remove_from_playlist">Aus vun der Lëscht vun de Songs ze spillen</string>
+  <string name="menu_grid">Grid</string>
+  <string name="set_as_ringtone">\'<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\' als Klingong</string>
+  <string name="are_you_sure_delete_files_text">Sidd Dir sécher datt Dir déi gewielte Fichier vu Ärem Apparat unzehuelen?</string>
+  <string name="menu_shuffle">All kuscheleg</string>
+    <string name="menu_clear_queue">Klore Sequenz</string>
+    <string name="page_artists">Kënschtler</string>
+    <string name="share_track_using">Bäisetze weg mat:</string>
+    <string name="accessibility_prev">Virdrun</string>
+  <string name="add_to_playlist">Zu der Lëscht vun de Lidder ze spillen</string>
+  <string name="frostwire_player">WireShare Player</string>
+    <string name="page_songs">Lidder</string>
+    <string name="sort_order_entry_number_of_songs">Zuel vu Lidder</string>
+    <string name="menu_sort_by">Zortéieren no</string>
+    <string name="sort_order_entry_number_of_albums">Zuel vu Alben</string>
+  <string name="sort_order_entry_filename">Fichiersnumm</string>
+  <string name="could_not_be_pinned_to_home_screen"><xliff:g id="name">%s</xliff:g> konnt net op Ärer Heemechtsplaz gestach ginn</string>
+    <string name="accessibility_repeat_all">Alles erëm</string>
+</resources>

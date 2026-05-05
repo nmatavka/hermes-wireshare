@@ -2,7 +2,10 @@ package org.limewire.libtorrent;
 
 import org.limewire.bittorrent.TorrentPeer;
 
-public class LibTorrentPeer implements TorrentPeer {
+import com.sun.jna.Structure;
+import com.sun.jna.WString;
+
+public class LibTorrentPeer extends Structure implements Structure.ByReference, TorrentPeer {
     public static final short source_tracker = 0x1;
     public static final short source_dht = 0x2;
     public static final short source_pex = 0x4;
@@ -21,26 +24,7 @@ public class LibTorrentPeer implements TorrentPeer {
     public float payload_down_speed;
     public float progress;
     public String country;
-    public String clientName;
-
-    public LibTorrentPeer() {
-    }
-
-    public LibTorrentPeer(int statusFlags, String peerId, String ip, int source, float upSpeed,
-            float downSpeed, float payloadUpSpeed, float payloadDownSpeed, float progress,
-            String country, String clientName) {
-        this.status_flags = statusFlags;
-        this.peer_id = peerId;
-        this.ip = ip;
-        this.source = source;
-        this.up_speed = upSpeed;
-        this.down_speed = downSpeed;
-        this.payload_up_speed = payloadUpSpeed;
-        this.payload_down_speed = payloadDownSpeed;
-        this.progress = progress;
-        this.country = country;
-        this.clientName = clientName;
-    }
+    public WString clientName;
 
     @Override
     public String getCountry() {
@@ -49,7 +33,13 @@ public class LibTorrentPeer implements TorrentPeer {
 
     @Override
     public String getClientName() {
-        return clientName != null ? clientName : "";
+        if (clientName != null) {
+            return clientName.toString();
+        } 
+        else {
+            return "";
+        }
+        
     }
     
     @Override

@@ -1,15 +1,13 @@
 package org.limewire.ui.swing.wizard;
 
-import org.limewire.inject.FactoryModules;
-
 import com.google.inject.AbstractModule;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 public class LimeWireUiWizardModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        
-        install(FactoryModules.newFactory(SetupComponentDecoratorFactory.class, SetupComponentDecorator.class));  
+        install(new FactoryModuleBuilder().build(SetupComponentDecoratorFactory.class));
     }
 
 }

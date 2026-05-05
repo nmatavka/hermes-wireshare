@@ -14,9 +14,6 @@ import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIFunctionMapper;
 import com.sun.jna.win32.W32APITypeMapper;
 
-import foxtrot.Job;
-import foxtrot.Worker;
-
 /**
  * A modal Folder chooser dialog box. This uses native calls in JNA
  * to load a native folder chooser on Windows systems. This class will not
@@ -91,25 +88,25 @@ public class WindowsFolderChooser {
      * @return a string containing the absolute path the user choose
      */
     public String showWidget() {
-        String returnPath = (String)Worker.post(new Job() {
-            @Override
-            public Object run() {
-                byte[] path = new byte[OSUtils.getMaxPathLength()];
-                
-                Pointer ptr = shell32.SHBrowseForFolder(info);
-                
-                // get path selected by the user
-                shell32.SHGetPathFromIDList(ptr, path);
-                String returnPath = Native.toString(path);
-                
-                // Dispose of the return path structure
-                Ole32.INSTANCE.CoTaskMemFree(ptr);
-                
-                return returnPath;
-            }
-        });
+        return SwingUtils.runOffEventDispatchThread(
+                new java.util.concurrent.Callable<String>() {
+                    @Override
+                    public String call() {
+                        byte[] path = new byte[OSUtils.getMaxPathLength()];
 
-        return returnPath;
+                        Pointer ptr = shell32.SHBrowseForFolder(info);
+
+                        // get path selected by the user
+                        shell32.SHGetPathFromIDList(ptr, path);
+                        String returnPath = Native.toString(path);
+
+                        // Dispose of the return path structure
+                        Ole32.INSTANCE.CoTaskMemFree(ptr);
+
+                        return returnPath;
+                    }
+                },
+                "windows-folder-chooser");
     }
 
     /**

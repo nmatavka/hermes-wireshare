@@ -26,8 +26,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.SwingUtilities;
 
-import net.sf.fmj.media.AbstractGainControl;
-
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.LazySingleton;
 import org.limewire.logging.Log;
@@ -619,15 +617,53 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
         return currentSong;
     }
 
-    private class JavaGainControl extends AbstractGainControl {
+    private class JavaGainControl implements GainControl {
         private static final float MAX = 1.0f;
         private static final float MIN = 0.0f;
         private float level = 0.0f;
+        private boolean mute;
+        private final List<GainChangeListener> gainListeners = new CopyOnWriteArrayList<GainChangeListener>();
 
+        @Override
+        public java.awt.Component getControlComponent() {
+            return null;
+        }
+
+        @Override
+        public void setMute(boolean mute) {
+            this.mute = mute;
+            notifyGainChangeListeners();
+        }
+
+        @Override
+        public boolean getMute() {
+            return mute;
+        }
+
+        @Override
+        public float setDB(float gainInDb) {
+            if (Float.isInfinite(gainInDb) && gainInDb < 0) {
+                return setLevel(MIN);
+            }
+
+            return setLevel((float) Math.pow(10.0d, gainInDb / 20.0d));
+        }
+
+        @Override
+        public float getDB() {
+            if (mute || level <= MIN) {
+                return Float.NEGATIVE_INFINITY;
+            }
+
+            return (float) (20.0d * Math.log10(level));
+        }
+
+        @Override
         public float getLevel() {
             return level;
         }
 
+        @Override
         public float setLevel(final float level) {
             if(level > MAX)
                 this.level = MAX;
@@ -636,10 +672,26 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
             else
                 this.level = level;
             
-            notifyListenersGainChangeEvent();
+            notifyGainChangeListeners();
             
             return this.level;
         }
 
+        @Override
+        public void addGainChangeListener(GainChangeListener listener) {
+            gainListeners.add(listener);
+        }
+
+        @Override
+        public void removeGainChangeListener(GainChangeListener listener) {
+            gainListeners.remove(listener);
+        }
+
+        private void notifyGainChangeListeners() {
+            GainChangeEvent event = new GainChangeEvent(this, mute, getDB(), level);
+            for (GainChangeListener listener : gainListeners) {
+                listener.gainChange(event);
+            }
+        }
     }
 }

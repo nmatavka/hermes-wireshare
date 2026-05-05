@@ -33,7 +33,6 @@ import org.limewire.inject.Modules;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
-import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.components.PlainCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainMenuItemUI;
@@ -41,7 +40,6 @@ import org.limewire.ui.swing.components.PlainMenuUI;
 import org.limewire.ui.swing.components.PlainWindowsCheckBoxMenuItemUI;
 import org.limewire.ui.swing.components.PlainWindowsMenuItemUI;
 import org.limewire.ui.swing.components.PlainWindowsMenuUI;
-import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.settings.SwingUiSettings;
@@ -52,8 +50,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import org.limewire.ui.swing.wizard.SetupWizard;
 import org.limewire.util.OSUtils;
-import org.mozilla.browser.MozillaInitialization;
-import org.mozilla.browser.MozillaInitialization.InitStatus;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -96,8 +92,6 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
     @Inject private DelayedShutdownHandler delayedShutdownHandler;
-    @Inject private HomeMediator homeMediator;
-    
     private OptionsDialog lastOptionsDialog;
     
     /** Starts with the mock core. */
@@ -131,13 +125,6 @@ public class AppFrame extends SingleFrameApplication {
         GuiUtils.assignResources(this);
 
         initUIDefaults();
-        
-        // Because we use a browser heavily, which is heavyweight,
-        // we must disable all lightweight popups.
-        if(MozillaInitialization.getStatus() != InitStatus.FAILED) {
-            JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-            ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-        }
         
         isStartup = args.length > 0 && STARTUP.equals(args[0]);
     }
@@ -205,8 +192,6 @@ public class AppFrame extends SingleFrameApplication {
         } else {
             getMainFrame().setVisible(true);
         }
-     // Reset the browser page to blank before continuing.  Necessary here so that Mac won't freeze.
-        homeMediator.getComponent().loadBlank();
         started = true;
     }
     
@@ -321,7 +306,6 @@ public class AppFrame extends SingleFrameApplication {
         };
         Injector childInjector;
         if (injector == null) {
-            LimeMozillaInitializer.initialize();
             childInjector = Guice.createInjector(Stage.DEVELOPMENT,
                     new LimeWireInjectModule(),
                     new LimeWireSwingUiModule(),

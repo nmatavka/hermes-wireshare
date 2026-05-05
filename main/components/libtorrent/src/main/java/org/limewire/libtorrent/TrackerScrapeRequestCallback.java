@@ -7,7 +7,9 @@ import org.limewire.bittorrent.TorrentScrapeData;
 import org.limewire.bittorrent.TorrentTrackerScraper.ScrapeCallback;
 import org.limewire.collection.IdentityHashSet;
 
-public class TrackerScrapeRequestCallback {
+import com.sun.jna.Callback;
+
+public class TrackerScrapeRequestCallback implements Callback {
     
     private final static int STATUS_SUCCESS = 0;
     

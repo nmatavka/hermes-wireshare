@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.ResourceUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 
@@ -29,6 +28,63 @@ public class LimeAssociations {
     }
 
     private static Map<AssociationType, LimeAssociationOption> fileAssociations = null;
+
+    private static Map<AssociationType, LimeAssociationOption> createWindowsAssociations() {
+        Map<AssociationType, LimeAssociationOption> associations = new HashMap<AssociationType, LimeAssociationOption>();
+
+        String runningPath = SystemUtils.getRunningPath();
+        if (runningPath == null || !runningPath.endsWith(PROGRAM + ".exe")) {
+            return Collections.emptyMap();
+        }
+
+        String protocolOpener = runningPath;
+        String fileOpener = "\"" + runningPath + "\" \"%1\"";
+        String fileIcon = runningPath + ",1";
+
+        ShellAssociation file = new WindowsFileTypeAssociation(
+                "torrent",
+                "application/x-bittorrent",
+                fileOpener,
+                "open",
+                "WireShare Torrent",
+                fileIcon,
+                PROGRAM
+        );
+        associations.put(
+                AssociationType.TORRENT,
+                new LimeAssociationOption(file, ".torrent", I18n.tr("\".torrent\" files"))
+        );
+
+        ShellAssociation magnet = new MagnetAssociation(PROGRAM, protocolOpener);
+        associations.put(
+                AssociationType.MAGNET,
+                new LimeAssociationOption(magnet, "magnet:", I18n.tr("\"magnet:\" links"))
+        );
+
+        return associations;
+    }
+
+    private static Map<AssociationType, LimeAssociationOption> createLinuxAssociations() {
+        if (!LinuxXdgAssociationSupport.isSupported()) {
+            return Collections.emptyMap();
+        }
+
+        Map<AssociationType, LimeAssociationOption> associations = new HashMap<AssociationType, LimeAssociationOption>();
+
+        ShellAssociation torrent = new LinuxXdgAssociation(LinuxXdgAssociationSupport.TORRENT_MIME_TYPES);
+        associations.put(
+                AssociationType.TORRENT,
+                new LimeAssociationOption(torrent, ".torrent", I18n.tr("\".torrent\" files"))
+        );
+
+        ShellAssociation magnet = new LinuxXdgAssociation(LinuxXdgAssociationSupport.MAGNET_SCHEME_TYPES);
+        associations.put(
+                AssociationType.MAGNET,
+                new LimeAssociationOption(magnet, "magnet:", I18n.tr("\"magnet:\" links"))
+        );
+
+        return associations;
+    }
 
     public synchronized static boolean anyAssociationsSupported() {
         return isTorrentAssociationSupported() || isMagnetAssociationSupported();
@@ -58,44 +114,10 @@ public class LimeAssociations {
 
     private static Map<AssociationType, LimeAssociationOption> getSupportedAssociations() {
         if (fileAssociations == null) {
-            if (OSUtils.isWindows() || OSUtils.isLinux()) {
-                if (!ResourceUtils.isJdicLibraryLoaded()) {
-                    fileAssociations = Collections.emptyMap();
-                } else {
-                    fileAssociations = new HashMap<AssociationType, LimeAssociationOption>();
-                    // strings that the shell will understand
-                    String fileOpener = null;
-                    String fileIcon = null;
-                    String protocolOpener = null;
-    
-                    if (OSUtils.isWindows()) {
-                        String runningPath = SystemUtils.getRunningPath();
-                        if (runningPath != null && runningPath.endsWith(PROGRAM + ".exe")) {
-                            protocolOpener = runningPath;
-                            fileOpener = "\"" + runningPath + "\" \"%1\"";
-                            fileIcon = runningPath + ",1";
-                        }
-                    }
-    
-                    // if we have a string that opens a file, register torrents
-                    if (fileOpener != null) {
-                        ShellAssociation file = new FileTypeAssociation("torrent",
-                                "application/x-bittorrent", fileOpener, "open", "WireShare Torrent",
-                                fileIcon);
-                        LimeAssociationOption torrent = new LimeAssociationOption(file, ".torrent",
-                                I18n.tr("\".torrent\" files"));
-                        fileAssociations.put(AssociationType.TORRENT, torrent);
-                    }
-    
-                    // if we have a string that opens a protocol, register magnets
-                    if (protocolOpener != null) {
-                        // Note: MagnetAssociation will only work on windows
-                        MagnetAssociation mag = new MagnetAssociation(PROGRAM, protocolOpener);
-                        LimeAssociationOption magOption = new LimeAssociationOption(mag, "magnet:",
-                                I18n.tr("\"magnet:\" links"));
-                        fileAssociations.put(AssociationType.MAGNET, magOption);
-                    }
-                }
+            if (OSUtils.isWindows()) {
+                fileAssociations = createWindowsAssociations();
+            } else if (OSUtils.isLinux()) {
+                fileAssociations = createLinuxAssociations();
             } else if (OSUtils.isMacOSX()) {
                 fileAssociations = new HashMap<AssociationType, LimeAssociationOption>();
                 if (OSXFileTypeAssociation.isNativeLibraryLoadedCorrectly()) {

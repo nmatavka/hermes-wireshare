@@ -18,7 +18,8 @@ public class Main {
         startTime = System.currentTimeMillis();
         try {
             if (isMacOSX()) {
-                MacEventHandler.instance();
+                GURLHandler.getInstance().register();
+                MacEventHandler.instance().register();
             }
 
             SplashScreen splashScreen = SplashScreen.getSplashScreen();
@@ -74,7 +75,7 @@ public class Main {
             // which would slow the speed of class-loading, causing the splash to be
             // displayed later.
             Class<?> loadClass = Class.forName("org.limewire.ui.swing.GuiLoader");
-            Object loadInstance = loadClass.getDeclaredConstructor().newInstance();
+            Object loadInstance = loadClass.newInstance();
             Method loadMethod = loadClass.getMethod("load", new Class[] { String[].class, Frame.class, Image.class } );
             loadMethod.invoke(loadInstance, args, splash, splashImage);
         } catch(Throwable t) {

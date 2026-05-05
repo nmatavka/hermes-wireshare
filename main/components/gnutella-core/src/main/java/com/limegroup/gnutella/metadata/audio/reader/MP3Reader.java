@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.mp3.MP3File;
+import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.datatype.AbstractDataType;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
@@ -46,20 +47,20 @@ public class MP3Reader extends AudioDataReader {
      */
     private void readV1Tag(AudioMetaData audioData, ID3v1Tag tag){
         if( audioData.getTitle() == null || audioData.getTitle().length() == 0)
-            audioData.setTitle(tag.getFirstTitle());
+            audioData.setTitle(tag.getFirst(FieldKey.TITLE));
         if( audioData.getArtist() == null || audioData.getArtist().length() == 0)
-            audioData.setArtist(tag.getFirstArtist());
+            audioData.setArtist(tag.getFirst(FieldKey.ARTIST));
         if( audioData.getAlbum() == null || audioData.getAlbum().length() == 0)
-            audioData.setAlbum(tag.getFirstAlbum());
+            audioData.setAlbum(tag.getFirst(FieldKey.ALBUM));
         if( audioData.getYear() == null || audioData.getYear().length() == 0)
-            audioData.setYear(tag.getFirstYear()); 
+            audioData.setYear(tag.getFirst(FieldKey.YEAR)); 
         if( audioData.getComment() == null || audioData.getComment().length() == 0)
-            audioData.setComment(tag.getFirstComment());
+            audioData.setComment(tag.getFirst(FieldKey.COMMENT));
         if( audioData.getGenre() == null || audioData.getGenre().length() == 0)
-            audioData.setGenre(tag.getFirstGenre()); 
+            audioData.setGenre(tag.getFirst(FieldKey.GENRE)); 
         if( audioData.getTrack() == null || audioData.getTrack().length() == 0) {
             try {
-                audioData.setTrack(tag.getFirstTrack());
+                audioData.setTrack(tag.getFirst(FieldKey.TRACK));
             }
             catch(UnsupportedOperationException e) {
                 // id3v1.0 tags dont have tracks
@@ -71,13 +72,13 @@ public class MP3Reader extends AudioDataReader {
      * Reads v2 tags from the mp3. 
      */
     private void readV2Tag(AudioMetaData audioData, AbstractID3v2Tag tag) {
-        audioData.setTitle(tag.getFirstTitle());
-        audioData.setArtist(tag.getFirstArtist());
-        audioData.setAlbum(tag.getFirstAlbum());
-        audioData.setYear(tag.getFirstYear()); 
-        audioData.setComment(tag.getFirstComment());
-        audioData.setGenre(parseGenre(tag.getFirstGenre()));
-        audioData.setTrack(tag.getFirstTrack());
+        audioData.setTitle(tag.getFirst(FieldKey.TITLE));
+        audioData.setArtist(tag.getFirst(FieldKey.ARTIST));
+        audioData.setAlbum(tag.getFirst(FieldKey.ALBUM));
+        audioData.setYear(tag.getFirst(FieldKey.YEAR)); 
+        audioData.setComment(tag.getFirst(FieldKey.COMMENT));
+        audioData.setGenre(parseGenre(tag.getFirst(FieldKey.GENRE)));
+        audioData.setTrack(tag.getFirst(FieldKey.TRACK));
         audioData.setLicense(tag.getFirst(ID3v24Frames.FRAME_ID_COPYRIGHTINFO));
                
         // read the PRIV tag if it exists
@@ -110,9 +111,8 @@ public class MP3Reader extends AudioDataReader {
      */
     // This suppressWarnings is for the iterator cast. The internal list is
     // generified to AbstractDataType but it doesn't expose that in the API.
-    @SuppressWarnings("unchecked")
     private void parseTagDataType(AbstractID3v2Frame frame, Map<String,byte[]> map) {
-        Iterator<AbstractDataType> iterator = frame.getBody().iterator();
+        Iterator<? extends AbstractDataType> iterator = frame.getBody().iterator();
         while (iterator.hasNext()) {
             AbstractDataType dataType = iterator.next();
             // if we have a String value, check if the next DataType is 

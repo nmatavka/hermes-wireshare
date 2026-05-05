@@ -1,7 +1,6 @@
 package org.limewire.libtorrent;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.limewire.bittorrent.TorrentFileEntry;
@@ -15,21 +14,13 @@ class TorrentInfoImpl implements TorrentInfo {
     private final List<String> seeds;
     private final List<TorrentFileEntry> fileEntries;
 
-    public TorrentInfoImpl(LibTorrentInfo libTorrentInfo, TorrentFileEntry[] fileEntries) {
-        this(libTorrentInfo.name, libTorrentInfo.piece_length, libTorrentInfo.getTrackers(),
-                libTorrentInfo.getSeeds(), Arrays.asList(fileEntries));
-    }
-
     public TorrentInfoImpl(String name, int pieceLength, List<TorrentTracker> trackers,
-            List<String> seeds, List<TorrentFileEntry> fileEntries) {
+            List<String> seeds, TorrentFileEntry[] fileEntries) {
         this.name = name;
         this.pieceLength = pieceLength;
-        this.trackers = trackers == null ? Collections.<TorrentTracker>emptyList()
-                : Collections.unmodifiableList(trackers);
-        this.seeds = seeds == null ? Collections.<String>emptyList()
-                : Collections.unmodifiableList(seeds);
-        this.fileEntries = fileEntries == null ? Collections.<TorrentFileEntry>emptyList()
-                : Collections.unmodifiableList(fileEntries);
+        this.trackers = trackers;
+        this.seeds = seeds;
+        this.fileEntries = Arrays.asList(fileEntries);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.settings;
 
+import java.awt.Component;
+import java.awt.Graphics;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.Map;
 
 import javax.swing.Icon;
 
-import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.friend.api.RosterEvent;
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
@@ -61,8 +62,8 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
         this.requiresDomain = requireDomain;
         this.serviceName = serviceName;
         this.label = label;
-        this.icon = icon != null ? icon : new EmptyIcon(16, 16);
-        this.largeIcon = largeIcon != null ? largeIcon : new EmptyIcon(28, 28);
+        this.icon = icon != null ? icon : new PlaceholderIcon(16, 16);
+        this.largeIcon = largeIcon != null ? largeIcon : new PlaceholderIcon(28, 28);
         this.username = "";
         this.canonicalId = "";
         this.password = "";
@@ -190,5 +191,29 @@ class FriendAccountConfigurationImpl implements FriendAccountConfiguration {
     @Override
     public Icon getLargeIcon() {
         return largeIcon;
+    }
+
+    private static final class PlaceholderIcon implements Icon {
+        private final int width;
+        private final int height;
+
+        private PlaceholderIcon(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+        }
+
+        @Override
+        public int getIconWidth() {
+            return width;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return height;
+        }
     }
 }

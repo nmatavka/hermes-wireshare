@@ -9,9 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.iTunesSettings;
-import org.limewire.external.itunes.windows.com.IITLibraryPlaylist;
-import org.limewire.external.itunes.windows.com.IITOperationStatus;
-import org.limewire.external.itunes.windows.com.IiTunes;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
@@ -20,6 +17,7 @@ import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComFailException;
 import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
+import com.jacob.com.Variant;
 
 /**
  * Handles sending completed downloads into iTunes.
@@ -160,20 +158,34 @@ public final class ItunesMediatorImpl implements ItunesMediator {
             try {
                 ActiveXComponent iTunesCom = new ActiveXComponent(ITUNES_ACTIVEX_NAME);
                 Dispatch iTunesController = iTunesCom.getObject();
-                IiTunes it = new IiTunes(iTunesController);
-                IITLibraryPlaylist pl = it.getLibraryPlaylist();
-                // Add the file
-                IITOperationStatus status = pl.addFile(newFile.getAbsolutePath());
-                if (status == null)
-                    return false;
-                while (status.getInProgress()) {
-                    // Waiting for add operation to complete (This is usually
-                    // instantaneous)...
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(10);
-                    } catch (InterruptedException ignored) {
-                        break;
+                Dispatch libraryPlaylist = null;
+                Dispatch addStatus = null;
+                try {
+                    libraryPlaylist = Dispatch.get(iTunesController, "LibraryPlaylist").toDispatch();
+                    Variant addStatusVariant = Dispatch.call(libraryPlaylist, "AddFile", newFile.getAbsolutePath());
+                    if (addStatusVariant == null || addStatusVariant.isNull()) {
+                        return false;
                     }
+
+                    addStatus = addStatusVariant.toDispatch();
+                    while (Dispatch.get(addStatus, "InProgress").getBoolean()) {
+                        // Waiting for add operation to complete (This is usually
+                        // instantaneous)...
+                        try {
+                            TimeUnit.MILLISECONDS.sleep(10);
+                        } catch (InterruptedException ignored) {
+                            break;
+                        }
+                    }
+                } finally {
+                    if (addStatus != null) {
+                        addStatus.safeRelease();
+                    }
+                    if (libraryPlaylist != null) {
+                        libraryPlaylist.safeRelease();
+                    }
+                    iTunesController.safeRelease();
+                    iTunesCom.safeRelease();
                 }
             } finally {
                 ComThread.Release();

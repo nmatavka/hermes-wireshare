@@ -11,6 +11,8 @@ import org.jaudiotagger.audio.exceptions.CannotWriteException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldDataInvalidException;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.KeyNotFoundException;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.limewire.util.FileUtils;
@@ -36,14 +38,30 @@ public class AudioDataEditor implements MetaWriter {
      *  a given tag field
      */
     protected Tag updateTag(Tag tag, AudioMetaData audioData) throws FieldDataInvalidException { 
-        tag.setAlbum(audioData.getAlbum());
-        tag.setArtist(audioData.getArtist());
-        tag.setComment(audioData.getComment()); 
-        tag.setGenre(audioData.getGenre());
-        tag.setTitle(audioData.getTitle());
-        tag.setYear(audioData.getYear());
-        tag.setTrack(audioData.getTrack());
+        setField(tag, FieldKey.ALBUM, audioData.getAlbum());
+        setField(tag, FieldKey.ARTIST, audioData.getArtist());
+        setField(tag, FieldKey.COMMENT, audioData.getComment());
+        setField(tag, FieldKey.GENRE, audioData.getGenre());
+        setField(tag, FieldKey.TITLE, audioData.getTitle());
+        setField(tag, FieldKey.YEAR, audioData.getYear());
+        setField(tag, FieldKey.TRACK, audioData.getTrack());
         return tag;
+    }
+
+    private void setField(Tag tag, FieldKey fieldKey, String value) throws FieldDataInvalidException {
+        if (value == null || value.isEmpty()) {
+            try {
+                tag.deleteField(fieldKey);
+            } catch (KeyNotFoundException ignored) {
+            }
+            return;
+        }
+
+        try {
+            tag.setField(fieldKey, value);
+        } catch (KeyNotFoundException e) {
+            throw new FieldDataInvalidException("Unsupported audio tag field: " + fieldKey, e);
+        }
     }
     
     /**

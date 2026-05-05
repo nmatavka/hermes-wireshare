@@ -1,0 +1,108 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml),
+ *            Marcelina Knitter (@marcelinkaaa)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/fragment_transfer_detail_files_file_type_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="5dp"
+        android:contentDescription="@null"
+        android:src="@drawable/my_files_audio_icon_selector_menu"
+        app:tint="@color/app_icon_primary" />
+
+    <RelativeLayout
+        android:id="@+id/fragment_transfer_detail_files_file_info_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toEndOf="@+id/fragment_transfer_detail_files_file_type_icon"
+        android:layout_toStartOf="@+id/fragment_transfer_detail_files_file_play_icon"
+        android:gravity="center_vertical"
+        android:paddingBottom="10dp"
+        android:paddingEnd="6dp"
+        android:paddingStart="0dp"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:id="@+id/fragment_transfer_detail_files_file_name"
+            style="@style/transferDetailText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:text="@string/transfer_detail_file_dummy" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/fragment_transfer_detail_files_file_name"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                android:id="@+id/fragment_transfer_detail_files_file_progressbar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/fragment_transfer_detail_files_file_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="55dp"
+                android:paddingStart="8dp"
+                android:text="@string/transfer_detail_percentage_dummy"
+                android:textColor="@color/app_text_primary"
+                android:textSize="@dimen/text_x_small"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/fragment_transfer_detail_files_file_download_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/transfer_detail_upload_size_dummy"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="@dimen/text_x_small" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <ImageButton
+        android:id="@+id/fragment_transfer_detail_files_file_play_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:background="@color/transparent"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/my_files_play_icon"
+        app:iconTint="@color/app_icon_primary"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/fragment_transfer_detail_files_file_info_container"
+        android:background="@drawable/divider_line"
+        android:contentDescription="@null" />
+</RelativeLayout>

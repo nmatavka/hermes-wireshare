@@ -15,6 +15,7 @@ import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
+import org.limewire.core.api.daap.DaapManager;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.api.file.CategoryManager;
 import org.limewire.core.api.network.BandwidthCollector;
@@ -69,7 +70,6 @@ import com.limegroup.gnutella.bootstrap.Bootstrapper;
 import com.limegroup.gnutella.bootstrap.LimeWireBootstrapModule;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.connection.LimeWireCoreConnectionModule;
-import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
@@ -159,8 +159,6 @@ import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
 import com.limegroup.gnutella.uploader.LimeWireUploaderModule;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
-import com.limegroup.gnutella.util.FECUtils;
-import com.limegroup.gnutella.util.FECUtilsImpl;
 import com.limegroup.gnutella.xml.LimeWireXmlModule;
 
 /**
@@ -289,7 +287,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
         bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
-        bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(BandwidthCollector.class).to(BandwidthCollectorImpl.class);
         bind(BandwidthCollectorDriver.class).to(BandwidthCollectorImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
@@ -327,7 +324,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HostCatcher.class);
         bind(LimeCoreGlue.class);
         bind(QRPUpdater.class);
-        bind(DaapManager.class);
+        bind(DaapManager.class).to(DisabledDaapManager.class);
         bind(FirewalledAddressSerializer.class).asEagerSingleton();
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();

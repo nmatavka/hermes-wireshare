@@ -1,50 +1,69 @@
 package org.limewire.libtorrent;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.limewire.bittorrent.TorrentTracker;
 
-public class LibTorrentInfo {
+import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
+import com.sun.jna.WString;
+
+public class LibTorrentInfo extends Structure {
     public String sha1;
 
-    public String name;
+    public WString name;
     
     public long total_size;
 
     public int piece_length;
 
+    public Pointer trackers;
+
+    public int num_trackers;
+
+    public Pointer seeds;
+
+    public int num_seeds;
+
     public String created_by;
 
     public String comment;
 
-    private final List<TorrentTracker> trackers_internal = new ArrayList<TorrentTracker>();
+    private List<TorrentTracker> trackers_internal = new ArrayList<TorrentTracker>();
 
-    private final List<String> seeds_internal = new ArrayList<String>();
+    private List<String> seeds_internal = new ArrayList<String>();
 
-    public LibTorrentInfo() {
-    }
-
-    public LibTorrentInfo(String sha1, String name, int pieceLength, List<TorrentTracker> trackers,
-            List<String> seeds) {
-        this.sha1 = sha1;
-        this.name = name;
-        this.piece_length = pieceLength;
-        if (trackers != null) {
-            trackers_internal.addAll(trackers);
+    @Override
+    public void read() {
+        super.read();
+        if (num_trackers > 0) {
+            LibTorrentAnnounceEntry[] entries = (LibTorrentAnnounceEntry[]) new LibTorrentAnnounceEntry(
+                    trackers).toArray(num_trackers);
+            for (int i = 0; i < entries.length; i++) {
+                LibTorrentAnnounceEntry entry = entries[i];
+                entry.read();
+                trackers_internal.add(entry);
+            }
         }
-        if (seeds != null) {
-            seeds_internal.addAll(seeds);
+
+        if (num_seeds > 0) {
+            LibTorrentAnnounceEntry[] entries = (LibTorrentAnnounceEntry[]) new LibTorrentAnnounceEntry(
+                    seeds).toArray(num_seeds);
+            for (int i = 0; i < entries.length; i++) {
+                LibTorrentAnnounceEntry entry = entries[i];
+                entry.read();
+                seeds_internal.add(entry.uri);
+            }
         }
     }
     
     
     public List<TorrentTracker> getTrackers() {
-        return Collections.unmodifiableList(trackers_internal);
+        return trackers_internal;
     }
     
     public List<String> getSeeds() {
-        return Collections.unmodifiableList(seeds_internal);
+        return seeds_internal;
     }
 }

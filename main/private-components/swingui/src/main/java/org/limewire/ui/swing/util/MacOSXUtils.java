@@ -18,10 +18,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.NativeLibraryLoader;
 import org.limewire.util.OSUtils;
-
-import foxtrot.Job;
-import foxtrot.Worker;
 
 /**
  * A collection of utility methods for OSX.
@@ -56,12 +54,13 @@ public class MacOSXUtils {
     static {
         if (OSUtils.isMacOSX()) {
             try {
-                System.loadLibrary("MacOSXUtils");
-                nativeLibraryLoadedCorrectly = true;
+                nativeLibraryLoadedCorrectly = NativeLibraryLoader.loadFirstAvailable(
+                        "MacOSXUtils",
+                        "lib/native/libMacOSXUtils.dylib",
+                        "nativelibs/osx/libMacOSXUtils.dylib",
+                        "build/native/osx/libMacOSXUtils.dylib");
             } catch (UnsatisfiedLinkError err) {
-                ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path")
-                        + "\n\n" + "trace dependencies="
-                        + MacOSXUtils.traceLibraryDependencies("libMacOSXUtils.dylib"));
+                ErrorService.error(err, "java.library.path=" + System.getProperty("java.library.path") + "\n\n" + "trace dependencies=" + MacOSXUtils.traceLibraryDependencies("MacOSXUtils.jnilib"));
             }
         }
     }
@@ -379,15 +378,15 @@ public class MacOSXUtils {
         try {
             final String directoryAbsolutePath = (directory != null) ? directory.getAbsolutePath() : null;
 
-            String[] filePaths = (String[]) Worker.post(new Job()
-            {
-                @Override
-                public Object run()
-                {
-                    String[] filePaths = OpenNativeFileDialog(dialogTitle, directoryAbsolutePath, canChooseFiles, canChooseDirectories, allowMultipleSelections); 
-                    return filePaths;
-                }
-            });
+            String[] filePaths = SwingUtils.runOffEventDispatchThread(
+                    new java.util.concurrent.Callable<String[]>() {
+                        @Override
+                        public String[] call() {
+                            return OpenNativeFileDialog(dialogTitle, directoryAbsolutePath,
+                                    canChooseFiles, canChooseDirectories, allowMultipleSelections);
+                        }
+                    },
+                    "mac-native-file-dialog");
             
             if (filePaths == null) {
                 return null;

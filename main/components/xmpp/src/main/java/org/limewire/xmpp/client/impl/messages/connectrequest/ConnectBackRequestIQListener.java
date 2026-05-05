@@ -1,8 +1,9 @@
 package org.limewire.xmpp.client.impl.messages.connectrequest;
 
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.StanzaListener;
+import org.jivesoftware.smack.filter.StanzaFilter;
+import org.jivesoftware.smack.packet.Stanza;
+import org.jxmpp.jid.impl.JidCreate;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.ConnectBackRequestFeature;
@@ -12,58 +13,58 @@ import org.limewire.friend.api.feature.FeatureTransport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequest;
-import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 /**
- * Listens for {@link ConnectBackRequestIQ connect back request iqs} and fires
- * a {@link ConnectBackRequestedEvent}.
+ * Listens for connect back request IQs and fires the feature transport handler.
  */
-public class ConnectBackRequestIQListener implements PacketListener, FeatureTransport<ConnectBackRequest> {
+public class ConnectBackRequestIQListener implements StanzaListener, FeatureTransport<ConnectBackRequest> {
 
     private static final Log LOG = LogFactory.getLog(ConnectBackRequestIQListener.class);
-    
+
     private final XMPPFriendConnectionImpl connection;
     private final Handler<ConnectBackRequest> connectBackRequestHandler;
 
     @Inject
     public ConnectBackRequestIQListener(@Assisted XMPPFriendConnectionImpl connection,
                                         FeatureTransport.Handler<ConnectBackRequest> connectBackRequestHandler,
-                                    FeatureRegistry featureRegistry) {
+                                        FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.connectBackRequestHandler = connectBackRequestHandler;
         new ConnectBackRequestIQFeatureInitializer().register(featureRegistry);
     }
-    
+
     @Override
-    public void processPacket(Packet packet) {
-        ConnectBackRequestIQ connectRequest = (ConnectBackRequestIQ)packet;
+    public void processStanza(Stanza stanza) {
+        ConnectBackRequestIQ connectRequest = (ConnectBackRequestIQ) stanza;
         LOG.debugf("processing connect request: {0}", connectRequest);
-        connectBackRequestHandler.featureReceived(packet.getFrom(), connectRequest.getConnectBackRequest());
+        if (connectRequest.getFrom() != null) {
+            connectBackRequestHandler.featureReceived(connectRequest.getFrom().toString(),
+                    connectRequest.getConnectBackRequest());
+        }
     }
-    
+
     @Override
     public void sendFeature(FriendPresence presence, ConnectBackRequest connectBackRequest)
             throws FriendException {
-        ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(connectBackRequest);
-        connectRequest.setTo(presence.getPresenceId());
-        connectRequest.setFrom(connection.getLocalJid());
-        LOG.debugf("sending request: {0}", connectRequest);
-        connection.sendPacket(connectRequest);
+        try {
+            ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(connectBackRequest);
+            connectRequest.setTo(JidCreate.from(presence.getPresenceId()));
+            connectRequest.setFrom(JidCreate.from(connection.getLocalJid()));
+            LOG.debugf("sending request: {0}", connectRequest);
+            connection.sendPacket(connectRequest);
+        } catch (Exception e) {
+            throw new FriendException(e);
+        }
     }
-    
-    public PacketFilter getPacketFilter() {
-        return new PacketFilter() {
-            @Override
-            public boolean accept(Packet packet) {
-                return packet instanceof ConnectBackRequestIQ;
-            }
-        };
+
+    public StanzaFilter getStanzaFilter() {
+        return stanza -> stanza instanceof ConnectBackRequestIQ;
     }
-    
+
     private static class ConnectBackRequestIQFeatureInitializer implements FeatureInitializer {
         @Override
         public void register(FeatureRegistry registry) {

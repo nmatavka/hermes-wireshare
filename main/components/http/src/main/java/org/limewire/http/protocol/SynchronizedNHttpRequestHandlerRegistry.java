@@ -19,7 +19,7 @@ public class SynchronizedNHttpRequestHandlerRegistry extends
     }
 
     @Override
-    public synchronized void setHandlers(Map<String, ? extends NHttpRequestHandler> map) {
+    public synchronized void setHandlers(Map<String, NHttpRequestHandler> map) {
         super.setHandlers(map);
     }
 

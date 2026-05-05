@@ -2,6 +2,7 @@ package org.limewire.ui.swing.table;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.InaccessibleObjectException;
 import java.util.Vector;
 
 import javax.swing.Action;
@@ -13,6 +14,8 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
  * A JXTable with some default functionality removed.
@@ -20,6 +23,8 @@ import org.jdesktop.swingx.JXTable;
  * and changes the 'enter' key to not move down.
  */
 public class BasicJXTable extends JXTable {
+
+    private static final Log LOG = LogFactory.getLog(BasicJXTable.class);
 
     // DO NOT INITIALIZE proxyMouseListener!!!!!
     // It is used in addMouseListener BEFORE the constuctor is run
@@ -101,5 +106,29 @@ public class BasicJXTable extends JXTable {
     public void setEnterKeyAction(Action action){
         getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "launchAction");
         getActionMap().put("launchAction", action);
+    }
+
+    @Override
+    public void setRowHeightEnabled(boolean enabled) {
+        try {
+            super.setRowHeightEnabled(enabled);
+        } catch (InaccessibleObjectException e) {
+            handleRowHeightCompatibilityFailure(e);
+        } catch (RuntimeException e) {
+            if (isSwingModuleAccessFailure(e)) {
+                handleRowHeightCompatibilityFailure(e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private void handleRowHeightCompatibilityFailure(RuntimeException exception) {
+        LOG.warn("Disabling SwingX variable row heights because Java 21 blocks access to JTable.rowModel", exception);
+    }
+
+    private boolean isSwingModuleAccessFailure(RuntimeException exception) {
+        return exception.getMessage() != null
+                && exception.getMessage().contains("module java.desktop does not \"opens javax.swing\"");
     }
 }

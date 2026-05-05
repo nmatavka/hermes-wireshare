@@ -1,0 +1,50 @@
+<!--
+    Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+    Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <plurals name="Nalbums">
+    <item quantity="one"><xliff:g id="count">%d</xliff:g> albumas</item>
+    <item quantity="few"><xliff:g id="count">%d</xliff:g> albumai</item>
+    <item quantity="other"><xliff:g id="count">%d</xliff:g> albumų</item>
+  </plurals>
+  <plurals name="Nsongs">
+    <item quantity="one"><xliff:g id="count">%d</xliff:g> daina</item>
+    <item quantity="few"><xliff:g id="count">%d</xliff:g> dainos</item>
+    <item quantity="other"><xliff:g id="count">%d</xliff:g> dainų</item>
+  </plurals>
+  <plurals name="NNNtrackstoplaylist">
+    <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina įtraukta į grojaraštį.</item>
+    <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> dainos įtrauktos į grojaraštį.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> dainų įtraukta į grojaraštį.</item>
+  </plurals>
+  <plurals name="NNNtracksfromplaylist">
+    <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina pašalinta iš grojaraščio.</item>
+    <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> dainos pašalintos iš grojaraščio.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> dainų pašalinta iš grojaraščio.</item>
+  </plurals>
+  <plurals name="NNNtrackstoqueue">
+    <item quantity="one"><xliff:g id="number" example="27">%d</xliff:g> daina įtraukta į eilę.</item>
+    <item quantity="few"><xliff:g id="number" example="27">%d</xliff:g> dainos įtrauktos į eilę.</item>
+    <item quantity="other"><xliff:g id="number" example="27">%d</xliff:g> dainų įtraukta į eilę.</item>
+  </plurals>
+  <plurals name="NNNtracksdeleted">
+    <item quantity="one"><xliff:g id="songs_to_delete">%d</xliff:g> daina pašalinta.</item>
+    <item quantity="few"><xliff:g id="songs_to_delete">%d</xliff:g> dainos pašalintos.</item>
+    <item quantity="other"><xliff:g id="songs_to_delete">%d</xliff:g> dainų pašalinta.</item>
+  </plurals>
+</resources>

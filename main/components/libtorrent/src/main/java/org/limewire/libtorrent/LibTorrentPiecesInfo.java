@@ -26,12 +26,8 @@ class LibTorrentPiecesInfo implements TorrentPiecesInfo {
      *  JNA.
      */
     LibTorrentPiecesInfo(LibTorrentPiecesInfoContainer piecesInfoContainer) {
-        this(piecesInfoContainer.getStateInfo(), piecesInfoContainer.getNumPiecesCompleted());
-    }
-
-    LibTorrentPiecesInfo(String stateInfo, int numPiecesCompleted) {
-        this.stateInfo = stateInfo;
-        this.numPiecesCompleted = numPiecesCompleted;
+        stateInfo = piecesInfoContainer.getStateInfo();
+        numPiecesCompleted = piecesInfoContainer.getNumPiecesCompleted();
     }
     
     @Override

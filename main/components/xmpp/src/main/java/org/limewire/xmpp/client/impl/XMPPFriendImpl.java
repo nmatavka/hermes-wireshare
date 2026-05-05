@@ -8,13 +8,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import net.jcip.annotations.GuardedBy;
 
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.chat2.Chat;
+import org.jivesoftware.smack.chat2.ChatManager;
+import org.jivesoftware.smack.chat2.IncomingChatMessageListener;
 import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.XMPPError;
-import org.jivesoftware.smackx.ChatStateListener;
-import org.jivesoftware.smackx.ChatStateManager;
+import org.jivesoftware.smack.packet.StanzaError;
+import org.jivesoftware.smack.roster.RosterEntry;
+import org.jivesoftware.smack.roster.packet.RosterPacket;
+import org.jivesoftware.smackx.chatstates.ChatStateListener;
+import org.jivesoftware.smackx.chatstates.ChatStateManager;
+import org.jxmpp.jid.EntityBareJid;
+import org.jxmpp.jid.impl.JidCreate;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.friend.api.ChatState;
 import org.limewire.friend.api.FriendException;
@@ -32,43 +37,37 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
 
-
 public class XMPPFriendImpl extends AbstractFriend {
-   
+
     private static final Log LOG = LogFactory.getLog(XMPPFriendImpl.class);
 
     private final String id;
     private final FeatureRegistry featureRegistry;
     private final String idNoService;
-    private AtomicReference<RosterEntry> rosterEntry;
-    private final org.jivesoftware.smack.XMPPConnection connection;
+    private final AtomicReference<RosterEntry> rosterEntry;
+    private final XMPPConnection connection;
     private final Network network;
 
-    // -----------------------------------------------------------------
-    // presences map (presences of this user who are signed in)
-    // and the active presence JID (the presence lw is chatting with)
-    // represent the Presence State
     private final Object presenceLock;
-    
+
     @GuardedBy("presenceLock")
     private final Map<String, FriendPresence> presences;
 
     @GuardedBy("presenceLock")
     private String activePresenceJid;
-    // -----------------------------------------------------------------
 
-
-    // -----------------------------------------------------------------
     private final Object chatListenerLock;
 
     @GuardedBy("chatListenerLock")
     private volatile IncomingChatListenerAdapter listenerAdapter;
-    // -----------------------------------------------------------------
 
+    private final Object chatSessionLock = new Object();
+
+    @GuardedBy("chatSessionLock")
+    private ChatSession activeChatSession;
 
     XMPPFriendImpl(String id, RosterEntry rosterEntry, Network network,
-             org.jivesoftware.smack.XMPPConnection connection,
-             FeatureRegistry featureRegistry) {
+                   XMPPConnection connection, FeatureRegistry featureRegistry) {
         this.id = id;
         this.featureRegistry = featureRegistry;
         this.idNoService = stripService(id, network.getNetworkName());
@@ -80,14 +79,13 @@ public class XMPPFriendImpl extends AbstractFriend {
         this.presenceLock = new Object();
         this.chatListenerLock = new Object();
     }
-    
+
     private static String stripService(String id, String service) {
         int idx = id.lastIndexOf("@" + service);
-        if(idx == -1) {
+        if (idx == -1) {
             return id;
-        } else {
-            return id.substring(0, idx);    
         }
+        return id.substring(0, idx);
     }
 
     @Override
@@ -103,38 +101,34 @@ public class XMPPFriendImpl extends AbstractFriend {
     @Override
     public String getName() {
         String name = rosterEntry.get().getName();
-        if(name != null) {
+        if (name != null) {
             String service = network.getNetworkName();
             int idx = name.lastIndexOf("@" + service);
-            if(idx == -1) {
+            if (idx == -1) {
                 return name;
-            } else {
-                return name.substring(0, idx);
             }
-        } else {
-            return null;
+            return name.substring(0, idx);
         }
+        return null;
     }
 
     @Override
     public String getRenderName() {
         String visualName = getName();
-        if(visualName == null) {
+        if (visualName == null) {
             return idNoService;
-        } else {
-            return visualName;
         }
+        return visualName;
     }
-    
+
     @Override
     public String getFirstName() {
         String visualName = getName();
-        if(visualName == null) {
+        if (visualName == null) {
             return idNoService;
-        } else {
-            String[] subStrings = visualName.split(" ");
-            return subStrings[0];
         }
+        String[] subStrings = visualName.split(" ");
+        return subStrings[0];
     }
 
     void setRosterEntry(RosterEntry rosterEntry) {
@@ -144,10 +138,11 @@ public class XMPPFriendImpl extends AbstractFriend {
     @Override
     public void setName(final String name) {
         Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+            @Override
             public void run() {
                 try {
                     XMPPFriendImpl.this.rosterEntry.get().setName(name);
-                } catch (org.jivesoftware.smack.XMPPException e) {
+                } catch (Exception e) {
                     LOG.debugf("set name failed", e);
                 }
             }
@@ -161,20 +156,15 @@ public class XMPPFriendImpl extends AbstractFriend {
             return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presences));
         }
     }
-    
+
     @Override
     public boolean isSubscribed() {
-        switch(rosterEntry.get().getType()) {
-            case both:
-            case to:
-                return true;
-            default:
-                return false;
-        }
+        RosterPacket.ItemType type = rosterEntry.get().getType();
+        return type == RosterPacket.ItemType.both || type == RosterPacket.ItemType.to;
     }
 
     void addPresense(FriendPresence presence) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debugf("adding presence {0}", presence.getPresenceId());
         }
         synchronized (presenceLock) {
@@ -184,26 +174,23 @@ public class XMPPFriendImpl extends AbstractFriend {
     }
 
     void removePresense(FriendPresence presence) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debugf("removing presence {0}", presence.getPresenceId());
         }
         Collection<Feature> features = presence.getFeatures();
-        for(Feature feature : features) {
+        for (Feature feature : features) {
             LOG.debugf("removing feature {0} for {1}", feature, presence);
             featureRegistry.get(feature.getID()).removeFeature(presence);
         }
 
         synchronized (presenceLock) {
             presences.remove(presence.getPresenceId());
-
-            // if the presence being removed is the same presence as the active presence, set the
-            // active presence to null so the next outgoing message goes to all of this user's presences
             if (presence.getPresenceId().equals(activePresenceJid)) {
                 activePresenceJid = null;
             }
-
             if (!isSignedIn()) {
                 removeChatListener();
+                clearActiveChatSession();
             }
         }
 
@@ -216,7 +203,7 @@ public class XMPPFriendImpl extends AbstractFriend {
     }
 
     void updatePresence(FriendPresence updatedPresence) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debugf("updating presence {0}", updatedPresence.getPresenceId());
         }
         synchronized (presenceLock) {
@@ -238,7 +225,7 @@ public class XMPPFriendImpl extends AbstractFriend {
 
     private String getChatParticipantId() {
         synchronized (presenceLock) {
-            return (activePresenceJid == null) ? id : activePresenceJid;
+            return activePresenceJid == null ? id : activePresenceJid;
         }
     }
 
@@ -258,25 +245,28 @@ public class XMPPFriendImpl extends AbstractFriend {
     @Override
     public boolean hasActivePresence() {
         synchronized (presenceLock) {
-            return (activePresenceJid != null);
+            return activePresenceJid != null;
         }
     }
 
     @Override
     public boolean isSignedIn() {
         synchronized (presenceLock) {
-            return !(presences.isEmpty());
+            return !presences.isEmpty();
         }
     }
 
     @Override
     public MessageWriter createChat(final MessageReader reader) {
-        if(LOG.isInfoEnabled()) {
-            LOG.info("new chat with " + getChatParticipantId());
+        try {
+            Chat chat = ChatManager.getInstanceFor(connection).chatWith(getBareJid());
+            if (LOG.isInfoEnabled()) {
+                LOG.info("new chat with " + getChatParticipantId());
+            }
+            return openChatSession(chat, reader).writer;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        final Chat chat = connection.getChatManager().createChat(getChatParticipantId(),
-                new DefaultChatStateListener(reader));
-        return new DefaultMessageWriter(chat);
     }
 
     @Override
@@ -284,7 +274,7 @@ public class XMPPFriendImpl extends AbstractFriend {
         synchronized (chatListenerLock) {
             if (listenerAdapter == null) {
                 listenerAdapter = new IncomingChatListenerAdapter(listener);
-                connection.getChatManager().addChatListener(listenerAdapter);
+                ChatManager.getInstanceFor(connection).addIncomingListener(listenerAdapter);
             }
         }
     }
@@ -292,53 +282,86 @@ public class XMPPFriendImpl extends AbstractFriend {
     @Override
     public void removeChatListener() {
         synchronized (chatListenerLock) {
-            if(listenerAdapter != null) {
-                connection.getChatManager().removeChatListener(listenerAdapter);
+            if (listenerAdapter != null) {
+                ChatManager.getInstanceFor(connection).removeIncomingListener(listenerAdapter);
                 listenerAdapter = null;
             }
         }
     }
 
-    private class IncomingChatListenerAdapter implements ChatManagerListener {
+    private EntityBareJid getBareJid() throws Exception {
+        return JidCreate.entityBareFrom(id);
+    }
+
+    private ChatSession openChatSession(Chat chat, MessageReader reader) {
+        synchronized (chatSessionLock) {
+            if (activeChatSession != null) {
+                ChatStateManager.getInstance(connection).removeChatStateListener(activeChatSession.chatStateListener);
+            }
+            DefaultMessageWriter writer = new DefaultMessageWriter(chat);
+            DefaultChatStateListener chatStateListener = new DefaultChatStateListener(reader);
+            ChatStateManager.getInstance(connection).addChatStateListener(chatStateListener);
+            activeChatSession = new ChatSession(chat, writer, reader, chatStateListener);
+            return activeChatSession;
+        }
+    }
+
+    private ChatSession getOrCreateIncomingChatSession(IncomingChatListener listener, Chat chat) {
+        synchronized (chatSessionLock) {
+            if (activeChatSession != null) {
+                return activeChatSession;
+            }
+            DefaultMessageWriter writer = new DefaultMessageWriter(chat);
+            MessageReader reader = listener.incomingChat(writer);
+            DefaultChatStateListener chatStateListener = new DefaultChatStateListener(reader);
+            ChatStateManager.getInstance(connection).addChatStateListener(chatStateListener);
+            activeChatSession = new ChatSession(chat, writer, reader, chatStateListener);
+            return activeChatSession;
+        }
+    }
+
+    private void clearActiveChatSession() {
+        synchronized (chatSessionLock) {
+            if (activeChatSession != null) {
+                ChatStateManager.getInstance(connection).removeChatStateListener(activeChatSession.chatStateListener);
+                activeChatSession = null;
+            }
+        }
+    }
+
+    private class IncomingChatListenerAdapter implements IncomingChatMessageListener {
         private final IncomingChatListener listener;
 
-        public IncomingChatListenerAdapter(IncomingChatListener listener) {
+        IncomingChatListenerAdapter(IncomingChatListener listener) {
             this.listener = listener;
         }
 
         @Override
-        public void chatCreated(final Chat chat, boolean createdLocally) {
-            String chatParticipant = chat.getParticipant();
-            if (!createdLocally && isForThisUser(chatParticipant)) {
-                if (!chatParticipant.equals(getChatParticipantId())) {
-                    setActivePresence(chatParticipant);
-                }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("new incoming chat with " + getChatParticipantId());
-                }
-                DefaultMessageWriter writer = new DefaultMessageWriter(chat);
-                MessageReader reader = listener.incomingChat(writer);
-                chat.addMessageListener(new DefaultChatStateListener(reader));
+        public void newIncomingMessage(EntityBareJid from, Message message, Chat chat) {
+            if (!isForThisUser(from)) {
+                return;
             }
+
+            String messageFrom = message.getFrom() != null ? message.getFrom().toString() : from.toString();
+            if (!messageFrom.equals(getChatParticipantId())) {
+                setActivePresence(messageFrom);
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("new incoming chat with " + getChatParticipantId());
+            }
+
+            ChatSession chatSession = getOrCreateIncomingChatSession(listener, chat);
+            chatSession.writer.deliverMessage(chat, message, chatSession.reader);
         }
 
-        private boolean isForThisUser(String incomingMsgJid) {
-            return incomingMsgJid.startsWith(id);
+        private boolean isForThisUser(EntityBareJid incomingMessageJid) {
+            return id.equals(incomingMessageJid.toString());
         }
-
     }
 
-    /**
-     * This class encapsulates the actual writing of messages in the smack API.
-     *                                                                                                    
-     * The message writer must take into account which presence is the current
-     * active presence and set the chat participant appropriately
-     * (set to jid identifying the presence, or the user id if no active presence)
-     *
-     */
     private class DefaultMessageWriter implements MessageWriter {
 
-        private Chat chat;
+        private final Chat chat;
 
         DefaultMessageWriter(Chat chat) {
             this.chat = chat;
@@ -347,9 +370,18 @@ public class XMPPFriendImpl extends AbstractFriend {
         @Override
         public void writeMessage(String message) throws FriendException {
             try {
-                chat.setParticipant(getChatParticipantId());
-                chat.sendMessage(message);
-            } catch (org.jivesoftware.smack.XMPPException e) {
+                String participantId = getChatParticipantId();
+                Message outgoing = connection.getStanzaFactory().buildMessageStanza()
+                        .ofType(Message.Type.chat)
+                        .setBody(message)
+                        .build();
+                if (id.equals(participantId)) {
+                    chat.send(outgoing);
+                } else {
+                    outgoing.setTo(JidCreate.from(participantId));
+                    connection.sendStanza(outgoing);
+                }
+            } catch (Exception e) {
                 throw new FriendException(e);
             }
         }
@@ -357,22 +389,30 @@ public class XMPPFriendImpl extends AbstractFriend {
         @Override
         public void setChatState(ChatState chatState) throws FriendException {
             try {
-                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
-            } catch (org.jivesoftware.smack.XMPPException e) {
+                ChatStateManager.getInstance(connection)
+                        .setCurrentState(org.jivesoftware.smackx.chatstates.ChatState.valueOf(chatState.toString()), chat);
+            } catch (Exception e) {
                 throw new FriendException(e);
+            }
+        }
+
+        void deliverMessage(Chat chat, Message message, MessageReader reader) {
+            String msgFromJid = message.getFrom() != null ? message.getFrom().toString() : getChatParticipantId();
+            if (!getChatParticipantId().equals(msgFromJid)) {
+                setActivePresence(msgFromJid);
+            }
+
+            if (message.getType() == Message.Type.error) {
+                String errorMsg = parseError(message);
+                if (errorMsg != null) {
+                    reader.error(errorMsg);
+                }
+            } else if (message.getBody() != null) {
+                reader.readMessage(message.getBody());
             }
         }
     }
 
-    /**
-     * Acts as an adapter between the smack message/chat state listener and our
-     * {@link MessageReader} class.
-     *
-     * Note: If a message is received which comes from a different presence
-     * than the presence LW is currently chatting with, processMessage will
-     * set the active presence to the presence from which it received the message.
-     *  
-     */
     private class DefaultChatStateListener implements ChatStateListener {
 
         private final MessageReader reader;
@@ -382,38 +422,36 @@ public class XMPPFriendImpl extends AbstractFriend {
         }
 
         @Override
-        public void processMessage(Chat chat, Message message) {
-            String msgFromJid = message.getFrom();
-            if (!(getChatParticipantId().equals(msgFromJid))) {
-                setActivePresence(msgFromJid);
-            }
-            
-            if (message.getType() == Message.Type.error) {
-                String errorMsg = parseError(message);
-                if (errorMsg != null) {
-                    reader.error(parseError(message));
-                }
-            } else {
-                reader.readMessage(message.getBody());
-            }
-        }
-
-        @Override
-        public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
-            if (isSignedIn()) {
+        public void stateChanged(Chat chat, org.jivesoftware.smackx.chatstates.ChatState state, Message message) {
+            if (isSignedIn() && chat.getXmppAddressOfChatPartner().toString().equals(id)) {
                 reader.newChatState(ChatState.valueOf(state.toString()));
             }
         }
-        
-        private String parseError(Message errorMessage) {
-            XMPPError error = errorMessage.getError();
-            if (error != null) {
-                String body = errorMessage.getBody();
-                if (body != null) {
-                    return "Error sending message: '" + body + "' : " + error.toString();
-                }
+    }
+
+    private String parseError(Message errorMessage) {
+        StanzaError error = errorMessage.getError();
+        if (error != null) {
+            String body = errorMessage.getBody();
+            if (body != null) {
+                return "Error sending message: '" + body + "' : " + error.toString();
             }
-            return null;
+        }
+        return null;
+    }
+
+    private static final class ChatSession {
+        private final Chat chat;
+        private final DefaultMessageWriter writer;
+        private final MessageReader reader;
+        private final DefaultChatStateListener chatStateListener;
+
+        private ChatSession(Chat chat, DefaultMessageWriter writer, MessageReader reader,
+                            DefaultChatStateListener chatStateListener) {
+            this.chat = chat;
+            this.writer = writer;
+            this.reader = reader;
+            this.chatStateListener = chatStateListener;
         }
     }
 }

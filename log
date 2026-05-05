@@ -1,0 +1,79 @@
+Buildfile: /Users/nick/Documents/wireshare-code-0/WireShare/build.xml
+     [echo] Java Version via Ant: 23
+
+ivy-load:
+[ivy:configure] :: Apache Ivy 2.5.2 - 20230817170011 :: https://ant.apache.org/ivy/ ::
+[ivy:configure] :: loading settings :: file = /Users/nick/Documents/wireshare-code-0/WireShare/main/components/common/ivysettings.xml
+
+initialize:
+
+publish-dependencies:
+
+ivy-load:
+
+initialize:
+[ivy:configure] :: loading settings :: file = /Users/nick/Documents/wireshare-code-0/WireShare/main/components/common/ivysettings.xml
+
+publish-dependencies:
+
+compile-src:
+     [echo] compiling source for common...
+
+jar:
+
+publish:
+[ivy:publish] :: delivering :: org.limewire#common;working@pandora.local :: 20250129033859 :: integration :: Wed Jan 29 03:38:59 EST 2025
+[ivy:publish] 	delivering ivy file to /Users/nick/Documents/wireshare-code-0/WireShare/main/components/common/dist/main/ivy.xml
+[ivy:publish] :: publishing :: org.limewire#common
+[ivy:publish] 	published common to /Users/nick/Documents/wireshare-code-0/WireShare/main/.ivy2/local/org.limewire/common/jars/common.jar
+[ivy:publish] 	published ivy to /Users/nick/Documents/wireshare-code-0/WireShare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml
+
+ivy-load:
+
+initialize:
+[ivy:configure] :: loading settings :: file = /Users/nick/Documents/wireshare-code-0/WireShare/main/components/common/ivysettings.xml
+
+publish-dependencies:
+
+compile-src:
+     [echo] compiling source for collection...
+[ivy:resolve] 
+[ivy:resolve] :: problems summary ::
+[ivy:resolve] :::: WARNINGS
+[ivy:resolve] 	impossible to put metadata file in cache: /Users/nick/Documents/wireshare-code-0/WireShare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml (working@local) (java.io.FileNotFoundException: /Users/nick/Documents/wireshare-code-0/WireShare/main/.ivy2/repositoryCache/org.limewire/common/ivy-20250129033859.xml.original (No such file or directory))
+[ivy:resolve] 
+[ivy:resolve] :: USE VERBOSE OR DEBUG MESSAGE LEVEL FOR MORE DETAILS
+    [javac] Compiling 60 source files to /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/build/classes
+    [javac] warning: [options] location of system modules is not set in conjunction with -source 12
+    [javac]   not setting the location of system modules may lead to class files that cannot run on JDK 12
+    [javac]     --release 12 is recommended instead of -source 12 -target 12 because it sets the location of system modules automatically
+    [javac] /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/src/main/java/org/limewire/collection/PatriciaTrie.java:2204: error: incompatible types: bad type in conditional expression
+    [javac]                     (fromKey == null ? firstEntry() : ceilingEntry(fromKey)),
+    [javac]                                                  ^
+    [javac]     Entry<K,V> cannot be converted to TrieEntry<K,V>
+    [javac]   where K,V are type-variables:
+    [javac]     K extends Object declared in class PatriciaTrie
+    [javac]     V extends Object declared in class PatriciaTrie
+    [javac] /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/src/main/java/org/limewire/collection/MultiIterable.java:52: warning: [unchecked] Possible heap pollution from parameterized vararg type Iterable<? extends T>
+    [javac]     public MultiIterable(Iterable<? extends T>... iterables) {
+    [javac]                                                   ^
+    [javac]   where T is a type-variable:
+    [javac]     T extends Object declared in class MultiIterable
+    [javac] /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/src/main/java/org/limewire/collection/MultiCollection.java:42: warning: [unchecked] Possible heap pollution from parameterized vararg type Collection<? extends T>
+    [javac]     public MultiCollection(Collection<? extends T>... collections) {
+    [javac]                                                       ^
+    [javac]   where T is a type-variable:
+    [javac]     T extends Object declared in class MultiCollection
+    [javac] /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/src/main/java/org/limewire/collection/MultiIterator.java:59: warning: [unchecked] Possible heap pollution from parameterized vararg type Iterator<? extends T>
+    [javac] 	public MultiIterator(Iterator<? extends T>... iterators) {
+    [javac] 	                                              ^
+    [javac]   where T is a type-variable:
+    [javac]     T extends Object declared in class MultiIterator
+    [javac] /Users/nick/Documents/wireshare-code-0/WireShare/main/components/collection/src/main/java/org/limewire/collection/MultiRRIterator.java:57: warning: [unchecked] Possible heap pollution from parameterized vararg type Iterator<? extends T>
+    [javac] 	public MultiRRIterator(Iterator<? extends T> ... iterators ) {
+    [javac] 	                                                 ^
+    [javac]   where T is a type-variable:
+    [javac]     T extends Object declared in class MultiRRIterator
+    [javac] Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+    [javac] 1 error
+    [javac] 5 warnings

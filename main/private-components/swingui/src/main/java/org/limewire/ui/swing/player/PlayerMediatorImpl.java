@@ -35,8 +35,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
-import net.sf.fmj.concurrent.ExecutorServiceManager;
-
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadPoolListeningExecutor;
 import org.limewire.core.api.Category;
@@ -116,7 +114,7 @@ class PlayerMediatorImpl implements PlayerMediator {
                 new LinkedBlockingQueue<Runnable>(),
                 ExecutorsHelper.daemonThreadFactory("Video ThreadPool"));
     
-        ExecutorServiceManager.setExecutorService(ExecutorsHelper.unconfigurableExecutorService(tpe));
+        ExecutorsHelper.unconfigurableExecutorService(tpe);
     }
 
     @Inject

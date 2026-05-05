@@ -74,7 +74,7 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
         rosterSupport.removeListener(rosterListener);
 
         if (noSaveListener != null) {
-            jabberConnection.removePacketListener(noSaveListener);
+            jabberConnection.removeAsyncStanzaListener(noSaveListener);
             noSaveListener.cleanup();
         }
     }
@@ -93,7 +93,7 @@ public class NoSaveFeatureInitializer implements FeatureInitializer {
             // make sure noSaveIQListener is ready for the reply messages
             if (noSaveListener == null) {
                 noSaveListener = NoSaveIQListener.createNoSaveIQListener(connection, friendPresenceSupport);
-                jabberConnection.addPacketListener(noSaveListener, noSaveListener.getPacketFilter());
+                jabberConnection.addAsyncStanzaListener(noSaveListener, noSaveListener.getStanzaFilter());
             }
             NoSaveIQ requestNoSaveSettingsPacket = NoSaveIQ.getNoSaveStatesMessage();
 

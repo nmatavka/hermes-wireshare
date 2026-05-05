@@ -2,61 +2,36 @@ package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.util.Map;
 
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.provider.IQProvider;
+import org.jivesoftware.smack.packet.IqData;
+import org.jivesoftware.smack.packet.XmlEnvironment;
+import org.jivesoftware.smack.provider.IqProvider;
+import org.jivesoftware.smack.xml.XmlPullParser;
+import org.jivesoftware.smack.xml.XmlPullParser.Event;
+import org.jivesoftware.smack.xml.XmlPullParserException;
+import org.jxmpp.JxmppContext;
 import org.limewire.friend.api.FileMetaData;
-import org.limewire.friend.impl.util.PresenceUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.client.impl.messages.InvalidIQException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 public class FileTransferIQ extends IQ {
 
-    private static Log LOG = LogFactory.getLog(FileTransferIQ.class);
-    
-    public enum TransferType {OFFER, REQUEST}
+    private static final Log LOG = LogFactory.getLog(FileTransferIQ.class);
+
+    public static final String ELEMENT = "file-transfer";
+    public static final String NAMESPACE = "jabber:iq:lw-file-transfer";
+
+    public enum TransferType { OFFER, REQUEST }
 
     private final FileMetaData fileMetaData;
     private final TransferType transferType;
-    
-    public FileTransferIQ(XmlPullParser parser) throws IOException, XmlPullParserException, InvalidIQException {
-        FileMetaData parsedMetaData = null;
-        TransferType parsedTransferType = null;
-        do {
-            int eventType = parser.getEventType();
-            if(eventType == XmlPullParser.START_TAG) {
-                if(parser.getName().equals("file-transfer")) {
-                    String transferTypeValue = parser.getAttributeValue(null, "type");
-                    if (transferTypeValue == null) {
-                        throw new InvalidIQException("no transfer type specified");
-                    }
-                    try {
-                        parsedTransferType = TransferType.valueOf(transferTypeValue);
-                    } catch (IllegalArgumentException iae) {
-                        throw new InvalidIQException("unknown transfer type: " + transferTypeValue);
-                    }
-                } else if(parser.getName().equals("file")) {
-                    parsedMetaData = new XMPPFileMetaData(parser);
-                }
-            } else if(eventType == XmlPullParser.END_TAG) {
-                if(parser.getName().equals("file-transfer")) {
-                    break;
-                }
-            }
-        } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-        
-        if (parsedMetaData == null || parsedTransferType == null) {
-            throw new InvalidIQException(MessageFormat.format("parsedMetaData {0}, parsedTransferType {1}", parsedMetaData, parsedTransferType));
-        }
-        this.fileMetaData = parsedMetaData;
-        this.transferType = parsedTransferType;
-    }
-    
+
     public FileTransferIQ(FileMetaData fileMetaData, TransferType transferType) {
+        super(ELEMENT, NAMESPACE);
         this.fileMetaData = fileMetaData;
         this.transferType = transferType;
     }
@@ -70,38 +45,77 @@ public class FileTransferIQ extends IQ {
     }
 
     @Override
-    public String getChildElementXML() {
-        String fileTransfer = "<file-transfer xmlns='jabber:iq:lw-file-transfer' type='" + transferType.toString() + "'>";
-        if(fileMetaData != null) {
-            fileTransfer += toXML(fileMetaData.getSerializableMap());
+    protected IQChildElementXmlStringBuilder getIQChildElementBuilder(IQChildElementXmlStringBuilder xml) {
+        xml.attribute("type", transferType.toString());
+        if (fileMetaData == null) {
+            xml.setEmptyElement();
+            return xml;
         }
-        fileTransfer += "</file-transfer>";
-        return fileTransfer;
-    }
-    
-    private String toXML(Map<String, String> data) {
-        StringBuilder fileMetadata = new StringBuilder("<file>");
-        for(Map.Entry<String, String> entry : data.entrySet()) {
-            fileMetadata.append("<").append(entry.getKey()).append(">");
-            fileMetadata.append(PresenceUtils.escapeForXML(entry.getValue()));
-            fileMetadata.append("</").append(entry.getKey()).append(">");
+        xml.rightAngleBracket();
+        xml.openElement("file");
+        for (Map.Entry<String, String> entry : fileMetaData.getSerializableMap().entrySet()) {
+            xml.element(entry.getKey(), entry.getValue());
         }
-        fileMetadata.append("</file>");
-        return fileMetadata.toString();
+        xml.closeElement("file");
+        return xml;
     }
-    
-    public static IQProvider getIQProvider() {
+
+    static FileTransferIQ parse(XmlPullParser parser, int initialDepth)
+            throws IOException, XmlPullParserException, InvalidIQException {
+        FileMetaData parsedMetaData = null;
+        TransferType parsedTransferType = null;
+
+        if (parser.getEventType() == Event.START_ELEMENT && ELEMENT.equals(parser.getName())) {
+            String transferTypeValue = parser.getAttributeValue(null, "type");
+            if (transferTypeValue == null) {
+                throw new InvalidIQException("no transfer type specified");
+            }
+            try {
+                parsedTransferType = TransferType.valueOf(transferTypeValue);
+            } catch (IllegalArgumentException iae) {
+                throw new InvalidIQException("unknown transfer type: " + transferTypeValue);
+            }
+        }
+
+        outer: while (true) {
+            Event event = parser.next();
+            switch (event) {
+            case START_ELEMENT:
+                if ("file".equals(parser.getName())) {
+                    parsedMetaData = new XMPPFileMetaData(parser);
+                }
+                break;
+            case END_ELEMENT:
+                if (parser.getDepth() == initialDepth) {
+                    break outer;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (parsedMetaData == null || parsedTransferType == null) {
+            throw new InvalidIQException(MessageFormat.format("parsedMetaData {0}, parsedTransferType {1}",
+                    parsedMetaData, parsedTransferType));
+        }
+        return new FileTransferIQ(parsedMetaData, parsedTransferType);
+    }
+
+    public static IqProvider<FileTransferIQ> getIQProvider() {
         return new FileTransferIQProvider();
     }
 
-    private static class FileTransferIQProvider implements IQProvider {
+    private static class FileTransferIQProvider extends IqProvider<FileTransferIQ> {
 
-        public IQ parseIQ(XmlPullParser parser) throws Exception {
+        @Override
+        public FileTransferIQ parse(XmlPullParser parser, int initialDepth, IqData iqData,
+                                    XmlEnvironment xmlEnvironment, JxmppContext jxmppContext)
+                throws XmlPullParserException, IOException, ParseException {
             try {
-                return new FileTransferIQ(parser);
+                return FileTransferIQ.parse(parser, initialDepth);
             } catch (InvalidIQException ie) {
                 LOG.debug("invalid iq", ie);
-                // throwing would close connection
                 return null;
             }
         }

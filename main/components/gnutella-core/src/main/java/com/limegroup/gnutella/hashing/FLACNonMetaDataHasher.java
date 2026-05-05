@@ -45,7 +45,12 @@ class FLACNonMetaDataHasher extends NonMetaDataHasher {
             
             boolean isEndOfHeader = false;
             while(!isEndOfHeader) {
-                MetadataBlockHeader mbh = MetadataBlockHeader.readHeader(raf);
+                MetadataBlockHeader mbh;
+                try {
+                    mbh = MetadataBlockHeader.readHeader(raf);
+                } catch (CannotReadException e) {
+                    throw new IOException(e);
+                }
                 
                 raf.seek(raf.getFilePointer() + mbh.getDataLength());
     

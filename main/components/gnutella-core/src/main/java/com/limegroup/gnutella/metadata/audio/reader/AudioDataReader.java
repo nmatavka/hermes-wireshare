@@ -9,6 +9,7 @@ import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.vorbiscomment.VorbisCommentTag;
@@ -44,13 +45,13 @@ public class AudioDataReader implements MetaReader {
      * type has its own format for describing the audio file. 
      */
     protected void readTag(AudioMetaData audioData, AudioFile audioFile, Tag tag){
-        audioData.setTitle(tag.getFirstTitle());
-        audioData.setArtist(tag.getFirstArtist());
-        audioData.setAlbum(tag.getFirstAlbum());
-        audioData.setYear(tag.getFirstYear());
-        audioData.setComment(tag.getFirstComment());
-        audioData.setTrack(tag.getFirstTrack());
-        audioData.setGenre(tag.getFirstGenre());
+        audioData.setTitle(tag.getFirst(FieldKey.TITLE));
+        audioData.setArtist(tag.getFirst(FieldKey.ARTIST));
+        audioData.setAlbum(tag.getFirst(FieldKey.ALBUM));
+        audioData.setYear(tag.getFirst(FieldKey.YEAR));
+        audioData.setComment(tag.getFirst(FieldKey.COMMENT));
+        audioData.setTrack(tag.getFirst(FieldKey.TRACK));
+        audioData.setGenre(tag.getFirst(FieldKey.GENRE));
         
         //if an ogg or flac file, try reading the license
         if(tag instanceof VorbisCommentTag) {

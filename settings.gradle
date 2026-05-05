@@ -1,22 +1,723 @@
-rootProject.name = 'WireShare'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = 'https://chaquo.com/maven' }
+        gradlePluginPortal()
+    }
+}
 
-def includeIvyModules = { File baseDir ->
-    if (!baseDir.exists()) {
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'hermes-wireshare'
+
+def runManagedCommand = { List<String> command, File workingDir = rootDir, boolean ignoreFailure = false ->
+    def normalizedCommand = command.collect { it.toString() }
+    def process = new ProcessBuilder(normalizedCommand)
+        .directory(workingDir)
+        .redirectErrorStream(true)
+        .start()
+
+    def output = new StringBuilder()
+    process.inputStream.eachLine { line ->
+        output.append(line).append(System.lineSeparator())
+    }
+
+    def exitCode = process.waitFor()
+    def result = [exitCode: exitCode, output: output.toString().trim()]
+
+    if (exitCode != 0 && !ignoreFailure) {
+        throw new GradleException("Command failed (${normalizedCommand.join(' ')}):\n${result.output}")
+    }
+
+    result
+}
+
+def refreshManagedGitCheckout = { File managedDir, String defaultBranch, String label ->
+    def fetchResult = runManagedCommand(
+        ['git', '-C', managedDir.absolutePath, 'fetch', '--depth', '1', 'origin', defaultBranch],
+        rootDir,
+        true
+    )
+    if (fetchResult.exitCode != 0) {
+        println("[${label}] Unable to refresh ${defaultBranch}; using cached checkout at ${managedDir}")
         return
     }
 
-    baseDir.eachDir { File moduleDir ->
-        if (new File(moduleDir, 'ivy.xml').exists()) {
-            include(":${moduleDir.name}")
-            project(":${moduleDir.name}").projectDir = moduleDir
+    def checkoutResult = runManagedCommand(
+        ['git', '-C', managedDir.absolutePath, 'checkout', '--force', '-B', 'codex-managed-sync', "origin/${defaultBranch}"],
+        rootDir,
+        true
+    )
+    if (checkoutResult.exitCode != 0) {
+        println("[${label}] Unable to check out origin/${defaultBranch}; using cached checkout at ${managedDir}")
+    }
+}
+
+def resolveManagedJlibtorrentProjectDir = {
+    def overrideDir = providers.gradleProperty('frostwireJlibtorrentDir').orNull
+    if (overrideDir) {
+        def explicitDir = file(overrideDir)
+        if (!explicitDir.exists()) {
+            throw new GradleException("Configured frostwireJlibtorrentDir does not exist: ${explicitDir}")
+        }
+        return explicitDir
+    }
+
+    def repoUrl = providers.gradleProperty('frostwireJlibtorrentRepo')
+        .orElse('https://github.com/frostwire/frostwire-jlibtorrent.git')
+        .get()
+    def managedDir = new File(rootDir, '.gradle/external/frostwire-jlibtorrent')
+    def offline = gradle.startParameter.isOffline()
+    def gitAvailable = runManagedCommand(['git', '--version'], rootDir, true).exitCode == 0
+
+    def branchOverride = providers.gradleProperty('frostwireJlibtorrentRef').orNull
+    def defaultBranch = branchOverride
+    if (!defaultBranch && !offline && gitAvailable) {
+        def headResult = runManagedCommand(
+            ['git', 'ls-remote', '--symref', repoUrl, 'HEAD'],
+            rootDir,
+            true
+        )
+        if (headResult.exitCode == 0) {
+            def branchLine = headResult.output.readLines().find { it.startsWith('ref: ') && it.endsWith('\tHEAD') }
+            if (branchLine != null) {
+                def matcher = branchLine =~ /^ref:\s+refs\/heads\/([^\t]+)\tHEAD$/
+                if (matcher.matches()) {
+                    defaultBranch = matcher.group(1)
+                }
+            }
+        }
+    }
+    if (!defaultBranch) {
+        defaultBranch = 'master'
+    }
+
+    if (offline) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "Gradle is offline and no cached frostwire-jlibtorrent checkout exists at ${managedDir}. " +
+                    "Run once online or set -PfrostwireJlibtorrentDir=/path/to/frostwire-jlibtorrent."
+            )
+        }
+        return managedDir
+    }
+
+    if (!gitAvailable) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "git is required to fetch frostwire-jlibtorrent from ${repoUrl}. " +
+                    "Install git or set -PfrostwireJlibtorrentDir=/path/to/frostwire-jlibtorrent."
+            )
+        }
+        println("[jlibtorrent] git unavailable; using cached checkout at ${managedDir}")
+        return managedDir
+    }
+
+    def ensureCheckout = {
+        managedDir.parentFile.mkdirs()
+        if (!new File(managedDir, '.git').exists()) {
+            if (managedDir.exists()) {
+                managedDir.deleteDir()
+            }
+            println("[jlibtorrent] Cloning ${repoUrl} (${defaultBranch}) into ${managedDir}")
+            runManagedCommand(
+                ['git', 'clone', '--depth', '1', '--branch', defaultBranch, repoUrl, managedDir.absolutePath],
+                rootDir
+            )
+            return
+        }
+
+        refreshManagedGitCheckout(managedDir, defaultBranch, 'jlibtorrent')
+    }
+
+    ensureCheckout()
+
+    if (!new File(managedDir, 'build.gradle').exists()) {
+        throw new GradleException("Managed frostwire-jlibtorrent checkout is missing build.gradle: ${managedDir}")
+    }
+
+    managedDir
+}
+
+def managedJlibtorrentProjectDir = resolveManagedJlibtorrentProjectDir()
+
+def resolveManagedJlibtorrentVersion = {
+    def explicitVersion = System.getenv('RELEASE_VERSION') ?: System.getenv('GITHUB_REF_NAME')?.replace('release/', '')
+    if (explicitVersion) {
+        return explicitVersion
+    }
+
+    def managedBuildFile = new File(managedJlibtorrentProjectDir, 'build.gradle')
+    def matcher = managedBuildFile.text =~ /(?m)version\s*=\s*version\s*=\s*.+?:\s*'([^']+)'/
+    if (!matcher.find()) {
+        throw new GradleException("Unable to determine managed frostwire-jlibtorrent version from ${managedBuildFile}")
+    }
+
+    matcher.group(1)
+}
+
+def syncManagedJlibtorrentJniVersion = {
+    def managedVersion = resolveManagedJlibtorrentVersion()
+    gradle.ext.set('managedJlibtorrentVersion', managedVersion)
+
+    def jniSourceFile = new File(
+        managedJlibtorrentProjectDir,
+        'src/main/java/com/frostwire/jlibtorrent/swig/libtorrent_jni.java'
+    )
+    if (!jniSourceFile.exists()) {
+        throw new GradleException("Managed frostwire-jlibtorrent checkout is missing ${jniSourceFile}")
+    }
+
+    def source = jniSourceFile.getText('UTF-8')
+    def matcher = source =~ /(?s)(public\s+static\s+String\s+jlibtorrentVersion\(\)\s*\{\s*.*?return\s+")([^"]+)(";)/ 
+    if (!matcher.find()) {
+        throw new GradleException("Unable to locate jlibtorrentVersion() in ${jniSourceFile}")
+    }
+
+    def currentVersion = matcher.group(2)
+    if (currentVersion == managedVersion) {
+        return
+    }
+
+    def updatedSource = source.replaceFirst(
+        /(?s)(public\s+static\s+String\s+jlibtorrentVersion\(\)\s*\{\s*.*?return\s+")([^"]+)(";)/,
+        "\$1${managedVersion}\$3"
+    )
+    jniSourceFile.setText(updatedSource, 'UTF-8')
+    println("[jlibtorrent] Synchronized libtorrent_jni.java version ${currentVersion} -> ${managedVersion}")
+}
+
+syncManagedJlibtorrentJniVersion()
+
+def resolveManagedSmackProjectDir = {
+    def overrideDir = providers.gradleProperty('smackDir').orNull
+    if (overrideDir) {
+        def explicitDir = file(overrideDir)
+        if (!explicitDir.exists()) {
+            throw new GradleException("Configured smackDir does not exist: ${explicitDir}")
+        }
+        return explicitDir
+    }
+
+    def repoUrl = providers.gradleProperty('smackRepo')
+        .orElse('https://github.com/igniterealtime/Smack.git')
+        .get()
+    def managedDir = new File(rootDir, '.gradle/external/Smack')
+    def offline = gradle.startParameter.isOffline()
+    def gitAvailable = runManagedCommand(['git', '--version'], rootDir, true).exitCode == 0
+
+    def branchOverride = providers.gradleProperty('smackRef').orNull
+    def defaultBranch = branchOverride
+    if (!defaultBranch && !offline && gitAvailable) {
+        def headResult = runManagedCommand(
+            ['git', 'ls-remote', '--symref', repoUrl, 'HEAD'],
+            rootDir,
+            true
+        )
+        if (headResult.exitCode == 0) {
+            def branchLine = headResult.output.readLines().find { it.startsWith('ref: ') && it.endsWith('\tHEAD') }
+            if (branchLine != null) {
+                def matcher = branchLine =~ /^ref:\s+refs\/heads\/([^\t]+)\tHEAD$/
+                if (matcher.matches()) {
+                    defaultBranch = matcher.group(1)
+                }
+            }
+        }
+    }
+    if (!defaultBranch) {
+        defaultBranch = 'master'
+    }
+
+    if (offline) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "Gradle is offline and no cached Smack checkout exists at ${managedDir}. " +
+                    "Run once online or set -PsmackDir=/path/to/Smack."
+            )
+        }
+        return managedDir
+    }
+
+    if (!gitAvailable) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "git is required to fetch Smack from ${repoUrl}. " +
+                    "Install git or set -PsmackDir=/path/to/Smack."
+            )
+        }
+        println("[smack] git unavailable; using cached checkout at ${managedDir}")
+        return managedDir
+    }
+
+    def ensureCheckout = {
+        managedDir.parentFile.mkdirs()
+        if (!new File(managedDir, '.git').exists()) {
+            if (managedDir.exists()) {
+                managedDir.deleteDir()
+            }
+            println("[smack] Cloning ${repoUrl} (${defaultBranch}) into ${managedDir}")
+            runManagedCommand(
+                ['git', 'clone', '--depth', '1', '--branch', defaultBranch, repoUrl, managedDir.absolutePath],
+                rootDir
+            )
+            return
+        }
+
+        refreshManagedGitCheckout(managedDir, defaultBranch, 'smack')
+    }
+
+    ensureCheckout()
+
+    if (!new File(managedDir, 'settings.gradle').exists()) {
+        throw new GradleException("Managed Smack checkout is missing settings.gradle: ${managedDir}")
+    }
+
+    managedDir
+}
+
+def managedSmackProjectDir = resolveManagedSmackProjectDir()
+def managedSmackVersionFile = new File(managedSmackProjectDir, 'version')
+if (!managedSmackVersionFile.exists() || managedSmackVersionFile.text.trim().isEmpty()) {
+    throw new GradleException("Managed Smack checkout is missing a usable version file: ${managedSmackVersionFile}")
+}
+gradle.ext.set('managedSmackVersion', managedSmackVersionFile.text.trim())
+
+includeBuild(managedSmackProjectDir) {
+    dependencySubstitution {
+        substitute module('org.igniterealtime.smack:smack-core') using project(':smack-core')
+        substitute module('org.igniterealtime.smack:smack-im') using project(':smack-im')
+        substitute module('org.igniterealtime.smack:smack-tcp') using project(':smack-tcp')
+        substitute module('org.igniterealtime.smack:smack-extensions') using project(':smack-extensions')
+        substitute module('org.igniterealtime.smack:smack-resolver-minidns') using project(':smack-resolver-minidns')
+        substitute module('org.igniterealtime.smack:smack-debug-slf4j') using project(':smack-debug-slf4j')
+        substitute module('org.igniterealtime.smack:smack-xmlparser-stax') using project(':smack-xmlparser-stax')
+    }
+}
+
+def resolveManagedGuiceProjectDir = {
+    def overrideDir = providers.gradleProperty('guiceDir').orNull
+    if (overrideDir) {
+        def explicitDir = file(overrideDir)
+        if (!explicitDir.exists()) {
+            throw new GradleException("Configured guiceDir does not exist: ${explicitDir}")
+        }
+        return explicitDir
+    }
+
+    def repoUrl = providers.gradleProperty('guiceRepo')
+        .orElse('https://github.com/google/guice.git')
+        .get()
+    def managedDir = new File(rootDir, '.gradle/external/guice')
+    def offline = gradle.startParameter.isOffline()
+    def gitAvailable = runManagedCommand(['git', '--version'], rootDir, true).exitCode == 0
+
+    def branchOverride = providers.gradleProperty('guiceRef').orNull
+    def defaultBranch = branchOverride
+    if (!defaultBranch && !offline && gitAvailable) {
+        def headResult = runManagedCommand(
+            ['git', 'ls-remote', '--symref', repoUrl, 'HEAD'],
+            rootDir,
+            true
+        )
+        if (headResult.exitCode == 0) {
+            def branchLine = headResult.output.readLines().find { it.startsWith('ref: ') && it.endsWith('\tHEAD') }
+            if (branchLine != null) {
+                def matcher = branchLine =~ /^ref:\s+refs\/heads\/([^\t]+)\tHEAD$/
+                if (matcher.matches()) {
+                    defaultBranch = matcher.group(1)
+                }
+            }
+        }
+    }
+    if (!defaultBranch) {
+        defaultBranch = 'master'
+    }
+
+    if (offline) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "Gradle is offline and no cached Guice checkout exists at ${managedDir}. " +
+                    "Run once online or set -PguiceDir=/path/to/guice."
+            )
+        }
+        return managedDir
+    }
+
+    if (!gitAvailable) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "git is required to fetch Guice from ${repoUrl}. " +
+                    "Install git or set -PguiceDir=/path/to/guice."
+            )
+        }
+        println("[guice] git unavailable; using cached checkout at ${managedDir}")
+        return managedDir
+    }
+
+    def ensureCheckout = {
+        managedDir.parentFile.mkdirs()
+        if (!new File(managedDir, '.git').exists()) {
+            if (managedDir.exists()) {
+                managedDir.deleteDir()
+            }
+            println("[guice] Cloning ${repoUrl} (${defaultBranch}) into ${managedDir}")
+            runManagedCommand(
+                ['git', 'clone', '--depth', '1', '--branch', defaultBranch, repoUrl, managedDir.absolutePath],
+                rootDir
+            )
+            return
+        }
+
+        refreshManagedGitCheckout(managedDir, defaultBranch, 'guice')
+    }
+
+    ensureCheckout()
+
+    if (!new File(managedDir, 'pom.xml').exists()) {
+        throw new GradleException("Managed Guice checkout is missing pom.xml: ${managedDir}")
+    }
+
+    managedDir
+}
+
+def managedGuiceProjectDir = resolveManagedGuiceProjectDir()
+def managedGuicePom = new File(managedGuiceProjectDir, 'pom.xml')
+def managedGuiceVersionMatcher = managedGuicePom.text =~ /<artifactId>\s*guice-parent\s*<\/artifactId>\s*<version>([^<]+)<\/version>/
+if (!managedGuiceVersionMatcher.find()) {
+    throw new GradleException("Managed Guice checkout is missing a usable guice-parent version in ${managedGuicePom}")
+}
+def managedGuiceVersion = managedGuiceVersionMatcher.group(1).trim()
+gradle.ext.set('managedGuiceVersion', managedGuiceVersion)
+
+def managedGuiceAdapterDir = new File(rootDir, '.gradle/external/guice-gradle-adapter')
+managedGuiceAdapterDir.mkdirs()
+new File(managedGuiceAdapterDir, 'guice').mkdirs()
+new File(managedGuiceAdapterDir, 'guice-assistedinject').mkdirs()
+new File(managedGuiceAdapterDir, 'settings.gradle').text = """rootProject.name = 'managed-guice-adapter'
+include 'guice', 'guice-assistedinject'
+"""
+def quotedGuiceDir = groovy.json.JsonOutput.toJson(managedGuiceProjectDir.absolutePath)
+new File(managedGuiceAdapterDir, 'build.gradle').text = """
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'java-library'
+}
+
+def managedGuiceDir = file(${quotedGuiceDir})
+
+allprojects {
+    group = 'com.google.inject'
+    version = '${managedGuiceVersion}'
+
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 11
+        options.compilerArgs.add('-parameters')
+    }
+
+    tasks.withType(Jar).configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
+project(':guice') {
+    sourceSets {
+        main {
+            java.srcDirs = [new File(managedGuiceDir, 'core/src')]
+        }
+    }
+
+    dependencies {
+        api 'jakarta.inject:jakarta.inject-api:2.0.1'
+        api 'aopalliance:aopalliance:1.0'
+        api 'com.google.guava:guava:33.0.0-jre'
+        implementation 'org.jspecify:jspecify:1.0.0'
+        compileOnly 'com.google.code.findbugs:jsr305:3.0.1'
+        compileOnly 'com.google.errorprone:error_prone_annotations:2.18.0'
+        implementation 'org.ow2.asm:asm:9.5'
+    }
+
+    jar {
+        manifest {
+            attributes('Automatic-Module-Name': 'com.google.guice')
         }
     }
 }
 
-includeIvyModules(file('main/components'))
-includeIvyModules(file('main/private-components'))
+project(':guice-assistedinject') {
+    group = 'com.google.inject.extensions'
 
-if (file('jlibtorrent/build.gradle').exists()) {
-    include(':jlibtorrent')
-    project(':jlibtorrent').projectDir = file('jlibtorrent')
+    sourceSets {
+        main {
+            java.srcDirs = [new File(managedGuiceDir, 'extensions/assistedinject/src')]
+        }
+    }
+
+    dependencies {
+        api project(':guice')
+        compileOnly 'com.google.errorprone:error_prone_annotations:2.18.0'
+    }
+
+    jar {
+        manifest {
+            attributes('Automatic-Module-Name': 'com.google.guice.extensions.assistedinject')
+        }
+    }
+}
+"""
+
+includeBuild(managedGuiceAdapterDir) {
+    dependencySubstitution {
+        substitute module('com.google.inject:guice') using project(':guice')
+        substitute module('com.google.inject.extensions:guice-assistedinject') using project(':guice-assistedinject')
+    }
+}
+
+def resolveManagedCybergarageUpnpProjectDir = {
+    def overrideDir = providers.gradleProperty('cybergarageUpnpDir').orNull
+    if (overrideDir) {
+        def explicitDir = file(overrideDir)
+        if (!explicitDir.exists()) {
+            throw new GradleException("Configured cybergarageUpnpDir does not exist: ${explicitDir}")
+        }
+        return explicitDir
+    }
+
+    def repoUrl = providers.gradleProperty('cybergarageUpnpRepo')
+        .orElse('https://github.com/cybergarage/cybergarage-upnp.git')
+        .get()
+    def managedDir = new File(rootDir, '.gradle/external/cybergarage-upnp')
+    def offline = gradle.startParameter.isOffline()
+    def gitAvailable = runManagedCommand(['git', '--version'], rootDir, true).exitCode == 0
+
+    def branchOverride = providers.gradleProperty('cybergarageUpnpRef').orNull
+    def defaultBranch = branchOverride
+    if (!defaultBranch && !offline && gitAvailable) {
+        def headResult = runManagedCommand(
+            ['git', 'ls-remote', '--symref', repoUrl, 'HEAD'],
+            rootDir,
+            true
+        )
+        if (headResult.exitCode == 0) {
+            def branchLine = headResult.output.readLines().find { it.startsWith('ref: ') && it.endsWith('\tHEAD') }
+            if (branchLine != null) {
+                def matcher = branchLine =~ /^ref:\s+refs\/heads\/([^\t]+)\tHEAD$/
+                if (matcher.matches()) {
+                    defaultBranch = matcher.group(1)
+                }
+            }
+        }
+    }
+    if (!defaultBranch) {
+        defaultBranch = 'master'
+    }
+
+    if (offline) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "Gradle is offline and no cached cybergarage-upnp checkout exists at ${managedDir}. " +
+                    "Run once online or set -PcybergarageUpnpDir=/path/to/cybergarage-upnp."
+            )
+        }
+        return managedDir
+    }
+
+    if (!gitAvailable) {
+        if (!managedDir.exists()) {
+            throw new GradleException(
+                "git is required to fetch cybergarage-upnp from ${repoUrl}. " +
+                    "Install git or set -PcybergarageUpnpDir=/path/to/cybergarage-upnp."
+            )
+        }
+        println("[cybergarage-upnp] git unavailable; using cached checkout at ${managedDir}")
+        return managedDir
+    }
+
+    def ensureCheckout = {
+        managedDir.parentFile.mkdirs()
+        if (!new File(managedDir, '.git').exists()) {
+            if (managedDir.exists()) {
+                managedDir.deleteDir()
+            }
+            println("[cybergarage-upnp] Cloning ${repoUrl} (${defaultBranch}) into ${managedDir}")
+            runManagedCommand(
+                ['git', 'clone', '--depth', '1', '--branch', defaultBranch, repoUrl, managedDir.absolutePath],
+                rootDir
+            )
+            return
+        }
+
+        refreshManagedGitCheckout(managedDir, defaultBranch, 'cybergarage-upnp')
+    }
+
+    ensureCheckout()
+
+    if (!new File(managedDir, 'pom.xml').exists()) {
+        throw new GradleException("Managed cybergarage-upnp checkout is missing pom.xml: ${managedDir}")
+    }
+
+    managedDir
+}
+
+def managedCybergarageUpnpProjectDir = resolveManagedCybergarageUpnpProjectDir()
+def managedCybergarageUpnpPom = new File(managedCybergarageUpnpProjectDir, 'pom.xml')
+def managedCybergarageUpnpVersionMatcher = managedCybergarageUpnpPom.text =~ /<artifactId>\s*upnp\s*<\/artifactId>\s*<version>([^<]+)<\/version>/
+if (!managedCybergarageUpnpVersionMatcher.find()) {
+    throw new GradleException("Managed cybergarage-upnp checkout is missing a usable version in ${managedCybergarageUpnpPom}")
+}
+def managedCybergarageUpnpVersion = managedCybergarageUpnpVersionMatcher.group(1).trim()
+gradle.ext.set('managedCybergarageUpnpVersion', managedCybergarageUpnpVersion)
+
+def managedCybergarageUpnpAdapterDir = new File(rootDir, '.gradle/external/cybergarage-upnp-gradle-adapter')
+managedCybergarageUpnpAdapterDir.mkdirs()
+new File(managedCybergarageUpnpAdapterDir, 'core').mkdirs()
+new File(managedCybergarageUpnpAdapterDir, 'std').mkdirs()
+new File(managedCybergarageUpnpAdapterDir, 'settings.gradle').text = """rootProject.name = 'managed-cybergarage-upnp-adapter'
+include 'core', 'std'
+"""
+def quotedCybergarageUpnpDir = groovy.json.JsonOutput.toJson(managedCybergarageUpnpProjectDir.absolutePath)
+new File(managedCybergarageUpnpAdapterDir, 'build.gradle').text = """
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
+plugins {
+    id 'java-library'
+}
+
+def managedCybergarageUpnpDir = file(${quotedCybergarageUpnpDir})
+
+allprojects {
+    group = 'org.cybergarage.upnp'
+    version = '${managedCybergarageUpnpVersion}'
+
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 11
+    }
+
+    tasks.withType(Jar).configureEach {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
+project(':core') {
+    sourceSets {
+        main {
+            java.srcDirs = [new File(managedCybergarageUpnpDir, 'core/src/main/java')]
+            resources.srcDirs = [new File(managedCybergarageUpnpDir, 'core/src/main/resources')]
+        }
+        test {
+            java.srcDirs = [new File(managedCybergarageUpnpDir, 'core/src/test/java')]
+            resources.srcDirs = [new File(managedCybergarageUpnpDir, 'core/src/test/resources')]
+        }
+    }
+
+    dependencies {
+        testImplementation 'junit:junit:4.13.2'
+    }
+}
+
+project(':std') {
+    sourceSets {
+        main {
+            java.srcDirs = [new File(managedCybergarageUpnpDir, 'std/src/main/java')]
+            resources.srcDirs = [new File(managedCybergarageUpnpDir, 'std/src/main/resources')]
+        }
+        test {
+            java.srcDirs = [new File(managedCybergarageUpnpDir, 'std/src/test/java')]
+            resources.srcDirs = [new File(managedCybergarageUpnpDir, 'std/src/test/resources')]
+        }
+    }
+
+    dependencies {
+        api project(':core')
+        testImplementation 'junit:junit:4.13.2'
+    }
+}
+"""
+
+includeBuild(managedCybergarageUpnpAdapterDir) {
+    dependencySubstitution {
+        substitute module('org.cybergarage.upnp:core') using project(':core')
+        substitute module('org.cybergarage.upnp:std') using project(':std')
+    }
+}
+
+def modules = [
+    'desktop-compose-contracts': 'desktop-compose-contracts',
+    'desktop-compose-legacy-compat': 'desktop-compose-legacy-compat',
+    'desktop-compose-app': 'desktop-compose-app',
+    'bittorrent-api': 'main/components/bittorrent-api',
+    'collection'    : 'main/components/collection',
+    'common'        : 'main/components/common',
+    'core-api'      : 'main/components/core-api',
+    'core-glue'     : 'main/components/core-glue',
+    'core-settings' : 'main/components/core-settings',
+    'friend'        : 'main/components/friend',
+    'gnutella-core' : 'main/components/gnutella-core',
+    'http'          : 'main/components/http',
+    'io'            : 'main/components/io',
+    'libtorrent'    : 'main/components/libtorrent',
+    'mojito'        : 'main/components/mojito',
+    'mojito-ui'     : 'main/components/mojito-ui',
+    'net'           : 'main/components/net',
+    'nio'           : 'main/components/nio',
+    'player'        : 'main/components/player',
+    'player-api'    : 'main/components/player-api',
+    'rest'          : 'main/components/rest',
+    'rudp'          : 'main/components/rudp',
+    'security'      : 'main/components/security',
+    'setting'       : 'main/components/setting',
+    'statistic'     : 'main/components/statistic',
+    'swingui'       : 'main/private-components/swingui',
+    'integrated-ui' : 'main/private-components/integrated-ui',
+    'xmpp'          : 'main/components/xmpp',
+    'xmpp-api'      : 'main/components/xmpp-api',
+    'jlibtorrent'   : 'jlibtorrent',
+    'android-app'   : 'android-app',
+]
+
+include(*(modules.keySet() as List))
+
+modules.each { name, path ->
+    project(":${name}").projectDir = name == 'jlibtorrent'
+        ? managedJlibtorrentProjectDir
+        : file(path)
 }

@@ -1,9 +1,10 @@
 package org.limewire.xmpp.client.impl.messages.authtoken;
 
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.StanzaListener;
+import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.Stanza;
+import org.jxmpp.jid.impl.JidCreate;
 import org.limewire.friend.api.FriendException;
 import org.limewire.friend.api.FriendPresence;
 import org.limewire.friend.api.feature.AuthToken;
@@ -13,10 +14,8 @@ import org.limewire.xmpp.client.impl.XMPPFriendConnectionImpl;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+public class AuthTokenIQListener implements StanzaListener, FeatureTransport<AuthToken> {
 
-
-public class AuthTokenIQListener implements PacketListener, FeatureTransport<AuthToken> {
-    
     private final XMPPFriendConnectionImpl connection;
     private final FeatureTransport.Handler<AuthToken> handler;
 
@@ -27,28 +26,28 @@ public class AuthTokenIQListener implements PacketListener, FeatureTransport<Aut
         this.handler = handler;
     }
 
-    public void processPacket(Packet packet) {
-        final AuthTokenIQ iq = (AuthTokenIQ)packet;
-        if(iq.getType().equals(IQ.Type.SET)) {
-            handler.featureReceived(iq.getFrom(), iq.getAuthToken());
+    @Override
+    public void processStanza(Stanza stanza) {
+        AuthTokenIQ iq = (AuthTokenIQ) stanza;
+        if (iq.getType() == IQ.Type.set && iq.getFrom() != null) {
+            handler.featureReceived(iq.getFrom().toString(), iq.getAuthToken());
         }
     }
 
     @Override
     public void sendFeature(FriendPresence presence, AuthToken localFeature) throws FriendException {
-        AuthTokenIQ queryResult = new AuthTokenIQ(localFeature);
-        queryResult.setTo(presence.getPresenceId());
-        queryResult.setFrom(connection.getLocalJid());
-        queryResult.setType(IQ.Type.SET);
-        connection.sendPacket(queryResult);
+        try {
+            AuthTokenIQ queryResult = new AuthTokenIQ(localFeature);
+            queryResult.setTo(JidCreate.from(presence.getPresenceId()));
+            queryResult.setFrom(JidCreate.from(connection.getLocalJid()));
+            queryResult.setType(IQ.Type.set);
+            connection.sendPacket(queryResult);
+        } catch (Exception e) {
+            throw new FriendException(e);
+        }
     }
 
-    public PacketFilter getPacketFilter() {
-        return new PacketFilter(){
-            public boolean accept(Packet packet) {
-                return packet instanceof AuthTokenIQ;
-            }
-        };
+    public StanzaFilter getStanzaFilter() {
+        return stanza -> stanza instanceof AuthTokenIQ;
     }
-
 }

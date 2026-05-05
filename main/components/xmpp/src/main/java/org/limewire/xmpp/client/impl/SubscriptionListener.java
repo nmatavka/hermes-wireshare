@@ -1,14 +1,14 @@
 package org.limewire.xmpp.client.impl;
 
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.Presence.Type;
+import org.jivesoftware.smack.packet.Stanza;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
+import org.jxmpp.jid.BareJid;
+import org.jxmpp.jid.impl.JidCreate;
 import org.limewire.friend.api.FriendRequest;
 import org.limewire.friend.api.FriendRequestDecisionHandler;
 import org.limewire.friend.api.FriendRequestEvent;
@@ -18,14 +18,9 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 /**
- * Handles presence subscriptions and unsubscriptions on an XMPP connection
- * (see RFC 3921 section 8). <code>FriendRequestEvent</code>s that require
- * decisions from the user are broadcast for interception by the UI, and the
- * results are passed back asynchronously through the
- * <code>FriendRequestDecisionHandler</code> interface. 
+ * Handles presence subscriptions and unsubscriptions on an XMPP connection.
  */
-class SubscriptionListener
-implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
+class SubscriptionListener implements StanzaListener, FriendRequestDecisionHandler {
 
     private static final Log LOG = LogFactory.getLog(SubscriptionListener.class);
 
@@ -39,103 +34,95 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
     }
 
     @Override
-    public void processPacket(Packet packet) {
+    public void processStanza(Stanza stanza) {
         try {
-            Presence presence = (Presence)packet;
-            String friendUsername = PresenceUtils.parseBareAddress(packet.getFrom());
-            if(presence.getType() == Type.subscribe) {
+            Presence presence = (Presence) stanza;
+            String friendUsername = PresenceUtils.parseBareAddress(stanza.getFrom().toString());
+            if (presence.getType() == Presence.Type.subscribe) {
                 LOG.debugf("subscribe from {0}", friendUsername);
-                // If this is a new friend request, ask the user what to do
-                Roster roster = connection.getRoster();
-                if(roster != null) {
-                    RosterEntry entry = roster.getEntry(friendUsername);
-                    if(entry == null) {
-                        LOG.debug("it's a new subscription");
-                        // Ask the user
-                        friendRequestBroadcaster.broadcast(new FriendRequestEvent(
-                                new FriendRequest(friendUsername, this),
-                                FriendRequestEvent.Type.REQUESTED));
-                    } else {
-                        LOG.debug("it's a response to our subscription");
-                        // Acknowledge the subscription
-                        Presence subbed = new Presence(Presence.Type.subscribed);
-                        subbed.setTo(friendUsername);
-                        connection.sendPacket(subbed);
-                    }
+                Roster roster = Roster.getInstanceFor(connection);
+                RosterEntry entry = roster.getEntry(JidCreate.bareFrom(friendUsername));
+                if (entry == null) {
+                    LOG.debug("it's a new subscription");
+                    friendRequestBroadcaster.broadcast(new FriendRequestEvent(
+                            new FriendRequest(friendUsername, this),
+                            FriendRequestEvent.Type.REQUESTED));
+                } else {
+                    LOG.debug("it's a response to our subscription");
+                    Presence subbed = connection.getStanzaFactory().buildPresenceStanza()
+                            .ofType(Presence.Type.subscribed)
+                            .to(JidCreate.bareFrom(friendUsername))
+                            .build();
+                    connection.sendStanza(subbed);
                 }
-            } else if(presence.getType() == Type.subscribed) {
+            } else if (presence.getType() == Presence.Type.subscribed) {
                 LOG.debugf("subscribed from {0}", friendUsername);
-            } else if(presence.getType() == Type.unsubscribe) {
+            } else if (presence.getType() == Presence.Type.unsubscribe) {
                 LOG.debugf("unsubscribe from {0}", friendUsername);
-                // Acknowledge the unsubscription
-                Presence unsubbed = new Presence(Presence.Type.unsubscribed);
-                unsubbed.setTo(friendUsername);
-                connection.sendPacket(unsubbed);
-                // If this is a response, don't respond again
-                Roster roster = connection.getRoster();
-                if(roster != null) {
-                    RosterEntry entry = roster.getEntry(friendUsername);
-                    if(entry == null) {
-                        LOG.debug("it's a response to our unsubscription");
-                    } else {
-                        LOG.debug("it's a new unsubscription");
-                        // Unsubscribe from the friend
-                        Presence unsub = new Presence(Presence.Type.unsubscribe);
-                        unsub.setTo(friendUsername);
-                        connection.sendPacket(unsub);
-                        // Remove the friend from the roster
-                        try {
-                            roster.removeEntry(entry);
-                        } catch(XMPPException x) {
-                            LOG.debug(x);
-                        }
-                    }
+                Presence unsubbed = connection.getStanzaFactory().buildPresenceStanza()
+                        .ofType(Presence.Type.unsubscribed)
+                        .to(JidCreate.bareFrom(friendUsername))
+                        .build();
+                connection.sendStanza(unsubbed);
+                Roster roster = Roster.getInstanceFor(connection);
+                RosterEntry entry = roster.getEntry(JidCreate.bareFrom(friendUsername));
+                if (entry == null) {
+                    LOG.debug("it's a response to our unsubscription");
+                } else {
+                    LOG.debug("it's a new unsubscription");
+                    Presence unsub = connection.getStanzaFactory().buildPresenceStanza()
+                            .ofType(Presence.Type.unsubscribe)
+                            .to(JidCreate.bareFrom(friendUsername))
+                            .build();
+                    connection.sendStanza(unsub);
+                    roster.removeEntry(entry);
                 }
-            } else if(presence.getType() == Type.unsubscribed) {
+            } else if (presence.getType() == Presence.Type.unsubscribed) {
                 LOG.debugf("unsubscribed from {0}", friendUsername);
             }
-        } catch (XMPPException e) {
-            LOG.debug("processPacket failed", e);
+        } catch (Exception e) {
+            LOG.debug("processStanza failed", e);
         }
     }
 
-    @Override
-    public boolean accept(Packet packet) {
-        if(packet instanceof Presence) {
-            Presence presence = (Presence)packet;
-            return presence.getType() == Type.subscribe
-            || presence.getType() == Type.subscribed
-            || presence.getType() == Type.unsubscribe
-            || presence.getType() == Type.unsubscribed;
-        }
-        return false;
+    public StanzaFilter getStanzaFilter() {
+        return stanza -> {
+            if (!(stanza instanceof Presence)) {
+                return false;
+            }
+            Presence presence = (Presence) stanza;
+            return presence.getType() == Presence.Type.subscribe
+                    || presence.getType() == Presence.Type.subscribed
+                    || presence.getType() == Presence.Type.unsubscribe
+                    || presence.getType() == Presence.Type.unsubscribed;
+        };
     }
 
     @Override
     public void handleDecision(String friendUsername, boolean accepted) {
         try {
-            if(!connection.isConnected())
+            if (!connection.isConnected()) {
                 return;
-            if(accepted) {
+            }
+            BareJid friendJid = JidCreate.bareFrom(friendUsername);
+            if (accepted) {
                 LOG.debug("user accepted");
-                // Acknowledge the subscription
-                Presence subbed = new Presence(Presence.Type.subscribed);
-                subbed.setTo(friendUsername);
-                connection.sendPacket(subbed);
-                // Add the friend to the roster (this will subscribe to the friend)
-                Roster roster = connection.getRoster();
-                if(roster != null) {
-                    roster.createEntry(friendUsername, friendUsername, null);
-                }
+                Presence subbed = connection.getStanzaFactory().buildPresenceStanza()
+                        .ofType(Presence.Type.subscribed)
+                        .to(friendJid)
+                        .build();
+                connection.sendStanza(subbed);
+                Roster.getInstanceFor(connection).createItemAndRequestSubscription(friendJid, friendUsername, null);
             } else {
                 LOG.debug("user declined");
-                // Refuse the subscription
-                Presence unsubbed = new Presence(Presence.Type.unsubscribed);
-                unsubbed.setTo(friendUsername);
-                connection.sendPacket(unsubbed);
+                Presence unsubbed = connection.getStanzaFactory().buildPresenceStanza()
+                        .ofType(Presence.Type.unsubscribed)
+                        .to(friendJid)
+                        .build();
+                connection.sendStanza(unsubbed);
             }
-        } catch (XMPPException e) {
-            LOG.debug("handleDecision failed", e);    
+        } catch (Exception e) {
+            LOG.debug("handleDecision failed", e);
         }
     }
 }

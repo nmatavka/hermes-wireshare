@@ -116,10 +116,48 @@ public class LibTorrentSession implements TorrentManager {
         lock.lock();
         try {
             validateLibrary();
+            File torrentFile = params.getTorrentFile();
+            File fastResumefile = params.getFastResumeFile();
+
+            List<URI> trackerList = params.getTrackers();
+            String firstTrackerURI = null;
+            if (trackerList != null && trackerList.size()>0) {
+                firstTrackerURI = trackerList.get(0).toASCIIString();
+            }
+            
+            String fastResumePath = fastResumefile != null ? fastResumefile.getAbsolutePath()
+                    : null;
+            
+            String torrentPath = torrentFile != null ? torrentFile.getAbsolutePath() : null;
+            String saveDirectory = params.getDownloadFolder().getAbsolutePath();
+            
             String sha1 = params.getSha1();
             
             Torrent torrent = new TorrentImpl(params, libTorrent, fastExecutor);
-            libTorrent.add_torrent(params);
+            libTorrent.add_torrent(sha1, firstTrackerURI, torrentPath, saveDirectory,
+                    fastResumePath);
+            
+            // Flush and add the SECONDARY i={1,..,n} trackers again so if there were user changes, ie. 
+            //  when loading from a memento the new user tracker list will be used.
+            if (trackerList != null) {
+                LOG.debug("flushing trackers");
+                
+                LibTorrentAnnounceEntry[] trackers = libTorrent.get_trackers(sha1);
+               
+                // Remove the trackers that were automatically added by loading the torrent file
+                for ( int i=1 ; i<trackers.length ; i++ ) {
+                    LibTorrentAnnounceEntry tracker = trackers[i];
+                    libTorrent.remove_tracker(sha1, tracker.uri, tracker.tier);
+                }
+                
+                // Add back for changes
+                for ( int i=1 ; i<trackerList.size() ; i++ ) {
+                    URI trackerURI = trackerList.get(i);
+                    if (trackerURI != null) {
+                        libTorrent.add_tracker(sha1, trackerURI.toASCIIString(), i);
+                    }
+                }
+            }
             
             updateStatus(torrent);
             torrents.put(sha1, torrent);

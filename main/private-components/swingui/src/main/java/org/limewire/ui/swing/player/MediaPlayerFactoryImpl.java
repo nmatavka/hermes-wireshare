@@ -1,14 +1,11 @@
 package org.limewire.ui.swing.player;
 
-import java.awt.Canvas;
 import java.awt.Container;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.media.IncompatibleSourceException;
 import javax.media.MediaLocator;
@@ -79,16 +76,6 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
             }
         }
         
-        if(OSUtils.isWindows7()) {
-            try { 
-                if(LOG.isDebugEnabled())
-                    LOG.debug("loading MediaFoundationPlayer");
-                Player player = createWindows7MFPlayer(file, parentComponent);
-                setupPlayer(player, file);
-                return player;
-            } catch (IncompatibleSourceException e) {
-            }
-        }
         if(LOG.isDebugEnabled())
             LOG.debug("Loading default java player");
         
@@ -98,45 +85,6 @@ class MediaPlayerFactoryImpl implements MediaPlayerFactory {
         parentComponent.add(p);
         
         return handler;
-    }
-    
-    /**
-     * Creates a MF Player on Windows 7. Unlike other players, a Container must created and 
-     * realized before the player is created since it requires a handle to the Container. 
-     * As a result we wait and add the Canvas prior to attempting to create the Player but 
-     * only for MFPlayer.
-     */
-    private Player createWindows7MFPlayer(File file, final Container parentComponent) throws IncompatibleSourceException {
-         //DS failed.  Now we try MF.
-         final AtomicReference<Canvas> mfCanvas = new AtomicReference<Canvas>(); 
-         try {
-             //create new canvas and add to parentComponent so we can get an hwnd
-             SwingUtilities.invokeAndWait(new Runnable() {
-                 @Override
-                 public void run() {
-                     Canvas canvas = new Canvas();
-                     parentComponent.add(canvas);
-                     //addNotify to make sure we have a working hwnd
-                     parentComponent.addNotify();
-                     mfCanvas.set(canvas);
-                 }
-             });
-         } catch (InterruptedException e) {
-             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
-         } catch (InvocationTargetException e) {
-             throw new IncompatibleSourceException(e.toString() + " \n" + ExceptionUtils.getStackTrace(e));
-         }
-         
-         final Player handler = new net.sf.fmj.mf.media.content.unknown.Handler(mfCanvas.get());
-         
-         SwingUtilities.invokeLater(new Runnable() {
-             @Override
-			public void run() {
-                 parentComponent.setPreferredSize(mfCanvas.get().getPreferredSize());
-             }
-         });
-        return handler;
-     
     }
     
     /**

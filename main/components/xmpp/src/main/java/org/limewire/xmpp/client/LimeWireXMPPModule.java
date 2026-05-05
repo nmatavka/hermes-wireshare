@@ -17,7 +17,6 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.AsynchronousEventBroadcaster;
-import org.limewire.inject.FactoryModules;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.client.impl.ConnectionConfigurationFactory;
@@ -43,6 +42,7 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListenerFa
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 
 public class LimeWireXMPPModule extends AbstractModule {
     private final Class<? extends JabberSettings> jabberSettingsClass;
@@ -83,17 +83,17 @@ public class LimeWireXMPPModule extends AbstractModule {
         connectionConfigurationFactories.add(new FallbackConnectionConfigurationFactory());
         bind(new TypeLiteral<List<ConnectionConfigurationFactory>>(){}).toInstance(connectionConfigurationFactories);
         
-        install(FactoryModules.newFactory(XMPPConnectionImplFactory.class, XMPPFriendConnectionImpl.class));
+        install(new FactoryModuleBuilder().build(XMPPConnectionImplFactory.class));
         
-        install(FactoryModules.newFactory(AddressIQListenerFactory.class, AddressIQListener.class));
-        install(FactoryModules.newFactory(AuthTokenIQListenerFactory.class, AuthTokenIQListener.class));
-        install(FactoryModules.newFactory(ConnectBackRequestIQListenerFactory.class, ConnectBackRequestIQListener.class));
-        install(FactoryModules.newFactory(LibraryChangedIQListenerFactory.class, LibraryChangedIQListener.class));
-        install(FactoryModules.newFactory(FileTransferIQListenerFactory.class, FileTransferIQListener.class));
+        install(new FactoryModuleBuilder().build(AddressIQListenerFactory.class));
+        install(new FactoryModuleBuilder().build(AuthTokenIQListenerFactory.class));
+        install(new FactoryModuleBuilder().build(ConnectBackRequestIQListenerFactory.class));
+        install(new FactoryModuleBuilder().build(LibraryChangedIQListenerFactory.class));
+        install(new FactoryModuleBuilder().build(FileTransferIQListenerFactory.class));
         
                 
         bind(IdleTime.class).to(IdleTimeImpl.class);
         
-        install(FactoryModules.newFactory(IdleStatusMonitorFactory.class, IdleStatusMonitor.class));
+        install(new FactoryModuleBuilder().build(IdleStatusMonitorFactory.class));
     }
 }

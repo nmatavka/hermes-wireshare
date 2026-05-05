@@ -32,12 +32,12 @@ public class AuthenticationInterceptorImpl implements AuthenticationInterceptor 
     private static final Log LOG = LogFactory.getLog(AuthenticationInterceptorImpl.class);
     
     private final Authenticator authenticator;
-    private final UriPatternMatcher protectedURIs;
+    private final UriPatternMatcher<String> protectedURIs;
     
     @Inject
     public AuthenticationInterceptorImpl(Authenticator authenticator) {
         this.authenticator = authenticator;
-        protectedURIs = new UriPatternMatcher();
+        protectedURIs = new UriPatternMatcher<String>();
     }
 
     public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {

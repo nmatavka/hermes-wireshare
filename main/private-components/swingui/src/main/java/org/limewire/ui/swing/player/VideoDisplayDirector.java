@@ -15,7 +15,6 @@ import javax.swing.JLayeredPane;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.components.LimeJFrame;
-import org.limewire.ui.swing.home.HomeMediator;
 import org.limewire.ui.swing.library.LibraryMediator;
 import org.limewire.ui.swing.mainframe.GlobalLayeredPane;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -87,7 +86,7 @@ class VideoDisplayDirector {
         // If the start screen is open, then open up the library view before showing the video.
         // The start screen has a heavy weight component that would cut off the video.
         NavItem selectedNavItem = navigator.getSelectedNavItem();
-        if (selectedNavItem == null || selectedNavItem.getId().equals(HomeMediator.NAME)) {
+        if (selectedNavItem == null) {
             NavItem item = navigator.getNavItem(NavCategory.LIBRARY, LibraryMediator.NAME);
             item.select();
         }

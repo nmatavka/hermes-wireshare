@@ -1,9 +1,11 @@
 package org.limewire.libtorrent;
 
+import com.sun.jna.Structure;
+
 /**
- * Legacy container retained for compatibility with older helper code.
+ * Basic mapping for returning pieces info from JNA.
  */
-public class LibTorrentPiecesInfoContainer {
+public class LibTorrentPiecesInfoContainer extends Structure {
     public int numPiecesCompleted;
     public String stateInfo;
     
