@@ -3,6 +3,7 @@ package org.limewire.ui.compose.integration
 import org.limewire.core.api.file.CategoryManager
 import org.limewire.ui.compose.runOnUi
 import org.limewire.ui.compose.tr
+import org.limewire.util.OSUtils
 import java.awt.EventQueue
 import java.awt.FileDialog
 import java.awt.Frame
@@ -16,6 +17,8 @@ import java.awt.Window
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FilenameFilter
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.CopyOnWriteArrayList
 
 class AwtDesktopFilePicker : DesktopFilePicker {
@@ -192,7 +195,8 @@ class AwtDesktopShellService : DesktopNotifications, ComposeTrayService {
         popupMenu.add(quitItem)
     }
 
-    override fun supportsNotifications(): Boolean = supportsTray()
+    override fun supportsNotifications(): Boolean =
+        supportsMacNotificationCenter() || supportsWindowsNotificationCenter() || supportsTray()
 
     override fun supportsTray(): Boolean = tray != null
 
@@ -227,15 +231,20 @@ class AwtDesktopShellService : DesktopNotifications, ComposeTrayService {
     }
 
     override fun showNotification(title: String, body: String, onOpen: (() -> Unit)?) {
-        if (!supportsTray()) {
+        if (!supportsNotifications()) {
             return
         }
-        notificationAction = onOpen
-        EventQueue.invokeLater {
-            val icon = trayIcon()
-            syncIconVisibility(forceVisible = true)
-            icon.displayMessage(title, body, TrayIcon.MessageType.INFO)
+        if (supportsMacNotificationCenter()) {
+            notificationAction = null
+            showMacNotificationCenterToast(title, body, onOpen)
+            return
         }
+        if (supportsWindowsNotificationCenter()) {
+            notificationAction = null
+            showWindowsNotificationCenterToast(title, body, onOpen)
+            return
+        }
+        showTrayNotification(title, body, onOpen)
     }
 
     override fun showChatNotification(senderName: String, body: String, onReply: () -> Unit) {
@@ -303,5 +312,98 @@ class AwtDesktopShellService : DesktopNotifications, ComposeTrayService {
         val tray = tray ?: return
         trayIcon?.let(tray::remove)
         trayVisible = false
+    }
+
+    private fun supportsMacNotificationCenter(): Boolean {
+        return OSUtils.isMacOSX() && !GraphicsEnvironment.isHeadless()
+    }
+
+    private fun supportsWindowsNotificationCenter(): Boolean {
+        return OSUtils.isWindows() && !GraphicsEnvironment.isHeadless()
+    }
+
+    private fun showMacNotificationCenterToast(title: String, body: String, onOpen: (() -> Unit)?) {
+        val script = "display notification ${appleScriptLiteral(body)} with title ${appleScriptLiteral(title)}"
+        runCatching {
+            ProcessBuilder("osascript", "-e", script).start()
+        }.recoverCatching {
+            if (it is IOException && supportsTray()) {
+                showTrayNotification(title, body, onOpen)
+            } else {
+                throw it
+            }
+        }
+    }
+
+    private fun showWindowsNotificationCenterToast(title: String, body: String, onOpen: (() -> Unit)?) {
+        Thread({
+            val shown = runCatching {
+                val process = ProcessBuilder(
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    WINDOWS_TOAST_SCRIPT
+                ).apply {
+                    environment()["WIRESHARE_TOAST_TITLE"] = title
+                    environment()["WIRESHARE_TOAST_BODY"] = body
+                }.start()
+                process.waitFor(5, TimeUnit.SECONDS) && process.exitValue() == 0
+            }.getOrDefault(false)
+            if (!shown && supportsTray()) {
+                showTrayNotification(title, body, onOpen)
+            }
+        }, "wireShare-windows-toast").apply {
+            isDaemon = true
+            start()
+        }
+    }
+
+    private fun showTrayNotification(title: String, body: String, onOpen: (() -> Unit)?) {
+        notificationAction = onOpen
+        EventQueue.invokeLater {
+            val icon = trayIcon()
+            syncIconVisibility(forceVisible = true)
+            icon.displayMessage(title, body, TrayIcon.MessageType.INFO)
+        }
+    }
+
+    private fun appleScriptLiteral(value: String): String {
+        val sanitized = value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\r", " ")
+            .replace("\n", " ")
+        return "\"$sanitized\""
+    }
+
+    private companion object {
+        private val WINDOWS_TOAST_SCRIPT = """
+            Add-Type -AssemblyName System.Runtime.WindowsRuntime | Out-Null
+            [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+            [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+            ${'$'}title = [Environment]::GetEnvironmentVariable('WIRESHARE_TOAST_TITLE')
+            ${'$'}body = [Environment]::GetEnvironmentVariable('WIRESHARE_TOAST_BODY')
+            if ([string]::IsNullOrWhiteSpace(${ '$' }title)) { ${ '$' }title = 'WireShare' }
+            if (${ '$' }null -eq ${ '$' }body) { ${ '$' }body = '' }
+            ${'$'}escape = [System.Security.SecurityElement]
+            ${'$'}toastXml = @"
+            <toast>
+              <visual>
+                <binding template="ToastGeneric">
+                  <text>${'$'}(${ '$' }escape::Escape(${ '$' }title))</text>
+                  <text>${'$'}(${ '$' }escape::Escape(${ '$' }body))</text>
+                </binding>
+              </visual>
+            </toast>
+            "@
+            ${'$'}xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+            ${'$'}xml.LoadXml(${ '$' }toastXml)
+            ${'$'}toast = [Windows.UI.Notifications.ToastNotification]::new(${ '$' }xml)
+            ${'$'}notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('WireShare')
+            ${'$'}notifier.Show(${ '$' }toast)
+        """.trimIndent()
     }
 }

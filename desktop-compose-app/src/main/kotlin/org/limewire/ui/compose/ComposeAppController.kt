@@ -61,10 +61,18 @@ import org.limewire.core.api.spam.SpamManager
 import org.limewire.core.api.upload.UploadItem
 import org.limewire.core.api.upload.UploadState
 import org.limewire.core.settings.BittorrentSettings
+import org.limewire.core.settings.ConnectionSettings
 import org.limewire.core.settings.DownloadSettings
 import org.limewire.core.settings.InstallSettings
 import org.limewire.core.settings.LibrarySettings
 import org.limewire.core.settings.UploadSettings
+import org.limewire.ed2k.api.Ed2kDownloadItem
+import org.limewire.ed2k.api.Ed2kGroupedSearchResultView
+import org.limewire.ed2k.api.Ed2kListener
+import org.limewire.ed2k.api.Ed2kServerRecord
+import org.limewire.ed2k.api.Ed2kService
+import org.limewire.ed2k.api.Ed2kStatus
+import org.limewire.ed2k.api.Ed2kUploadItem
 import org.limewire.friend.api.ChatState
 import org.limewire.friend.api.FriendConnection
 import org.limewire.friend.api.FriendConnectionEvent
@@ -99,6 +107,7 @@ import org.limewire.ui.compose.integration.FileIdentityPresentation
 import org.limewire.ui.compose.integration.FileIconPresentation
 import org.limewire.util.OSUtils
 import org.limewire.listener.EventListener
+import com.google.common.base.Predicate
 import java.awt.EventQueue
 import java.awt.Frame
 import java.awt.Component
@@ -138,6 +147,7 @@ enum class SearchSourceFilter {
     ALL,
     FRIENDS,
     NETWORK,
+    ED2K_KAD,
     BROWSABLE
 }
 
@@ -319,6 +329,7 @@ class ComposeAppController(
     private val browseService: ComposeBrowseService,
     private val recentDownloadsService: ComposeRecentDownloadsService,
     private val transferRepairService: ComposeTransferRepairService,
+    private val ed2kService: Ed2kService,
     private val advancedToolsService: ComposeAdvancedToolsService,
     private val searchSuggestionsService: ComposeSearchSuggestionsService,
     private val advancedSearchSuggestionsService: ComposeAdvancedSearchSuggestionsService,
@@ -385,6 +396,7 @@ class ComposeAppController(
         val total: Int,
         var started: Int = 0,
         var autoRenamed: Int = 0,
+        var replacedExisting: Int = 0,
         var alreadySaved: Int = 0,
         var alreadyDownloading: Int = 0,
         var alreadyUploading: Int = 0,
@@ -512,6 +524,7 @@ class ComposeAppController(
     private var windowPlacementApplied = false
     private var startupRuntimeErrorsFlushed = false
     private var startupSystemWarningsShown = false
+    private var startupGnutellaConnectAttempted = false
     private var systemMessageListenerAttached = false
     private val librarySectionStates = mutableMapOf<String, LibrarySectionViewState>()
     private val downloadCompletionStates = mutableMapOf<String, Boolean>()
@@ -673,6 +686,32 @@ class ComposeAppController(
         }
     }
 
+    private val ed2kListener = object : Ed2kListener {
+        override fun downloadsChanged() {
+            runOnUi {
+                syncEd2kDownloads()
+            }
+        }
+
+        override fun uploadsChanged() {
+            runOnUi {
+                syncEd2kUploads()
+            }
+        }
+
+        override fun statusChanged() {
+            runOnUi {
+                syncEd2kStatus()
+            }
+        }
+
+        override fun searchChanged(sessionId: String) {
+            runOnUi {
+                syncEd2kSearchSession(sessionId)
+            }
+        }
+    }
+
     private val trayListener = object : ComposeTrayService.Listener {
         override fun restoreRequested() {
             restoreApplication()
@@ -680,7 +719,7 @@ class ComposeAppController(
 
         override fun showTransfersRequested() {
             restoreApplication()
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            openTransfersWorkspace(TransferTrayMode.DOWNLOADS)
         }
 
         override fun toggleExitAfterTransfersRequested() {
@@ -702,10 +741,13 @@ class ComposeAppController(
     val sharedListFriendIds = mutableStateListOf<String>()
     val sharedLists = mutableStateListOf<SharedFileList>()
     val downloads = mutableStateListOf<DownloadItem>()
+    val ed2kDownloads = mutableStateListOf<DownloadItem>()
     val uploads = mutableStateListOf<UploadItem>()
+    val ed2kUploads = mutableStateListOf<UploadItem>()
     val chatFriends = mutableStateListOf<FriendRosterItem>()
     val chatConversations = mutableStateMapOf<String, ChatConversationState>()
     val advancedConnections = mutableStateListOf<ConnectionItem>()
+    val advancedEd2kServers = mutableStateListOf<Ed2kServerRecord>()
     val incomingSearchPhrases = mutableStateListOf<String>()
 
     private val defaultSearchLayout = settingsService.loadSearchLayoutPreferences()
@@ -778,6 +820,7 @@ class ComposeAppController(
     val selectedDownloadUrns = mutableStateListOf<String>()
     var downloadSelectionAnchorUrn by mutableStateOf<String?>(null)
     var visibleDownloadColumns by mutableStateOf(defaultDownloadLayout.visibleColumns)
+    var downloadSearchText by mutableStateOf("")
     var uploadFilterMode by mutableStateOf(defaultUploadLayout.filterMode)
     var uploadSortMode by mutableStateOf(defaultUploadLayout.sortMode)
     var uploadSortDescending by mutableStateOf(defaultUploadLayout.sortDescending)
@@ -796,12 +839,19 @@ class ComposeAppController(
     var addConnectionPort by mutableStateOf("6346")
     var addConnectionUseTls by mutableStateOf(true)
     var addConnectionError by mutableStateOf<String?>(null)
+    var advancedEd2kServerHost by mutableStateOf("")
+    var advancedEd2kServerPort by mutableStateOf("4661")
+    var advancedKadBootstrapHost by mutableStateOf("")
+    var advancedKadBootstrapPort by mutableStateOf("4672")
+    var advancedEd2kError by mutableStateOf<String?>(null)
     var advancedToolsDhtName by mutableStateOf("")
     var advancedToolsDhtRunning by mutableStateOf(false)
+    var ed2kStatus by mutableStateOf(ed2kService.status)
     var advancedMojitoVisualizerAvailable by mutableStateOf(advancedToolsService.mojitoVisualizerAvailable())
     var advancedMojitoVisualizerTitle by mutableStateOf("")
     var advancedMojitoVisualizerComponent by mutableStateOf<Component?>(null)
     var consoleAvailable by mutableStateOf(advancedToolsService.consoleAvailable())
+    private var lastAdvancedToolsErrorMessage: String? = null
     val consoleLoggerNames = mutableStateListOf<String>()
     var selectedConsoleLogger by mutableStateOf("root")
     var selectedConsoleLevel by mutableStateOf("INFO")
@@ -946,8 +996,13 @@ class ComposeAppController(
         closeables += AutoCloseable { sharedFileListManager.removePropertyChangeListener(sharedFileCountListener) }
         libraryManager.libraryManagedList.addFileProcessingListener(fileProcessingListener)
         closeables += AutoCloseable { libraryManager.libraryManagedList.removeFileProcessingListener(fileProcessingListener) }
+        ed2kService.addListener(ed2kListener)
+        closeables += AutoCloseable { ed2kService.removeListener(ed2kListener) }
         closeables += AutoCloseable { clearPublicDocumentWarningBindings() }
         bindEventLists()
+        syncEd2kDownloads()
+        syncEd2kUploads()
+        syncEd2kStatus()
         primeDownloadCompletionState()
         bindPlayer()
         bindFriends()
@@ -1015,6 +1070,86 @@ class ComposeAppController(
             addPropertyListener = { item, listener -> item.addPropertyChangeListener(listener) },
             removePropertyListener = { item, listener -> item.removePropertyChangeListener(listener) }
         )
+    }
+
+    private fun syncEd2kDownloads() {
+        reconcileKeyedStateList(ed2kDownloads, ed2kService.downloads, ::downloadSelectionKey)
+        syncEd2kStatus()
+        invalidateDownloadPresentationCache()
+        downloadsEpoch += 1
+        recentDownloadsEpoch += 1
+        handleDownloadLifecycleChanges()
+        maybeAutoHideTray()
+    }
+
+    private fun syncEd2kUploads() {
+        reconcileKeyedStateList(ed2kUploads, ed2kService.uploads, ::uploadSelectionKey)
+        syncEd2kStatus()
+        invalidateUploadPresentationCache()
+        uploadsEpoch += 1
+        maybeAutoHideTray()
+    }
+
+    private fun syncEd2kStatus() {
+        ed2kStatus = ed2kService.status
+        if (advancedToolsWindowOpen) {
+            refreshAdvancedEd2kServersSnapshot()
+        }
+    }
+
+    private fun syncEd2kSearchSession(sessionId: String) {
+        val session = ed2kService.getSearchSession(sessionId)
+        val matchingTabs = searchTabs.filter { it.ed2kSessionId == sessionId }
+        if (matchingTabs.isEmpty()) {
+            return
+        }
+        matchingTabs.forEach { tab ->
+            reconcileKeyedStateList(
+                tab.ed2kResults,
+                session?.results.orEmpty(),
+                ::searchResultKeyOf
+            )
+            tab.ed2kSearchRunning = session?.isRunning == true
+            refreshCombinedSearchRunning(tab)
+            syncMergedSearchResults(tab)
+        }
+    }
+
+    private fun syncMergedSearchResults(tab: SearchTabSession) {
+        val merged = LinkedHashMap<String, GroupedSearchResult>()
+        tab.networkResults.forEach { result ->
+            merged[searchResultKeyOf(result)] = result
+        }
+        tab.ed2kResults.forEach { result ->
+            merged[searchResultKeyOf(result)] = result
+        }
+        reconcileKeyedStateList(tab.results, merged.values.toList(), ::searchResultKeyOf)
+        scheduleSearchTabPresentationRefresh(tab, SearchPresentationDirty.RESULTS.mask)
+    }
+
+    private fun refreshCombinedSearchRunning(tab: SearchTabSession) {
+        tab.searchRunning = tab.networkSearchRunning || tab.ed2kSearchRunning
+    }
+
+    private fun continueEd2kSearch(tab: SearchTabSession, clearExisting: Boolean) {
+        if (tab.searchType !in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW)) {
+            return
+        }
+        runCatching {
+            val existingSessionId = tab.ed2kSessionId
+            val session = if (existingSessionId == null) {
+                ed2kService.startSearch(tab.query)
+            } else {
+                ed2kService.repeatSearch(existingSessionId, clearExisting) ?: ed2kService.startSearch(tab.query)
+            }
+            tab.ed2kSessionId = session.id
+            tab.ed2kSearchRunning = session.isRunning
+            reconcileKeyedStateList(tab.ed2kResults, session.results, ::searchResultKeyOf)
+            syncMergedSearchResults(tab)
+        }.onFailure {
+            tab.ed2kSearchRunning = false
+            refreshCombinedSearchRunning(tab)
+        }
     }
 
     private fun bindPlayer() {
@@ -1138,10 +1273,14 @@ class ComposeAppController(
 
     fun showAdvancedToolsWindow() {
         advancedToolsWindowOpen = true
-        refreshAdvancedToolsSummaryState()
+        runAdvancedToolsAction {
+            refreshAdvancedToolsSummaryState()
+        }
         refreshActiveAdvancedToolsTab()
-        attachAdvancedConsole()
-        syncAdvancedMojitoVisualizer()
+        runAdvancedToolsAction {
+            attachAdvancedConsole()
+            syncAdvancedMojitoVisualizer()
+        }
     }
 
     fun closeAdvancedToolsWindow() {
@@ -1154,12 +1293,14 @@ class ComposeAppController(
         if (!advancedToolsWindowOpen) {
             return
         }
-        ComposePerformanceTracker.measure("advancedTools.refreshAll") {
-            refreshAdvancedToolsSummaryState()
-            refreshAdvancedToolsConnectionsSnapshot()
-            refreshConsoleLoggerNames()
-            flushDelayedConsoleOutput(force = false)
-            syncAdvancedMojitoVisualizer()
+        runAdvancedToolsAction {
+            ComposePerformanceTracker.measure("advancedTools.refreshAll") {
+                refreshAdvancedToolsSummaryState()
+                refreshAdvancedToolsConnectionsSnapshot()
+                refreshConsoleLoggerNames()
+                flushDelayedConsoleOutput(force = false)
+                syncAdvancedMojitoVisualizer()
+            }
         }
     }
 
@@ -1167,19 +1308,25 @@ class ComposeAppController(
         if (!advancedToolsWindowOpen) {
             return
         }
-        when (selectedAdvancedToolsTab) {
-            AdvancedToolsTab.CONNECTIONS -> ComposePerformanceTracker.measure("advancedTools.refreshConnections") {
-                refreshAdvancedToolsSummaryState()
-                refreshAdvancedToolsConnectionsSnapshot()
-            }
-            AdvancedToolsTab.CONSOLE -> ComposePerformanceTracker.measure("advancedTools.refreshConsole") {
-                refreshAdvancedToolsSummaryState()
-                refreshConsoleLoggerNames()
-                flushDelayedConsoleOutput(force = false)
-            }
-            AdvancedToolsTab.MOJITO -> ComposePerformanceTracker.measure("advancedTools.refreshMojito") {
-                refreshAdvancedToolsSummaryState()
-                syncAdvancedMojitoVisualizer()
+        runAdvancedToolsAction {
+            when (selectedAdvancedToolsTab) {
+                AdvancedToolsTab.CONNECTIONS -> ComposePerformanceTracker.measure("advancedTools.refreshConnections") {
+                    refreshAdvancedToolsSummaryState()
+                    refreshAdvancedToolsConnectionsSnapshot()
+                }
+                AdvancedToolsTab.ED2K -> ComposePerformanceTracker.measure("advancedTools.refreshEd2k") {
+                    refreshAdvancedToolsSummaryState()
+                    refreshAdvancedEd2kServersSnapshot()
+                }
+                AdvancedToolsTab.CONSOLE -> ComposePerformanceTracker.measure("advancedTools.refreshConsole") {
+                    refreshAdvancedToolsSummaryState()
+                    refreshConsoleLoggerNames()
+                    flushDelayedConsoleOutput(force = false)
+                }
+                AdvancedToolsTab.MOJITO -> ComposePerformanceTracker.measure("advancedTools.refreshMojito") {
+                    refreshAdvancedToolsSummaryState()
+                    syncAdvancedMojitoVisualizer()
+                }
             }
         }
     }
@@ -1190,6 +1337,7 @@ class ComposeAppController(
         }
         return when (selectedAdvancedToolsTab) {
             AdvancedToolsTab.CONNECTIONS -> 1500L
+            AdvancedToolsTab.ED2K -> 2000L
             AdvancedToolsTab.MOJITO -> 2000L
             AdvancedToolsTab.CONSOLE -> null
         }
@@ -1201,6 +1349,7 @@ class ComposeAppController(
         }
         advancedToolsDhtName = advancedToolsService.dhtName()
         advancedToolsDhtRunning = advancedToolsService.dhtRunning()
+        ed2kStatus = advancedToolsService.ed2kStatus()
         advancedMojitoVisualizerAvailable = advancedToolsService.mojitoVisualizerAvailable()
         consoleAvailable = advancedToolsService.consoleAvailable()
     }
@@ -1215,6 +1364,25 @@ class ComposeAppController(
         }
         incomingSearchPhrases.clear()
         incomingSearchPhrases.addAll(advancedToolsService.incomingSearchListSnapshot())
+    }
+
+    private fun refreshAdvancedEd2kServersSnapshot() {
+        advancedEd2kServers.clear()
+        advancedEd2kServers.addAll(advancedToolsService.ed2kServers())
+    }
+
+    private inline fun runAdvancedToolsAction(block: () -> Unit) {
+        runCatching(block)
+            .onSuccess {
+                lastAdvancedToolsErrorMessage = null
+            }
+            .onFailure { failure ->
+                val message = failure.message ?: tr("Advanced Tools could not be refreshed.")
+                if (message != lastAdvancedToolsErrorMessage) {
+                    showNotice(tr("Advanced Tools"), message, OperationNoticeLevel.ERROR)
+                    lastAdvancedToolsErrorMessage = message
+                }
+            }
     }
 
     fun selectAdvancedToolsTab(tab: AdvancedToolsTab) {
@@ -1700,11 +1868,23 @@ class ComposeAppController(
         syncLiveLibraryQueueIfNeeded()
     }
 
-    fun selectTransfers(mode: TransferTrayMode = trayMode) {
+    fun openTransfersWorkspace(mode: TransferTrayMode = trayMode) {
         refreshTorrentEngineHealthState()
-        trayExpanded = true
         trayMode = mode
         currentScreen = ComposeScreen.Transfers
+    }
+
+    fun showTransferTray(mode: TransferTrayMode = trayMode) {
+        trayMode = mode
+        setTransferTrayExpanded(true)
+    }
+
+    fun noteTransferActivity(mode: TransferTrayMode = trayMode) {
+        trayMode = mode
+    }
+
+    fun selectTransfers(mode: TransferTrayMode = trayMode) {
+        openTransfersWorkspace(mode)
     }
 
     fun selectFriends() {
@@ -1731,7 +1911,11 @@ class ComposeAppController(
     }
 
     fun toggleTray() {
-        trayExpanded = !trayExpanded
+        setTransferTrayExpanded(!trayExpanded)
+    }
+
+    private fun setTransferTrayExpanded(expanded: Boolean) {
+        trayExpanded = expanded
         trayBehaviorPreferences = trayBehaviorPreferences.copy(showTransfersTray = trayExpanded)
         settingsService.saveTrayBehaviorPreferences(trayBehaviorPreferences)
     }
@@ -2239,14 +2423,26 @@ class ComposeAppController(
         session.sortMode = defaultSearchLayout.sortMode
         session.sortDescending = defaultSearchLayout.sortDescending
         session.visibleColumns = defaultSearchLayout.visibleColumns + defaultAdditionalSearchColumns(category)
-        session.searchRunning = searchType == SearchDetails.SearchType.KEYWORD || searchType == SearchDetails.SearchType.WHATS_NEW
+        session.networkSearchRunning = searchType == SearchDetails.SearchType.KEYWORD || searchType == SearchDetails.SearchType.WHATS_NEW
+        if (session.networkSearchRunning) {
+            runCatching {
+                ed2kService.startSearch(query)
+            }.onSuccess { ed2kSession ->
+                session.ed2kSessionId = ed2kSession.id
+                session.ed2kSearchRunning = ed2kSession.isRunning
+                reconcileKeyedStateList(session.ed2kResults, ed2kSession.results, ::searchResultKeyOf)
+            }.onFailure {
+                session.ed2kSearchRunning = false
+            }
+        }
+        refreshCombinedSearchRunning(session)
         session.startedWhileNotFullyConnected = session.searchRunning && !isFullyConnected()
         session.descriptor = searchTabDescriptor(session)
         session.binding = EventListBinding(
             resultList.groupedResults,
-            session.results,
-            onChanged = { scheduleSearchTabPresentationRefresh(session, SearchPresentationDirty.RESULTS.mask) },
-            keyOf = { it.urn.toString() }
+            session.networkResults,
+            onChanged = { syncMergedSearchResults(session) },
+            keyOf = ::searchResultKeyOf
         )
         val searchListener = object : SearchListener {
             override fun handleSearchResult(search: Search, searchResult: SearchResult) {
@@ -2261,7 +2457,8 @@ class ComposeAppController(
                         return@runOnUi
                     }
                     if (session.searchType in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW)) {
-                        session.searchRunning = true
+                        session.networkSearchRunning = true
+                        refreshCombinedSearchRunning(session)
                         session.startedWhileNotFullyConnected = !isFullyConnected()
                     }
                     scheduleSearchTabPresentationRefresh(session, SearchPresentationDirty.STATUS.mask)
@@ -2274,7 +2471,8 @@ class ComposeAppController(
                         return@runOnUi
                     }
                     if (session.searchType in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW)) {
-                        session.searchRunning = false
+                        session.networkSearchRunning = false
+                        refreshCombinedSearchRunning(session)
                     }
                     scheduleSearchTabPresentationRefresh(session, SearchPresentationDirty.STATUS.mask)
                 }
@@ -2332,8 +2530,12 @@ class ComposeAppController(
         return tab.searchType in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW) && tab.searchRunning
     }
 
+    fun canSearchAgain(tab: SearchTabSession): Boolean {
+        return tab.searchType in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW)
+    }
+
     fun canRepeatSearch(tab: SearchTabSession): Boolean {
-        return tab.searchType in setOf(SearchDetails.SearchType.KEYWORD, SearchDetails.SearchType.WHATS_NEW) && !tab.searchRunning
+        return canSearchAgain(tab) && !tab.searchRunning
     }
 
     fun shouldShowSearchConnectionWarning(tab: SearchTabSession): Boolean {
@@ -2359,7 +2561,10 @@ class ComposeAppController(
             return
         }
         tab.search.stop()
-        tab.searchRunning = false
+        tab.networkSearchRunning = false
+        tab.ed2kSessionId?.let(ed2kService::stopSearch)
+        tab.ed2kSearchRunning = false
+        refreshCombinedSearchRunning(tab)
         scheduleSearchTabPresentationRefresh(tab, SearchPresentationDirty.STATUS.mask)
     }
 
@@ -2367,11 +2572,35 @@ class ComposeAppController(
         if (!canRepeatSearch(tab)) {
             return
         }
+        restartSearch(tab)
+    }
+
+    fun continueSearch(tab: SearchTabSession) {
+        if (!canSearchAgain(tab)) {
+            return
+        }
+        tab.networkSearchRunning = true
+        tab.startedWhileNotFullyConnected = !isFullyConnected()
+        continueEd2kSearch(tab, clearExisting = false)
+        refreshCombinedSearchRunning(tab)
+        scheduleSearchTabPresentationRefresh(tab, SearchPresentationDirty.STATUS.mask)
+        tab.search.repeat()
+    }
+
+    fun restartSearch(tab: SearchTabSession) {
+        if (!canSearchAgain(tab)) {
+            return
+        }
         clearSearchSelection(tab)
         tab.expandedSimilarResultKeys.clear()
         tab.resultList.clear()
-        tab.searchRunning = true
+        tab.networkResults.clear()
+        tab.ed2kResults.clear()
+        tab.networkSearchRunning = true
         tab.startedWhileNotFullyConnected = !isFullyConnected()
+        continueEd2kSearch(tab, clearExisting = true)
+        refreshCombinedSearchRunning(tab)
+        syncMergedSearchResults(tab)
         scheduleSearchTabPresentationRefresh(tab, SearchPresentationDirty.FULL)
         tab.search.repeat()
     }
@@ -2380,6 +2609,7 @@ class ComposeAppController(
         tab.searchListenerCloseable?.close()
         tab.browseStatusCloseable?.close()
         tab.binding?.close()
+        tab.ed2kSessionId?.let(ed2kService::stopSearch)
         searchManager.stopSearch(tab.resultList)
         tab.resultList.dispose()
         searchTabs.remove(tab)
@@ -2401,8 +2631,25 @@ class ComposeAppController(
         restoreApplication()
         val trimmed = uriText.trim()
         if (trimmed.isEmpty()) {
-            reportError(tr("Enter a magnet link or torrent URL."))
+            reportError(tr("Enter a magnet link, ED2K link, or torrent URL."))
             return false
+        }
+
+        if (trimmed.startsWith("ed2k://", ignoreCase = true)) {
+            return runCatching {
+                val result = ed2kService.openEd2kLink(trimmed)
+                if (result.isTransferStarted) {
+                    noteTransferActivity(TransferTrayMode.DOWNLOADS)
+                } else {
+                    result.statusMessage?.takeIf(String::isNotBlank)?.let {
+                        showNotice(tr("ED2K"), it, OperationNoticeLevel.SUCCESS)
+                    }
+                }
+                true
+            }.getOrElse { failure ->
+                reportError(failure.message ?: trimmed)
+                false
+            }
         }
 
         val uri = try {
@@ -2557,7 +2804,6 @@ class ComposeAppController(
             filenameFilter = FilenameFilter { _, name -> name.lowercase(Locale.US).endsWith(".torrent") }
         )
         if (files.isNotEmpty()) {
-            selectTransfers()
             files.forEach(::handleOpenFile)
         }
     }
@@ -2621,6 +2867,8 @@ class ComposeAppController(
 
     fun hasStalledDownloads(): Boolean = transferRepairService.stalledDownloadCount() > 0
 
+    fun retryableStalledDownloadCount(): Int = transferRepairService.stalledDownloadCount()
+
     fun fixStalledDownloads() {
         val repaired = transferRepairService.fixStalledDownloads()
         if (repaired <= 0) {
@@ -2631,7 +2879,7 @@ class ComposeAppController(
             )
             return
         }
-        selectTransfers(TransferTrayMode.DOWNLOADS)
+        noteTransferActivity(TransferTrayMode.DOWNLOADS)
         showNotice(
             tr("Fix Stalled Downloads"),
             tr("Trying {0} stalled download(s) again.", repaired),
@@ -2643,7 +2891,7 @@ class ComposeAppController(
                 body = tr("Trying {0} stalled download(s) again.", repaired),
                 onOpen = {
                     restoreApplication()
-                    selectTransfers(TransferTrayMode.DOWNLOADS)
+                    openTransfersWorkspace(TransferTrayMode.DOWNLOADS)
                 }
             )
         }
@@ -2679,8 +2927,8 @@ class ComposeAppController(
     }
 
     fun canRetryConnection(): Boolean {
-        return connectionStrengthState == ConnectionStrength.DISCONNECTED ||
-            connectionStrengthState == ConnectionStrength.NO_INTERNET
+        return displayedConnectionStrength() == ConnectionStrength.DISCONNECTED ||
+            displayedConnectionStrength() == ConnectionStrength.NO_INTERNET
     }
 
     fun retryConnection() {
@@ -2775,13 +3023,13 @@ class ComposeAppController(
             var totalDown = 0.0
             var totalUp = 0.0
 
-            downloads.forEach { item ->
+            allDownloads().forEach { item ->
                 if (!item.state.isFinished) {
                     activeDownloads += 1
                     totalDown += item.downloadSpeed.toDouble()
                 }
             }
-            uploads.forEach { item ->
+            allUploads().forEach { item ->
                 if (!item.isFinished) {
                     activeUploads += 1
                     totalUp += item.uploadSpeed.toDouble()
@@ -2789,8 +3037,8 @@ class ComposeAppController(
             }
 
             TransferActivitySummary(
-                downloadCount = downloads.size,
-                uploadCount = uploads.size,
+                downloadCount = allDownloads().size,
+                uploadCount = allUploads().size,
                 activeDownloadCount = activeDownloads,
                 activeUploadCount = activeUploads,
                 totalDownloadBandwidth = totalDown.toFloat(),
@@ -2806,15 +3054,15 @@ class ComposeAppController(
             return cachedSearchDownloadIndex
         }
         cachedSearchDownloadIndex = SearchDownloadIndex(
-            byUrn = downloads.asSequence()
+            byUrn = allDownloads().asSequence()
                 .mapNotNull { item -> item.urn?.toString()?.let { it to item } }
                 .toMap(),
-            finishedUrns = downloads.asSequence()
+            finishedUrns = allDownloads().asSequence()
                 .mapNotNull { item ->
                     item.urn?.toString()?.takeIf { item.state.isFinished || item.completeFiles.isNotEmpty() }
                 }
                 .toSet(),
-            activeUrns = downloads.asSequence()
+            activeUrns = allDownloads().asSequence()
                 .mapNotNull { item ->
                     item.urn?.toString()?.takeIf { !item.state.isFinished && item.completeFiles.isEmpty() }
                 }
@@ -3081,6 +3329,28 @@ class ComposeAppController(
                 startupFileAssociationPrompt = prompt
             }
         }
+        beginStartupGnutellaConnect()
+    }
+
+    private fun beginStartupGnutellaConnect() {
+        if (startupGnutellaConnectAttempted) {
+            return
+        }
+        EventQueue.invokeLater {
+            if (startupGnutellaConnectAttempted) {
+                return@invokeLater
+            }
+            if (!ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
+                return@invokeLater
+            }
+            startupGnutellaConnectAttempted = true
+            if (connectionManager.isConnected || displayedConnectionStrength() == ConnectionStrength.CONNECTING) {
+                return@invokeLater
+            }
+            runCatching {
+                connectionManager.connect()
+            }
+        }
     }
 
     private fun maybeShowStartupSystemWarnings() {
@@ -3236,7 +3506,7 @@ class ComposeAppController(
         languageDialogOpen = false
     }
 
-    fun connectionStrength(): ConnectionStrength = connectionStrengthState
+    fun connectionStrength(): ConnectionStrength = displayedConnectionStrength()
 
     fun activeLibrarySection(): LibrarySection? = librarySections.firstOrNull { it.id == selectedLibrarySectionId }
 
@@ -3364,11 +3634,11 @@ class ComposeAppController(
     }
 
     fun draggableSearchResultKeys(tab: SearchTabSession, result: GroupedSearchResult): List<String> {
-        val selection = selectedSearchResults(tab).map { it.urn.toString() }
-        return if (result.urn.toString() in tab.selectedResultKeys && selection.isNotEmpty()) {
+        val selection = selectedSearchResults(tab).map(::searchResultKeyOf)
+        return if (searchResultKeyOf(result) in tab.selectedResultKeys && selection.isNotEmpty()) {
             selection
         } else {
-            listOf(result.urn.toString())
+            listOf(searchResultKeyOf(result))
         }
     }
 
@@ -3728,7 +3998,8 @@ class ComposeAppController(
                     } else {
                         tr("Shared with {0} friends", friendCount)
                     },
-                    publicCollection = list.isPublic
+                    publicCollection = list.isPublic,
+                    ed2kPublished = list.isPublic
                 )
             }
             .toList()
@@ -4575,6 +4846,27 @@ class ComposeAppController(
     fun currentSharedListSharingBusy(): Boolean =
         friendConnectionState == FriendConnectionEvent.Type.CONNECTING || friendLoginBusy
 
+    fun currentSharedListEd2kAssociationLabel(): String {
+        val list = currentSharedList()
+        return when {
+            list == null -> tr("ED2K/Kad publishing")
+            list.isPublic -> tr("Published to ED2K/Kad")
+            else -> tr("Not published to ED2K/Kad")
+        }
+    }
+
+    fun currentSharedListEd2kAssociationBody(): String {
+        val list = currentSharedList()
+        return when {
+            list == null -> tr("ED2K/Kad publishing follows Public Shared collections.")
+            list.isPublic -> tr("This public collection is published to ED2K/Kad automatically.")
+            else -> tr("ED2K/Kad only follows public shared collections right now. Friends-only collections stay off that network.")
+        }
+    }
+
+    fun currentSharedListEd2kPublished(): Boolean =
+        currentSharedList()?.isPublic == true
+
     fun currentSharedListSharingSummaryItems(): List<SharedListSharingSummaryItem> {
         val items = sharedListFriendIds
             .mapNotNull { friendId ->
@@ -4677,7 +4969,7 @@ class ComposeAppController(
     fun downloadDroppedSearchResults(tabId: Long, resultKeys: List<String>) {
         val tab = searchTabs.firstOrNull { it.id == tabId } ?: return
         val keySet = resultKeys.toSet()
-        val results = tab.results.filter { it.urn.toString() in keySet }
+        val results = tab.results.filter { searchResultKeyOf(it) in keySet }
         if (results.isEmpty()) {
             return
         }
@@ -4942,10 +5234,9 @@ class ComposeAppController(
             confirmLabel = tr("Remove"),
             onConfirm = {
                 confirmationDialog = null
-                items.forEach { item ->
-                    affectedLists.forEach { list ->
-                        list.removeFile(item.file)
-                    }
+                val files = uniqueLibraryFiles(items)
+                affectedLists.forEach { list ->
+                    removeFilesFromLocalList(list, files)
                 }
             },
             onDismiss = { confirmationDialog = null }
@@ -4973,7 +5264,7 @@ class ComposeAppController(
             onConfirm = {
                 confirmationDialog = null
                 if (sharedList != null) {
-                    items.forEach { sharedList.removeFile(it.file) }
+                    removeFilesFromLocalList(sharedList, uniqueLibraryFiles(items))
                 } else {
                     removeLibraryItemsFromLibrary(items)
                 }
@@ -5038,7 +5329,7 @@ class ComposeAppController(
     fun downloadSearchResult(tab: SearchTabSession, result: GroupedSearchResult) {
         try {
             addSearchDownload(tab, result)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 searchDownloadAction(tab, result),
@@ -5057,7 +5348,7 @@ class ComposeAppController(
         ) ?: return
         try {
             addSearchDownload(tab, result, saveFile, false)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 searchDownloadAction(tab, result),
@@ -5084,7 +5375,9 @@ class ComposeAppController(
         saveFile: File? = null,
         overwrite: Boolean = false
     ) {
-        if (saveFile == null) {
+        if (isEd2kSearchResult(result)) {
+            ed2kService.addSearchResultDownload(result, saveFile, overwrite)
+        } else if (saveFile == null) {
             downloadListManager.addDownload(tab.search, result.searchResults)
         } else {
             downloadListManager.addDownload(tab.search, result.searchResults, saveFile, overwrite)
@@ -5092,7 +5385,7 @@ class ComposeAppController(
     }
 
     private fun startSearchDownloads(tab: SearchTabSession, results: List<GroupedSearchResult>) {
-        val dedupedResults = results.distinctBy { it.urn.toString() }
+        val dedupedResults = results.distinctBy(::searchResultKeyOf)
         when (dedupedResults.size) {
             0 -> return
             1 -> downloadSearchResult(tab, dedupedResults.first())
@@ -5103,25 +5396,25 @@ class ComposeAppController(
     private fun queueBulkSearchDownloads(tab: SearchTabSession, results: List<GroupedSearchResult>) {
         val pending = ArrayDeque(results)
         val summary = BulkSearchDownloadSummary(total = pending.size)
-        val autoRenameDuplicates = settingsService.loadPreferences().transfers.autoRenameDuplicateFiles
-        processBulkSearchDownloads(tab, pending, summary, autoRenameDuplicates)
+        val duplicateAction = settingsService.loadPreferences().transfers.duplicateDownloadAction
+        processBulkSearchDownloads(tab, pending, summary, duplicateAction)
     }
 
     private fun processBulkSearchDownloads(
         tab: SearchTabSession,
         pending: ArrayDeque<GroupedSearchResult>,
         summary: BulkSearchDownloadSummary,
-        autoRenameDuplicates: Boolean
+        duplicateAction: DuplicateDownloadAction
     ) {
         var processed = 0
         while (processed < BULK_SEARCH_DOWNLOAD_CHUNK_SIZE && pending.isNotEmpty()) {
             val result = pending.removeFirst()
-            attemptBulkSearchDownload(tab, result, summary, autoRenameDuplicates)
+            attemptBulkSearchDownload(tab, result, summary, duplicateAction)
             processed += 1
         }
         if (pending.isNotEmpty()) {
             EventQueue.invokeLater {
-                processBulkSearchDownloads(tab, pending, summary, autoRenameDuplicates)
+                processBulkSearchDownloads(tab, pending, summary, duplicateAction)
             }
         } else {
             finalizeBulkSearchDownloads(summary)
@@ -5132,28 +5425,36 @@ class ComposeAppController(
         tab: SearchTabSession,
         result: GroupedSearchResult,
         summary: BulkSearchDownloadSummary,
-        autoRenameDuplicates: Boolean
+        duplicateAction: DuplicateDownloadAction
     ) {
         try {
             addSearchDownload(tab, result)
             summary.started += 1
         } catch (failure: DownloadException) {
-            if (
-                autoRenameDuplicates &&
-                (failure.errorCode == DownloadException.ErrorCode.FILE_ALREADY_EXISTS ||
-                    failure.errorCode == DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO)
-            ) {
-                val target = failure.file
-                if (target != null) {
-                    try {
-                        addSearchDownload(tab, result, nextAvailableDownloadTarget(target), false)
-                        summary.started += 1
-                        summary.autoRenamed += 1
-                        return
-                    } catch (retryFailure: DownloadException) {
-                        recordBulkSearchDownloadFailure(summary, retryFailure)
-                        return
+            val target = failure.file
+            if (target != null) {
+                try {
+                    when {
+                        duplicateAction == DuplicateDownloadAction.RENAME &&
+                            (failure.errorCode == DownloadException.ErrorCode.FILE_ALREADY_EXISTS ||
+                                failure.errorCode == DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO) -> {
+                            addSearchDownload(tab, result, nextAvailableDownloadTarget(target), false)
+                            summary.started += 1
+                            summary.autoRenamed += 1
+                            return
+                        }
+
+                        duplicateAction == DuplicateDownloadAction.REPLACE &&
+                            failure.errorCode == DownloadException.ErrorCode.FILE_ALREADY_EXISTS -> {
+                            addSearchDownload(tab, result, target, true)
+                            summary.started += 1
+                            summary.replacedExisting += 1
+                            return
+                        }
                     }
+                } catch (retryFailure: DownloadException) {
+                    recordBulkSearchDownloadFailure(summary, retryFailure)
+                    return
                 }
             }
             recordBulkSearchDownloadFailure(summary, failure)
@@ -5179,14 +5480,15 @@ class ComposeAppController(
 
     private fun finalizeBulkSearchDownloads(summary: BulkSearchDownloadSummary) {
         if (summary.started > 0 || summary.alreadyDownloading > 0) {
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } else if (summary.alreadyUploading > 0) {
-            selectTransfers(TransferTrayMode.UPLOADS)
+            noteTransferActivity(TransferTrayMode.UPLOADS)
         }
 
         val parts = buildList {
             if (summary.started > 0) add(tr("Started {0}", summary.started))
-            if (summary.autoRenamed > 0) add(tr("{0} renamed automatically", summary.autoRenamed))
+            if (summary.autoRenamed > 0) add(tr("{0} saved with a different name to avoid duplicates", summary.autoRenamed))
+            if (summary.replacedExisting > 0) add(tr("{0} replaced an existing file", summary.replacedExisting))
             if (summary.alreadySaved > 0) add(tr("{0} already complete", summary.alreadySaved))
             if (summary.alreadyDownloading > 0) add(tr("{0} already in transfers", summary.alreadyDownloading))
             if (summary.alreadyUploading > 0) add(tr("{0} already seeding", summary.alreadyUploading))
@@ -5201,7 +5503,7 @@ class ComposeAppController(
             append(parts.joinToString(" • "))
             if (summary.nameConflicts > 0) {
                 append(". ")
-                append(tr("Turn on Automatically rename duplicate files or retry individual items with Download As."))
+                append(tr("Change duplicate download handling in Preferences, or retry individual items with Download As."))
             }
             summary.firstFailureMessage?.let { failureMessage ->
                 if (summary.failed > 0) {
@@ -5215,6 +5517,7 @@ class ComposeAppController(
             summary.failed > 0 || summary.nameConflicts > 0 -> OperationNoticeLevel.WARNING
             summary.started > 0 && (
                 summary.autoRenamed > 0 ||
+                    summary.replacedExisting > 0 ||
                     summary.alreadySaved > 0 ||
                     summary.alreadyDownloading > 0 ||
                     summary.alreadyUploading > 0
@@ -5265,14 +5568,14 @@ class ComposeAppController(
     }
 
     fun areSimilarResultsExpanded(tab: SearchTabSession, result: GroupedSearchResult): Boolean {
-        return result.urn.toString() in tab.expandedSimilarResultKeys
+        return searchResultKeyOf(result) in tab.expandedSimilarResultKeys
     }
 
     fun toggleSimilarResults(tab: SearchTabSession, result: GroupedSearchResult) {
         if (!canShowSimilarResults(result)) {
             return
         }
-        val key = result.urn.toString()
+        val key = searchResultKeyOf(result)
         if (key in tab.expandedSimilarResultKeys) {
             tab.expandedSimilarResultKeys.remove(key)
         } else {
@@ -5400,8 +5703,11 @@ class ComposeAppController(
         if (tab.results.any { it.friends.isNotEmpty() }) {
             filters += SearchSourceFilter.FRIENDS
         }
-        if (tab.results.any { it.friends.isEmpty() }) {
+        if (tab.results.any { it.friends.isEmpty() && !isEd2kSearchResult(it) }) {
             filters += SearchSourceFilter.NETWORK
+        }
+        if (tab.results.any(::isEd2kSearchResult)) {
+            filters += SearchSourceFilter.ED2K_KAD
         }
         if (tab.results.any { result -> result.searchResults.any { it.source.isBrowseHostEnabled } }) {
             filters += SearchSourceFilter.BROWSABLE
@@ -5499,11 +5805,11 @@ class ComposeAppController(
         toggleSelection: Boolean = false
     ) {
         val selection = computeSelectionUpdate(
-            visibleKeys = visibleSearchResults(tab).map { it.urn.toString() },
+            visibleKeys = visibleSearchResults(tab).map(::searchResultKeyOf),
             currentSelection = tab.selectedResultKeys,
             currentPrimary = tab.selectedResultKey,
             currentAnchor = tab.selectionAnchorKey,
-            targetKey = result.urn.toString(),
+            targetKey = searchResultKeyOf(result),
             extendSelection = extendSelection,
             toggleSelection = toggleSelection
         )
@@ -5515,7 +5821,7 @@ class ComposeAppController(
     }
 
     fun selectAllVisibleSearchResults(tab: SearchTabSession) {
-        val keys = visibleSearchResults(tab).map { it.urn.toString() }
+        val keys = visibleSearchResults(tab).map(::searchResultKeyOf)
         val primary = tab.selectedResultKey?.takeIf { it in keys } ?: keys.firstOrNull()
         applySearchSelection(tab, keys, primary, primary)
     }
@@ -5525,7 +5831,7 @@ class ComposeAppController(
     }
 
     fun handleSearchContextSelection(tab: SearchTabSession, result: GroupedSearchResult) {
-        if (result.urn.toString() !in tab.selectedResultKeys) {
+        if (searchResultKeyOf(result) !in tab.selectedResultKeys) {
             selectSearchResult(tab, result)
         }
     }
@@ -5534,15 +5840,15 @@ class ComposeAppController(
         val results = tab.presentationState.visibleResults
         val key = tab.selectedResultKey
         if (key != null) {
-            results.firstOrNull { it.urn.toString() == key }?.let { return it }
+            results.firstOrNull { searchResultKeyOf(it) == key }?.let { return it }
         }
         val selectedKeys = tab.selectedResultKeys.toSet()
-        return results.firstOrNull { it.urn.toString() in selectedKeys } ?: results.firstOrNull()
+        return results.firstOrNull { searchResultKeyOf(it) in selectedKeys } ?: results.firstOrNull()
     }
 
     fun selectedSearchResults(tab: SearchTabSession): List<GroupedSearchResult> {
         val selectedKeys = tab.selectedResultKeys.toSet()
-        return tab.presentationState.visibleResults.filter { it.urn.toString() in selectedKeys }
+        return tab.presentationState.visibleResults.filter { searchResultKeyOf(it) in selectedKeys }
     }
 
     fun moveSearchSelection(tab: SearchTabSession, delta: Int) {
@@ -5553,7 +5859,7 @@ class ComposeAppController(
             tab.selectionAnchorKey = null
             return
         }
-        val currentIndex = results.indexOfFirst { it.urn.toString() == tab.selectedResultKey }
+        val currentIndex = results.indexOfFirst { searchResultKeyOf(it) == tab.selectedResultKey }
         val nextIndex = when {
             currentIndex < 0 -> 0
             else -> (currentIndex + delta).coerceIn(0, results.lastIndex)
@@ -5566,7 +5872,7 @@ class ComposeAppController(
         if (results.isEmpty()) {
             return
         }
-        val currentIndex = results.indexOfFirst { it.urn.toString() == tab.selectedResultKey }
+        val currentIndex = results.indexOfFirst { searchResultKeyOf(it) == tab.selectedResultKey }
         val nextIndex = when {
             currentIndex < 0 -> 0
             else -> (currentIndex + delta).coerceIn(0, results.lastIndex)
@@ -5703,7 +6009,7 @@ class ComposeAppController(
                 torrentFiles = searchTorrentFilesCount(result),
                 torrentTrackers = searchTorrentTrackersCount(result),
                 spamRank = if (result.searchResults.any(SearchResult::isSpam)) 1 else 0,
-                localRank = localRanks[result.urn.toString()] ?: 0
+                localRank = localRanks[searchResultKeyOf(result)] ?: 0
             )
         }
     }
@@ -5712,7 +6018,7 @@ class ComposeAppController(
         val downloadIndex = searchDownloadIndex()
         val libraryIndex = searchLibraryIndex()
         return results.associate { result ->
-            val key = result.urn.toString()
+            val key = searchResultKeyOf(result)
             val rank = when {
                 key in libraryIndex.libraryUrns -> 2
                 key in libraryIndex.sharedTargetsByUrn -> 2
@@ -5763,10 +6069,90 @@ class ComposeAppController(
             ?: "${item.fileName}:${item.startDate.time}"
     }
 
+    fun downloadItemKey(item: DownloadItem): String = downloadSelectionKey(item)
+
     private fun uploadSelectionKey(item: UploadItem): String {
         return item.urn?.toString()
             ?: item.file?.absolutePath
             ?: "${item.fileName}:${item.startTime}"
+    }
+
+    fun uploadItemKey(item: UploadItem): String = uploadSelectionKey(item)
+
+    private fun searchResultKeyOf(result: GroupedSearchResult): String {
+        return result.urn?.toString()
+            ?: result.searchResults.firstOrNull()?.magnetURL?.takeIf(String::isNotBlank)
+            ?: result.fileName
+    }
+
+    private fun isEd2kSearchResult(result: GroupedSearchResult): Boolean {
+        return result is Ed2kGroupedSearchResultView || result.urn?.toString()?.startsWith("urn:ed2k:") == true
+    }
+
+    fun isEd2kDownloadItem(item: DownloadItem): Boolean {
+        return item is Ed2kDownloadItem || item.urn?.toString()?.startsWith("urn:ed2k:") == true
+    }
+
+    fun isEd2kUploadItem(item: UploadItem): Boolean {
+        return item is Ed2kUploadItem || item.urn?.toString()?.startsWith("urn:ed2k:") == true
+    }
+
+    fun ed2kLink(item: DownloadItem): String? = (item as? Ed2kDownloadItem)?.ed2kLink
+
+    fun ed2kLink(item: UploadItem): String? = (item as? Ed2kUploadItem)?.ed2kLink
+
+    fun canRequestMoreSources(item: DownloadItem): Boolean {
+        return isEd2kDownloadItem(item) && item.state != DownloadState.DONE
+    }
+
+    fun requestMoreSources(item: DownloadItem? = selectedDownloadItem()) {
+        val resolvedItem = item ?: return
+        runCatching {
+            ed2kService.requestMoreSources(resolvedItem)
+            showNotice(tr("ED2K"), tr("Asked ED2K/Kad to look for more sources."), OperationNoticeLevel.SUCCESS)
+        }.onFailure { failure ->
+            showNotice(
+                tr("ED2K"),
+                failure.message ?: tr("WireShare could not request more ED2K/Kad sources."),
+                OperationNoticeLevel.ERROR
+            )
+        }
+    }
+
+    private fun allDownloads(): List<DownloadItem> = downloads + ed2kDownloads
+
+    private fun allUploads(): List<UploadItem> = uploads + ed2kUploads
+
+    fun trayDownloads(): List<DownloadItem> = sortDownloads(allDownloads())
+
+    fun trayUploads(): List<UploadItem> = sortUploads(allUploads())
+
+    fun isDownloadProblemItem(item: DownloadItem): Boolean = isDownloadProblem(item)
+
+    fun isUploadProblemItem(item: UploadItem): Boolean = isUploadProblem(item)
+
+    fun stalledDownloadItemCount(): Int = allDownloads().count(::isDownloadProblem)
+
+    fun stalledUploadItemCount(): Int = allUploads().count(::isUploadProblem)
+
+    fun openTransfersWorkspaceForDownload(item: DownloadItem? = null) {
+        if (item != null) {
+            if (!matchesDownloadFilter(item, downloadFilterMode)) {
+                updateDownloadFilterMode(TransferFilterMode.ALL)
+            }
+            selectDownloadItem(item)
+        }
+        openTransfersWorkspace(TransferTrayMode.DOWNLOADS)
+    }
+
+    fun openTransfersWorkspaceForUpload(item: UploadItem? = null) {
+        if (item != null) {
+            if (!matchesUploadFilter(item, uploadFilterMode)) {
+                updateUploadFilterMode(TransferFilterMode.ALL)
+            }
+            selectUploadItem(item)
+        }
+        openTransfersWorkspace(TransferTrayMode.UPLOADS)
     }
 
     fun selectedDownloadItem(): DownloadItem? {
@@ -5910,18 +6296,49 @@ class ComposeAppController(
         saveDownloadLayoutPreferences()
     }
 
+    fun updateDownloadSearchText(value: String) {
+        if (downloadSearchText == value) {
+            return
+        }
+        downloadSearchText = value
+        invalidateDownloadPresentationCache()
+    }
+
+    private fun matchesDownloadFilter(item: DownloadItem, mode: TransferFilterMode): Boolean {
+        return when (mode) {
+            TransferFilterMode.ALL -> true
+            TransferFilterMode.ACTIVE -> !item.state.isFinished && !isDownloadProblem(item)
+            TransferFilterMode.FINISHED -> item.state.isFinished
+            TransferFilterMode.STALLED -> isDownloadProblem(item)
+        }
+    }
+
+    private fun matchesDownloadSearch(item: DownloadItem, filter: String): Boolean {
+        if (filter.isBlank()) {
+            return true
+        }
+        return listOfNotNull(
+            item.fileName,
+            FileUtils.getFilenameNoExtension(item.fileName),
+            FileUtils.getFileExtension(item.fileName),
+            item.title.takeUnless(String::isBlank),
+            item.saveFile?.absolutePath,
+            item.downloadingFile?.absolutePath,
+            item.category.getPluralName(),
+            item.category.getSingularName(),
+            item.state.name.replace('_', ' '),
+            item.errorState.takeUnless { it == DownloadItem.ErrorState.NONE }?.message
+        ).any { it.lowercase(Locale.US).contains(filter) }
+    }
+
     fun visibleDownloads(): List<DownloadItem> {
         if (!visibleDownloadsDirty) {
             return cachedVisibleDownloads
         }
         cachedVisibleDownloads = ComposePerformanceTracker.measure("transfers.visibleDownloads") {
-            val filtered = downloads.filter { item ->
-                when (downloadFilterMode) {
-                    TransferFilterMode.ALL -> true
-                    TransferFilterMode.ACTIVE -> !item.state.isFinished && !isDownloadProblem(item)
-                    TransferFilterMode.FINISHED -> item.state.isFinished
-                    TransferFilterMode.STALLED -> isDownloadProblem(item)
-                }
+            val textFilter = downloadSearchText.trim().lowercase(Locale.US)
+            val filtered = allDownloads().filter { item ->
+                matchesDownloadFilter(item, downloadFilterMode) && matchesDownloadSearch(item, textFilter)
             }
             sortDownloads(filtered)
         }
@@ -5929,24 +6346,24 @@ class ComposeAppController(
         return cachedVisibleDownloads
     }
 
-    fun hasPausableDownloads(): Boolean = downloads.any { it.state.isPausable }
+    fun hasPausableDownloads(): Boolean = allDownloads().any { it.state.isPausable }
 
-    fun hasResumableDownloads(): Boolean = downloads.any {
+    fun hasResumableDownloads(): Boolean = allDownloads().any {
         it.state.isResumable || (it.state == DownloadState.ERROR && it.isTryAgainEnabled)
     }
 
-    fun hasErrorDownloads(): Boolean = downloads.any { it.state == DownloadState.ERROR }
+    fun hasErrorDownloads(): Boolean = allDownloads().any { it.state == DownloadState.ERROR }
 
-    fun hasStalledDownloadItems(): Boolean = downloads.any { it.state == DownloadState.STALLED }
+    fun hasStalledDownloadItems(): Boolean = allDownloads().any { it.state == DownloadState.STALLED }
 
-    fun hasAnyDownloads(): Boolean = downloads.isNotEmpty()
+    fun hasAnyDownloads(): Boolean = allDownloads().isNotEmpty()
 
     fun pauseAllDownloads() {
-        downloads.filter { it.state.isPausable }.forEach(DownloadItem::pause)
+        allDownloads().filter { it.state.isPausable }.forEach(DownloadItem::pause)
     }
 
     fun resumeAllDownloads() {
-        downloads.forEach { item ->
+        allDownloads().forEach { item ->
             when {
                 item.state.isResumable -> item.resume()
                 item.state == DownloadState.ERROR && item.isTryAgainEnabled -> item.resume()
@@ -6105,13 +6522,10 @@ class ComposeAppController(
     }
 
     fun clearProblemDownloads() {
-        downloads
+        allDownloads()
             .filter(::isDownloadProblem)
             .forEach { item ->
-                if (!item.state.isFinished) {
-                    item.cancel()
-                }
-                downloadListManager.remove(item)
+                removeDownloadItem(item)
             }
         selectedDownloadUrn = null
         selectedDownloadUrns.clear()
@@ -6124,21 +6538,21 @@ class ComposeAppController(
     }
 
     fun cancelAllStalledDownloads() {
-        downloads
+        allDownloads()
             .filter { it.state == DownloadState.STALLED }
             .toList()
             .forEach(::removeDownloadItem)
     }
 
     fun cancelAllErrorDownloads() {
-        downloads
+        allDownloads()
             .filter { it.state == DownloadState.ERROR }
             .toList()
             .forEach(::removeDownloadItem)
     }
 
     fun cancelAllDownloads() {
-        downloads.toList().forEach(::removeDownloadItem)
+        allDownloads().toList().forEach(::removeDownloadItem)
     }
 
     fun openDownloadItem(item: DownloadItem) {
@@ -6266,7 +6680,7 @@ class ComposeAppController(
     }
 
     private fun searchLocalAvailability(result: GroupedSearchResult): SearchLocalAvailability {
-        val key = result.urn.toString()
+        val key = searchResultKeyOf(result)
         return searchLocalAvailabilityCache.getOrPut(key) {
             val libraryIndex = searchLibraryIndex()
             val downloadItem = searchDownloadIndex().byUrn[key]
@@ -6301,7 +6715,7 @@ class ComposeAppController(
     }
 
     fun searchResultPresentation(result: GroupedSearchResult): SearchResultPresentation {
-        val key = result.urn.toString()
+        val key = searchResultKeyOf(result)
         return searchResultPresentationCache.getOrPut(key) {
             ComposePerformanceTracker.measure("search.resultPresentation") {
                 buildSearchResultPresentation(result)
@@ -6346,7 +6760,9 @@ class ComposeAppController(
 
     fun removeDownloadItem(item: DownloadItem) {
         item.cancel()
-        downloadListManager.remove(item)
+        if (!isEd2kDownloadItem(item)) {
+            downloadListManager.remove(item)
+        }
         val selectionKey = downloadSelectionKey(item)
         if (selectedDownloadUrn == selectionKey) {
             selectedDownloadUrn = null
@@ -6527,41 +6943,43 @@ class ComposeAppController(
         saveUploadLayoutPreferences()
     }
 
+    private fun matchesUploadFilter(item: UploadItem, mode: TransferFilterMode): Boolean {
+        return when (mode) {
+            TransferFilterMode.ALL -> true
+            TransferFilterMode.ACTIVE -> !item.isFinished && !isUploadProblem(item)
+            TransferFilterMode.FINISHED -> item.isFinished
+            TransferFilterMode.STALLED -> isUploadProblem(item)
+        }
+    }
+
     fun visibleUploads(): List<UploadItem> {
         if (!visibleUploadsDirty) {
             return cachedVisibleUploads
         }
         cachedVisibleUploads = ComposePerformanceTracker.measure("transfers.visibleUploads") {
-            val filtered = uploads.filter { item ->
-                when (uploadFilterMode) {
-                    TransferFilterMode.ALL -> true
-                    TransferFilterMode.ACTIVE -> !item.isFinished && !isUploadProblem(item)
-                    TransferFilterMode.FINISHED -> item.isFinished
-                    TransferFilterMode.STALLED -> isUploadProblem(item)
-                }
-            }
+            val filtered = allUploads().filter { item -> matchesUploadFilter(item, uploadFilterMode) }
             sortUploads(filtered)
         }
         visibleUploadsDirty = false
         return cachedVisibleUploads
     }
 
-    fun hasPausableUploads(): Boolean = uploads.any { it.state == UploadState.UPLOADING }
+    fun hasPausableUploads(): Boolean = allUploads().any { it.state == UploadState.UPLOADING }
 
-    fun hasResumableUploads(): Boolean = uploads.any { it.state == UploadState.PAUSED }
+    fun hasResumableUploads(): Boolean = allUploads().any { it.state == UploadState.PAUSED }
 
-    fun hasErrorUploads(): Boolean = uploads.any(::isUploadProblem)
+    fun hasErrorUploads(): Boolean = allUploads().any(::isUploadProblem)
 
-    fun hasTorrentUploads(): Boolean = uploads.any { it.uploadItemType == UploadItem.UploadItemType.BITTORRENT }
+    fun hasTorrentUploads(): Boolean = allUploads().any { it.uploadItemType == UploadItem.UploadItemType.BITTORRENT }
 
-    fun hasAnyUploads(): Boolean = uploads.isNotEmpty()
+    fun hasAnyUploads(): Boolean = allUploads().isNotEmpty()
 
     fun pauseActiveUploads() {
-        uploads.filter { it.state == UploadState.UPLOADING }.forEach(UploadItem::pause)
+        allUploads().filter { it.state == UploadState.UPLOADING }.forEach(UploadItem::pause)
     }
 
     fun resumeAllUploads() {
-        uploads.filter { it.state == UploadState.PAUSED }.forEach(UploadItem::resume)
+        allUploads().filter { it.state == UploadState.PAUSED }.forEach(UploadItem::resume)
     }
 
     fun pauseSelectedUploads() {
@@ -6575,7 +6993,7 @@ class ComposeAppController(
     }
 
     fun resumePausedUploads() {
-        uploads.filter { it.state == UploadState.PAUSED }.forEach(UploadItem::resume)
+        allUploads().filter { it.state == UploadState.PAUSED }.forEach(UploadItem::resume)
     }
 
     fun resumeSelectedUploads() {
@@ -6611,7 +7029,7 @@ class ComposeAppController(
     }
 
     fun cancelAllErrorUploads() {
-        uploads
+        allUploads()
             .filter(::isUploadProblem)
             .toList()
             .forEach(::removeUploadItem)
@@ -6765,7 +7183,9 @@ class ComposeAppController(
         if (!item.isFinished) {
             item.cancel()
         }
-        uploadListManager.remove(item)
+        if (!isEd2kUploadItem(item)) {
+            uploadListManager.remove(item)
+        }
         val selectionKey = uploadSelectionKey(item)
         if (selectedUploadUrn == selectionKey) {
             selectedUploadUrn = null
@@ -7155,7 +7575,7 @@ class ComposeAppController(
     fun advancedConsoleLevelOptions(): List<String> = ADVANCED_CONSOLE_LEVELS
 
     fun advancedConnectionStrengthLabel(): String {
-        return when (connectionStrengthState) {
+        return when (displayedConnectionStrength()) {
             ConnectionStrength.NO_INTERNET -> tr("No Internet")
             ConnectionStrength.DISCONNECTED -> tr("Disconnected")
             ConnectionStrength.CONNECTING -> tr("Connecting")
@@ -7172,7 +7592,7 @@ class ComposeAppController(
         return if (connectionManager.isConnected) {
             if (connectionManager.isUltrapeer) tr("You are an Ultrapeer node.") else tr("You are a Leaf node.")
         } else {
-            when (connectionStrengthState) {
+            when (displayedConnectionStrength()) {
                 ConnectionStrength.NO_INTERNET -> tr("You are not connected to the Internet.")
                 ConnectionStrength.DISCONNECTED -> tr("You are connected to the Internet, but not connected to the Gnutella network.")
                 else -> tr("WireShare is still establishing its Gnutella connections.")
@@ -7182,8 +7602,8 @@ class ComposeAppController(
 
     fun advancedNodeRoleBadgeLabel(): String {
         return when {
-            !connectionStrengthState.isOnline -> tr("Offline")
-            connectionStrengthState == ConnectionStrength.CONNECTING -> tr("Connecting")
+            !displayedConnectionStrength().isOnline -> tr("Offline")
+            displayedConnectionStrength() == ConnectionStrength.CONNECTING -> tr("Connecting")
             connectionManager.isUltrapeer -> tr("Ultrapeer")
             else -> tr("Leaf")
         }
@@ -7230,6 +7650,171 @@ class ComposeAppController(
             ultrapeerCount,
             peerCount
         )
+    }
+
+    fun ed2kServerStatusLabel(): String {
+        return when (ed2kStatus.serverState) {
+            Ed2kStatus.ConnectionState.DISCONNECTED -> tr("Disconnected")
+            Ed2kStatus.ConnectionState.CONNECTING -> tr("Connecting")
+            Ed2kStatus.ConnectionState.CONNECTED -> tr("Connected")
+        }
+    }
+
+    fun ed2kKadStatusLabel(): String {
+        val base = when (ed2kStatus.kadState) {
+            Ed2kStatus.ConnectionState.DISCONNECTED -> tr("Disconnected")
+            Ed2kStatus.ConnectionState.CONNECTING -> tr("Connecting")
+            Ed2kStatus.ConnectionState.CONNECTED -> tr("Connected")
+        }
+        return when (ed2kStatus.kadBootstrapState) {
+            Ed2kStatus.KadBootstrapState.NOT_BOOTSTRAPPED -> tr("{0} · No nodes", base)
+            Ed2kStatus.KadBootstrapState.BOOTSTRAPPING -> tr("{0} · Bootstrapping · {1} nodes", base, ed2kStatus.kadContactCount)
+            Ed2kStatus.KadBootstrapState.BOOTSTRAPPED -> tr("{0} · {1} nodes", base, ed2kStatus.kadContactCount)
+        }
+    }
+
+    fun ed2kConnectedServerText(): String {
+        return ed2kStatus.serverStatusDetail?.takeIf(String::isNotBlank)
+            ?: ed2kStatus.connectedServerName?.takeIf(String::isNotBlank)
+            ?: tr("No ED2K server connected")
+    }
+
+    fun ed2kSummaryText(): String {
+        return tr(
+            "{0} server(s) · {1} download(s) · {2} upload(s) · {3} shared · {4} Kad nodes",
+            ed2kStatus.serverCount,
+            ed2kStatus.downloadCount,
+            ed2kStatus.uploadCount,
+            ed2kStatus.sharedFileCount,
+            ed2kStatus.kadContactCount
+        )
+    }
+
+    fun canConnectEd2kServer(): Boolean = ed2kStatus.serverCount > 0 && ed2kStatus.serverState != Ed2kStatus.ConnectionState.CONNECTED
+
+    fun canDisconnectEd2kServer(): Boolean = ed2kStatus.serverState != Ed2kStatus.ConnectionState.DISCONNECTED
+
+    fun canConnectKad(): Boolean = ed2kStatus.kadState != Ed2kStatus.ConnectionState.CONNECTED
+
+    fun canDisconnectKad(): Boolean = ed2kStatus.kadState != Ed2kStatus.ConnectionState.DISCONNECTED
+
+    fun connectAnyEd2kServer() {
+        runCatching {
+            advancedToolsService.ed2kConnectAnyServer()
+            advancedEd2kError = null
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to connect to an ED2K server.")
+            showNotice(tr("ED2K"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    fun disconnectEd2kServer() {
+        runCatching {
+            advancedToolsService.ed2kDisconnectServer()
+            advancedEd2kError = null
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to disconnect from the ED2K server.")
+            showNotice(tr("ED2K"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    fun connectKad() {
+        runCatching {
+            advancedToolsService.ed2kConnectKad()
+            advancedEd2kError = null
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to connect Kad.")
+            showNotice(tr("Kad"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    fun disconnectKad() {
+        runCatching {
+            advancedToolsService.ed2kDisconnectKad()
+            advancedEd2kError = null
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to disconnect Kad.")
+            showNotice(tr("Kad"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    fun submitEd2kServerConnect() {
+        val host = advancedEd2kServerHost.trim()
+        val port = advancedEd2kServerPort.trim().toIntOrNull()
+        when {
+            host.isEmpty() -> advancedEd2kError = tr("Enter an ED2K server host.")
+            port == null || port !in 1..65535 -> advancedEd2kError = tr("Enter a valid ED2K server port.")
+            else -> runCatching {
+                advancedToolsService.ed2kConnectServer(host, port)
+                advancedEd2kError = null
+            }.onFailure { failure ->
+                advancedEd2kError = failure.message ?: tr("Unable to connect to the ED2K server.")
+                showNotice(tr("ED2K"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+            }
+        }
+    }
+
+    fun importEd2kServers() {
+        val file = filePicker.chooseFiles(
+            parent = windowRef,
+            title = tr("Import ED2K Server List (server.met or .txt)"),
+            multiple = false,
+            filenameFilter = FilenameFilter { _, name ->
+                name.endsWith(".met", ignoreCase = true) || name.endsWith(".txt", ignoreCase = true)
+            }
+        ).firstOrNull() ?: return
+        runCatching {
+            advancedToolsService.ed2kImportServers(file)
+            advancedEd2kError = null
+            showNotice(tr("ED2K"), tr("Imported ED2K server list."), OperationNoticeLevel.SUCCESS)
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to import the ED2K server list.")
+            showNotice(tr("ED2K"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    fun importKadNodes() {
+        val file = filePicker.chooseFiles(
+            parent = windowRef,
+            title = tr("Import Kad Nodes (nodes.dat)"),
+            multiple = false,
+            filenameFilter = FilenameFilter { _, name ->
+                name.endsWith(".dat", ignoreCase = true)
+            }
+        ).firstOrNull() ?: return
+        runCatching {
+            advancedToolsService.ed2kImportKadNodes(file)
+            advancedEd2kError = null
+            showNotice(tr("Kad"), tr("Imported Kad nodes."), OperationNoticeLevel.SUCCESS)
+        }.onFailure { failure ->
+            advancedEd2kError = failure.message ?: tr("Unable to import Kad nodes.")
+            showNotice(tr("Kad"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+        }
+    }
+
+    private fun displayedConnectionStrength(): ConnectionStrength {
+        if (connectionStrengthState == ConnectionStrength.DISCONNECTED &&
+            advancedConnections.any { !it.isConnected && it.status == ConnectionItem.Status.CONNECTING }) {
+            return ConnectionStrength.CONNECTING
+        }
+        return connectionStrengthState
+    }
+
+    fun bootstrapKad() {
+        val host = advancedKadBootstrapHost.trim()
+        val port = advancedKadBootstrapPort.trim().toIntOrNull()
+        when {
+            host.isEmpty() -> advancedEd2kError = tr("Enter a Kad bootstrap host.")
+            port == null || port !in 1..65535 -> advancedEd2kError = tr("Enter a valid Kad bootstrap port.")
+            else -> runCatching {
+                advancedToolsService.ed2kBootstrapKad(host, port)
+                advancedEd2kError = null
+                showNotice(tr("Kad"), tr("Started Kad bootstrap from {0}:{1}.", host, port), OperationNoticeLevel.SUCCESS)
+            }.onFailure { failure ->
+                advancedEd2kError = failure.message ?: tr("Unable to bootstrap Kad.")
+                showNotice(tr("Kad"), advancedEd2kError ?: "", OperationNoticeLevel.ERROR)
+            }
+        }
     }
 
     private fun attachAdvancedConsole() {
@@ -7736,8 +8321,8 @@ class ComposeAppController(
         if (!closeTrayWhenNoTransfers) {
             return
         }
-        val hasActiveDownloads = downloads.any { !it.state.isFinished }
-        val hasActiveUploads = uploads.any { !it.isFinished }
+        val hasActiveDownloads = allDownloads().any { !it.state.isFinished }
+        val hasActiveUploads = allUploads().any { !it.isFinished }
         if (!hasActiveDownloads && !hasActiveUploads) {
             trayExpanded = false
         }
@@ -7862,6 +8447,7 @@ class ComposeAppController(
     ) {
         maybeClearActiveLibraryFiltersForImport(fileList, files)
         val rejected = mutableListOf<File>()
+        val failed = mutableListOf<File>()
         val allowedExtensions = buildLibraryImportExtensionSet(allowedCategories, advancedExtensions)
         val filter = FileFilter { candidate ->
             when {
@@ -7875,10 +8461,14 @@ class ComposeAppController(
         }
 
         files.forEach { file ->
-            when {
-                fileList.isDirectoryAllowed(file) -> fileList.addFolder(file, filter)
-                fileList.isFileAllowed(file) -> fileList.addFile(file)
-                else -> rejected.add(file)
+            try {
+                when {
+                    fileList.isDirectoryAllowed(file) -> fileList.addFolder(file, filter)
+                    fileList.isFileAllowed(file) -> fileList.addFile(file)
+                    else -> rejected.add(file)
+                }
+            } catch (_: Exception) {
+                failed.add(file)
             }
         }
 
@@ -7888,6 +8478,13 @@ class ComposeAppController(
                 tr("Add Files"),
                 tr("{0} item(s) could not be added to {1}.", rejected.size, destinationLabel),
                 OperationNoticeLevel.WARNING
+            )
+        }
+        if (failed.isNotEmpty()) {
+            showNotice(
+                tr("Add Files"),
+                tr("{0} item(s) could not be imported into {1}.", failed.size, destinationLabel),
+                OperationNoticeLevel.ERROR
             )
         }
     }
@@ -8110,22 +8707,35 @@ class ComposeAppController(
     }
 
     private fun removeLibraryItemsFromLibrary(items: List<LocalFileItem>) {
-        items.forEach { item ->
-            if (item.file == playerCurrentFile) {
-                playerService.stop()
-            }
-            libraryManager.libraryManagedList.removeFile(item.file)
-        }
+        val files = uniqueLibraryFiles(items)
+        stopPlayerIfNeeded(files)
+        removeFilesFromLocalList(libraryManager.libraryManagedList, files)
     }
 
     private fun deleteLibraryItemsFromDisk(items: List<LocalFileItem>) {
-        items.forEach { item ->
-            if (item.file == playerCurrentFile) {
-                playerService.stop()
-            }
-            libraryManager.libraryManagedList.removeFile(item.file)
-            FileUtils.delete(item.file, OSUtils.supportsTrash())
+        val files = uniqueLibraryFiles(items)
+        stopPlayerIfNeeded(files)
+        removeFilesFromLocalList(libraryManager.libraryManagedList, files)
+        FileUtils.delete(files, OSUtils.supportsTrash())
+    }
+
+    private fun uniqueLibraryFiles(items: List<LocalFileItem>): List<File> {
+        return items.map { it.file }.distinct()
+    }
+
+    private fun stopPlayerIfNeeded(files: Collection<File>) {
+        val current = playerCurrentFile ?: return
+        if (files.any { it == current }) {
+            playerService.stop()
         }
+    }
+
+    private fun removeFilesFromLocalList(list: LocalFileList, files: Collection<File>) {
+        if (files.isEmpty()) {
+            return
+        }
+        val fileSet = files.toHashSet()
+        list.removeFiles(Predicate { item -> item.file in fileSet })
     }
 
     private fun applyPendingCollectionShares() {
@@ -8399,14 +9009,14 @@ class ComposeAppController(
 
     private fun primeDownloadCompletionState() {
         downloadCompletionStates.clear()
-        downloads.forEach { item ->
+        allDownloads().forEach { item ->
             downloadCompletionStates[downloadSelectionKey(item)] = item.state.isFinished
         }
     }
 
     private fun handleDownloadLifecycleChanges() {
         val currentKeys = mutableSetOf<String>()
-        downloads.forEach { item ->
+        allDownloads().forEach { item ->
             val key = downloadSelectionKey(item)
             currentKeys += key
             val finished = item.state.isFinished
@@ -8428,7 +9038,7 @@ class ComposeAppController(
             body = item.title ?: item.fileName,
             onOpen = {
                 restoreApplication()
-                selectTransfers(TransferTrayMode.DOWNLOADS)
+                openTransfersWorkspace(TransferTrayMode.DOWNLOADS)
                 if (item.isLaunchable) {
                     openDownloadItem(item)
                 } else {
@@ -9011,7 +9621,7 @@ class ComposeAppController(
             if (!groupSimilarResultsEnabled && tab.expandedSimilarResultKeys.isNotEmpty()) {
                 tab.expandedSimilarResultKeys.clear()
             }
-            val validKeys = tab.results.map { it.urn.toString() }.toSet()
+            val validKeys = tab.results.map(::searchResultKeyOf).toSet()
             tab.expandedSimilarResultKeys.retainAll(validKeys)
             val presentationCategory = rawSearchPresentationCategory(tab)
             val filteredResultsByExcludedGroups = hashMapOf<Set<SearchFilterGroup>, List<GroupedSearchResult>>()
@@ -9318,7 +9928,8 @@ class ComposeAppController(
         return when (filter) {
             SearchSourceFilter.ALL -> true
             SearchSourceFilter.FRIENDS -> result.friends.isNotEmpty()
-            SearchSourceFilter.NETWORK -> result.friends.isEmpty()
+            SearchSourceFilter.NETWORK -> result.friends.isEmpty() && !isEd2kSearchResult(result)
+            SearchSourceFilter.ED2K_KAD -> isEd2kSearchResult(result)
             SearchSourceFilter.BROWSABLE -> result.searchResults.any { it.source.isBrowseHostEnabled }
         }
     }
@@ -9345,7 +9956,8 @@ class ComposeAppController(
         return when (filter) {
             SearchSourceFilter.ALL -> tr("All sources")
             SearchSourceFilter.FRIENDS -> tr("Friend sources")
-            SearchSourceFilter.NETWORK -> tr("Network sources")
+            SearchSourceFilter.NETWORK -> tr("WireShare network")
+            SearchSourceFilter.ED2K_KAD -> tr("ED2K/Kad")
             SearchSourceFilter.BROWSABLE -> tr("Browsable")
         }
     }
@@ -9784,7 +10396,7 @@ class ComposeAppController(
     }
 
     private fun searchResultDownloadItem(result: GroupedSearchResult): DownloadItem? {
-        return searchDownloadIndex().byUrn[result.urn.toString()]
+        return searchDownloadIndex().byUrn[searchResultKeyOf(result)]
     }
 
     private fun searchTorrentFilesCount(result: GroupedSearchResult): Int {
@@ -10382,13 +10994,13 @@ class ComposeAppController(
     }
 
     private fun hasActiveTorrentDownloads(): Boolean {
-        return downloads.any {
+        return allDownloads().any {
             it.downloadItemType == DownloadItem.DownloadItemType.BITTORRENT && !it.state.isFinished
         }
     }
 
     private fun cancelActiveTorrentDownloads() {
-        downloads
+        allDownloads()
             .filter {
                 it.downloadItemType == DownloadItem.DownloadItemType.BITTORRENT && !it.state.isFinished
             }
@@ -10397,7 +11009,7 @@ class ComposeAppController(
     }
 
     private fun cancelAllTorrentUploads() {
-        uploads
+        allUploads()
             .filter { it.uploadItemType == UploadItem.UploadItemType.BITTORRENT }
             .toList()
             .forEach(::removeUploadItem)
@@ -10405,7 +11017,7 @@ class ComposeAppController(
     }
 
     private fun cancelAllUploads() {
-        uploads.toList().forEach(::removeUploadItem)
+        allUploads().toList().forEach(::removeUploadItem)
         cancelActiveTorrentDownloads()
     }
 
@@ -10444,7 +11056,7 @@ class ComposeAppController(
     private fun openTorrentUri(uri: URI) {
         try {
             downloadListManager.addTorrentDownload(uri, false)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 object : DownloadAction {
@@ -10478,7 +11090,7 @@ class ComposeAppController(
         }
         try {
             downloadListManager.addTorrentDownload(file, null, false)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 object : DownloadAction {
@@ -10498,7 +11110,7 @@ class ComposeAppController(
     private fun openMagnetDownload(magnet: MagnetLink) {
         try {
             downloadListManager.addDownload(magnet, null, false)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 object : DownloadAction {
@@ -10518,7 +11130,7 @@ class ComposeAppController(
     private fun openTorrentMagnet(magnet: MagnetLink) {
         try {
             downloadListManager.addTorrentDownload(magnet.name, magnet.urn, magnet.trackerUrls)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
             handleDownloadException(
                 object : DownloadAction {
@@ -10538,23 +11150,46 @@ class ComposeAppController(
     fun handleDownloadException(action: DownloadAction, failure: DownloadException, supportsNewSaveDir: Boolean) {
         when (failure.errorCode) {
             DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING -> {
-                selectTransfers(TransferTrayMode.DOWNLOADS)
+                noteTransferActivity(TransferTrayMode.DOWNLOADS)
                 showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.INFO)
             }
 
             DownloadException.ErrorCode.FILE_ALREADY_UPLOADING -> {
-                selectTransfers(TransferTrayMode.UPLOADS)
+                noteTransferActivity(TransferTrayMode.UPLOADS)
                 showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.INFO)
             }
 
             DownloadException.ErrorCode.FILE_ALREADY_EXISTS,
             DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO -> {
                 val target = failure.file
-                if (supportsNewSaveDir) {
-                    if (target != null && settingsService.loadPreferences().transfers.autoRenameDuplicateFiles) {
+                val duplicateAction = settingsService.loadPreferences().transfers.duplicateDownloadAction
+                when {
+                    duplicateAction == DuplicateDownloadAction.IGNORE -> {
+                        showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.INFO)
+                        action.downloadCanceled(failure)
+                        return
+                    }
+
+                    duplicateAction == DuplicateDownloadAction.RENAME &&
+                        supportsNewSaveDir &&
+                        target != null -> {
                         retryDownload(action, nextAvailableDownloadTarget(target), false, supportsNewSaveDir)
                         return
                     }
+
+                    duplicateAction == DuplicateDownloadAction.REPLACE &&
+                        target != null &&
+                        failure.errorCode == DownloadException.ErrorCode.FILE_ALREADY_EXISTS -> {
+                        retryDownload(action, target, true, supportsNewSaveDir)
+                        return
+                    }
+                }
+                if (!supportsNewSaveDir && failure.errorCode == DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
+                    showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.WARNING)
+                    action.downloadCanceled(failure)
+                    return
+                }
+                if (supportsNewSaveDir) {
                     val chosenTarget = filePicker.chooseSaveFile(
                         parent = windowRef,
                         title = tr("Save File As..."),
@@ -10630,7 +11265,7 @@ class ComposeAppController(
     private fun retryDownload(action: DownloadAction, saveFile: File, overwrite: Boolean, supportsNewSaveDir: Boolean) {
         try {
             action.download(saveFile, overwrite)
-            selectTransfers(TransferTrayMode.DOWNLOADS)
+            noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (retryFailure: DownloadException) {
             handleDownloadException(action, retryFailure, supportsNewSaveDir)
         }
@@ -10692,7 +11327,7 @@ class ComposeAppController(
 
     private fun isDownloadSaveLocationTaken(candidate: File): Boolean {
         val candidatePath = canonicalPath(candidate)
-        return downloads.any { item ->
+        return allDownloads().any { item ->
             item.saveFile?.let(::canonicalPath) == candidatePath
         }
     }
@@ -10840,18 +11475,39 @@ class ComposeAppController(
         if (distinctFiles.isEmpty()) {
             return
         }
-        distinctFiles.forEach(collection::addFile)
-        showNotice(
-            tr("Collection Updated"),
-            tr(
-                "Added {0} {1} from {2} to \"{3}\".",
-                distinctFiles.size,
-                if (distinctFiles.size == 1) tr("item") else tr("items"),
-                sourceLabel,
-                collection.collectionName
-            ),
-            OperationNoticeLevel.SUCCESS
-        )
+        val failed = mutableListOf<File>()
+        distinctFiles.forEach { file ->
+            try {
+                collection.addFile(file)
+            } catch (_: Exception) {
+                failed.add(file)
+            }
+        }
+        val successCount = distinctFiles.size - failed.size
+        if (successCount > 0) {
+            showNotice(
+                tr("Collection Updated"),
+                tr(
+                    "Added {0} {1} from {2} to \"{3}\".",
+                    successCount,
+                    if (successCount == 1) tr("item") else tr("items"),
+                    sourceLabel,
+                    collection.collectionName
+                ),
+                if (failed.isEmpty()) OperationNoticeLevel.SUCCESS else OperationNoticeLevel.WARNING
+            )
+        }
+        if (failed.isNotEmpty()) {
+            showNotice(
+                tr("Collection Updated"),
+                tr(
+                    "{0} item(s) could not be added to \"{1}\".",
+                    failed.size,
+                    collection.collectionName
+                ),
+                OperationNoticeLevel.ERROR
+            )
+        }
     }
 
     private fun playQueueEntries(

@@ -573,6 +573,50 @@ public class FileUtils {
     }
 
     /**
+     * Deletes the given files or directories, moving them to the trash can or
+     * recycle bin if the platform has one and <code>moveToTrash</code> is true.
+     *
+     * @param files the files or directories to trash or delete
+     * @param moveToTrash whether the files should be moved to the trash bin or
+     *        permanently deleted
+     * @return true if every existing file was removed successfully
+     *
+     * @throws IllegalArgumentException if the OS does not support moving files
+     *         to a trash bin, check with {@link OSUtils#supportsTrash()}.
+     */
+    public static boolean delete(Iterable<File> files, boolean moveToTrash) {
+        List<File> existingFiles = new ArrayList<File>();
+        Set<File> seenFiles = new HashSet<File>();
+        for (File file : files) {
+            if (file != null && file.exists() && seenFiles.add(file)) {
+                existingFiles.add(file);
+            }
+        }
+        if (existingFiles.isEmpty()) {
+            return false;
+        }
+        if (moveToTrash) {
+            if (OSUtils.isMacOSX()) {
+                return moveToTrashOSX(existingFiles);
+            } else if (OSUtils.isWindows()) {
+                boolean success = true;
+                for (File file : existingFiles) {
+                    success &= SystemUtils.recycle(file);
+                }
+                return success;
+            } else {
+                throw new IllegalArgumentException("OS does not support trash");
+            }
+        } else {
+            boolean success = true;
+            for (File file : existingFiles) {
+                success &= deleteRecursive(file);
+            }
+            return success;
+        }
+    }
+
+    /**
      * Moves the given file or directory to Trash.
      * 
      * @param file the file or directory to move to Trash
@@ -594,6 +638,28 @@ public class FileUtils {
             LOG.error("IOException", err);
         }
         return !file.exists();
+    }
+
+    private static boolean moveToTrashOSX(List<File> files) {
+        try {
+            String[] command = moveToTrashCommand(files);
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream();
+            Process process = builder.start();
+            ProcessUtils.consumeAllInput(process);
+            process.waitFor();
+        } catch (InterruptedException err) {
+            LOG.error("InterruptedException", err);
+        } catch (IOException err) {
+            LOG.error("IOException", err);
+        }
+
+        for (File file : files) {
+            if (file.exists()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -621,6 +687,37 @@ public class FileUtils {
                 "move " + fileOrFolder + " hfsPath to trash", "-e", "end if", "-e", "end tell" };
 
         return command;
+    }
+
+    private static String[] moveToTrashCommand(List<File> files) {
+        List<String> command = new ArrayList<String>();
+        command.add("osascript");
+        command.add("-e");
+        command.add("set trashItems to {}");
+
+        for (File file : files) {
+            String path = null;
+            try {
+                path = file.getCanonicalPath();
+            } catch (IOException err) {
+                LOG.error("IOException", err);
+                path = file.getAbsolutePath();
+            }
+            command.add("-e");
+            command.add("set end of trashItems to (POSIX file \"" + path + "\")");
+        }
+
+        command.add("-e");
+        command.add("tell application \"Finder\"");
+        command.add("-e");
+        command.add("repeat with targetItem in trashItems");
+        command.add("-e");
+        command.add("if targetItem exists then move targetItem to trash");
+        command.add("-e");
+        command.add("end repeat");
+        command.add("-e");
+        command.add("end tell");
+        return command.toArray(new String[command.size()]);
     }
 
     /**

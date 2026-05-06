@@ -56,6 +56,116 @@ def refreshManagedGitCheckout = { File managedDir, String defaultBranch, String 
     }
 }
 
+def parseFlexibleBoolean = { Object value, boolean defaultValue = false ->
+    if (value == null) {
+        return defaultValue
+    }
+    def normalized = value.toString().trim().toLowerCase(Locale.ROOT)
+    if (normalized.isEmpty()) {
+        return defaultValue
+    }
+    normalized in ['1', 'true', 'yes', 'on']
+}
+
+def readCachedJson = { File cacheFile ->
+    if (!cacheFile.exists()) {
+        return null
+    }
+    try {
+        new groovy.json.JsonSlurper().parse(cacheFile)
+    } catch (Exception ignored) {
+        null
+    }
+}
+
+def writeCachedJson = { File cacheFile, Object payload ->
+    cacheFile.parentFile.mkdirs()
+    cacheFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(payload)) + System.lineSeparator()
+}
+
+def fetchLatestGitHubReleaseMetadata = { String repoSlug, File cacheFile, boolean offline, String label ->
+    def cached = readCachedJson(cacheFile)
+    if (offline) {
+        if (cached != null) {
+            return cached
+        }
+        throw new GradleException(
+            "Gradle is offline and no cached ${label} release metadata exists at ${cacheFile}. " +
+                "Run once online to resolve the latest published release."
+        )
+    }
+
+    try {
+        def connection = new URL("https://api.github.com/repos/${repoSlug}/releases/latest").openConnection()
+        connection.setRequestProperty('Accept', 'application/vnd.github+json')
+        connection.setRequestProperty('User-Agent', 'WireShare-Gradle')
+        connection.setConnectTimeout(15000)
+        connection.setReadTimeout(15000)
+        def response = new groovy.json.JsonSlurper().parse(connection.inputStream)
+        def tagName = response.tag_name?.toString()
+        if (!tagName) {
+            throw new GradleException("GitHub latest release response for ${repoSlug} did not include tag_name")
+        }
+        def version = tagName.startsWith('release/') ? tagName.substring('release/'.length()) : tagName.replaceFirst(/^v/, '')
+        def assetUrls = [:]
+        (response.assets ?: []).each { asset ->
+            if (asset?.name && asset?.browser_download_url) {
+                assetUrls[asset.name.toString()] = asset.browser_download_url.toString()
+            }
+        }
+        def metadata = [
+            repoSlug   : repoSlug,
+            tagName    : tagName,
+            version    : version,
+            publishedAt: response.published_at?.toString(),
+            assetUrls  : assetUrls,
+            resolvedAt : new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX"),
+        ]
+        writeCachedJson(cacheFile, metadata)
+        return metadata
+    } catch (Exception failure) {
+        if (cached != null) {
+            println("[${label}] Unable to refresh latest release metadata; using cached metadata at ${cacheFile}")
+            return cached
+        }
+        throw new GradleException("Unable to resolve latest published release for ${repoSlug}", failure)
+    }
+}
+
+def ensureManagedGitCloneAtRef = { File managedDir, String repoUrl, String ref, String label, boolean refreshBranch ->
+    def refMarker = new File(managedDir, '.codex-managed-ref')
+    managedDir.parentFile.mkdirs()
+
+    if (!new File(managedDir, '.git').exists()) {
+        if (managedDir.exists()) {
+            managedDir.deleteDir()
+        }
+        println("[${label}] Cloning ${repoUrl} (${ref}) into ${managedDir}")
+        runManagedCommand(
+            ['git', 'clone', '--depth', '1', '--branch', ref, repoUrl, managedDir.absolutePath],
+            rootDir
+        )
+        refMarker.text = ref + System.lineSeparator()
+        return
+    }
+
+    def currentRef = refMarker.exists() ? refMarker.text.trim() : ''
+    if (currentRef != ref) {
+        managedDir.deleteDir()
+        println("[${label}] Re-cloning ${repoUrl} (${ref}) into ${managedDir}")
+        runManagedCommand(
+            ['git', 'clone', '--depth', '1', '--branch', ref, repoUrl, managedDir.absolutePath],
+            rootDir
+        )
+        refMarker.text = ref + System.lineSeparator()
+        return
+    }
+
+    if (refreshBranch) {
+        refreshManagedGitCheckout(managedDir, ref, label)
+    }
+}
+
 def resolveManagedJlibtorrentProjectDir = {
     def overrideDir = providers.gradleProperty('frostwireJlibtorrentDir').orNull
     if (overrideDir) {
@@ -63,6 +173,8 @@ def resolveManagedJlibtorrentProjectDir = {
         if (!explicitDir.exists()) {
             throw new GradleException("Configured frostwireJlibtorrentDir does not exist: ${explicitDir}")
         }
+        gradle.ext.set('managedJlibtorrentUsePublishedNatives', false)
+        gradle.ext.set('managedJlibtorrentResolutionMode', 'explicit-dir')
         return explicitDir
     }
 
@@ -70,8 +182,76 @@ def resolveManagedJlibtorrentProjectDir = {
         .orElse('https://github.com/frostwire/frostwire-jlibtorrent.git')
         .get()
     def managedDir = new File(rootDir, '.gradle/external/frostwire-jlibtorrent')
+    def metadataCacheFile = new File(rootDir, '.gradle/external/frostwire-jlibtorrent-release-metadata.json')
     def offline = gradle.startParameter.isOffline()
     def gitAvailable = runManagedCommand(['git', '--version'], rootDir, true).exitCode == 0
+    def sourceHeadMode = parseFlexibleBoolean(
+        providers.gradleProperty('frostwireJlibtorrentSourceHead').orNull,
+        false
+    )
+    def explicitVersion = providers.gradleProperty('frostwireJlibtorrentVersion').orNull
+
+    if (!sourceHeadMode) {
+        def releaseMetadata
+        if (explicitVersion) {
+            def normalizedVersion = explicitVersion.replaceFirst(/^release\//, '').replaceFirst(/^v/, '')
+            def tagName = explicitVersion.startsWith('release/') ? explicitVersion : "release/${normalizedVersion}"
+            def assetNames = [
+                "jlibtorrent-${normalizedVersion}.jar",
+                "jlibtorrent-macosx-arm64-${normalizedVersion}.jar",
+                "jlibtorrent-macosx-x86_64-${normalizedVersion}.jar",
+                "jlibtorrent-linux-arm64-${normalizedVersion}.jar",
+                "jlibtorrent-linux-x86_64-${normalizedVersion}.jar",
+                "jlibtorrent-windows-${normalizedVersion}.jar",
+            ]
+            def assetUrls = assetNames.collectEntries { assetName ->
+                [(assetName): "https://github.com/frostwire/frostwire-jlibtorrent/releases/download/${tagName}/${assetName}".toString()]
+            }
+            releaseMetadata = [
+                repoSlug   : 'frostwire/frostwire-jlibtorrent',
+                tagName    : tagName,
+                version    : normalizedVersion,
+                assetUrls  : assetUrls,
+                resolvedAt : new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX"),
+            ]
+            writeCachedJson(metadataCacheFile, releaseMetadata)
+        } else {
+            releaseMetadata = fetchLatestGitHubReleaseMetadata(
+                'frostwire/frostwire-jlibtorrent',
+                metadataCacheFile,
+                offline,
+                'jlibtorrent'
+            )
+        }
+
+        if (!gitAvailable) {
+            if (!managedDir.exists()) {
+                throw new GradleException(
+                    "git is required to fetch frostwire-jlibtorrent source for release ${releaseMetadata.tagName}. " +
+                        "Install git or set -PfrostwireJlibtorrentDir=/path/to/frostwire-jlibtorrent."
+                )
+            }
+            println("[jlibtorrent] git unavailable; using cached release checkout at ${managedDir}")
+        } else if (!offline) {
+            ensureManagedGitCloneAtRef(managedDir, repoUrl, releaseMetadata.tagName.toString(), 'jlibtorrent', false)
+        } else if (!managedDir.exists()) {
+            throw new GradleException(
+                "Gradle is offline and no cached frostwire-jlibtorrent release checkout exists at ${managedDir}. " +
+                    "Run once online or set -PfrostwireJlibtorrentDir=/path/to/frostwire-jlibtorrent."
+            )
+        }
+
+        if (!new File(managedDir, 'build.gradle').exists()) {
+            throw new GradleException("Managed frostwire-jlibtorrent checkout is missing build.gradle: ${managedDir}")
+        }
+
+        gradle.ext.set('managedJlibtorrentVersion', releaseMetadata.version.toString())
+        gradle.ext.set('managedJlibtorrentReleaseTag', releaseMetadata.tagName.toString())
+        gradle.ext.set('managedJlibtorrentReleaseAssets', releaseMetadata.assetUrls ?: [:])
+        gradle.ext.set('managedJlibtorrentUsePublishedNatives', true)
+        gradle.ext.set('managedJlibtorrentResolutionMode', 'published-release')
+        return managedDir
+    }
 
     def branchOverride = providers.gradleProperty('frostwireJlibtorrentRef').orNull
     def defaultBranch = branchOverride
@@ -115,36 +295,23 @@ def resolveManagedJlibtorrentProjectDir = {
         println("[jlibtorrent] git unavailable; using cached checkout at ${managedDir}")
         return managedDir
     }
-
-    def ensureCheckout = {
-        managedDir.parentFile.mkdirs()
-        if (!new File(managedDir, '.git').exists()) {
-            if (managedDir.exists()) {
-                managedDir.deleteDir()
-            }
-            println("[jlibtorrent] Cloning ${repoUrl} (${defaultBranch}) into ${managedDir}")
-            runManagedCommand(
-                ['git', 'clone', '--depth', '1', '--branch', defaultBranch, repoUrl, managedDir.absolutePath],
-                rootDir
-            )
-            return
-        }
-
-        refreshManagedGitCheckout(managedDir, defaultBranch, 'jlibtorrent')
-    }
-
-    ensureCheckout()
+    ensureManagedGitCloneAtRef(managedDir, repoUrl, defaultBranch, 'jlibtorrent', true)
 
     if (!new File(managedDir, 'build.gradle').exists()) {
         throw new GradleException("Managed frostwire-jlibtorrent checkout is missing build.gradle: ${managedDir}")
     }
 
+    gradle.ext.set('managedJlibtorrentUsePublishedNatives', false)
+    gradle.ext.set('managedJlibtorrentResolutionMode', 'source-head')
     managedDir
 }
 
 def managedJlibtorrentProjectDir = resolveManagedJlibtorrentProjectDir()
 
 def resolveManagedJlibtorrentVersion = {
+    if (gradle.ext.has('managedJlibtorrentVersion')) {
+        return gradle.ext.managedJlibtorrentVersion
+    }
     def explicitVersion = System.getenv('RELEASE_VERSION') ?: System.getenv('GITHUB_REF_NAME')?.replace('release/', '')
     if (explicitVersion) {
         return explicitVersion
@@ -684,6 +851,8 @@ def modules = [
     'desktop-compose-contracts': 'desktop-compose-contracts',
     'desktop-compose-legacy-compat': 'desktop-compose-legacy-compat',
     'desktop-compose-app': 'desktop-compose-app',
+    'ed2k-api'      : 'ed2k-api',
+    'ed2k-backend'  : 'ed2k-backend',
     'bittorrent-api': 'main/components/bittorrent-api',
     'collection'    : 'main/components/collection',
     'common'        : 'main/components/common',
@@ -706,8 +875,6 @@ def modules = [
     'security'      : 'main/components/security',
     'setting'       : 'main/components/setting',
     'statistic'     : 'main/components/statistic',
-    'swingui'       : 'main/private-components/swingui',
-    'integrated-ui' : 'main/private-components/integrated-ui',
     'xmpp'          : 'main/components/xmpp',
     'xmpp-api'      : 'main/components/xmpp-api',
     'jlibtorrent'   : 'jlibtorrent',

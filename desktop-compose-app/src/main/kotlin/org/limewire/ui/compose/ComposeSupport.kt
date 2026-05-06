@@ -111,6 +111,8 @@ internal class EventListBinding<T>(
 ) : AutoCloseable {
     private val listeners = IdentityHashMap<T, PropertyChangeListener>()
     private var onChangedScheduled = false
+    @Volatile
+    private var closed = false
     private val listListener = ListEventListener<T> {
         syncList()
     }
@@ -121,8 +123,14 @@ internal class EventListBinding<T>(
     }
 
     private fun syncList() {
+        if (closed) {
+            return
+        }
         val items = snapshotEventList(list)
         runOnUi {
+            if (closed) {
+                return@runOnUi
+            }
             ComposePerformanceTracker.measure("eventListBinding.sync") {
                 if (keyOf == null) {
                     target.clear()
@@ -186,7 +194,16 @@ internal class EventListBinding<T>(
     }
 
     override fun close() {
-        list.removeListEventListener(listListener)
+        if (closed) {
+            return
+        }
+        closed = true
+        try {
+            list.removeListEventListener(listListener)
+        } catch (_: IllegalArgumentException) {
+            // GlazedLists can throw if a binding is torn down after its source list
+            // already discarded the listener during a rapid view or shutdown transition.
+        }
         runOnUi {
             detachPropertyListeners()
         }

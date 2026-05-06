@@ -1,7 +1,7 @@
 package org.limewire.ui.compose.integration
 
-import org.limewire.ui.swing.util.I18n
-import org.limewire.ui.swing.util.LanguageUtils
+import org.limewire.ui.desktop.util.I18n
+import org.limewire.ui.desktop.util.LanguageUtils
 import java.util.Locale
 
 class SwingComposeLocalizationService : ComposeLocalizationService {

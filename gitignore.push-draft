@@ -1,0 +1,80 @@
+# Draft ignore list for a temporary push mirror.
+# Keep this aligned with the GitHub repo ignore rules, plus a few mirror-only
+# exclusions for borrowed source trees and generated external checkouts.
+
+# macOS
+.DS_Store
+
+# Logs
+log/
+*.log
+
+# Top-level build outputs
+/build/
+/WireShare.jar
+
+# Gradle / Java transient outputs
+.gradle/
+**/build/
+**/out/
+**/classes/
+**/tmp/
+local.properties
+
+# Local dependency caches / package-manager state
+.ivy2/
+.m2/
+/main/.ivy2/
+
+# Archives / packaged artefacts
+*.jar
+!gradle/wrapper/*.jar
+
+# Flatpak build/cache output
+/org.team_hermes.WireShare/.flatpak-builder/
+/org.team_hermes.WireShare/build-dir/
+
+# Optional: generated Flatpak staging payload
+/org.team_hermes.WireShare/files/
+
+# Common editor / IDE noise
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Test / report artefacts
+coverage/
+reports/
+all
+
+# jlibtorrent native build output
+/jlibtorrent/swig/bin/
+/jlibtorrent/build/
+
+# Managed/generated upstream checkouts used only during local builds
+/.gradle/external/
+
+# Borrowed source trees not intended for the push mirror
+/frostwire-master/
+/jlibtorrent/
+
+# Explicitly retired third-party jar paths, if they ever reappear locally
+/main/lib/jars/MozillaGlue-1.9.jar
+/main/lib/jars/MozillaInterfaces-1.9.jar
+/main/lib/jars/mozswing.jar
+/main/lib/jars/mozdom4java.jar
+/main/lib/jars/htmlcleaner-2.1.jar
+/main/lib/jars/jdic.jar
+
+# Legacy vendored support payloads that are not source and should not sync
+/main/lib/jars/hashes

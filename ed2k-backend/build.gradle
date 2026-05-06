@@ -1,0 +1,55 @@
+dependencies {
+    implementation project(':common')
+    implementation project(':core-api')
+    implementation project(':core-settings')
+    implementation project(':ed2k-api')
+    implementation project(':friend')
+    implementation project(':gnutella-core')
+    implementation project(':io')
+    implementation project(':setting')
+
+    implementation 'commons-io:commons-io:2.17.0'
+}
+
+def ed2kBoundaryFiles = fileTree(projectDir) {
+    include 'src/main/java/**/*.java'
+    include 'src/main/resources/**/*.properties'
+    exclude '**/build/**'
+}
+
+def forbiddenEd2kTokens = [
+    'org.jmule.ui.',
+    'javax.swing.',
+    'org.eclipse.swt.',
+    'org.jdesktop.',
+    '/android/',
+    'jed2k-master/',
+]
+
+tasks.register('verifyEd2kBoundary') {
+    group = 'verification'
+    description = 'Fails if the transplanted ED2K backend reaches into JMule UI-era code or desktop widget toolkits.'
+    inputs.files(ed2kBoundaryFiles)
+
+    doLast {
+        def violations = []
+        ed2kBoundaryFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            forbiddenEd2kTokens.each { token ->
+                if (text.contains(token)) {
+                    violations << "${token}: ${project.relativePath(file)}"
+                }
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "ED2K backend boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyEd2kBoundary')
+}

@@ -15,6 +15,9 @@ import org.limewire.core.api.connection.GnutellaConnectionManager
 import org.limewire.core.api.mojito.MojitoManager
 import org.limewire.core.api.monitor.IncomingSearchManager
 import org.limewire.core.api.support.LocalClientInfoFactory
+import org.limewire.ed2k.api.Ed2kServerRecord
+import org.limewire.ed2k.api.Ed2kService
+import org.limewire.ed2k.api.Ed2kStatus
 import org.limewire.listener.EventBean
 import org.limewire.ui.compose.snapshotEventList
 import org.limewire.util.ThreadUtils
@@ -35,6 +38,16 @@ interface ComposeAdvancedToolsService {
     fun firewallTransferStatusEvent(): FirewallTransferStatusEvent?
     fun dhtName(): String
     fun dhtRunning(): Boolean
+    fun ed2kStatus(): Ed2kStatus
+    fun ed2kServers(): List<Ed2kServerRecord>
+    fun ed2kConnectAnyServer()
+    fun ed2kConnectServer(host: String, port: Int)
+    fun ed2kDisconnectServer()
+    fun ed2kImportServers(file: File)
+    fun ed2kImportKadNodes(file: File)
+    fun ed2kBootstrapKad(host: String, port: Int)
+    fun ed2kConnectKad()
+    fun ed2kDisconnectKad()
     fun mojitoVisualizerAvailable(): Boolean
     fun openMojitoVisualizer(): ComposeMojitoVisualizerSession?
     fun addConnection(host: String, port: Int, useTls: Boolean)
@@ -59,6 +72,7 @@ class CoreComposeAdvancedToolsService(
     private val connectionManager: GnutellaConnectionManager,
     private val incomingSearchManager: IncomingSearchManager,
     private val mojitoManager: MojitoManager,
+    private val ed2kService: Ed2kService,
     private val firewallStatusBean: EventBean<FirewallStatusEvent>,
     private val firewallTransferBean: EventBean<FirewallTransferStatusEvent>,
     private val localClientInfoFactory: LocalClientInfoFactory,
@@ -86,9 +100,45 @@ class CoreComposeAdvancedToolsService(
 
     override fun firewallTransferStatusEvent(): FirewallTransferStatusEvent? = firewallTransferBean.lastEvent
 
-    override fun dhtName(): String = mojitoManager.name
+    override fun dhtName(): String = mojitoManager.name?.takeIf { it.isNotBlank() } ?: "Mojito"
 
     override fun dhtRunning(): Boolean = mojitoManager.isRunning
+
+    override fun ed2kStatus(): Ed2kStatus = ed2kService.status
+
+    override fun ed2kServers(): List<Ed2kServerRecord> = ed2kService.servers
+
+    override fun ed2kConnectAnyServer() {
+        ed2kService.connectAnyServer()
+    }
+
+    override fun ed2kConnectServer(host: String, port: Int) {
+        ed2kService.connectServer(host, port)
+    }
+
+    override fun ed2kDisconnectServer() {
+        ed2kService.disconnectServer()
+    }
+
+    override fun ed2kImportServers(file: File) {
+        ed2kService.importServers(file)
+    }
+
+    override fun ed2kImportKadNodes(file: File) {
+        ed2kService.importKadNodes(file)
+    }
+
+    override fun ed2kBootstrapKad(host: String, port: Int) {
+        ed2kService.bootstrapKad(host, port)
+    }
+
+    override fun ed2kConnectKad() {
+        ed2kService.connectKad()
+    }
+
+    override fun ed2kDisconnectKad() {
+        ed2kService.disconnectKad()
+    }
 
     override fun mojitoVisualizerAvailable(): Boolean = mojitoVisualizerPlugin != null
 

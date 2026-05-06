@@ -58,6 +58,8 @@ dependencies {
     implementation project(':core-settings')
     implementation project(':desktop-compose-contracts')
     implementation project(':desktop-compose-legacy-compat')
+    implementation project(':ed2k-api')
+    implementation project(':ed2k-backend')
     implementation project(':friend')
     implementation project(':gnutella-core')
     implementation project(':io')

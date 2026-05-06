@@ -7,6 +7,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -20,20 +22,30 @@ fun WireShareTheme(
     localeEpoch: Int = 0,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when (appearance) {
-        ComposeAppearance.SOLARIZED_LIGHT -> paletteToLightScheme(SOLARIZED_LIGHT_PALETTE)
-        ComposeAppearance.SOLARIZED_DARK -> paletteToDarkScheme(SOLARIZED_DARK_PALETTE)
-        ComposeAppearance.SELENIZED_DARK -> paletteToDarkScheme(SELENIZED_DARK_PALETTE)
-        ComposeAppearance.SELENIZED_BLACK -> paletteToDarkScheme(SELENIZED_BLACK_PALETTE)
-        ComposeAppearance.SELENIZED_LIGHT -> paletteToLightScheme(SELENIZED_LIGHT_PALETTE)
-        ComposeAppearance.SELENIZED_WHITE -> paletteToLightScheme(SELENIZED_WHITE_PALETTE)
+    val palette = when (appearance) {
+        ComposeAppearance.SOLARIZED_LIGHT -> SOLARIZED_LIGHT_PALETTE
+        ComposeAppearance.SOLARIZED_DARK -> SOLARIZED_DARK_PALETTE
+        ComposeAppearance.SELENIZED_DARK -> SELENIZED_DARK_PALETTE
+        ComposeAppearance.SELENIZED_BLACK -> SELENIZED_BLACK_PALETTE
+        ComposeAppearance.SELENIZED_LIGHT -> SELENIZED_LIGHT_PALETTE
+        ComposeAppearance.SELENIZED_WHITE -> SELENIZED_WHITE_PALETTE
     }
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = WireShareTypography,
-        shapes = WireShareShapes,
-        content = content
-    )
+    val colorScheme = when (appearance) {
+        ComposeAppearance.SOLARIZED_LIGHT,
+        ComposeAppearance.SELENIZED_LIGHT,
+        ComposeAppearance.SELENIZED_WHITE -> paletteToLightScheme(palette)
+        ComposeAppearance.SOLARIZED_DARK,
+        ComposeAppearance.SELENIZED_DARK,
+        ComposeAppearance.SELENIZED_BLACK -> paletteToDarkScheme(palette)
+    }
+    CompositionLocalProvider(LocalThemePalette provides palette) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = WireShareTypography,
+            shapes = WireShareShapes,
+            content = content
+        )
+    }
 }
 
 private val WireShareTypography = Typography().run {
@@ -90,7 +102,7 @@ private val WireShareShapes = Shapes(
     large = RoundedCornerShape(18.dp)
 )
 
-private data class ThemePalette(
+internal data class ThemePalette(
     val bg0: Color,
     val bg1: Color,
     val bg2: Color,
@@ -106,6 +118,8 @@ private data class ThemePalette(
     val orange: Color,
     val violet: Color
 )
+
+internal val LocalThemePalette = staticCompositionLocalOf { SELENIZED_LIGHT_PALETTE }
 
 private fun paletteToLightScheme(palette: ThemePalette): ColorScheme {
     return lightColorScheme(

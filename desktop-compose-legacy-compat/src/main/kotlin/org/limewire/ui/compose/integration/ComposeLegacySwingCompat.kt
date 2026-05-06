@@ -19,13 +19,12 @@ import org.limewire.ui.swing.friends.chat.ChatStateEvent
 import org.limewire.ui.swing.friends.chat.ComposeChatBridge
 import org.limewire.ui.swing.friends.chat.SwingComposeChatCompatBridge
 import org.limewire.ui.swing.friends.settings.ComposeFriendAccountCompat
-import org.limewire.ui.swing.plugin.SwingUiPlugin
 import java.awt.Component
 
 fun legacyComposeSwingCompatModule(): AbstractModule {
     return object : AbstractModule() {
         override fun configure() {
-            bind(SwingUiPlugin::class.java)
+            bind(ComposeMojitoVisualizerPlugin::class.java)
                 .annotatedWith(Names.named("MojitoArcsPlugin"))
                 .to(ComposeMojitoArcsPlugin::class.java)
         }
@@ -46,10 +45,9 @@ fun createLegacyChatCompatBridge(injector: Injector): ComposeChatCompatBridge {
 }
 
 fun findOptionalMojitoVisualizerPlugin(injector: Injector): ComposeMojitoVisualizerPlugin? {
-    val plugin = injector.findOptionalInstance(
-        Key.get(SwingUiPlugin::class.java, Names.named("MojitoArcsPlugin"))
-    ) ?: return null
-    return SwingComposeMojitoVisualizerPlugin(plugin)
+    return injector.findOptionalInstance(
+        Key.get(ComposeMojitoVisualizerPlugin::class.java, Names.named("MojitoArcsPlugin"))
+    )
 }
 
 private fun createComposeFriendsInjector(injector: Injector): Injector {
@@ -79,23 +77,5 @@ private fun <T> Injector.findOptionalInstance(key: Key<T>): T? {
         getInstance(key)
     } catch (_: ConfigurationException) {
         null
-    }
-}
-
-private class SwingComposeMojitoVisualizerPlugin(
-    private val plugin: SwingUiPlugin
-) : ComposeMojitoVisualizerPlugin {
-    override fun openSession(): ComposeMojitoVisualizerSession? {
-        val component = plugin.pluginComponent ?: return null
-        plugin.startPlugin()
-        return object : ComposeMojitoVisualizerSession {
-            override val title: String = plugin.pluginName
-
-            override fun component(): Component = component
-
-            override fun close() {
-                plugin.stopPlugin()
-            }
-        }
     }
 }

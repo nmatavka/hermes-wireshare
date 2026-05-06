@@ -1,6 +1,6 @@
 package org.limewire.ui.compose.integration
 
-import org.limewire.ui.swing.settings.ConsoleSettings
+import org.limewire.ui.desktop.settings.ConsoleSettings
 
 fun legacySwingComposeConsoleSettings(): ComposeConsoleSettings {
     return object : ComposeConsoleSettings {

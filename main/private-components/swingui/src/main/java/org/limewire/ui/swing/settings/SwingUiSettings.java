@@ -85,6 +85,13 @@ public final class SwingUiSettings extends LimeProps {
     public static final BooleanSetting AUTO_RENAME_DUPLICATE_FILES =
         FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", true);
 
+    /**
+     * Default action when a new download conflicts with an existing filename.
+     * 0 = ignore, 1 = rename, 2 = replace.
+     */
+    public static final IntSetting DUPLICATE_DOWNLOAD_ACTION =
+        FACTORY.createIntSetting("DUPLICATE_DOWNLOAD_ACTION", 1);
+
     /** True if any positions have been set. */
     public static final BooleanSetting POSITIONS_SET =
         FACTORY.createBooleanSetting("POSITIONS_SET", false);

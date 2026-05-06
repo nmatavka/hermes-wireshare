@@ -24,7 +24,7 @@ public final class LimeWireUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static String LIMEWIRE_VERSION = "6.0.0";//5.6.6";
+	private static String LIMEWIRE_VERSION = "7.0";
     
     /**
      * The current revision of the BitTorrent protocol implementation.
@@ -189,8 +189,8 @@ public final class LimeWireUtils {
         if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
-                String majorStr = version.substring(0, firstDot);
-                return new Integer(majorStr).intValue();
+                String majorStr = firstDot >= 0 ? version.substring(0, firstDot) : version;
+                return Integer.parseInt(majorStr);
             }
             catch (NumberFormatException nfe) {
             }
@@ -214,10 +214,15 @@ public final class LimeWireUtils {
         if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
-                String minusMajor = version.substring(firstDot+1);
-                int secondDot = minusMajor.indexOf(".");
-                String minorStr = minusMajor.substring(0, secondDot);
-                return new Integer(minorStr).intValue();
+                if (firstDot < 0 || firstDot + 1 >= version.length()) {
+                    return 0;
+                }
+
+                int secondDot = version.indexOf(".", firstDot + 1);
+                String minorStr = secondDot >= 0
+                    ? version.substring(firstDot + 1, secondDot)
+                    : version.substring(firstDot + 1);
+                return Integer.parseInt(minorStr);
             }
             catch (NumberFormatException nfe) {
             }
@@ -231,6 +236,10 @@ public final class LimeWireUtils {
             try {
                 int firstDot = version.indexOf(".");
                 int secondDot = version.indexOf(".", firstDot+1);
+
+                if (firstDot < 0 || secondDot < 0 || secondDot + 1 >= version.length()) {
+                    return 0;
+                }
                 
                 int p = secondDot+1;
                 int q = p;
@@ -242,7 +251,7 @@ public final class LimeWireUtils {
                 
                 if (p != q) {
                     String service = version.substring(p, q);
-                    return new Integer(service).intValue();
+                    return Integer.parseInt(service);
                 }
             }
             catch (NumberFormatException nfe) {

@@ -19,7 +19,9 @@ import org.cybergarage.upnp.ControlPoint;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
 import org.cybergarage.upnp.Service;
+import org.cybergarage.upnp.UPnP;
 import org.cybergarage.upnp.device.DeviceChangeListener;
+import org.cybergarage.xml.parser.JaxpParser;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inject.EagerSingleton;
@@ -125,6 +127,10 @@ public class UPnPManager implements org.limewire.lifecycle.Service {
 	@Inject
 	UPnPManager(UPnPManagerConfiguration configuration) {
         this.configuration = configuration;
+        // The managed cybergarage-upnp source tree no longer ships the old optional
+        // XmlPullParser implementation, so bind the bundled JAXP parser explicitly
+        // instead of probing for a class that will never exist in our runtime.
+        UPnP.setXMLParser(new JaxpParser());
         this.controlPoint = new ControlPoint();
     }
 	

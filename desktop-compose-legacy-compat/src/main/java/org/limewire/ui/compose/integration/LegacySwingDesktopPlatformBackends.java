@@ -4,8 +4,8 @@ import java.io.File;
 import java.net.URI;
 
 import org.limewire.core.api.file.CategoryManager;
-import org.limewire.ui.swing.settings.SwingUiSettings;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.desktop.settings.SwingUiSettings;
+import org.limewire.ui.desktop.util.NativeLaunchUtils;
 import org.limewire.util.CommonUtils;
 
 public final class LegacySwingDesktopPlatformBackends {

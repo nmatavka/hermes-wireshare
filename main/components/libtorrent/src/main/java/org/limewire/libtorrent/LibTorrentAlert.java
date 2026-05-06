@@ -6,6 +6,9 @@ import org.limewire.bittorrent.TorrentAlert;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Structure mapping to the wrapper_alert_info structure in the
  * libtorrentwrapper library.
@@ -36,6 +39,11 @@ public class LibTorrentAlert extends Structure implements TorrentAlert {
      * Pointer to the resume data in memory.
      */
     public Pointer resume_data;
+
+    @Override
+    protected List<String> getFieldOrder() {
+        return Arrays.asList("category", "sha1", "message", "has_data", "resume_data");
+    }
     
     @Override
     public int getCategory() {

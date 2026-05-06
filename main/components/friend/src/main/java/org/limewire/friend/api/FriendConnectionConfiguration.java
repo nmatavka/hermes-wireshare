@@ -2,8 +2,6 @@ package org.limewire.friend.api;
 
 import java.util.List;
 
-import javax.swing.Icon;
-
 import org.limewire.io.UnresolvedIpPort;
 import org.limewire.listener.EventListener;
 
@@ -60,5 +58,4 @@ public interface FriendConnectionConfiguration extends Network {
     
     public Object getAttribute(String key);
     
-    public Icon getIcon();
 }

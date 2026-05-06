@@ -28,6 +28,13 @@ def managedGuiceVersion = gradle.ext.has('managedGuiceVersion')
     ? gradle.ext.managedGuiceVersion
     : '6.0.0'
 
+def macosCodesignIdentity = providers.gradleProperty('macosCodesignIdentity')
+    .orElse(providers.environmentVariable('MACOS_CODESIGN_IDENTITY'))
+def macosCodesignKeychain = providers.gradleProperty('macosCodesignKeychain')
+    .orElse(providers.environmentVariable('MACOS_CODESIGN_KEYCHAIN'))
+def macosNotaryProfile = providers.gradleProperty('macosNotaryProfile')
+    .orElse(providers.environmentVariable('MACOS_NOTARY_PROFILE'))
+
 def legacySkippedDependencies = [
     'AnimatedTransitions',
     'MozillaGlue',
@@ -103,6 +110,26 @@ def hostJlibtorrentNativeTaskName = {
         return 'nativeWindowsX86_64Jar'
     }
     throw new GradleException("Unsupported host platform for jlibtorrent natives: ${hostOs.name()}/${hostArch}")
+}
+
+def managedJlibtorrentUsePublishedNatives = gradle.ext.has('managedJlibtorrentUsePublishedNatives') &&
+    gradle.ext.managedJlibtorrentUsePublishedNatives
+
+def hostJlibtorrentNativeArtifactName = { String version ->
+    if (hostOs.isMacOsX()) {
+        return isArm64
+            ? "jlibtorrent-macosx-arm64-${version}.jar"
+            : "jlibtorrent-macosx-x86_64-${version}.jar"
+    }
+    if (hostOs.isLinux()) {
+        return isArm64
+            ? "jlibtorrent-linux-arm64-${version}.jar"
+            : "jlibtorrent-linux-x86_64-${version}.jar"
+    }
+    if (hostOs.isWindows()) {
+        return "jlibtorrent-windows-${version}.jar"
+    }
+    throw new GradleException("Unsupported host platform for jlibtorrent native artifact: ${hostOs.name()}/${hostArch}")
 }
 
 def messageBundleSourceDir = rootDir.toPath().resolve('main/lib/messagebundles').toFile()
@@ -269,10 +296,6 @@ configure(subprojects.findAll { !['jlibtorrent', 'android-app', 'desktop-compose
                 java.exclude('com/limegroup/gnutella/daap/**')
                 java.exclude('com/limegroup/gnutella/util/FECUtilsImpl.java')
             }
-            if (project.name == 'swingui') {
-                java.exclude('org/limewire/ui/swing/browser/**')
-                java.exclude('org/limewire/ui/swing/home/**')
-            }
         }
         test {
             java.setSrcDirs(['src/test/java'])
@@ -312,28 +335,6 @@ configure(subprojects.findAll { !['jlibtorrent', 'android-app', 'desktop-compose
 project(':libtorrent') {
     dependencies {
         implementation project(':jlibtorrent')
-    }
-}
-
-project(':jlibtorrent') {
-    def hostNativeTaskName = hostJlibtorrentNativeTaskName()
-    def hostNativeTask = tasks.named(hostNativeTaskName)
-    def hostNativeJarFile = hostNativeTask.flatMap { archiveTask -> archiveTask.archiveFile }
-
-    tasks.withType(Test).configureEach {
-        dependsOn hostNativeTask
-        onlyIf {
-            def nativeJar = hostNativeJarFile.get().asFile
-            if (nativeJar.exists()) {
-                return true
-            }
-
-            logger.lifecycle(
-                "Skipping ${path} because ${nativeJar.name} was not produced by ${project.path}:${hostNativeTaskName}. " +
-                    "The managed frostwire-jlibtorrent checkout does not include host native binaries for this machine."
-            )
-            false
-        }
     }
 }
 
@@ -398,102 +399,294 @@ tasks.register('compileMacCompatibilityNatives') {
     }
 }
 
-project(':integrated-ui') {
-    apply plugin: 'application'
+def managedJlibtorrentReleaseAssets = gradle.ext.has('managedJlibtorrentReleaseAssets')
+    ? (gradle.ext.managedJlibtorrentReleaseAssets as Map)
+    : [:]
+def managedJlibtorrentNativeAssetName = hostJlibtorrentNativeArtifactName(gradle.ext.managedJlibtorrentVersion.toString())
+def managedJlibtorrentNativeAssetUrl = managedJlibtorrentReleaseAssets[managedJlibtorrentNativeAssetName]?.toString()
+def managedJlibtorrentNativeAssetFile = layout.buildDirectory.file("managed-jlibtorrent/${managedJlibtorrentNativeAssetName}")
 
-    application {
-        mainClass = 'org.limewire.ui.swing.Main'
-    }
+tasks.register('downloadManagedJlibtorrentHostNativeJar') {
+    onlyIf { managedJlibtorrentUsePublishedNatives }
+    outputs.file(managedJlibtorrentNativeAssetFile)
 
-    def nativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
-    def nativeJarFile = nativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
-
-    dependencies {
-        runtimeOnly(files(nativeJarFile) {
-            builtBy nativeJarTask
-        })
-    }
-
-    tasks.named('run', JavaExec).configure {
-        dependsOn nativeJarTask
-
-        if (hostOs.isMacOsX()) {
-            dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-            jvmArgs(
-                "-Djava.library.path=${nativeOutputDir.get().asFile.absolutePath}:${rootDir.toPath().resolve('nativelibs/osx').toFile().absolutePath}"
+    doLast {
+        def targetFile = managedJlibtorrentNativeAssetFile.get().asFile
+        if (targetFile.exists() && !gradle.startParameter.refreshDependencies) {
+            return
+        }
+        if (gradle.startParameter.isOffline()) {
+            throw new GradleException(
+                "Gradle is offline and ${targetFile.name} has not been cached yet. " +
+                    "Run once online to download the managed frostwire-jlibtorrent native jar."
             )
         }
-    }
-
-    if (hostOs.isMacOsX()) {
-        tasks.named('startScripts').configure {
-            dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-            doLast {
-                unixScript.text = unixScript.text.replace(
-                    'DEFAULT_JVM_OPTS=""',
-                    'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
-                )
-            }
+        if (!managedJlibtorrentNativeAssetUrl) {
+            throw new GradleException(
+                "No published frostwire-jlibtorrent native asset URL was resolved for ${managedJlibtorrentNativeAssetName}. " +
+                    "Use -PfrostwireJlibtorrentSourceHead=true to opt into source-head mode if you need local native builds."
+            )
         }
 
-        ['distTar', 'distZip', 'installDist'].each { taskName ->
-            tasks.named(taskName).configure {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            }
-        }
-    }
-
-    distributions {
-        main {
-            contents {
-                from(nativeJarFile) {
-                    into 'lib'
-                }
-                if (hostOs.isMacOsX()) {
-                    from(nativeOutputDir) {
-                        into 'lib/native'
-                    }
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/linux').toFile()) {
-                    into 'resources/linux'
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/osx').toFile()) {
-                    into 'resources/osx'
-                }
-                from(rootDir.toPath().resolve('main/lib/resources/windows').toFile()) {
-                    into 'resources/windows'
-                }
+        targetFile.parentFile.mkdirs()
+        def connection = new URL(managedJlibtorrentNativeAssetUrl).openConnection()
+        connection.setRequestProperty('User-Agent', 'WireShare-Gradle')
+        connection.setConnectTimeout(15000)
+        connection.setReadTimeout(30000)
+        connection.inputStream.withCloseable { stream ->
+            targetFile.withOutputStream { output ->
+                output << stream
             }
         }
     }
 }
 
-project(':desktop-compose-app') {
-    def nativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
-    def nativeJarFile = nativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
+def sourceHostNativeJarTask = project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
+def sourceHostNativeJarFile = sourceHostNativeJarTask.flatMap { archiveTask -> archiveTask.archiveFile }
+def hostNativeJarTask = managedJlibtorrentUsePublishedNatives
+    ? tasks.named('downloadManagedJlibtorrentHostNativeJar')
+    : sourceHostNativeJarTask
+def hostNativeJarFile = managedJlibtorrentUsePublishedNatives
+    ? managedJlibtorrentNativeAssetFile
+    : sourceHostNativeJarFile
+def macRuntimePayloadDir = layout.buildDirectory.dir('macos/runtime-payload')
+def macAppInputDir = layout.buildDirectory.dir('macos/app-input')
+def macAppImageDir = layout.buildDirectory.dir('macos/app-image')
+def macNotaryZipFile = layout.buildDirectory.file('macos/WireShare-mac.zip')
 
+project(':jlibtorrent') {
+    tasks.withType(Test).configureEach {
+        def sourceNativeTaskName = hostJlibtorrentNativeTaskName()
+        def sourceNativeTask = managedJlibtorrentUsePublishedNatives ? null : tasks.named(sourceNativeTaskName)
+        def sourceNativeJarFile = managedJlibtorrentUsePublishedNatives
+            ? null
+            : sourceNativeTask.flatMap { archiveTask -> archiveTask.archiveFile }
+        def resolvedNativeTask = managedJlibtorrentUsePublishedNatives
+            ? rootProject.tasks.named('downloadManagedJlibtorrentHostNativeJar')
+            : sourceNativeTask
+        def resolvedNativeJarFile = managedJlibtorrentUsePublishedNatives
+            ? rootProject.layout.buildDirectory.file("managed-jlibtorrent/${hostJlibtorrentNativeArtifactName(gradle.ext.managedJlibtorrentVersion.toString())}")
+            : sourceNativeJarFile
+
+        dependsOn resolvedNativeTask
+        onlyIf {
+            if (managedJlibtorrentUsePublishedNatives) {
+                logger.lifecycle(
+                    "Skipping ${path} because managed frostwire-jlibtorrent release natives are used for packaging, not for running upstream JNI tests on this machine."
+                )
+                return false
+            }
+
+            def nativeJar = resolvedNativeJarFile.get().asFile
+            if (nativeJar.exists()) {
+                return true
+            }
+
+            logger.lifecycle(
+                managedJlibtorrentUsePublishedNatives
+                    ? "Skipping ${path} because the managed frostwire-jlibtorrent release asset ${nativeJar.name} is unavailable for this machine."
+                    : "Skipping ${path} because ${nativeJar.name} was not produced by ${project.path}:${sourceNativeTaskName}. " +
+                        "The managed frostwire-jlibtorrent checkout does not include host native binaries for this machine."
+            )
+            false
+        }
+    }
+}
+
+tasks.register('stageMacRuntimePayload', Sync) {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn tasks.named('compileMacCompatibilityNatives')
+    dependsOn hostNativeJarTask
+
+    into(macRuntimePayloadDir)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(nativeOutputDir) {
+        into 'lib/native'
+    }
+    from(rootDir.toPath().resolve('nativelibs/osx').toFile()) {
+        into 'lib/native'
+        include '*.dylib'
+        include '*.jnilib'
+    }
+    from({
+        def nativeJar = hostNativeJarFile.get().asFile
+        if (!nativeJar.exists()) {
+            return []
+        }
+        return zipTree(nativeJar).matching {
+            include '**/*.dylib'
+            include '**/*.jnilib'
+        }
+    })
+}
+
+tasks.register('signMacRuntimePayload') {
+    onlyIf { hostOs.isMacOsX() && macosCodesignIdentity.isPresent() }
+    dependsOn tasks.named('stageMacRuntimePayload')
+    inputs.dir(macRuntimePayloadDir)
+    outputs.dir(macRuntimePayloadDir)
+
+    doLast {
+        def identity = macosCodesignIdentity.get()
+        def keychain = macosCodesignKeychain.orNull
+        def binaries = fileTree(macRuntimePayloadDir.get().asFile).matching {
+            include '**/*.dylib'
+            include '**/*.jnilib'
+        }.files.sort()
+
+        binaries.each { File binary ->
+            def command = ['codesign', '--force', '--sign', identity, '--timestamp']
+            if (keychain) {
+                command += ['--keychain', keychain]
+            }
+            command += [binary.absolutePath]
+            exec {
+                commandLine(command)
+            }
+        }
+    }
+}
+
+tasks.register('prepareMacRuntimePayload') {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn(macosCodesignIdentity.isPresent()
+        ? tasks.named('signMacRuntimePayload')
+        : tasks.named('stageMacRuntimePayload'))
+}
+
+tasks.register('verifyMacRuntimePayloadSignatures') {
+    onlyIf { hostOs.isMacOsX() && macosCodesignIdentity.isPresent() }
+    dependsOn tasks.named('signMacRuntimePayload')
+
+    doLast {
+        fileTree(macRuntimePayloadDir.get().asFile).matching {
+            include '**/*.dylib'
+            include '**/*.jnilib'
+        }.files.sort().each { File binary ->
+            exec {
+                commandLine('codesign', '--verify', '--strict', '--verbose=2', binary.absolutePath)
+            }
+        }
+    }
+}
+
+tasks.register('stageMacAppInput', Sync) {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn tasks.named('wireShareJar')
+
+    from(rootProject.layout.projectDirectory.file('WireShare.jar'))
+    into(macAppInputDir)
+}
+
+tasks.register('packageMacAppImage', Exec) {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn tasks.named('stageMacAppInput')
+
+    def outputDir = macAppImageDir.get().asFile
+    def inputDir = macAppInputDir.get().asFile
+    def jpackageBinary = new File(javaHomePath.get(), 'bin/jpackage').absolutePath
+    def iconFile = rootDir.toPath().resolve('main/lib/resources/osx/wireshare.icns').toFile()
+
+    doFirst {
+        delete(outputDir)
+        outputDir.mkdirs()
+    }
+
+    def command = [
+        jpackageBinary,
+        '--type', 'app-image',
+        '--dest', outputDir.absolutePath,
+        '--input', inputDir.absolutePath,
+        '--name', 'WireShare',
+        '--main-jar', 'WireShare.jar',
+        '--app-version', project.version.toString(),
+        '--vendor', 'Hermes',
+        '--mac-package-identifier', 'com.wireshare.gnutella',
+        '--icon', iconFile.absolutePath,
+    ]
+    if (macosCodesignIdentity.isPresent()) {
+        command += ['--mac-sign', '--mac-signing-key-user-name', macosCodesignIdentity.get()]
+        if (macosCodesignKeychain.isPresent()) {
+            command += ['--mac-signing-keychain', macosCodesignKeychain.get()]
+        }
+    }
+    commandLine(command)
+}
+
+tasks.register('zipMacAppImageForNotarization', Exec) {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn tasks.named('packageMacAppImage')
+
+    def appBundle = macAppImageDir.map { dir -> new File(dir.asFile, 'WireShare.app') }
+    def zipFile = macNotaryZipFile.get().asFile
+
+    doFirst {
+        zipFile.parentFile.mkdirs()
+        zipFile.delete()
+    }
+
+    commandLine(
+        'ditto',
+        '-c',
+        '-k',
+        '--keepParent',
+        appBundle.get().absolutePath,
+        zipFile.absolutePath
+    )
+}
+
+tasks.register('notarizeMacAppImage') {
+    onlyIf {
+        hostOs.isMacOsX() &&
+            macosCodesignIdentity.isPresent() &&
+            macosNotaryProfile.isPresent()
+    }
+    dependsOn tasks.named('zipMacAppImageForNotarization')
+
+    doLast {
+        def zipFile = macNotaryZipFile.get().asFile
+        def appBundle = macAppImageDir.get().asFile.toPath().resolve('WireShare.app').toFile()
+
+        exec {
+            commandLine(
+                'xcrun',
+                'notarytool',
+                'submit',
+                zipFile.absolutePath,
+                '--wait',
+                '--keychain-profile',
+                macosNotaryProfile.get()
+            )
+        }
+        exec {
+            commandLine('xcrun', 'stapler', 'staple', appBundle.absolutePath)
+        }
+    }
+}
+
+project(':desktop-compose-app') {
     pluginManager.withPlugin('application') {
         dependencies {
-            runtimeOnly(files(nativeJarFile) {
-                builtBy nativeJarTask
+            runtimeOnly(files(hostNativeJarFile) {
+                builtBy hostNativeJarTask
             })
         }
 
         tasks.named('run', JavaExec).configure {
-            dependsOn nativeJarTask
+            dependsOn hostNativeJarTask
 
             if (hostOs.isMacOsX()) {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
+                dependsOn rootProject.tasks.named('prepareMacRuntimePayload')
                 jvmArgs(
-                    "-Djava.library.path=${nativeOutputDir.get().asFile.absolutePath}:${rootDir.toPath().resolve('nativelibs/osx').toFile().absolutePath}"
+                    "-Djava.library.path=${macRuntimePayloadDir.get().asFile.toPath().resolve('lib/native').toFile().absolutePath}"
                 )
             }
         }
 
         if (hostOs.isMacOsX()) {
             tasks.named('startScripts').configure {
-                dependsOn rootProject.tasks.named('compileMacCompatibilityNatives')
+                dependsOn rootProject.tasks.named('prepareMacRuntimePayload')
                 doLast {
                     unixScript.text = unixScript.text.replace(
                         'DEFAULT_JVM_OPTS=""',
@@ -513,13 +706,11 @@ project(':desktop-compose-app') {
         distributions {
             main {
                 contents {
-                    from(nativeJarFile) {
+                    from(hostNativeJarFile) {
                         into 'lib'
                     }
                     if (hostOs.isMacOsX()) {
-                        from(nativeOutputDir) {
-                            into 'lib/native'
-                        }
+                        from(macRuntimePayloadDir)
                     }
                     from(rootDir.toPath().resolve('main/lib/resources/linux').toFile()) {
                         into 'resources/linux'
@@ -539,9 +730,9 @@ project(':desktop-compose-app') {
 tasks.register('wireShareJar', Jar) {
     dependsOn project(':desktop-compose-app').tasks.named('classes')
     dependsOn project(':desktop-compose-app').configurations.runtimeClasspath
-    dependsOn project(':jlibtorrent').tasks.named(hostJlibtorrentNativeTaskName())
+    dependsOn hostNativeJarTask
     if (hostOs.isMacOsX()) {
-        dependsOn tasks.named('compileMacCompatibilityNatives')
+        dependsOn tasks.named('prepareMacRuntimePayload')
     }
 
     archiveFileName = 'WireShare.jar'
@@ -551,7 +742,8 @@ tasks.register('wireShareJar', Jar) {
 
     manifest {
         attributes(
-            'Main-Class': 'org.limewire.ui.compose.Main'
+            'Main-Class': 'org.limewire.ui.compose.Main',
+            'Multi-Release': 'true'
         )
     }
 
@@ -559,12 +751,11 @@ tasks.register('wireShareJar', Jar) {
     from({
         project(':desktop-compose-app').configurations.runtimeClasspath
             .filter { file -> file.exists() }
+            .findAll { file -> !hostOs.isMacOsX() || file.name != hostNativeJarFile.get().asFile.name }
             .collect { file -> file.isDirectory() ? file : zipTree(file) }
     })
     if (hostOs.isMacOsX()) {
-        from(nativeOutputDir) {
-            into 'lib/native'
-        }
+        from(macRuntimePayloadDir)
     }
     from(rootDir.toPath().resolve('main/lib/resources/linux').toFile())
     from(rootDir.toPath().resolve('main/lib/resources/osx').toFile())
@@ -693,17 +884,123 @@ tasks.register('verifyNoVendoredJarUsage') {
     }
 }
 
+def legacySwingBuildFiles = files(
+    rootProject.file('settings.gradle'),
+    rootProject.file('build.gradle')
+)
+
+tasks.register('verifyNoLegacySwingBuildWiring') {
+    group = 'verification'
+    description = 'Fails when removed Swing build wiring is reintroduced.'
+    inputs.files(legacySwingBuildFiles)
+
+    doLast {
+        def violations = []
+        def forbiddenPatterns = [
+            [label: ':swingui module', pattern: /'swingui'\s*:/],
+            [label: ':integrated-ui module', pattern: /'integrated-ui'\s*:/],
+            [label: 'runSwing task', pattern: /tasks\.register\(['"]runSwing['"]/],
+            [label: 'legacy Swing module block', pattern: /project\(':integrated-ui'\)\s*\{/],
+            [label: 'legacy Swing main class', pattern: /mainClass\s*=\s*['"]org\.limewire\.ui\.swing\.Main['"]/],
+        ]
+
+        legacySwingBuildFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            forbiddenPatterns.each { entry ->
+                if ((text =~ entry.pattern).find()) {
+                    violations << "${entry.label}: ${rootProject.relativePath(file)}"
+                }
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "Legacy Swing build wiring check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.register('verifyNoJmuleBuildDependency') {
+    group = 'verification'
+    description = 'Fails if the active build still depends on the donor jmule source tree.'
+
+    def trackedFiles = files(
+        rootProject.file('settings.gradle'),
+        rootProject.file('build.gradle'),
+        rootProject.file('desktop-compose-app/build.gradle'),
+        rootProject.file('ed2k-api/build.gradle'),
+        rootProject.file('ed2k-backend/build.gradle')
+    )
+    inputs.files(trackedFiles)
+
+    doLast {
+        def violations = []
+        def forbiddenProjectToken = "project(':j" + "mule')"
+        trackedFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            if (text.contains(forbiddenProjectToken)) {
+                violations << "${rootProject.relativePath(file)} still references :jmule"
+            }
+        }
+
+        if (rootProject.file('jmule/build.gradle').exists()) {
+            violations << 'jmule/build.gradle exists, but jmule must remain a donor-only folder'
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "JMule donor boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.register('verifyNoJed2kBuildDependency') {
+    group = 'verification'
+    description = 'Fails if the active build still depends on the donor jed2k source tree.'
+
+    def trackedFiles = files(
+        rootProject.file('settings.gradle'),
+        rootProject.file('build.gradle'),
+        rootProject.file('desktop-compose-app/build.gradle'),
+        rootProject.file('ed2k-api/build.gradle'),
+        rootProject.file('ed2k-backend/build.gradle')
+    )
+    inputs.files(trackedFiles)
+
+    doLast {
+        def violations = []
+        def forbiddenProjectToken = "project(':jed2k" + "-master')"
+        def forbiddenSourceTokenUnix = 'jed2k' + '-master/src'
+        def forbiddenSourceTokenWindows = 'jed2k' + '-master\\src'
+        trackedFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            if (text.contains(forbiddenProjectToken) || text.contains(forbiddenSourceTokenUnix) || text.contains(forbiddenSourceTokenWindows)) {
+                violations << "${rootProject.relativePath(file)} still references jed2k-master"
+            }
+        }
+
+        if (rootProject.file('jed2k-master/build.gradle').exists()) {
+            violations << 'jed2k-master/build.gradle exists, but jed2k-master must remain a donor-only folder'
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "jed2k donor boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
 tasks.named('check') {
     dependsOn tasks.named('verifyDependencyHygiene')
     dependsOn tasks.named('verifyNoVendoredJarUsage')
+    dependsOn tasks.named('verifyNoLegacySwingBuildWiring')
+    dependsOn tasks.named('verifyNoJmuleBuildDependency')
+    dependsOn tasks.named('verifyNoJed2kBuildDependency')
 }
 
 tasks.register('run') {
     dependsOn project(':desktop-compose-app').tasks.named('run')
-}
-
-tasks.register('runSwing') {
-    group = 'application'
-    description = 'Runs the legacy Swing desktop application.'
-    dependsOn project(':integrated-ui').tasks.named('run')
 }

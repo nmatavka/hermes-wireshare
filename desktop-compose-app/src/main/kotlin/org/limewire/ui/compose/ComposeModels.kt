@@ -208,6 +208,8 @@ class SearchTabSession(
     val search: Search,
     val resultList: SearchResultList
 ) {
+    val networkResults = mutableStateListOf<org.limewire.core.api.search.GroupedSearchResult>()
+    val ed2kResults = mutableStateListOf<org.limewire.core.api.search.GroupedSearchResult>()
     val results = mutableStateListOf<org.limewire.core.api.search.GroupedSearchResult>()
     var sortMode by mutableStateOf(SearchSortMode.RELEVANCE)
     var sortDescending by mutableStateOf(false)
@@ -229,7 +231,10 @@ class SearchTabSession(
     var browseStatus by mutableStateOf<BrowseStatusPresentation?>(null)
     var browseRefreshing by mutableStateOf(false)
     var searchRunning by mutableStateOf(false)
+    var networkSearchRunning by mutableStateOf(false)
+    var ed2kSearchRunning by mutableStateOf(false)
     var startedWhileNotFullyConnected by mutableStateOf(false)
+    var ed2kSessionId by mutableStateOf<String?>(null)
     val expandedSimilarResultKeys = mutableStateListOf<String>()
     var presentationState by mutableStateOf(
         SearchPresentationState(presentationCategory = category)
@@ -254,6 +259,7 @@ data class LibrarySectionViewState(
 
 enum class AdvancedToolsTab {
     CONNECTIONS,
+    ED2K,
     CONSOLE,
     MOJITO
 }
@@ -408,7 +414,8 @@ data class LibrarySharingMembershipPresentation(
     val listId: Int,
     val label: String,
     val subtitle: String,
-    val publicCollection: Boolean
+    val publicCollection: Boolean,
+    val ed2kPublished: Boolean
 )
 
 data class LibraryFileInfoDialogState(

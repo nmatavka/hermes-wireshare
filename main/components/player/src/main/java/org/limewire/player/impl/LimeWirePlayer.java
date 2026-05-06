@@ -11,6 +11,7 @@ import static org.limewire.player.api.PlayerState.SEEKING_PLAY;
 import static org.limewire.player.api.PlayerState.STOPPED;
 import static org.limewire.player.api.PlayerState.UNKNOWN;
 
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,6 @@ import javax.media.GainChangeListener;
 import javax.media.GainControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inject.LazySingleton;
@@ -511,7 +511,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * @param properties any properties about the source that we extracted
      */
     protected void notifyOpened(final Map<String,Object> properties){
-        SwingUtilities.invokeLater(new Runnable(){
+        EventQueue.invokeLater(new Runnable(){
             public void run(){
                 fireOpened(properties);
             }
@@ -527,7 +527,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      *        list the new value
      */
     protected void notifyEvent(final PlayerState state, final double value) {
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
             public void run() {
                 fireStateUpdated(new AudioPlayerEvent(state,value));
             }
@@ -539,7 +539,7 @@ public class LimeWirePlayer implements Runnable, AudioPlayer {
      * off of the player thread while using a lock on the input stream.
      */
     protected void notifyProgress(final int bytesread) {
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
             public void run() {
                 fireProgress(bytesread);
             }

@@ -1,0 +1,46 @@
+dependencies {
+    api project(':core-api')
+}
+
+def ed2kApiBoundaryFiles = fileTree(projectDir) {
+    include 'src/main/java/**/*.java'
+    include 'src/main/resources/**/*.properties'
+    exclude '**/build/**'
+}
+
+def forbiddenEd2kApiTokens = [
+    'org.jmule.ui.',
+    'javax.swing.',
+    'org.eclipse.swt.',
+    'org.jdesktop.',
+    '/android/',
+    'jed2k-master/',
+]
+
+tasks.register('verifyEd2kApiBoundary') {
+    group = 'verification'
+    description = 'Fails if the ED2K API layer reaches into JMule UI-era code or desktop widget toolkits.'
+    inputs.files(ed2kApiBoundaryFiles)
+
+    doLast {
+        def violations = []
+        ed2kApiBoundaryFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            forbiddenEd2kApiTokens.each { token ->
+                if (text.contains(token)) {
+                    violations << "${token}: ${project.relativePath(file)}"
+                }
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "ED2K API boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyEd2kApiBoundary')
+}

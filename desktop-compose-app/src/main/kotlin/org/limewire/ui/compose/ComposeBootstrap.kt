@@ -77,6 +77,8 @@ import org.limewire.util.I18NConvert
 import org.limewire.util.OSUtils
 import org.limewire.util.SystemUtils
 import org.limewire.core.impl.CoreGlueModule
+import org.limewire.ed2k.api.Ed2kService
+import org.limewire.ed2k.backend.Ed2kModule
 import kotlin.system.exitProcess
 
 object ComposeBootstrap {
@@ -145,6 +147,7 @@ object ComposeBootstrap {
             Stage.DEVELOPMENT,
             LimeWireCoreModule(),
             CoreGlueModule(),
+            Ed2kModule(),
             legacyComposeSwingCompatModule()
         )
         GuiceUtils.loadEagerSingletons(injector)
@@ -187,6 +190,7 @@ object ComposeBootstrap {
             connectionManager = injector.getInstance(GnutellaConnectionManager::class.java),
             incomingSearchManager = injector.getInstance(IncomingSearchManager::class.java),
             mojitoManager = injector.getInstance(MojitoManager::class.java),
+            ed2kService = injector.getInstance(Ed2kService::class.java),
             firewallStatusBean = injector.getInstance(
                 Key.get(object : TypeLiteral<org.limewire.listener.EventBean<FirewallStatusEvent>>() {})
             ),
@@ -238,6 +242,7 @@ object ComposeBootstrap {
             transferRepairService = CoreComposeTransferRepairService(
                 injector.getInstance(DownloadListManager::class.java)
             ),
+            ed2kService = injector.getInstance(Ed2kService::class.java),
             advancedToolsService = advancedToolsService,
             searchSuggestionsService = CoreComposeSearchSuggestionsService(searchHistory),
             advancedSearchSuggestionsService = CoreComposeAdvancedSearchSuggestionsService(

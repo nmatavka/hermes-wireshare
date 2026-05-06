@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.swing.Icon;
-
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.friend.api.FriendConnectionFactory;
+import org.limewire.friend.api.FriendConnectionConfiguration;
 import org.limewire.friend.api.Network;
 import org.limewire.friend.api.PasswordManager;
 import org.limewire.io.UnresolvedIpPort;
@@ -19,7 +18,7 @@ import org.limewire.io.UnresolvedIpPortImpl;
 import org.limewire.ui.compose.FriendLoginDraft;
 import org.limewire.ui.compose.FriendLoginOption;
 import org.limewire.ui.compose.integration.ComposeFriendLoginStore;
-import org.limewire.ui.swing.settings.SwingUiSettings;
+import org.limewire.ui.desktop.settings.SwingUiSettings;
 
 public final class ComposeFriendAccountCompat {
 
@@ -292,15 +291,10 @@ public final class ComposeFriendAccountCompat {
     }
 
     private static final class ComposeFriendAccountConfiguration implements FriendAccountConfiguration {
-        private static final Icon SMALL_PLACEHOLDER_ICON = new PlaceholderIcon(16, 16);
-        private static final Icon LARGE_PLACEHOLDER_ICON = new PlaceholderIcon(28, 28);
-
         private final boolean requireDomain;
         private final String resource;
         private final List<UnresolvedIpPort> defaultServers;
         private final boolean modifyUser;
-        private final Icon icon;
-        private final Icon largeIcon;
         private final Network.Type type;
         private final Map<String, Object> attributes = Collections.synchronizedMap(new LinkedHashMap<String, Object>());
 
@@ -316,8 +310,7 @@ public final class ComposeFriendAccountCompat {
                 String label,
                 String resource,
                 List<UnresolvedIpPort> defaultServers) {
-            this(requireDomain, serviceName, label, resource, defaultServers, true, SMALL_PLACEHOLDER_ICON,
-                    LARGE_PLACEHOLDER_ICON, Network.Type.XMPP);
+            this(requireDomain, serviceName, label, resource, defaultServers, true, Network.Type.XMPP);
         }
 
         ComposeFriendAccountConfiguration(
@@ -327,8 +320,7 @@ public final class ComposeFriendAccountCompat {
                 String resource,
                 List<UnresolvedIpPort> defaultServers,
                 boolean modifyUser) {
-            this(requireDomain, serviceName, label, resource, defaultServers, modifyUser, SMALL_PLACEHOLDER_ICON,
-                    LARGE_PLACEHOLDER_ICON, Network.Type.XMPP);
+            this(requireDomain, serviceName, label, resource, defaultServers, modifyUser, Network.Type.XMPP);
         }
 
         ComposeFriendAccountConfiguration(
@@ -338,8 +330,6 @@ public final class ComposeFriendAccountCompat {
                 String resource,
                 List<UnresolvedIpPort> defaultServers,
                 boolean modifyUser,
-                Icon icon,
-                Icon largeIcon,
                 Network.Type type) {
             this.requireDomain = requireDomain;
             this.serviceName = serviceName;
@@ -347,8 +337,6 @@ public final class ComposeFriendAccountCompat {
             this.resource = resource;
             this.defaultServers = defaultServers;
             this.modifyUser = modifyUser;
-            this.icon = icon;
-            this.largeIcon = largeIcon;
             this.type = type;
         }
 
@@ -375,16 +363,6 @@ public final class ComposeFriendAccountCompat {
         @Override
         public void setLabel(String label) {
             this.label = label;
-        }
-
-        @Override
-        public Icon getIcon() {
-            return icon;
-        }
-
-        @Override
-        public Icon getLargeIcon() {
-            return largeIcon;
         }
 
         @Override
@@ -471,34 +449,26 @@ public final class ComposeFriendAccountCompat {
         }
     }
 
-    private static final class PlaceholderIcon implements Icon {
-        private final int width;
-        private final int height;
-
-        private PlaceholderIcon(int width, int height) {
-            this.width = width;
-            this.height = height;
-        }
-
-        @Override
-        public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
-        }
-
-        @Override
-        public int getIconWidth() {
-            return width;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return height;
-        }
-    }
-
     private static String nullToEmpty(String value) {
         return value != null ? value : "";
     }
 
     private static final String JABBER_LABEL = "Jabber";
     private static final String DEFAULT_JABBER_SERVICE = "jabber.org";
+}
+
+interface FriendAccountConfiguration extends FriendConnectionConfiguration {
+    void setLabel(String label);
+    void setServiceName(String serviceName);
+    void setUsername(String username);
+    void setPassword(String password);
+    boolean storePassword();
+}
+
+interface FriendAccountConfigurationManager {
+    FriendAccountConfiguration getConfig(String label);
+    List<String> getLabels();
+    List<FriendAccountConfiguration> getConfigurations();
+    FriendAccountConfiguration getAutoLoginConfig();
+    void setAutoLoginConfig(FriendAccountConfiguration config);
 }

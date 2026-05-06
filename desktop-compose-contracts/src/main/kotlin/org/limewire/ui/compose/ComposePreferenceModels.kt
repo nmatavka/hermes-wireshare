@@ -207,6 +207,12 @@ data class ITunesPreferencesDraft(
     val password: String
 )
 
+enum class DuplicateDownloadAction {
+    IGNORE,
+    RENAME,
+    REPLACE
+}
+
 data class LibraryPreferencesDraft(
     val playerEnabled: Boolean,
     val handleMagnets: Boolean,
@@ -226,7 +232,7 @@ data class TransferPreferencesDraft(
     val torrentSeedDays: String,
     val torrentSeedHours: String,
     val showTorrentSelectorBeforeDownloading: Boolean,
-    val autoRenameDuplicateFiles: Boolean,
+    val duplicateDownloadAction: DuplicateDownloadAction,
     val showTransfersTrayByDefault: Boolean,
     val closeTrayWhenNoTransfers: Boolean,
     val showTotalBandwidth: Boolean,

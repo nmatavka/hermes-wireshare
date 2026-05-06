@@ -1,8 +1,8 @@
 package org.limewire.ui.compose.settings;
 
-import org.limewire.ui.swing.settings.StartupSettings;
-import org.limewire.ui.swing.util.LocaleUtils;
-import org.limewire.ui.swing.util.WindowsUtils;
+import org.limewire.ui.desktop.settings.StartupSettings;
+import org.limewire.ui.desktop.util.LocaleUtils;
+import org.limewire.ui.desktop.util.WindowsUtils;
 import org.limewire.util.OSUtils;
 
 public final class LegacySwingComposeStartupBackend {

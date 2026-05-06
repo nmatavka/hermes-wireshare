@@ -10,6 +10,7 @@ import org.limewire.core.api.daap.DaapManager
 import org.limewire.core.api.file.CategoryManager
 import org.limewire.core.api.library.LibraryManager
 import org.limewire.core.api.library.LocalFileItem
+import org.limewire.core.api.library.SharedFileList
 import org.limewire.core.api.library.SharedFileListManager
 import org.limewire.core.api.network.NetworkManager
 import org.limewire.core.api.spam.SpamManager
@@ -39,6 +40,7 @@ import org.limewire.ui.compose.ConnectionLayoutPreferences
 import org.limewire.ui.compose.DownloadColumn
 import org.limewire.ui.compose.DownloadLayoutPreferences
 import org.limewire.ui.compose.DownloadSortMode
+import org.limewire.ui.compose.DuplicateDownloadAction
 import org.limewire.ui.compose.FileAssociationPromptState
 import org.limewire.ui.compose.FriendLoginDraft
 import org.limewire.ui.compose.FriendLoginOption
@@ -76,18 +78,19 @@ import org.limewire.ui.compose.UploadSortMode
 import org.limewire.ui.compose.WindowPlacementPreferences
 import org.limewire.ui.compose.integration.ComposeFriendLoginStore
 import org.limewire.ui.compose.integration.ComposeSettingsService
-import org.limewire.ui.swing.settings.QuestionsHandler
-import org.limewire.ui.swing.settings.StartupSettings
-import org.limewire.ui.swing.settings.SwingUiSettings
-import org.limewire.ui.swing.shell.LimeAssociationOption
-import org.limewire.ui.swing.shell.LimeAssociations
-import org.limewire.ui.swing.util.I18n
-import org.limewire.ui.swing.util.MacOSXUtils
-import org.limewire.ui.swing.util.WindowsUtils
+import org.limewire.ui.desktop.settings.QuestionsHandler
+import org.limewire.ui.desktop.settings.StartupSettings
+import org.limewire.ui.desktop.settings.SwingUiSettings
+import org.limewire.ui.desktop.shell.LimeAssociationOption
+import org.limewire.ui.desktop.shell.LimeAssociations
+import org.limewire.ui.desktop.util.I18n
+import org.limewire.ui.desktop.util.MacOSXUtils
+import org.limewire.ui.desktop.util.WindowsUtils
 import org.limewire.util.CommonUtils
 import org.limewire.util.FileUtils
 import org.limewire.util.OSUtils
 import java.io.File
+import java.io.FileFilter
 import java.io.IOException
 import java.io.RandomAccessFile
 import java.net.NetworkInterface
@@ -221,7 +224,7 @@ class LegacySwingComposeSettingsBackend(
                 torrentSeedDays = wholeDays(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()).toString(),
                 torrentSeedHours = remainingHours(BittorrentSettings.LIBTORRENT_SEED_TIME_LIMIT.getValue()).toString(),
                 showTorrentSelectorBeforeDownloading = BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.getValue(),
-                autoRenameDuplicateFiles = SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue(),
+                duplicateDownloadAction = readDuplicateDownloadAction(),
                 showTransfersTrayByDefault = SwingUiSettings.SHOW_TRANSFERS_TRAY.getValue(),
                 closeTrayWhenNoTransfers = SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.getValue(),
                 showTotalBandwidth = SwingUiSettings.SHOW_TOTAL_BANDWIDTH.getValue(),
@@ -350,6 +353,7 @@ class LegacySwingComposeSettingsBackend(
         } else {
             revertCategorySaveDirectoriesToDefault()
         }
+        ensureAutomaticLibraryRoots()
 
         BittorrentSettings.UPLOAD_TORRENTS_FOREVER.setValue(draft.transfers.uploadTorrentsForever)
         if (!draft.transfers.uploadTorrentsForever) {
@@ -370,7 +374,7 @@ class LegacySwingComposeSettingsBackend(
             )
         }
         BittorrentSettings.TORRENT_SHOW_POPUP_BEFORE_DOWNLOADING.setValue(draft.transfers.showTorrentSelectorBeforeDownloading)
-        SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(draft.transfers.autoRenameDuplicateFiles)
+        writeDuplicateDownloadAction(draft.transfers.duplicateDownloadAction)
         SwingUiSettings.SHOW_TRANSFERS_TRAY.setValue(draft.transfers.showTransfersTrayByDefault)
         SwingUiSettings.HIDE_BOTTOM_TRAY_WHEN_NO_TRANSFERS.setValue(draft.transfers.closeTrayWhenNoTransfers)
         SwingUiSettings.SHOW_TOTAL_BANDWIDTH.setValue(draft.transfers.showTotalBandwidth)
@@ -485,6 +489,54 @@ class LegacySwingComposeSettingsBackend(
 
     override fun validateCurrentSaveDirectory(): String? {
         return validateSaveDirectory(SharingSettings.getSaveDirectory()).errorMessage
+    }
+
+    private fun ensureAutomaticLibraryRoots() {
+        val managedList = libraryManager?.libraryManagedList
+        currentSaveRoots().forEach { root ->
+            if (!root.exists()) {
+                root.mkdirs()
+            }
+            root.listFiles()?.forEach { candidate ->
+                if (candidate.isFile) {
+                    managedList?.addFile(candidate)
+                }
+            }
+        }
+
+        val publicSharedList = findPublicSharedList()
+        val sharedRoot = canonicalizeFile(SharingSettings.DEFAULT_SHARE_DIR)
+        if (!sharedRoot.exists()) {
+            sharedRoot.mkdirs()
+        }
+        if (publicSharedList != null && publicSharedList.isDirectoryAllowed(sharedRoot)) {
+            publicSharedList.addFolder(sharedRoot, FileFilter { candidate ->
+                candidate.isDirectory || publicSharedList.isFileAllowed(candidate)
+            })
+        }
+    }
+
+    private fun currentSaveRoots(): LinkedHashSet<File> {
+        val roots = linkedSetOf<File>()
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory())
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.AUDIO))
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.VIDEO))
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.IMAGE))
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.DOCUMENT))
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.PROGRAM))
+        roots += canonicalizeFile(SharingSettings.getSaveDirectory(Category.OTHER))
+        return roots
+    }
+
+    private fun findPublicSharedList(): SharedFileList? {
+        val manager = sharedFileListManager ?: return null
+        val model = manager.model
+        model.readWriteLock.readLock().lock()
+        return try {
+            model.firstOrNull { it.isPublic }
+        } finally {
+            model.readWriteLock.readLock().unlock()
+        }
     }
 
     override fun startupFileAssociationPrompt(): FileAssociationPromptState? {
@@ -1165,6 +1217,31 @@ class LegacySwingComposeSettingsBackend(
 
     private fun bytesToKiBString(value: Int): String {
         return if (value <= 0) "0" else (value / 1024).toString()
+    }
+
+    private fun readDuplicateDownloadAction(): DuplicateDownloadAction {
+        if (SwingUiSettings.DUPLICATE_DOWNLOAD_ACTION.isDefault()) {
+            return if (SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.getValue()) {
+                DuplicateDownloadAction.RENAME
+            } else {
+                DuplicateDownloadAction.IGNORE
+            }
+        }
+        return when (SwingUiSettings.DUPLICATE_DOWNLOAD_ACTION.getValue()) {
+            0 -> DuplicateDownloadAction.IGNORE
+            2 -> DuplicateDownloadAction.REPLACE
+            else -> DuplicateDownloadAction.RENAME
+        }
+    }
+
+    private fun writeDuplicateDownloadAction(action: DuplicateDownloadAction) {
+        val storedValue = when (action) {
+            DuplicateDownloadAction.IGNORE -> 0
+            DuplicateDownloadAction.RENAME -> 1
+            DuplicateDownloadAction.REPLACE -> 2
+        }
+        SwingUiSettings.DUPLICATE_DOWNLOAD_ACTION.setValue(storedValue)
+        SwingUiSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(action == DuplicateDownloadAction.RENAME)
     }
 
     private fun formatSeedRatio(value: Float): String {

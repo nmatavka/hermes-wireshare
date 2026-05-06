@@ -44,7 +44,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.desktop.util.I18n;
 
 import com.google.inject.Inject;
 

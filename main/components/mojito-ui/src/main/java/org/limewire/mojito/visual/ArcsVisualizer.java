@@ -1,5 +1,6 @@
 package org.limewire.mojito.visual;
 
+import java.awt.EventQueue;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -20,7 +21,6 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.limewire.mojito.Context;
@@ -49,7 +49,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
     public static ArcsVisualizer show(final Context context) {
         final ArcsVisualizer arcs = new ArcsVisualizer(context, context.getLocalNodeID());
         
-        SwingUtilities.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame(context.getName());
                 frame.getContentPane().add(arcs);
@@ -140,11 +140,11 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
             }
         };
         
-        if(SwingUtilities.isEventDispatchThread()) {
+        if(EventQueue.isDispatchThread()) {
             runner.run();
         } else {
             try {
-                SwingUtilities.invokeAndWait(runner);
+                EventQueue.invokeAndWait(runner);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {

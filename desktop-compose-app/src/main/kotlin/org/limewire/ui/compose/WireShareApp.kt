@@ -1,5 +1,6 @@
 package org.limewire.ui.compose
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -32,6 +33,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -101,8 +103,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -130,6 +134,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -150,6 +156,7 @@ import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -159,8 +166,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
@@ -183,6 +192,7 @@ import org.limewire.core.api.search.SearchCategory
 import org.limewire.core.api.search.SearchDetails
 import org.limewire.core.api.search.SearchResult
 import org.limewire.core.api.search.browse.BrowseStatus.BrowseState
+import org.limewire.ed2k.api.Ed2kStatus
 import org.limewire.core.api.upload.UploadItem
 import org.limewire.core.api.upload.UploadState
 import org.limewire.friend.api.ChatState
@@ -408,6 +418,29 @@ private fun CompactFilledTonalButton(
 }
 
 @Composable
+private fun CompactTranslucentButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit
+) {
+    val desktopDensity = LocalDesktopDensity.current
+    FilledTonalButton(
+        onClick = onClick,
+        modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
+        enabled = enabled,
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+        ),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+        content = content
+    )
+}
+
+@Composable
 private fun CompactButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -465,23 +498,73 @@ private fun compactSummary(vararg parts: Pair<String, String?>): String {
     }.joinToString(" • ")
 }
 
+private enum class DesktopDialogPreset {
+    COMPACT,
+    FORM,
+    INSPECTOR,
+    WORKSPACE
+}
+
+private data class DesktopDialogSize(
+    val preferredWidth: Dp,
+    val preferredHeight: Dp,
+    val minWidth: Dp,
+    val minHeight: Dp
+)
+
+private fun desktopDialogSize(preset: DesktopDialogPreset, density: DesktopDensity): DesktopDialogSize {
+    return when (preset) {
+        DesktopDialogPreset.COMPACT -> DesktopDialogSize(
+            preferredWidth = if (density.compactHorizontal) 440.dp else 500.dp,
+            preferredHeight = if (density.compactVertical) 280.dp else 320.dp,
+            minWidth = 380.dp,
+            minHeight = 220.dp
+        )
+
+        DesktopDialogPreset.FORM -> DesktopDialogSize(
+            preferredWidth = if (density.compactHorizontal) 620.dp else 700.dp,
+            preferredHeight = if (density.compactVertical) 460.dp else 540.dp,
+            minWidth = 440.dp,
+            minHeight = 280.dp
+        )
+
+        DesktopDialogPreset.INSPECTOR -> DesktopDialogSize(
+            preferredWidth = if (density.compactHorizontal) 900.dp else 980.dp,
+            preferredHeight = if (density.compactVertical) 620.dp else 760.dp,
+            minWidth = 620.dp,
+            minHeight = 360.dp
+        )
+
+        DesktopDialogPreset.WORKSPACE -> DesktopDialogSize(
+            preferredWidth = if (density.compactHorizontal) 980.dp else 1120.dp,
+            preferredHeight = if (density.compactVertical) 660.dp else 780.dp,
+            minWidth = 680.dp,
+            minHeight = 420.dp
+        )
+    }
+}
+
 @Composable
 private fun ResponsiveDesktopDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     confirmButton: @Composable RowScope.() -> Unit,
     dismissButton: (@Composable RowScope.() -> Unit)? = null,
-    preferredWidth: Dp = 760.dp,
-    preferredHeight: Dp = LocalDesktopDensity.current.dialogPreferredHeight,
+    preset: DesktopDialogPreset = DesktopDialogPreset.FORM,
+    preferredWidth: Dp? = null,
+    preferredHeight: Dp? = null,
     allowDismissOnOutsideClick: Boolean = true,
     scrollBody: Boolean = true,
     body: @Composable ColumnScope.() -> Unit
 ) {
     val density = LocalDesktopDensity.current
-    val dialogWidth = minOf(preferredWidth, density.windowWidth * density.dialogWidthFraction)
-        .coerceAtLeast(340.dp)
-    val dialogHeight = minOf(preferredHeight, density.windowHeight * density.dialogHeightFraction)
-        .coerceAtLeast(240.dp)
+    val size = remember(preset, density) { desktopDialogSize(preset, density) }
+    val targetWidth = preferredWidth ?: size.preferredWidth
+    val targetHeight = preferredHeight ?: size.preferredHeight
+    val dialogWidth = minOf(targetWidth, density.windowWidth * density.dialogWidthFraction)
+        .coerceAtLeast(size.minWidth)
+    val dialogHeight = minOf(targetHeight, density.windowHeight * density.dialogHeightFraction)
+        .coerceAtLeast(size.minHeight)
     val bodyScrollState = rememberScrollState()
 
     Dialog(onDismissRequest = {
@@ -495,9 +578,9 @@ private fun ResponsiveDesktopDialog(
             shadowElevation = 18.dp,
             modifier = Modifier
                 .width(dialogWidth)
-                .heightIn(max = dialogHeight)
+                .heightIn(min = size.minHeight, max = dialogHeight)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth().heightIn(min = size.minHeight)) {
                 Box(modifier = Modifier.fillMaxWidth().padding(density.dialogHeaderPadding)) {
                     title()
                 }
@@ -505,11 +588,11 @@ private fun ResponsiveDesktopDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f, fill = false)
+                        .weight(1f, fill = true)
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .then(
                                 if (scrollBody) {
                                     Modifier.verticalScroll(bodyScrollState)
@@ -536,6 +619,104 @@ private fun ResponsiveDesktopDialog(
                         confirmButton()
                     }
                 }
+            }
+        }
+    }
+}
+
+private data class DesktopTableColumnSpec(
+    val priority: Int,
+    val minWidth: Dp,
+    val preferredWidth: Dp = minWidth,
+    val flexWeight: Float = 0f,
+    val alignment: TextAlign = TextAlign.Start,
+    val truncation: TextOverflow = TextOverflow.Ellipsis,
+    val compactOptional: Boolean = false
+)
+
+private data class DesktopTableLayout<C>(
+    val tableWidth: Dp,
+    private val columnWidths: Map<C, Dp>
+) {
+    fun width(column: C): Dp = columnWidths.getValue(column)
+
+    fun modifier(column: C): Modifier = Modifier.width(width(column))
+}
+
+private fun <C> resolveDesktopTableLayout(
+    availableWidth: Dp,
+    visibleColumns: List<C>,
+    specFor: (C) -> DesktopTableColumnSpec,
+    leadingWidth: Dp,
+    trailingWidth: Dp,
+    rowHorizontalPadding: Dp,
+    interColumnSpacing: Dp = 0.dp
+): DesktopTableLayout<C> {
+    val specs = visibleColumns.associateWith(specFor)
+    val fixedWidth = specs
+        .filterValues { it.flexWeight <= 0f }
+        .values
+        .fold(0.dp) { total, spec -> total + spec.preferredWidth }
+    val flexibleMinWidth = specs
+        .filterValues { it.flexWeight > 0f }
+        .values
+        .fold(0.dp) { total, spec -> total + spec.minWidth }
+    val spacingWidth = interColumnSpacing * (visibleColumns.size - 1).coerceAtLeast(0)
+    val minimumTableWidth = leadingWidth + trailingWidth + rowHorizontalPadding * 2 + spacingWidth + fixedWidth + flexibleMinWidth
+    val targetTableWidth = if (availableWidth > minimumTableWidth) availableWidth else minimumTableWidth
+    val distributableWidth = targetTableWidth - leadingWidth - trailingWidth - rowHorizontalPadding * 2 - spacingWidth - fixedWidth
+    val extraFlexibleWidth = if (distributableWidth > flexibleMinWidth) {
+        distributableWidth - flexibleMinWidth
+    } else {
+        0.dp
+    }
+    val totalFlexWeight = specs.values.sumOf { it.flexWeight.toDouble() }.toFloat()
+    val widths = visibleColumns.associateWith { column ->
+        val spec = specs.getValue(column)
+        if (spec.flexWeight > 0f && totalFlexWeight > 0f) {
+            spec.minWidth + extraFlexibleWidth * (spec.flexWeight / totalFlexWeight)
+        } else {
+            spec.preferredWidth
+        }
+    }
+    return DesktopTableLayout(
+        tableWidth = targetTableWidth,
+        columnWidths = widths
+    )
+}
+
+@Composable
+private fun <C> DesktopScrollableTable(
+    visibleColumns: List<C>,
+    specFor: (C) -> DesktopTableColumnSpec,
+    leadingWidth: Dp,
+    trailingWidth: Dp,
+    rowHorizontalPadding: Dp,
+    modifier: Modifier = Modifier,
+    interColumnSpacing: Dp = 0.dp,
+    content: @Composable ColumnScope.(DesktopTableLayout<C>) -> Unit
+) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val scrollState = rememberScrollState()
+        val layout = remember(maxWidth, visibleColumns) {
+            resolveDesktopTableLayout(
+                availableWidth = maxWidth,
+                visibleColumns = visibleColumns,
+                specFor = specFor,
+                leadingWidth = leadingWidth,
+                trailingWidth = trailingWidth,
+                rowHorizontalPadding = rowHorizontalPadding,
+                interColumnSpacing = interColumnSpacing
+            )
+        }
+
+        Box(modifier = Modifier.fillMaxSize().horizontalScroll(scrollState)) {
+            Column(
+                modifier = Modifier
+                    .width(layout.tableWidth)
+                    .fillMaxHeight()
+            ) {
+                content(layout)
             }
         }
     }
@@ -581,31 +762,6 @@ fun WireShareDesktopApp(controller: ComposeAppController, exitApplication: () ->
         }
     }
 
-    if (controller.advancedToolsWindowOpen) {
-        val advancedWindowState = rememberWindowState(width = 1180.dp, height = 780.dp)
-        Window(
-            onCloseRequest = { controller.closeAdvancedToolsWindow() },
-            title = "Advanced Tools",
-            state = advancedWindowState
-        ) {
-            LaunchedEffect(controller.advancedToolsWindowOpen, controller.selectedAdvancedToolsTab) {
-                val selectedTab = controller.selectedAdvancedToolsTab
-                val refreshInterval = controller.advancedToolsAutoRefreshIntervalMillis()
-                    ?: return@LaunchedEffect
-                while (controller.advancedToolsWindowOpen && controller.selectedAdvancedToolsTab == selectedTab) {
-                    controller.refreshActiveAdvancedToolsTab()
-                    delay(refreshInterval)
-                }
-            }
-            WireShareTheme(appearance = controller.appearance, localeEpoch = localeEpoch) {
-                ProvideDesktopDensity {
-                    Surface(modifier = Modifier.fillMaxSize()) {
-                        AdvancedToolsWindow(controller)
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Composable
@@ -848,12 +1004,12 @@ private fun FrameWindowScope.AppMenuBar(controller: ComposeAppController) {
         }
         Menu("View") {
             Item("My Files", onClick = { controller.selectLibrary() })
-            Item("Transfers", onClick = { controller.selectTransfers() })
+            Item("Transfers", onClick = { controller.openTransfersWorkspace() })
             Item("Friends", onClick = { controller.selectFriends() })
             Item("Player", onClick = { controller.selectPlayer() })
             Separator()
-            Item("Show Downloads Tray", onClick = { controller.selectTransfers(TransferTrayMode.DOWNLOADS) })
-            Item("Show Uploads Tray", onClick = { controller.selectTransfers(TransferTrayMode.UPLOADS) })
+            Item("Show Downloads Tray", onClick = { controller.showTransferTray(TransferTrayMode.DOWNLOADS) })
+            Item("Show Uploads Tray", onClick = { controller.showTransferTray(TransferTrayMode.UPLOADS) })
             Item(
                 if (controller.trayExpanded) "Hide Transfer Tray" else "Show Transfer Tray",
                 onClick = { controller.toggleTray() }
@@ -1008,6 +1164,10 @@ private fun Dialogs(controller: ComposeAppController) {
 
     if (controller.openLinkDialogOpen) {
         OpenLinkDialog(controller)
+    }
+
+    if (controller.advancedToolsWindowOpen) {
+        AdvancedToolsDialog(controller)
     }
 
     if (controller.friendLoginDialogOpen) {
@@ -1214,32 +1374,76 @@ private fun BlockingTorrentSelectionDialog(
 }
 
 @Composable
-private fun AdvancedToolsWindow(controller: ComposeAppController) {
-    val desktopDensity = LocalDesktopDensity.current
-    val desktopType = LocalDesktopTypeScale.current
-    Column(
-        modifier = Modifier.fillMaxSize().padding(desktopDensity.cardPadding),
-        verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Advanced Tools", style = desktopType.screenTitle)
-            Text(
-                "Inspect connections, incoming searches, Mojito activity, and diagnostic output.",
-                style = desktopType.summary,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+private fun AdvancedToolsDialog(controller: ComposeAppController) {
+    LaunchedEffect(controller.advancedToolsWindowOpen, controller.selectedAdvancedToolsTab) {
+        val selectedTab = controller.selectedAdvancedToolsTab
+        val refreshInterval = controller.advancedToolsAutoRefreshIntervalMillis()
+            ?: return@LaunchedEffect
+        while (controller.advancedToolsWindowOpen && controller.selectedAdvancedToolsTab == selectedTab) {
+            controller.refreshActiveAdvancedToolsTab()
+            delay(refreshInterval)
         }
-        PrimaryTabRow(selectedTabIndex = controller.selectedAdvancedToolsTab.ordinal) {
-            AdvancedToolsTab.entries.forEach { tab ->
-                Tab(
-                    selected = controller.selectedAdvancedToolsTab == tab,
-                    onClick = { controller.selectAdvancedToolsTab(tab) },
-                    text = { Text(friendlyName(tab.name)) }
+    }
+
+    ResponsiveDesktopDialog(
+        onDismissRequest = { controller.closeAdvancedToolsWindow() },
+        title = {
+            val desktopType = LocalDesktopTypeScale.current
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("Advanced Tools", style = desktopType.screenTitle)
+                Text(
+                    "Inspect Gnutella, ED2K/Kad, incoming searches, Mojito activity, and diagnostic output.",
+                    style = desktopType.summary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
+        },
+        dismissButton = {
+            TextButton(onClick = { controller.closeAdvancedToolsWindow() }) {
+                Text("Close")
+            }
+        },
+        confirmButton = {
+            FilledTonalButton(onClick = { controller.refreshActiveAdvancedToolsTab() }) {
+                Text("Refresh")
+            }
+        },
+        preset = DesktopDialogPreset.WORKSPACE,
+        preferredWidth = 1180.dp,
+        preferredHeight = 780.dp,
+        allowDismissOnOutsideClick = false,
+        scrollBody = false
+    ) {
+        AdvancedToolsContent(controller, Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun AdvancedToolsContent(
+    controller: ComposeAppController,
+    modifier: Modifier = Modifier
+) {
+    val desktopDensity = LocalDesktopDensity.current
+    Column(
+        modifier = modifier.padding(desktopDensity.cardPadding),
+        verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+    ) {
+        SemanticPrimaryTabRow(
+            tabs = AdvancedToolsTab.entries.map { tab ->
+                SemanticTabSpec(
+                    label = when (tab) {
+                        AdvancedToolsTab.ED2K -> "ED2K/Kad"
+                        else -> friendlyName(tab.name)
+                    },
+                    tone = advancedToolsTabTone(tab),
+                    selected = controller.selectedAdvancedToolsTab == tab,
+                    onClick = { controller.selectAdvancedToolsTab(tab) }
+                )
+            }
+        )
         when (controller.selectedAdvancedToolsTab) {
             AdvancedToolsTab.CONNECTIONS -> AdvancedToolsConnectionsTab(controller, Modifier.weight(1f))
+            AdvancedToolsTab.ED2K -> AdvancedToolsEd2kTab(controller, Modifier.weight(1f))
             AdvancedToolsTab.CONSOLE -> AdvancedToolsConsoleTab(controller, Modifier.weight(1f))
             AdvancedToolsTab.MOJITO -> AdvancedToolsMojitoTab(controller, Modifier.weight(1f))
         }
@@ -1332,8 +1536,14 @@ private fun AdvancedToolsConnectionsTab(
                 } else {
                     val visibleColumns = ConnectionColumn.entries.filter { it in controller.visibleConnectionColumns }
                     val rows = controller.sortedAdvancedConnections()
-                    val scrollState = rememberScrollState()
-                    Box(modifier = Modifier.fillMaxWidth().horizontalScroll(scrollState)) {
+                    DesktopScrollableTable(
+                        visibleColumns = visibleColumns,
+                        specFor = ::connectionColumnSpec,
+                        leadingWidth = 0.dp,
+                        trailingWidth = 180.dp,
+                        rowHorizontalPadding = 12.dp,
+                        interColumnSpacing = 10.dp
+                    ) { layout ->
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(
                                 modifier = Modifier
@@ -1346,7 +1556,7 @@ private fun AdvancedToolsConnectionsTab(
                                 visibleColumns.forEach { column ->
                                     TextButton(
                                         onClick = { controller.setConnectionSort(column) },
-                                        modifier = Modifier.width(connectionColumnWidth(column))
+                                        modifier = layout.modifier(column)
                                     ) {
                                         Text(
                                             connectionColumnLabel(column) + if (controller.connectionSortColumn == column) {
@@ -1381,7 +1591,7 @@ private fun AdvancedToolsConnectionsTab(
                                         visibleColumns.forEach { column ->
                                             Text(
                                                 connectionColumnValue(item, column),
-                                                modifier = Modifier.width(connectionColumnWidth(column)),
+                                                modifier = layout.modifier(column),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis
@@ -1499,6 +1709,260 @@ private fun AdvancedToolsConnectionsTab(
                                 }
                                 CompactTextButton(onClick = { controller.submitIncomingSearch(query) }) {
                                     Text("Search")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AdvancedToolsEd2kTab(
+    controller: ComposeAppController,
+    modifier: Modifier = Modifier
+) {
+    val desktopDensity = LocalDesktopDensity.current
+    val desktopType = LocalDesktopTypeScale.current
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(desktopDensity.cardPadding),
+                verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+            ) {
+                Text(
+                    compactSummary(
+                        "ED2K server" to controller.ed2kServerStatusLabel(),
+                        "Kad" to controller.ed2kKadStatusLabel(),
+                        "Server" to controller.ed2kConnectedServerText(),
+                        "Activity" to controller.ed2kSummaryText()
+                    ),
+                    style = desktopType.summary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CompactFilledTonalButton(
+                        onClick = { controller.connectAnyEd2kServer() },
+                        enabled = controller.canConnectEd2kServer()
+                    ) {
+                        Text("Connect ED2K")
+                    }
+                    CompactOutlinedButton(
+                        onClick = { controller.disconnectEd2kServer() },
+                        enabled = controller.canDisconnectEd2kServer()
+                    ) {
+                        Text("Disconnect ED2K")
+                    }
+                    CompactOutlinedButton(
+                        onClick = { controller.connectKad() },
+                        enabled = controller.canConnectKad()
+                    ) {
+                        Text("Connect Kad")
+                    }
+                    CompactOutlinedButton(
+                        onClick = { controller.disconnectKad() },
+                        enabled = controller.canDisconnectKad()
+                    ) {
+                        Text("Disconnect Kad")
+                    }
+                    CompactTextButton(onClick = { controller.importEd2kServers() }) {
+                        Text("Import server.met / server list")
+                    }
+                    CompactTextButton(onClick = { controller.importKadNodes() }) {
+                        Text("Import nodes.dat")
+                    }
+                }
+                Text(
+                    "Use server.met to load ED2K servers and nodes.dat to seed Kad. You can also paste ed2k:// serverlist or nodeslist links into Open Link.",
+                    style = desktopType.meta,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                controller.advancedEd2kError?.takeIf { it.isNotBlank() }?.let { error ->
+                    Text(error, color = MaterialTheme.colorScheme.error, style = desktopType.meta)
+                }
+            }
+        }
+
+        Card {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(desktopDensity.cardPadding),
+                verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+            ) {
+                Text("Connect to a specific ED2K server", style = desktopType.sectionTitle)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OutlinedTextField(
+                        value = controller.advancedEd2kServerHost,
+                        onValueChange = {
+                            controller.advancedEd2kServerHost = it
+                            controller.advancedEd2kError = null
+                        },
+                        label = { Text("Host") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = controller.advancedEd2kServerPort,
+                        onValueChange = {
+                            controller.advancedEd2kServerPort = it.filter(Char::isDigit)
+                            controller.advancedEd2kError = null
+                        },
+                        label = { Text("Port") },
+                        singleLine = true,
+                        modifier = Modifier.width(140.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    CompactFilledTonalButton(onClick = { controller.submitEd2kServerConnect() }) {
+                        Text("Connect")
+                    }
+                }
+            }
+        }
+
+        Card {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(desktopDensity.cardPadding),
+                verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+            ) {
+                Text("Bootstrap Kad from a node", style = desktopType.sectionTitle)
+                Text(
+                    "Use a known Kad endpoint or import nodes.dat when you need to repopulate the routing table.",
+                    style = desktopType.meta,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OutlinedTextField(
+                        value = controller.advancedKadBootstrapHost,
+                        onValueChange = {
+                            controller.advancedKadBootstrapHost = it
+                            controller.advancedEd2kError = null
+                        },
+                        label = { Text("Kad Host") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = controller.advancedKadBootstrapPort,
+                        onValueChange = {
+                            controller.advancedKadBootstrapPort = it.filter(Char::isDigit)
+                            controller.advancedEd2kError = null
+                        },
+                        label = { Text("Kad Port") },
+                        singleLine = true,
+                        modifier = Modifier.width(140.dp)
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CompactFilledTonalButton(onClick = { controller.bootstrapKad() }) {
+                        Text("Bootstrap Kad")
+                    }
+                    CompactOutlinedButton(onClick = { controller.importKadNodes() }) {
+                        Text("Import nodes.dat")
+                    }
+                }
+            }
+        }
+
+        Card {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(desktopDensity.cardPadding),
+                verticalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text("ED2K Servers", style = desktopType.sectionTitle)
+                        Text(
+                            "Imported and discovered servers available to the transplanted backend.",
+                            style = desktopType.meta,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        "${controller.advancedEd2kServers.size} server(s)",
+                        style = desktopType.meta,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (controller.advancedEd2kServers.isEmpty()) {
+                    Text(
+                        "No ED2K servers are loaded yet. Import server.met, paste an ed2k serverlist link into Open Link, or connect using a known host and port.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = desktopType.summary
+                    )
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        controller.advancedEd2kServers.forEach { server ->
+                            val serverAddress = server.address?.takeUnless { it.isBlank() } ?: "Unknown host"
+                            val serverLabel = server.name?.takeUnless { it.isBlank() } ?: "$serverAddress:${server.port}"
+                            val serverDescription = server.description?.takeUnless { it.isBlank() }
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (server.isConnected) {
+                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(
+                                            serverLabel,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            listOfNotNull(
+                                                "$serverAddress:${server.port}",
+                                                serverDescription
+                                            ).joinToString(" · "),
+                                            style = desktopType.meta,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            "${server.userCount} user(s) · ${server.fileCount} file(s)",
+                                            style = desktopType.meta,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    if (server.isConnected) {
+                                        InlineStatusBadge("Connected", tone = BadgeTone.GREEN, icon = Icons.Rounded.Check)
+                                    } else {
+                                        CompactOutlinedButton(
+                                            onClick = {
+                                                controller.advancedEd2kServerHost = serverAddress
+                                                controller.advancedEd2kServerPort = server.port.toString()
+                                                controller.submitEd2kServerConnect()
+                                            }
+                                        ) {
+                                            Text("Connect")
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -2567,6 +3031,7 @@ private fun PreferencesDialog(controller: ComposeAppController) {
     val validationError = preferencesValidationError(draft)
     val contentScrollState = rememberScrollState()
     val desktopDensity = LocalDesktopDensity.current
+    val stackedSectionPicker = desktopDensity.compactHorizontal || desktopDensity.windowWidth <= 1180.dp
 
     LaunchedEffect(controller.preferencesDialogVersion, section) {
         if (section == PreferencesSection.TRANSFERS) {
@@ -2590,40 +3055,49 @@ private fun PreferencesDialog(controller: ComposeAppController) {
             }
         },
         title = { Text("Preferences") },
-        preferredWidth = 1120.dp,
-        preferredHeight = if (desktopDensity.compactVertical) 640.dp else 760.dp,
+        preset = DesktopDialogPreset.WORKSPACE,
         scrollBody = false
     ) {
+            if (stackedSectionPicker) {
+                PreferenceDropdownField(
+                    label = "Section",
+                    value = section.label,
+                    options = PreferencesSection.entries.map { it to it.label },
+                    onSelected = { section = it }
+                )
+            }
             Row(
-                modifier = Modifier.fillMaxWidth().heightIn(min = 360.dp, max = if (desktopDensity.compactVertical) 620.dp else 700.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 420.dp, max = if (desktopDensity.compactVertical) 660.dp else 740.dp),
                 horizontalArrangement = Arrangement.spacedBy(desktopDensity.sectionGap)
             ) {
-                Surface(
-                    modifier = Modifier.width(if (desktopDensity.compactHorizontal) 164.dp else 180.dp).fillMaxHeight(),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize().padding(desktopDensity.cardPadding),
-                        verticalArrangement = Arrangement.spacedBy(desktopDensity.shellGap)
+                if (!stackedSectionPicker) {
+                    Surface(
+                        modifier = Modifier.width(196.dp).fillMaxHeight(),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        PreferencesSection.entries.forEach { entry ->
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (section == entry) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    Color.Transparent
-                                },
-                                modifier = Modifier.fillMaxWidth().clickable { section = entry }
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                                    Text(entry.label, fontWeight = if (section == entry) FontWeight.SemiBold else FontWeight.Medium)
-                                    Text(
-                                        entry.summary,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                        Column(
+                            modifier = Modifier.fillMaxSize().padding(desktopDensity.cardPadding),
+                            verticalArrangement = Arrangement.spacedBy(desktopDensity.shellGap)
+                        ) {
+                            PreferencesSection.entries.forEach { entry ->
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (section == entry) {
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    } else {
+                                        Color.Transparent
+                                    },
+                                    modifier = Modifier.fillMaxWidth().clickable { section = entry }
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                                        Text(entry.label, fontWeight = if (section == entry) FontWeight.SemiBold else FontWeight.Medium)
+                                        Text(
+                                            entry.summary,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -2991,9 +3465,22 @@ private fun PreferencesDialog(controller: ComposeAppController) {
                                             transfers = draft.transfers.copy(showTorrentSelectorBeforeDownloading = it)
                                         )
                                     }
-                                    PreferenceToggle("Automatically rename duplicate files", draft.transfers.autoRenameDuplicateFiles) {
-                                        draft = draft.copy(transfers = draft.transfers.copy(autoRenameDuplicateFiles = it))
-                                    }
+                                    PreferenceDropdownField(
+                                        label = "If a download file already exists",
+                                        value = when (draft.transfers.duplicateDownloadAction) {
+                                            DuplicateDownloadAction.IGNORE -> "Ignore the new download"
+                                            DuplicateDownloadAction.RENAME -> "Save with a different name"
+                                            DuplicateDownloadAction.REPLACE -> "Replace the existing file"
+                                        },
+                                        options = listOf(
+                                            DuplicateDownloadAction.IGNORE to "Ignore the new download",
+                                            DuplicateDownloadAction.RENAME to "Save with a different name",
+                                            DuplicateDownloadAction.REPLACE to "Replace the existing file"
+                                        ),
+                                        onSelected = { action ->
+                                            draft = draft.copy(transfers = draft.transfers.copy(duplicateDownloadAction = action))
+                                        }
+                                    )
                                     PreferenceToggle("Show Transfers by default", draft.transfers.showTransfersTrayByDefault) {
                                         draft = draft.copy(transfers = draft.transfers.copy(showTransfersTrayByDefault = it))
                                     }
@@ -3545,7 +4032,14 @@ private fun PreferenceToggle(
     onChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .toggleable(
+                value = value,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = onChange
+            ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -3559,11 +4053,10 @@ private fun PreferenceToggle(
                 )
             }
         }
-        FilterChip(
-            selected = value,
+        Switch(
+            checked = value,
             enabled = enabled,
-            onClick = { onChange(!value) },
-            label = { Text(if (value) "On" else "Off") }
+            onCheckedChange = null
         )
     }
 }
@@ -3992,7 +4485,7 @@ private fun LanguageDialog(controller: ComposeAppController) {
 private fun OpenLinkDialog(controller: ComposeAppController) {
     val validationError = controller.openLinkDialogError ?: validateOpenLinkDraft(controller.openLinkText)
 
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = { controller.openLinkDialogOpen = false },
         confirmButton = {
             Button(onClick = { controller.submitOpenLink(controller.openLinkText) }, enabled = validationError == null) {
@@ -4005,25 +4498,26 @@ private fun OpenLinkDialog(controller: ComposeAppController) {
             }
         },
         title = { Text("Open Link") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = controller.openLinkText,
-                    onValueChange = {
-                        controller.openLinkText = it
-                        controller.openLinkDialogError = null
-                    },
-                    label = { Text("Magnet or torrent URL") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = validationError != null
-                )
-                validationError?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-            }
+        preset = DesktopDialogPreset.COMPACT,
+        preferredWidth = 560.dp,
+        preferredHeight = 260.dp,
+        scrollBody = false
+    ) {
+        OutlinedTextField(
+            value = controller.openLinkText,
+            onValueChange = {
+                controller.openLinkText = it
+                controller.openLinkDialogError = null
+            },
+            label = { Text("Magnet, ED2K, or torrent URL") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            isError = validationError != null
+        )
+        validationError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
-    )
+    }
 }
 
 @Composable
@@ -4034,7 +4528,7 @@ private fun AdvancedSearchDialog(controller: ComposeAppController) {
     val fields = remember(draft.category) { controller.advancedSearchFields(draft.category) }
     val hasValues = draft.values.values.any { it.trim().isNotEmpty() }
 
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = {
             controller.dismissAdvancedSearchSuggestions()
             controller.advancedSearchDialogOpen = false
@@ -4053,62 +4547,59 @@ private fun AdvancedSearchDialog(controller: ComposeAppController) {
             }
         },
         title = { Text("Advanced Search") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        preset = DesktopDialogPreset.FORM,
+        preferredWidth = 720.dp,
+        preferredHeight = if (LocalDesktopDensity.current.compactVertical) 520.dp else 620.dp
+    ) {
+        Box {
+            OutlinedButton(
+                onClick = { categoryMenuExpanded = true },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Box {
-                    OutlinedButton(
-                        onClick = { categoryMenuExpanded = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Category: ${friendlyName(draft.category.name)}")
-                    }
-                    DropdownMenu(
-                        expanded = categoryMenuExpanded,
-                        onDismissRequest = { categoryMenuExpanded = false }
-                    ) {
-                        categories.forEach { category ->
-                            DropdownMenuItem(
-                                text = { Text(friendlyName(category.name)) },
-                                onClick = {
-                                    categoryMenuExpanded = false
-                                    controller.updateAdvancedSearchCategory(category)
-                                }
-                            )
+                Text("Category: ${friendlyName(draft.category.name)}")
+            }
+            DropdownMenu(
+                expanded = categoryMenuExpanded,
+                onDismissRequest = { categoryMenuExpanded = false }
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = { Text(friendlyName(category.name)) },
+                        onClick = {
+                            categoryMenuExpanded = false
+                            controller.updateAdvancedSearchCategory(category)
                         }
-                    }
-                }
-                fields.forEach { field ->
-                    AdvancedSearchFieldInput(
-                        controller = controller,
-                        field = field,
-                        value = draft.values[field.key].orEmpty()
                     )
-                }
-                Text(
-                    "Advanced searches open in new search tabs.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                when {
-                    controller.advancedSearchDialogError != null -> Text(
-                        controller.advancedSearchDialogError!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    !hasValues -> {
-                        Text(
-                            "Fill in at least one field to continue.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
                 }
             }
         }
-    )
+        fields.forEach { field ->
+            AdvancedSearchFieldInput(
+                controller = controller,
+                field = field,
+                value = draft.values[field.key].orEmpty()
+            )
+        }
+        Text(
+            "Advanced searches open in new search tabs.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        when {
+            controller.advancedSearchDialogError != null -> Text(
+                controller.advancedSearchDialogError!!,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            !hasValues -> {
+                Text(
+                    "Fill in at least one field to continue.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -4296,7 +4787,7 @@ private fun FriendLoginDialog(controller: ComposeAppController) {
         "Sign In"
     }
 
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = { controller.friendLoginDialogOpen = false },
         confirmButton = {
             Button(
@@ -4321,74 +4812,71 @@ private fun FriendLoginDialog(controller: ComposeAppController) {
             }
         },
         title = { Text(title) },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+        preset = DesktopDialogPreset.FORM,
+        preferredWidth = 700.dp,
+        preferredHeight = if (LocalDesktopDensity.current.compactVertical) 520.dp else 600.dp
+    ) {
+        Text(
+            if (mode == FriendLoginDialogMode.SAVE_SETTINGS) {
+                "Save account details for automatic sign-in without starting a live Friends connection right now."
+            } else {
+                "Use the saved backend account configuration to sign in, browse friends, and start chatting."
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Box {
+            OutlinedButton(
+                onClick = { configMenuExpanded = true },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    if (mode == FriendLoginDialogMode.SAVE_SETTINGS) {
-                        "Save account details for automatic sign-in without starting a live Friends connection right now."
-                    } else {
-                        "Use the saved backend account configuration to sign in, browse friends, and start chatting."
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Box {
-                    OutlinedButton(
-                        onClick = { configMenuExpanded = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(localDraft.configLabel)
-                    }
-                    DropdownMenu(
-                        expanded = configMenuExpanded,
-                        onDismissRequest = { configMenuExpanded = false }
-                    ) {
-                        configs.forEach { config ->
-                            DropdownMenuItem(
-                                text = { Text(config.label) },
-                                onClick = {
-                                    configMenuExpanded = false
-                                    controller.updateFriendLoginConfig(config.label)
-                                }
-                            )
+                Text(localDraft.configLabel)
+            }
+            DropdownMenu(
+                expanded = configMenuExpanded,
+                onDismissRequest = { configMenuExpanded = false }
+            ) {
+                configs.forEach { config ->
+                    DropdownMenuItem(
+                        text = { Text(config.label) },
+                        onClick = {
+                            configMenuExpanded = false
+                            controller.updateFriendLoginConfig(config.label)
                         }
-                    }
-                }
-                if (localDraft.configLabel == "Jabber") {
-                    OutlinedTextField(
-                        value = localDraft.serviceName,
-                        onValueChange = { localDraft = localDraft.copy(serviceName = it) },
-                        label = { Text("Domain") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
                     )
-                }
-                OutlinedTextField(
-                    value = localDraft.username,
-                    onValueChange = { localDraft = localDraft.copy(username = it) },
-                    label = { Text(if (localDraft.configLabel == "Gmail") "Email" else "Username") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = localDraft.password,
-                    onValueChange = { localDraft = localDraft.copy(password = it) },
-                    label = { Text("Password") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                PreferenceToggle("Sign in automatically", localDraft.autoLogin) {
-                    localDraft = localDraft.copy(autoLogin = it)
-                }
-                displayedError?.let { error ->
-                    Text(error, color = MaterialTheme.colorScheme.error)
                 }
             }
         }
-    )
+        if (localDraft.configLabel == "Jabber") {
+            OutlinedTextField(
+                value = localDraft.serviceName,
+                onValueChange = { localDraft = localDraft.copy(serviceName = it) },
+                label = { Text("Domain") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        OutlinedTextField(
+            value = localDraft.username,
+            onValueChange = { localDraft = localDraft.copy(username = it) },
+            label = { Text(if (localDraft.configLabel == "Gmail") "Email" else "Username") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = localDraft.password,
+            onValueChange = { localDraft = localDraft.copy(password = it) },
+            label = { Text("Password") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        PreferenceToggle("Sign in automatically", localDraft.autoLogin) {
+            localDraft = localDraft.copy(autoLogin = it)
+        }
+        displayedError?.let { error ->
+            Text(error, color = MaterialTheme.colorScheme.error)
+        }
+    }
 }
 
 @Composable
@@ -4400,7 +4888,7 @@ private fun AddFriendDialog(controller: ComposeAppController) {
         else -> null
     }
 
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = { controller.addFriendDialogOpen = false },
         confirmButton = {
             Button(
@@ -4420,29 +4908,30 @@ private fun AddFriendDialog(controller: ComposeAppController) {
             }
         },
         title = { Text("Add Friend") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Username") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = validationError != null
-                )
-                OutlinedTextField(
-                    value = nickname,
-                    onValueChange = { nickname = it },
-                    label = { Text("Nickname") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                validationError?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-            }
+        preset = DesktopDialogPreset.COMPACT,
+        preferredWidth = 560.dp,
+        preferredHeight = 300.dp,
+        scrollBody = false
+    ) {
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            isError = validationError != null
+        )
+        OutlinedTextField(
+            value = nickname,
+            onValueChange = { nickname = it },
+            label = { Text("Nickname") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        validationError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
-    )
+    }
 }
 
 @Composable
@@ -4452,7 +4941,7 @@ private fun TextEntryDialog(dialog: TextEntryDialogState, dismiss: () -> Unit) {
     val validationError = dialog.validator(value)
     val displayedError = submitError ?: validationError
 
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = dismiss,
         confirmButton = {
             Button(onClick = {
@@ -4477,25 +4966,26 @@ private fun TextEntryDialog(dialog: TextEntryDialogState, dismiss: () -> Unit) {
             }
         },
         title = { Text(dialog.title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = {
-                        value = it
-                        submitError = null
-                    },
-                    label = { Text(dialog.label) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = displayedError != null
-                )
-                displayedError?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-            }
+        preset = DesktopDialogPreset.COMPACT,
+        preferredWidth = 560.dp,
+        preferredHeight = 280.dp,
+        scrollBody = false
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                value = it
+                submitError = null
+            },
+            label = { Text(dialog.label) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            isError = displayedError != null
+        )
+        displayedError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
-    )
+    }
 }
 
 @Composable
@@ -4503,7 +4993,7 @@ private fun ConfirmationDialog(dialog: ConfirmationDialogState, dismiss: () -> U
     var checkboxChecked by remember(dialog.checkboxLabel, dialog.checkboxInitialChecked) {
         mutableStateOf(dialog.checkboxInitialChecked)
     }
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = {
             dialog.onDismiss()
             dismiss()
@@ -4539,22 +5029,22 @@ private fun ConfirmationDialog(dialog: ConfirmationDialogState, dismiss: () -> U
             }
         },
         title = { Text(dialog.title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(dialog.message)
-                dialog.checkboxLabel?.let { label ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { checkboxChecked = !checkboxChecked },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Checkbox(checked = checkboxChecked, onCheckedChange = { checkboxChecked = it })
-                        Text(label, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
+        preset = DesktopDialogPreset.FORM,
+        preferredWidth = 620.dp,
+        preferredHeight = 320.dp
+    ) {
+        Text(dialog.message)
+        dialog.checkboxLabel?.let { label ->
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { checkboxChecked = !checkboxChecked },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Checkbox(checked = checkboxChecked, onCheckedChange = { checkboxChecked = it })
+                Text(label, style = MaterialTheme.typography.bodyMedium)
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -4562,7 +5052,7 @@ private fun LibraryDeletionChoiceDialog(
     controller: ComposeAppController,
     dialog: LibraryDeletionChoiceDialogState
 ) {
-    AlertDialog(
+    ResponsiveDesktopDialog(
         onDismissRequest = { controller.libraryDeletionChoiceDialog = null },
         confirmButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -4586,8 +5076,13 @@ private fun LibraryDeletionChoiceDialog(
             }
         },
         title = { Text(dialog.title) },
-        text = { Text(dialog.message) }
-    )
+        preset = DesktopDialogPreset.COMPACT,
+        preferredWidth = 620.dp,
+        preferredHeight = 280.dp,
+        scrollBody = false
+    ) {
+        Text(dialog.message)
+    }
 }
 
 @Composable
@@ -4793,6 +5288,9 @@ private fun SharedCollectionSharingPanel(controller: ComposeAppController) {
     val editorRows = controller.currentSharedListSharingEditorRows()
     val signedIn = controller.currentSharedListSharingSignedIn()
     val busy = controller.currentSharedListSharingBusy()
+    val ed2kAssociationLabel = controller.currentSharedListEd2kAssociationLabel()
+    val ed2kAssociationBody = controller.currentSharedListEd2kAssociationBody()
+    val ed2kAssociationPublished = controller.currentSharedListEd2kPublished()
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
@@ -4803,6 +5301,26 @@ private fun SharedCollectionSharingPanel(controller: ComposeAppController) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text("Sharing", fontWeight = FontWeight.SemiBold)
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    InlineStatusBadge(
+                        ed2kAssociationLabel,
+                        tone = if (ed2kAssociationPublished) BadgeTone.GREEN else BadgeTone.ORANGE,
+                        icon = if (ed2kAssociationPublished) Icons.Rounded.Check else Icons.Rounded.CloudOff
+                    )
+                    Text(
+                        ed2kAssociationBody,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             when {
                 controller.sharedListSharingEditMode && signedIn -> {
                     OutlinedTextField(
@@ -4982,7 +5500,7 @@ private fun AppShell(controller: ComposeAppController) {
                 ShellHeader(controller, searchFocusRequester)
                 SearchTabs(controller)
             }
-            if (controller.trayExpanded) {
+            if (controller.trayExpanded && controller.currentScreen != ComposeScreen.Transfers) {
                 VerticalSplitPane(
                     fraction = controller.transferMainAreaFraction,
                     onFractionChange = { controller.updateTransferPaneFraction(it) },
@@ -4999,15 +5517,30 @@ private fun AppShell(controller: ComposeAppController) {
                                 .fillMaxSize()
                                 .padding(horizontal = desktopDensity.shellPadding, vertical = desktopDensity.shellPadding)
                         ) {
-                            TransferTray(controller, embedded = false)
+                            TransferTray(controller)
                         }
                     }
                 )
             } else {
-                MainWorkspace(controller)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    MainWorkspace(controller)
+                }
             }
-            StatusBar(controller)
         }
+        ConnectionStatusOverlay(
+            controller = controller,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(
+                    start = desktopDensity.overlayInset,
+                    bottom = desktopDensity.overlayInset
+                )
+                .zIndex(3f)
+        )
         val activeFriendRequest = controller.activeFriendRequest()
         if (
             (activeFriendRequest != null && controller.currentScreen != ComposeScreen.Friends) ||
@@ -5593,6 +6126,8 @@ private fun SearchTabs(controller: ComposeAppController) {
     ) {
         controller.searchTabs.forEach { tab ->
             val isActive = tab.id == activeId
+            val tabTone = searchCategoryTabTone(controller.searchPresentationCategory(tab))
+            val tabColors = semanticTabColors(tabTone, isActive)
             var tabMenuExpanded by remember(tab.id) { mutableStateOf(false) }
             Box(
                 modifier = Modifier.onPointerEvent(PointerEventType.Press) { event ->
@@ -5605,7 +6140,8 @@ private fun SearchTabs(controller: ComposeAppController) {
                 Surface(
                     shape = RoundedCornerShape(desktopDensity.tabCorner),
                     tonalElevation = if (isActive) 3.dp else 0.dp,
-                    color = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                    color = tabColors.container,
+                    border = BorderStroke(1.dp, tabColors.border),
                     modifier = Modifier.clickable { controller.selectSearchTab(tab.id) }
                 ) {
                     Row(
@@ -5624,6 +6160,7 @@ private fun SearchTabs(controller: ComposeAppController) {
                             Text(
                                 tab.title,
                                 style = desktopType.body,
+                                color = tabColors.content,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium
@@ -5634,13 +6171,13 @@ private fun SearchTabs(controller: ComposeAppController) {
                                     .distinct()
                                     .joinToString(" • "),
                                 style = desktopType.meta,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = if (isActive) tabColors.content.copy(alpha = 0.82f) else MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
                         CompactIconButton(onClick = { controller.closeSearchTab(tab.id) }) {
-                            Icon(Icons.Rounded.Close, contentDescription = "Close")
+                            Icon(Icons.Rounded.Close, contentDescription = "Close", tint = tabColors.content)
                         }
                     }
                 }
@@ -5692,6 +6229,7 @@ private fun SideRail(controller: ComposeAppController) {
                 selected = controller.currentScreen is ComposeScreen.Library,
                 icon = Icons.Rounded.Folder,
                 label = "My Files",
+                tone = BadgeTone.GREEN,
                 onClick = { controller.selectLibrary() },
                 desktopDensity = desktopDensity,
                 desktopType = desktopType
@@ -5700,6 +6238,7 @@ private fun SideRail(controller: ComposeAppController) {
                 selected = controller.currentScreen is ComposeScreen.Transfers,
                 icon = Icons.Rounded.SwapVert,
                 label = "Transfers",
+                tone = BadgeTone.MAGENTA,
                 onClick = { controller.selectTransfers() },
                 desktopDensity = desktopDensity,
                 desktopType = desktopType
@@ -5708,6 +6247,7 @@ private fun SideRail(controller: ComposeAppController) {
                 selected = controller.currentScreen is ComposeScreen.Friends,
                 icon = Icons.Rounded.Forum,
                 label = "Friends",
+                tone = BadgeTone.CYAN,
                 onClick = { controller.selectFriends() },
                 desktopDensity = desktopDensity,
                 desktopType = desktopType
@@ -5716,6 +6256,7 @@ private fun SideRail(controller: ComposeAppController) {
                 selected = controller.currentScreen is ComposeScreen.Player,
                 icon = Icons.Rounded.LibraryMusic,
                 label = "Player",
+                tone = BadgeTone.ORANGE,
                 onClick = { controller.selectPlayer() },
                 desktopDensity = desktopDensity,
                 desktopType = desktopType
@@ -5729,14 +6270,32 @@ private fun SideRailItem(
     selected: Boolean,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
+    tone: BadgeTone,
     onClick: () -> Unit,
     desktopDensity: DesktopDensity,
     desktopType: DesktopTypeScale
 ) {
+    val selectedColors = metricBadgeColors(tone)
+    val containerColor = if (selected) {
+        selectedColors.container
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.14f)
+    }
+    val contentColor = if (selected) {
+        selectedColors.content
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val borderColor = if (selected) {
+        selectedColors.border
+    } else {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f)
+    }
     Surface(
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        color = containerColor,
         shape = RoundedCornerShape(desktopDensity.railItemCorner),
         tonalElevation = if (selected) 2.dp else 0.dp,
+        border = BorderStroke(1.dp, borderColor),
         modifier = Modifier
             .width(desktopDensity.railWidth - 10.dp)
             .clickable(onClick = onClick)
@@ -5751,11 +6310,13 @@ private fun SideRailItem(
             Icon(
                 icon,
                 contentDescription = null,
-                modifier = Modifier.size(desktopDensity.railIconSize)
+                modifier = Modifier.size(desktopDensity.railIconSize),
+                tint = contentColor
             )
             Text(
                 label,
                 style = desktopType.label,
+                color = contentColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -5793,6 +6354,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
     val availableLibraryColumns = controller.availableLibraryColumns()
     val visibleLibraryColumns = controller.visibleLibraryColumns.intersect(availableLibraryColumns.toSet())
         .ifEmpty { setOf(LibraryColumn.NAME) }
+    val orderedVisibleLibraryColumns = availableLibraryColumns.filter { it in visibleLibraryColumns }
     val availableLibrarySortModes = controller.availableLibrarySortModes()
     var activeSectionDropTargetActive by remember(controller.selectedLibrarySectionId) { mutableStateOf(false) }
     val selectedItems = controller.selectedLibraryItems()
@@ -6019,7 +6581,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
                 }
                 if (activeSection?.isShared == true) {
                     Text(
-                        "Visibility: ${if (activeSection.isPublic) "Public" else "Friends Only"} • Shared with ${controller.sharedListFriendIds.size} account${if (controller.sharedListFriendIds.size == 1) "" else "s"}",
+                        "Visibility: ${if (activeSection.isPublic) "Public" else "Friends Only"} • Shared with ${controller.sharedListFriendIds.size} account${if (controller.sharedListFriendIds.size == 1) "" else "s"} • ${if (activeSection.isPublic) "Published to ED2K/Kad" else "ED2K/Kad off"}",
                         style = desktopType.summary,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -6494,295 +7056,74 @@ private fun LibraryScreen(controller: ComposeAppController) {
                             }
                         }
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = visibleItems.isNotEmpty() && visibleItems.all { it.file.absolutePath in controller.selectedLibraryItemPaths },
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        controller.selectAllVisibleLibraryItems()
-                                    } else {
-                                        controller.clearLibrarySelection()
-                                    }
-                                }
-                            )
-                            if (LibraryColumn.NAME in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Name",
-                                    active = controller.librarySortMode == LibrarySortMode.NAME,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.weight(1.4f)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.NAME)
-                                }
-                            }
-                            if (LibraryColumn.TYPE in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Type",
-                                    active = controller.librarySortMode == LibrarySortMode.TYPE,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(96.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.TYPE)
-                                }
-                            }
-                            if (LibraryColumn.FILENAME in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Filename",
-                                    active = controller.librarySortMode == LibrarySortMode.FILENAME,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(172.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.FILENAME)
-                                }
-                            }
-                            if (LibraryColumn.EXTENSION in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Extension",
-                                    active = controller.librarySortMode == LibrarySortMode.EXTENSION,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(92.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.EXTENSION)
-                                }
-                            }
-                            if (LibraryColumn.SIZE in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Size",
-                                    active = controller.librarySortMode == LibrarySortMode.SIZE,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(92.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.SIZE)
-                                }
-                            }
-                            if (LibraryColumn.ACTIVITY in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Activity",
-                                    active = controller.librarySortMode == LibrarySortMode.ACTIVITY,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(126.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.ACTIVITY)
-                                }
-                            }
-                            if (LibraryColumn.HITS in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Hits",
-                                    active = controller.librarySortMode == LibrarySortMode.HITS,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.HITS)
-                                }
-                            }
-                            if (LibraryColumn.UPLOADS in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Uploads",
-                                    active = controller.librarySortMode == LibrarySortMode.UPLOADS,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(78.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.UPLOADS)
-                                }
-                            }
-                            if (LibraryColumn.UPLOAD_ATTEMPTS in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Upload Attempts",
-                                    active = controller.librarySortMode == LibrarySortMode.UPLOAD_ATTEMPTS,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(132.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.UPLOAD_ATTEMPTS)
-                                }
-                            }
-                            if (LibraryColumn.UPDATED in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Updated",
-                                    active = controller.librarySortMode == LibrarySortMode.UPDATED,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(108.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.UPDATED)
-                                }
-                            }
-                            if (LibraryColumn.LOCATION in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Location",
-                                    active = controller.librarySortMode == LibrarySortMode.LOCATION,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(180.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.LOCATION)
-                                }
-                            }
-                            if (LibraryColumn.LENGTH in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Length",
-                                    active = controller.librarySortMode == LibrarySortMode.LENGTH,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(84.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.LENGTH)
-                                }
-                            }
-                            if (LibraryColumn.BITRATE in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Bitrate",
-                                    active = controller.librarySortMode == LibrarySortMode.BITRATE,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(86.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.BITRATE)
-                                }
-                            }
-                            if (LibraryColumn.TRACK in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Track",
-                                    active = controller.librarySortMode == LibrarySortMode.TRACK,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.TRACK)
-                                }
-                            }
-                            if (LibraryColumn.ARTIST in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Artist",
-                                    active = controller.librarySortMode == LibrarySortMode.ARTIST,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.ARTIST)
-                                }
-                            }
-                            if (LibraryColumn.ALBUM in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Album",
-                                    active = controller.librarySortMode == LibrarySortMode.ALBUM,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.ALBUM)
-                                }
-                            }
-                            if (LibraryColumn.GENRE in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Genre",
-                                    active = controller.librarySortMode == LibrarySortMode.GENRE,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(96.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.GENRE)
-                                }
-                            }
-                            if (LibraryColumn.YEAR in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Year",
-                                    active = controller.librarySortMode == LibrarySortMode.YEAR,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.YEAR)
-                                }
-                            }
-                            if (LibraryColumn.AUTHOR in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = libraryColumnLabel(controller.libraryCategoryFilter, LibraryColumn.AUTHOR),
-                                    active = controller.librarySortMode == LibrarySortMode.AUTHOR,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.AUTHOR)
-                                }
-                            }
-                            if (LibraryColumn.COMPANY in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Company",
-                                    active = controller.librarySortMode == LibrarySortMode.COMPANY,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.COMPANY)
-                                }
-                            }
-                            if (LibraryColumn.PLATFORM in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Platform",
-                                    active = controller.librarySortMode == LibrarySortMode.PLATFORM,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(100.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.PLATFORM)
-                                }
-                            }
-                            if (LibraryColumn.DESCRIPTION in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Description",
-                                    active = controller.librarySortMode == LibrarySortMode.DESCRIPTION,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(180.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.DESCRIPTION)
-                                }
-                            }
-                            if (LibraryColumn.FILES in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Files",
-                                    active = controller.librarySortMode == LibrarySortMode.FILES,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(68.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.FILES)
-                                }
-                            }
-                            if (LibraryColumn.TRACKERS in visibleLibraryColumns) {
-                                SortableHeaderText(
-                                    label = "Trackers",
-                                    active = controller.librarySortMode == LibrarySortMode.TRACKERS,
-                                    descending = controller.librarySortDescending,
-                                    modifier = Modifier.width(82.dp)
-                                ) {
-                                    controller.toggleLibrarySort(LibrarySortMode.TRACKERS)
-                                }
-                            }
-                            Spacer(Modifier.width(54.dp))
-                        }
-                    }
-                    HorizontalDivider()
-                    if (visibleItems.isEmpty()) {
-                        EmptyState(
-                            icon = Icons.Rounded.Folder,
-                            title = libraryEmptyStateTitle(controller.hasActiveLibraryFilters(), activeSection),
-                            body = libraryEmptyStateBody(controller.hasActiveLibraryFilters(), activeSection)
-                        )
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(visibleItems, key = { it.file.absolutePath }) { item ->
-                                val isPlaying = currentFile == item.file &&
-                                    playerState in setOf(PlayerState.PLAYING, PlayerState.SEEKING_PLAY, PlayerState.PAUSED)
-                                FileRow(
-                                    controller = controller,
-                                    item = item,
-                                    selected = item.file.absolutePath in controller.selectedLibraryItemPaths,
-                                    primarySelected = controller.selectedLibraryItemPath == item.file.absolutePath,
-                                    selectedCount = selectedItems.size,
-                                    isPlaying = isPlaying,
-                                    visibleColumns = visibleLibraryColumns,
-                                    onSelect = { extendSelection, toggleSelection ->
-                                        controller.selectLibraryItem(item, extendSelection, toggleSelection)
-                                        tableFocusRequester.requestFocus()
-                                    },
-                                    onToggleChecked = {
-                                        controller.toggleLibraryItemChecked(item)
-                                        tableFocusRequester.requestFocus()
+                        DesktopScrollableTable(
+                            visibleColumns = orderedVisibleLibraryColumns,
+                            specFor = ::libraryColumnSpec,
+                            leadingWidth = 48.dp,
+                            trailingWidth = 54.dp,
+                            rowHorizontalPadding = 14.dp
+                        ) { layout ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = visibleItems.isNotEmpty() && visibleItems.all { it.file.absolutePath in controller.selectedLibraryItemPaths },
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            controller.selectAllVisibleLibraryItems()
+                                        } else {
+                                            controller.clearLibrarySelection()
+                                        }
                                     }
                                 )
-                                HorizontalDivider()
+                                orderedVisibleLibraryColumns.forEach { column ->
+                                    SortableHeaderText(
+                                        label = libraryColumnLabel(controller.libraryCategoryFilter, column),
+                                        active = controller.librarySortMode.asLibraryColumn() == column,
+                                        descending = controller.librarySortDescending,
+                                        modifier = layout.modifier(column)
+                                    ) {
+                                        controller.toggleLibrarySort(column.asLibrarySortMode())
+                                    }
+                                }
+                                Spacer(Modifier.width(54.dp))
+                            }
+                            HorizontalDivider()
+                            if (visibleItems.isEmpty()) {
+                                EmptyState(
+                                    icon = Icons.Rounded.Folder,
+                                    title = libraryEmptyStateTitle(controller.hasActiveLibraryFilters(), activeSection),
+                                    body = libraryEmptyStateBody(controller.hasActiveLibraryFilters(), activeSection)
+                                )
+                            } else {
+                                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                                    items(visibleItems, key = { it.file.absolutePath }) { item ->
+                                        val isPlaying = currentFile == item.file &&
+                                            playerState in setOf(PlayerState.PLAYING, PlayerState.SEEKING_PLAY, PlayerState.PAUSED)
+                                        FileRow(
+                                            controller = controller,
+                                            item = item,
+                                            selected = item.file.absolutePath in controller.selectedLibraryItemPaths,
+                                            primarySelected = controller.selectedLibraryItemPath == item.file.absolutePath,
+                                            selectedCount = selectedItems.size,
+                                            isPlaying = isPlaying,
+                                            visibleColumns = visibleLibraryColumns,
+                                            layout = layout,
+                                            onSelect = { extendSelection, toggleSelection ->
+                                                controller.selectLibraryItem(item, extendSelection, toggleSelection)
+                                                tableFocusRequester.requestFocus()
+                                            },
+                                            onToggleChecked = {
+                                                controller.toggleLibraryItemChecked(item)
+                                                tableFocusRequester.requestFocus()
+                                            }
+                                        )
+                                        HorizontalDivider()
+                                    }
+                                }
                             }
                         }
                     }
@@ -6867,6 +7208,7 @@ private fun FileRow(
     selectedCount: Int,
     isPlaying: Boolean,
     visibleColumns: Set<LibraryColumn>,
+    layout: DesktopTableLayout<LibraryColumn>,
     onSelect: (extendSelection: Boolean, toggleSelection: Boolean) -> Unit,
     onToggleChecked: () -> Unit
 ) {
@@ -6913,7 +7255,7 @@ private fun FileRow(
                 onCheckedChange = { onToggleChecked() }
             )
             if (LibraryColumn.NAME in visibleColumns) {
-                Row(modifier = Modifier.weight(1.4f), verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = layout.modifier(LibraryColumn.NAME), verticalAlignment = Alignment.CenterVertically) {
                     FileIdentityIcon(
                         icon = identity.icon,
                         modifier = Modifier.size(18.dp),
@@ -6931,25 +7273,25 @@ private fun FileRow(
                 }
             }
             if (LibraryColumn.TYPE in visibleColumns) {
-                Text(item.category.getSingularName(), modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
+                Text(item.category.getSingularName(), modifier = layout.modifier(LibraryColumn.TYPE), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.FILENAME in visibleColumns) {
                 Text(
                     libraryColumnValueText(item, LibraryColumn.FILENAME),
-                    modifier = Modifier.width(172.dp),
+                    modifier = layout.modifier(LibraryColumn.FILENAME),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
             if (LibraryColumn.EXTENSION in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.EXTENSION), modifier = Modifier.width(92.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.EXTENSION), modifier = layout.modifier(LibraryColumn.EXTENSION), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.SIZE in visibleColumns) {
-                Text(formatBytes(item.size), modifier = Modifier.width(92.dp), style = MaterialTheme.typography.bodySmall)
+                Text(formatBytes(item.size), modifier = layout.modifier(LibraryColumn.SIZE), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.ACTIVITY in visibleColumns) {
-                Column(modifier = Modifier.width(126.dp)) {
+                Column(modifier = layout.modifier(LibraryColumn.ACTIVITY)) {
                     Text("${item.numHits} hits", style = MaterialTheme.typography.bodySmall)
                     Text(
                         "${item.numUploads} uploads",
@@ -6959,68 +7301,68 @@ private fun FileRow(
                 }
             }
             if (LibraryColumn.HITS in visibleColumns) {
-                Text(item.numHits.toString(), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
+                Text(item.numHits.toString(), modifier = layout.modifier(LibraryColumn.HITS), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.UPLOADS in visibleColumns) {
-                Text(item.numUploads.toString(), modifier = Modifier.width(78.dp), style = MaterialTheme.typography.bodySmall)
+                Text(item.numUploads.toString(), modifier = layout.modifier(LibraryColumn.UPLOADS), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.UPLOAD_ATTEMPTS in visibleColumns) {
-                Text(item.numUploadAttempts.toString(), modifier = Modifier.width(132.dp), style = MaterialTheme.typography.bodySmall)
+                Text(item.numUploadAttempts.toString(), modifier = layout.modifier(LibraryColumn.UPLOAD_ATTEMPTS), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.UPDATED in visibleColumns) {
                 Text(
                     formatDate(item.lastModifiedTime),
-                    modifier = Modifier.width(108.dp),
+                    modifier = layout.modifier(LibraryColumn.UPDATED),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             if (LibraryColumn.LOCATION in visibleColumns) {
                 Text(
                     libraryColumnValueText(item, LibraryColumn.LOCATION),
-                    modifier = Modifier.width(180.dp),
+                    modifier = layout.modifier(LibraryColumn.LOCATION),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
             if (LibraryColumn.LENGTH in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.LENGTH), modifier = Modifier.width(84.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.LENGTH), modifier = layout.modifier(LibraryColumn.LENGTH), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.BITRATE in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.BITRATE), modifier = Modifier.width(86.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.BITRATE), modifier = layout.modifier(LibraryColumn.BITRATE), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.TRACK in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.TRACK), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.TRACK), modifier = layout.modifier(LibraryColumn.TRACK), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.ARTIST in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.ARTIST), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.ARTIST), modifier = layout.modifier(LibraryColumn.ARTIST), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.ALBUM in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.ALBUM), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.ALBUM), modifier = layout.modifier(LibraryColumn.ALBUM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.GENRE in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.GENRE), modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.GENRE), modifier = layout.modifier(LibraryColumn.GENRE), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.YEAR in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.YEAR), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.YEAR), modifier = layout.modifier(LibraryColumn.YEAR), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.AUTHOR in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.AUTHOR), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.AUTHOR), modifier = layout.modifier(LibraryColumn.AUTHOR), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.COMPANY in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.COMPANY), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.COMPANY), modifier = layout.modifier(LibraryColumn.COMPANY), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.PLATFORM in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.PLATFORM), modifier = Modifier.width(100.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.PLATFORM), modifier = layout.modifier(LibraryColumn.PLATFORM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.DESCRIPTION in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.DESCRIPTION), modifier = Modifier.width(180.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(libraryColumnValueText(item, LibraryColumn.DESCRIPTION), modifier = layout.modifier(LibraryColumn.DESCRIPTION), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             if (LibraryColumn.FILES in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.FILES), modifier = Modifier.width(68.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.FILES), modifier = layout.modifier(LibraryColumn.FILES), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.TRACKERS in visibleColumns) {
-                Text(libraryColumnValueText(item, LibraryColumn.TRACKERS), modifier = Modifier.width(82.dp), style = MaterialTheme.typography.bodySmall)
+                Text(libraryColumnValueText(item, LibraryColumn.TRACKERS), modifier = layout.modifier(LibraryColumn.TRACKERS), style = MaterialTheme.typography.bodySmall)
             }
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
@@ -7212,13 +7554,17 @@ private fun SearchScreen(controller: ComposeAppController, tab: SearchTabSession
                                 }
                             }
                         )
-                        when {
-                            controller.canStopSearch(tab) -> CompactFilledTonalButton(onClick = { controller.stopSearch(tab) }) {
+                        if (controller.canStopSearch(tab)) {
+                            CompactFilledTonalButton(onClick = { controller.stopSearch(tab) }) {
                                 Text("Stop Search")
                             }
-
-                            controller.canRepeatSearch(tab) -> CompactOutlinedButton(onClick = { controller.repeatSearch(tab) }) {
-                                Text("Repeat Search")
+                        }
+                        if (controller.canSearchAgain(tab)) {
+                            CompactOutlinedButton(onClick = { controller.continueSearch(tab) }) {
+                                Text("Search Again")
+                            }
+                            CompactTextButton(onClick = { controller.restartSearch(tab) }) {
+                                Text("Restart Search")
                             }
                         }
                     }
@@ -7305,6 +7651,7 @@ private fun SearchResultsWorkspace(
     tableFocusRequester: FocusRequester,
     resultsListState: androidx.compose.foundation.lazy.LazyListState
 ) {
+    val orderedVisibleSearchColumns = availableSearchColumns.filter { it in visibleSearchColumns }
     HorizontalSplitPane(
         fraction = controller.searchResultsPaneFraction,
         onFractionChange = { controller.updateSearchPaneFraction(it) },
@@ -7330,293 +7677,93 @@ private fun SearchResultsWorkspace(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    HeaderContextMenuArea(
-                        menuContent = {
-                            availableSearchSortModes.forEach { mode ->
-                                DropdownMenuItem(
-                                    text = { Text("Sort by ${searchColumnLabel(presentationCategory, mode.asSearchColumn())}") },
-                                    onClick = {
-                                        controller.toggleSearchSort(tab, mode)
-                                        dismiss()
-                                    }
-                                )
+                    DesktopScrollableTable(
+                        visibleColumns = orderedVisibleSearchColumns,
+                        specFor = ::searchColumnSpec,
+                        leadingWidth = 48.dp,
+                        trailingWidth = 54.dp,
+                        rowHorizontalPadding = 14.dp
+                    ) { layout ->
+                        HeaderContextMenuArea(
+                            modifier = Modifier.fillMaxWidth(),
+                            menuContent = {
+                                availableSearchSortModes.forEach { mode ->
+                                    DropdownMenuItem(
+                                        text = { Text("Sort by ${searchColumnLabel(presentationCategory, mode.asSearchColumn())}") },
+                                        onClick = {
+                                            controller.toggleSearchSort(tab, mode)
+                                            dismiss()
+                                        }
+                                    )
+                                }
+                                HorizontalDivider()
+                                availableSearchColumns.forEach { column ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text("${if (column in visibleSearchColumns) "Hide" else "Show"} ${searchColumnLabel(presentationCategory, column)}")
+                                        },
+                                        onClick = {
+                                            controller.toggleSearchColumn(tab, column)
+                                            dismiss()
+                                        }
+                                    )
+                                }
                             }
-                            HorizontalDivider()
-                            availableSearchColumns.forEach { column ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text("${if (column in visibleSearchColumns) "Hide" else "Show"} ${searchColumnLabel(presentationCategory, column)}")
-                                    },
-                                    onClick = {
-                                        controller.toggleSearchColumn(tab, column)
-                                        dismiss()
-                                    }
-                                )
-                            }
-                        }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Checkbox(
-                                checked = results.isNotEmpty() && results.all { searchResultKey(it) in tab.selectedResultKeys },
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        controller.selectAllVisibleSearchResults(tab)
-                                    } else {
-                                        controller.clearSearchSelection(tab)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = results.isNotEmpty() && results.all { searchResultKey(it) in tab.selectedResultKeys },
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            controller.selectAllVisibleSearchResults(tab)
+                                        } else {
+                                            controller.clearSearchSelection(tab)
+                                        }
+                                    }
+                                )
+                                orderedVisibleSearchColumns.forEach { column ->
+                                    SortableHeaderText(
+                                        label = searchColumnLabel(presentationCategory, column),
+                                        active = tab.sortMode.asSearchColumn() == column && tab.sortMode != SearchSortMode.RELEVANCE,
+                                        descending = tab.sortDescending,
+                                        modifier = layout.modifier(column)
+                                    ) {
+                                        controller.toggleSearchSort(tab, column.asSearchSortMode())
                                     }
                                 }
-                            )
-                            if (SearchColumn.NAME in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Name",
-                                    active = tab.sortMode == SearchSortMode.NAME,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.weight(1.4f)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.NAME)
-                                }
+                                Spacer(Modifier.width(54.dp))
                             }
-                            if (SearchColumn.TYPE in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Type",
-                                    active = tab.sortMode == SearchSortMode.TYPE,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(96.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.TYPE)
-                                }
-                            }
-                            if (SearchColumn.FROM in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "From",
-                                    active = tab.sortMode == SearchSortMode.FROM,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.FROM)
-                                }
-                            }
-                            if (SearchColumn.FILENAME in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Filename",
-                                    active = tab.sortMode == SearchSortMode.FILENAME,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(172.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.FILENAME)
-                                }
-                            }
-                            if (SearchColumn.EXTENSION in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Extension",
-                                    active = tab.sortMode == SearchSortMode.EXTENSION,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(92.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.EXTENSION)
-                                }
-                            }
-                            if (SearchColumn.SIZE in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Size",
-                                    active = tab.sortMode == SearchSortMode.SIZE,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(90.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.SIZE)
-                                }
-                            }
-                            if (SearchColumn.SOURCES in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Sources",
-                                    active = tab.sortMode == SearchSortMode.SOURCES,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.SOURCES)
-                                }
-                            }
-                            if (SearchColumn.FRIENDS in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Friends",
-                                    active = tab.sortMode == SearchSortMode.FRIENDS,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.FRIENDS)
-                                }
-                            }
-                            if (SearchColumn.LENGTH in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Length",
-                                    active = tab.sortMode == SearchSortMode.LENGTH,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(84.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.LENGTH)
-                                }
-                            }
-                            if (SearchColumn.QUALITY in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Quality",
-                                    active = tab.sortMode == SearchSortMode.QUALITY,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(118.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.QUALITY)
-                                }
-                            }
-                            if (SearchColumn.BITRATE in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Bitrate",
-                                    active = tab.sortMode == SearchSortMode.BITRATE,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(86.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.BITRATE)
-                                }
-                            }
-                            if (SearchColumn.TRACK in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Track",
-                                    active = tab.sortMode == SearchSortMode.TRACK,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.TRACK)
-                                }
-                            }
-                            if (SearchColumn.ARTIST in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Artist",
-                                    active = tab.sortMode == SearchSortMode.ARTIST,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.ARTIST)
-                                }
-                            }
-                            if (SearchColumn.ALBUM in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Album",
-                                    active = tab.sortMode == SearchSortMode.ALBUM,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.ALBUM)
-                                }
-                            }
-                            if (SearchColumn.GENRE in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Genre",
-                                    active = tab.sortMode == SearchSortMode.GENRE,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(96.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.GENRE)
-                                }
-                            }
-                            if (SearchColumn.YEAR in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Year",
-                                    active = tab.sortMode == SearchSortMode.YEAR,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(72.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.YEAR)
-                                }
-                            }
-                            if (SearchColumn.AUTHOR in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = searchColumnLabel(presentationCategory, SearchColumn.AUTHOR),
-                                    active = tab.sortMode == SearchSortMode.AUTHOR,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.AUTHOR)
-                                }
-                            }
-                            if (SearchColumn.COMPANY in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Company",
-                                    active = tab.sortMode == SearchSortMode.COMPANY,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(120.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.COMPANY)
-                                }
-                            }
-                            if (SearchColumn.PLATFORM in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Platform",
-                                    active = tab.sortMode == SearchSortMode.PLATFORM,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(100.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.PLATFORM)
-                                }
-                            }
-                            if (SearchColumn.DESCRIPTION in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Description",
-                                    active = tab.sortMode == SearchSortMode.DESCRIPTION,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(180.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.DESCRIPTION)
-                                }
-                            }
-                            if (SearchColumn.FILES in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Files",
-                                    active = tab.sortMode == SearchSortMode.FILES,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(68.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.FILES)
-                                }
-                            }
-                            if (SearchColumn.TRACKERS in visibleSearchColumns) {
-                                SortableHeaderText(
-                                    label = "Trackers",
-                                    active = tab.sortMode == SearchSortMode.TRACKERS,
-                                    descending = tab.sortDescending,
-                                    modifier = Modifier.width(82.dp)
-                                ) {
-                                    controller.toggleSearchSort(tab, SearchSortMode.TRACKERS)
-                                }
-                            }
-                            Spacer(Modifier.width(54.dp))
                         }
-                    }
-                    HorizontalDivider()
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = resultsListState
-                    ) {
-                        items(results, key = { searchResultKey(it) }) { result ->
-                            SearchResultRow(
-                                controller = controller,
-                                tab = tab,
-                                result = result,
-                                visibleColumns = visibleSearchColumns,
-                                selected = searchResultKey(result) in tab.selectedResultKeys,
-                                primarySelected = searchResultKey(result) == selectedResult?.let(::searchResultKey),
-                                onSelect = { extendSelection, toggleSelection ->
-                                    controller.selectSearchResult(tab, result, extendSelection, toggleSelection)
-                                    tableFocusRequester.requestFocus()
-                                },
-                                onToggleChecked = {
-                                    controller.toggleSearchResultChecked(tab, result)
-                                    tableFocusRequester.requestFocus()
-                                }
-                            )
-                            HorizontalDivider()
+                        HorizontalDivider()
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = resultsListState
+                        ) {
+                            items(results, key = { searchResultKey(it) }) { result ->
+                                SearchResultRow(
+                                    controller = controller,
+                                    tab = tab,
+                                    result = result,
+                                    visibleColumns = visibleSearchColumns,
+                                    layout = layout,
+                                    selected = searchResultKey(result) in tab.selectedResultKeys,
+                                    primarySelected = searchResultKey(result) == selectedResult?.let(::searchResultKey),
+                                    onSelect = { extendSelection, toggleSelection ->
+                                        controller.selectSearchResult(tab, result, extendSelection, toggleSelection)
+                                        tableFocusRequester.requestFocus()
+                                    },
+                                    onToggleChecked = {
+                                        controller.toggleSearchResultChecked(tab, result)
+                                        tableFocusRequester.requestFocus()
+                                    }
+                                )
+                                HorizontalDivider()
+                            }
                         }
                     }
                 }
@@ -7866,9 +8013,11 @@ private fun SearchRangeFacetSection(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(controller.searchRangeFacetLabelText(facet), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
-                controller.searchRangeSelectionLabel(tab, facet)?.let { label ->
-                    Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+                Text(
+                    controller.searchRangeSelectionLabel(tab, facet) ?: tr("Any"),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             if (selection.minimumId != null || selection.maximumId != null) {
                 TextButton(onClick = { controller.clearSearchRangeSelection(tab, facet) }) {
@@ -7893,40 +8042,99 @@ private fun SearchRangeFacetSection(
                 }
             )
         } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                SearchRangeSelector(
-                    label = "Minimum",
-                    currentId = selection.minimumId,
-                    buckets = buckets,
-                    allowAny = true,
-                    modifier = Modifier.weight(1f),
-                    onSelected = { selectedId ->
-                        controller.updateSearchRangeSelection(
-                            tab = tab,
-                            facet = facet,
-                            minimumId = selectedId,
-                            maximumId = selection.maximumId,
-                            preserveExisting = false
-                        )
-                    }
-                )
-                SearchRangeSelector(
-                    label = "Maximum",
-                    currentId = selection.maximumId,
-                    buckets = buckets,
-                    allowAny = true,
-                    modifier = Modifier.weight(1f),
-                    onSelected = { selectedId ->
-                        controller.updateSearchRangeSelection(
-                            tab = tab,
-                            facet = facet,
-                            minimumId = selection.minimumId,
-                            maximumId = selectedId,
-                            preserveExisting = false
-                        )
-                    }
-                )
-            }
+            SearchBoundedRangeSelector(
+                selection = selection,
+                buckets = buckets,
+                onSelectionChanged = { minimumId, maximumId ->
+                    controller.updateSearchRangeSelection(
+                        tab = tab,
+                        facet = facet,
+                        minimumId = minimumId,
+                        maximumId = maximumId,
+                        preserveExisting = false
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchBoundedRangeSelector(
+    selection: SearchRangeSelection,
+    buckets: List<SearchRangeBucket>,
+    modifier: Modifier = Modifier,
+    onSelectionChanged: (minimumId: String?, maximumId: String?) -> Unit
+) {
+    val desktopType = LocalDesktopTypeScale.current
+    if (buckets.isEmpty()) {
+        return
+    }
+
+    val maxPosition = buckets.size + 1
+
+    fun minimumPosition(id: String?): Float {
+        val index = buckets.indexOfFirst { it.id == id }
+        return if (id == null || index < 0) 0f else (index + 1).toFloat()
+    }
+
+    fun maximumPosition(id: String?): Float {
+        val index = buckets.indexOfFirst { it.id == id }
+        return if (id == null || index < 0) maxPosition.toFloat() else (index + 1).toFloat()
+    }
+
+    fun minimumIdFor(position: Int): String? {
+        return if (position <= 0) null else buckets.getOrNull(position - 1)?.id
+    }
+
+    fun maximumIdFor(position: Int): String? {
+        return if (position >= maxPosition) null else buckets.getOrNull(position - 1)?.id
+    }
+
+    val initialRange = remember(selection, buckets) {
+        minimumPosition(selection.minimumId)..maximumPosition(selection.maximumId)
+    }
+    var sliderRange by remember(selection, buckets) { mutableStateOf(initialRange) }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            "Minimum to maximum",
+            style = desktopType.label,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        RangeSlider(
+            value = sliderRange,
+            onValueChange = { rawRange ->
+                val snappedStart = rawRange.start.roundToInt().coerceIn(0, buckets.size)
+                val snappedEnd = rawRange.endInclusive.roundToInt().coerceIn(1, maxPosition)
+                sliderRange = snappedStart.toFloat()..snappedEnd.toFloat()
+                val nextMinimumId = minimumIdFor(snappedStart)
+                val nextMaximumId = maximumIdFor(snappedEnd)
+                if (nextMinimumId != selection.minimumId || nextMaximumId != selection.maximumId) {
+                    onSelectionChanged(nextMinimumId, nextMaximumId)
+                }
+            },
+            valueRange = 0f..maxPosition.toFloat(),
+            steps = buckets.size,
+            enabled = buckets.isNotEmpty()
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Any",
+                style = desktopType.hint,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+            Text(
+                buckets.lastOrNull()?.label ?: "Max",
+                style = desktopType.hint,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
         }
     }
 }
@@ -7940,33 +8148,59 @@ private fun SearchRangeSelector(
     modifier: Modifier = Modifier,
     onSelected: (String?) -> Unit
 ) {
-    var expanded by remember(label, currentId, buckets.size) { mutableStateOf(false) }
-    val currentLabel = buckets.firstOrNull { it.id == currentId }?.label ?: if (allowAny) "Any" else "None"
-    Box(modifier = modifier) {
-        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("$label: $currentLabel", maxLines = 1)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    val desktopType = LocalDesktopTypeScale.current
+    val options = remember(buckets, allowAny) {
+        buildList {
             if (allowAny) {
-                DropdownMenuItem(
-                    text = { Text("Any") },
-                    onClick = {
-                        expanded = false
-                        onSelected(null)
-                    }
-                )
+                add(null)
             }
-            buckets
-                .filterNot { allowAny && it.minimum == 0L }
-                .forEach { bucket ->
-                DropdownMenuItem(
-                    text = { Text(bucket.label) },
-                    onClick = {
-                        expanded = false
-                        onSelected(bucket.id)
-                    }
-                )
-            }
+            addAll(
+                buckets
+                    .filterNot { allowAny && it.minimum == 0L }
+                    .map(SearchRangeBucket::id)
+            )
+        }
+    }
+    val labelsById = remember(buckets) { buckets.associate { it.id to it.label } }
+    val currentIndex = options.indexOf(currentId).takeIf { it >= 0 } ?: 0
+    var sliderIndex by remember(label, currentId, options) { mutableFloatStateOf(currentIndex.toFloat()) }
+    val selectedIndex = sliderIndex.roundToInt().coerceIn(0, (options.size - 1).coerceAtLeast(0))
+    val selectedId = options.getOrNull(selectedIndex)
+    val currentLabel = selectedId?.let(labelsById::get) ?: if (allowAny) "Any" else "None"
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("$label: $currentLabel", style = desktopType.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Slider(
+            value = sliderIndex,
+            onValueChange = { rawValue ->
+                val snapped = rawValue.roundToInt().coerceIn(0, (options.size - 1).coerceAtLeast(0))
+                sliderIndex = snapped.toFloat()
+                val nextId = options.getOrNull(snapped)
+                if (nextId != currentId) {
+                    onSelected(nextId)
+                }
+            },
+            valueRange = 0f..(options.size - 1).coerceAtLeast(0).toFloat(),
+            steps = (options.size - 2).coerceAtLeast(0),
+            enabled = options.size > 1
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                if (allowAny) "Any" else (options.firstOrNull()?.let(labelsById::get) ?: "Min"),
+                style = desktopType.hint,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+            Text(
+                labelsById[options.lastOrNull()] ?: if (allowAny) "Any" else "Max",
+                style = desktopType.hint,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
         }
     }
 }
@@ -8006,9 +8240,10 @@ private fun SearchConnectionBanner(controller: ComposeAppController, tab: Search
                     TextButton(onClick = { controller.stopSearch(tab) }) {
                         Text("Stop Search")
                     }
-                } else if (controller.canRepeatSearch(tab)) {
-                    TextButton(onClick = { controller.repeatSearch(tab) }) {
-                        Text("Repeat Search")
+                }
+                if (controller.canSearchAgain(tab)) {
+                    TextButton(onClick = { controller.continueSearch(tab) }) {
+                        Text("Search Again")
                     }
                 }
             }
@@ -8186,6 +8421,7 @@ private fun SearchResultRow(
     tab: SearchTabSession,
     result: GroupedSearchResult,
     visibleColumns: Set<SearchColumn>,
+    layout: DesktopTableLayout<SearchColumn>,
     selected: Boolean,
     primarySelected: Boolean,
     onSelect: (extendSelection: Boolean, toggleSelection: Boolean) -> Unit,
@@ -8199,6 +8435,9 @@ private fun SearchResultRow(
     val identity = presentation.identity
     val dragTransferData = searchResultsTransferData(tab.id, controller.draggableSearchResultKeys(tab, result))
     var menuExpanded by remember(searchResultKey(result)) { mutableStateOf(false) }
+    var contextMenuExpanded by remember(searchResultKey(result)) { mutableStateOf(false) }
+    var contextMenuOffset by remember(searchResultKey(result)) { mutableStateOf(DpOffset.Zero) }
+    val density = LocalDensity.current
     Surface(
         color = when {
             primarySelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
@@ -8218,146 +8457,20 @@ private fun SearchResultRow(
                     rowKey = searchResultKey(result),
                     onSelect = onSelect,
                     onActivate = { controller.activateSelectedSearchResult(tab) },
-                    onContextRequest = {
+                    onContextRequest = { position ->
                         controller.handleSearchContextSelection(tab, result)
-                        menuExpanded = true
+                        menuExpanded = false
+                        contextMenuOffset = with(density) { DpOffset(position.x.toDp(), position.y.toDp()) }
+                        contextMenuExpanded = true
                     }
                 )
             )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = selected,
-                onCheckedChange = { onToggleChecked() }
-            )
-            if (SearchColumn.NAME in visibleColumns) {
-                Row(modifier = Modifier.weight(1.4f), verticalAlignment = Alignment.CenterVertically) {
-                    FileIdentityIcon(
-                        icon = identity.icon,
-                        modifier = Modifier.size(18.dp),
-                        fallback = FileIconToken.OTHER
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(
-                                buildSearchMetadata(identity.subtitle, primary, result),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            availabilityLabel?.let { label ->
-                                InlineStatusBadge(label = label)
-                            }
-                        }
-                    }
-                }
-            }
-            if (SearchColumn.TYPE in visibleColumns) {
-                Text(
-                    primary?.category?.getSingularName() ?: "File",
-                    modifier = Modifier.width(96.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            if (SearchColumn.FROM in visibleColumns) {
-                Text(
-                    searchColumnValueText(primary, result, SearchColumn.FROM),
-                    modifier = Modifier.width(120.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            if (SearchColumn.FILENAME in visibleColumns) {
-                Text(
-                    searchColumnValueText(primary, result, SearchColumn.FILENAME),
-                    modifier = Modifier.width(172.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            if (SearchColumn.EXTENSION in visibleColumns) {
-                Text(
-                    searchColumnValueText(primary, result, SearchColumn.EXTENSION),
-                    modifier = Modifier.width(92.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            if (SearchColumn.SIZE in visibleColumns) {
-                Text(
-                    primary?.size?.let(::formatBytes) ?: "Unknown",
-                    modifier = Modifier.width(90.dp),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            if (SearchColumn.SOURCES in visibleColumns) {
-                Text(result.sources.size.toString(), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.FRIENDS in visibleColumns) {
-                Text(result.friends.size.toString(), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.LENGTH in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.LENGTH), modifier = Modifier.width(84.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.QUALITY in visibleColumns) {
-                Text(
-                    searchColumnValueText(primary, result, SearchColumn.QUALITY),
-                    modifier = Modifier.width(118.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            if (SearchColumn.BITRATE in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.BITRATE), modifier = Modifier.width(86.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.TRACK in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.TRACK), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.ARTIST in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.ARTIST), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.ALBUM in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.ALBUM), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.GENRE in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.GENRE), modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.YEAR in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.YEAR), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.AUTHOR in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.AUTHOR), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.COMPANY in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.COMPANY), modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.PLATFORM in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.PLATFORM), modifier = Modifier.width(100.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.DESCRIPTION in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.DESCRIPTION), modifier = Modifier.width(180.dp), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            if (SearchColumn.FILES in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.FILES), modifier = Modifier.width(68.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            if (SearchColumn.TRACKERS in visibleColumns) {
-                Text(searchColumnValueText(primary, result, SearchColumn.TRACKERS), modifier = Modifier.width(82.dp), style = MaterialTheme.typography.bodySmall)
-            }
-            Box {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Rounded.MoreVert, contentDescription = "Actions")
-                }
-                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+        fun dismissMenus() {
+            menuExpanded = false
+            contextMenuExpanded = false
+        }
+        val menuContent: @Composable () -> Unit = {
                     val selectedResults = controller.selectedSearchResults(tab)
                     val multiSelection = selectedResults.size > 1
                     val actionResults = selectedResults.ifEmpty { listOf(result) }
@@ -8367,7 +8480,7 @@ private fun SearchResultRow(
                     DropdownMenuItem(
                         text = { Text(if (multiSelection) "Download Selected" else "Download") },
                         onClick = {
-                            menuExpanded = false
+                            dismissMenus()
                             controller.downloadSelectedSearchResults(tab)
                         }
                     )
@@ -8375,7 +8488,7 @@ private fun SearchResultRow(
                         DropdownMenuItem(
                             text = { Text("Download As…") },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 controller.downloadSearchResultAs(tab, result)
                             }
                         )
@@ -8384,14 +8497,14 @@ private fun SearchResultRow(
                         DropdownMenuItem(
                             text = { Text("Chat") },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 controller.chatFromSearchResult(result)
                             }
                         )
                         DropdownMenuItem(
                             text = { Text("Browse Friend") },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 controller.browseFriendLibrary(result.friends.first().id)
                             }
                         )
@@ -8401,7 +8514,7 @@ private fun SearchResultRow(
                             DropdownMenuItem(
                                 text = { Text(if (multiSelection) "Unmark Selected as Spam" else "Unmark Spam") },
                                 onClick = {
-                                    menuExpanded = false
+                                    dismissMenus()
                                     controller.unmarkSearchResultsAsSpam(tab, actionResults)
                                 }
                             )
@@ -8411,15 +8524,15 @@ private fun SearchResultRow(
                             DropdownMenuItem(
                                 text = { Text(if (multiSelection) "Mark Selected as Spam" else "Mark as Spam") },
                                 onClick = {
-                                    menuExpanded = false
+                                    dismissMenus()
                                     controller.markSearchResultsAsSpam(tab, actionResults)
                                 }
                             )
                         }
                     }
                     if (!multiSelection) {
-                        BrowseSourceMenuItems(controller, browseTargets) { menuExpanded = false }
-                        BlockUserMenuItems(controller, blockTargets) { menuExpanded = false }
+                        BrowseSourceMenuItems(controller, browseTargets) { dismissMenus() }
+                        BlockUserMenuItems(controller, blockTargets) { dismissMenus() }
                     }
                     if (!multiSelection && controller.canShowSimilarResults(result)) {
                         DropdownMenuItem(
@@ -8433,7 +8546,7 @@ private fun SearchResultRow(
                                 )
                             },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 controller.toggleSimilarResults(tab, result)
                             }
                         )
@@ -8443,7 +8556,7 @@ private fun SearchResultRow(
                             DropdownMenuItem(
                                 text = { Text(showInTargetLabel(target)) },
                                 onClick = {
-                                    menuExpanded = false
+                                    dismissMenus()
                                     controller.showSearchResultInTarget(result, target)
                                 }
                             )
@@ -8453,7 +8566,7 @@ private fun SearchResultRow(
                         DropdownMenuItem(
                             text = { Text("View File Info") },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 controller.showSearchFileInfo(result)
                             }
                         )
@@ -8463,7 +8576,7 @@ private fun SearchResultRow(
                             text = { Text(if (multiSelection) "Copy Links" else "Copy Link") },
                             leadingIcon = { Icon(Icons.Rounded.Link, contentDescription = null) },
                             onClick = {
-                                menuExpanded = false
+                                dismissMenus()
                                 copyTextToClipboard(magnetLinks.joinToString("\n"))
                             }
                         )
@@ -8472,7 +8585,7 @@ private fun SearchResultRow(
                         text = { Text(if (multiSelection) "Copy Names" else "Copy Name") },
                         leadingIcon = { Icon(Icons.Rounded.ContentCopy, contentDescription = null) },
                         onClick = {
-                            menuExpanded = false
+                            dismissMenus()
                             copyTextToClipboard(
                                 if (multiSelection) {
                                     selectedResults.joinToString("\n") { it.fileName }
@@ -8486,7 +8599,7 @@ private fun SearchResultRow(
                         text = { Text(if (multiSelection) "Copy URNs" else "Copy URN") },
                         leadingIcon = { Icon(Icons.Rounded.Link, contentDescription = null) },
                         onClick = {
-                            menuExpanded = false
+                            dismissMenus()
                             copyTextToClipboard(
                                 if (multiSelection) {
                                     selectedResults.joinToString("\n") { searchResultKey(it) }
@@ -8496,7 +8609,163 @@ private fun SearchResultRow(
                             )
                         }
                     )
+        }
+        Box {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = selected,
+                    onCheckedChange = { onToggleChecked() }
+                )
+                if (SearchColumn.NAME in visibleColumns) {
+                    Row(modifier = layout.modifier(SearchColumn.NAME), verticalAlignment = Alignment.CenterVertically) {
+                        FileIdentityIcon(
+                            icon = identity.icon,
+                            modifier = Modifier.size(18.dp),
+                            fallback = FileIconToken.OTHER
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                InlineStatusBadge(
+                                    searchSourceText(result),
+                                    tone = searchSourceBadgeTone(result),
+                                    icon = searchSourceBadgeIcon(result)
+                                )
+                                Text(
+                                    buildSearchMetadata(identity.subtitle, primary, result),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                availabilityLabel?.let { label ->
+                                    InlineStatusBadge(
+                                        label = label,
+                                        tone = localAvailabilityBadgeTone(label),
+                                        icon = localAvailabilityBadgeIcon(label)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
+                if (SearchColumn.TYPE in visibleColumns) {
+                    Text(
+                        primary?.category?.getSingularName() ?: "File",
+                        modifier = layout.modifier(SearchColumn.TYPE),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                if (SearchColumn.FROM in visibleColumns) {
+                    Text(
+                        searchColumnValueText(primary, result, SearchColumn.FROM),
+                        modifier = layout.modifier(SearchColumn.FROM),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (SearchColumn.FILENAME in visibleColumns) {
+                    Text(
+                        searchColumnValueText(primary, result, SearchColumn.FILENAME),
+                        modifier = layout.modifier(SearchColumn.FILENAME),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (SearchColumn.EXTENSION in visibleColumns) {
+                    Text(
+                        searchColumnValueText(primary, result, SearchColumn.EXTENSION),
+                        modifier = layout.modifier(SearchColumn.EXTENSION),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                if (SearchColumn.SIZE in visibleColumns) {
+                    Text(
+                        primary?.size?.let(::formatBytes) ?: "Unknown",
+                        modifier = layout.modifier(SearchColumn.SIZE),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                if (SearchColumn.SOURCES in visibleColumns) {
+                    Text(result.sources.size.toString(), modifier = layout.modifier(SearchColumn.SOURCES), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.FRIENDS in visibleColumns) {
+                    Text(result.friends.size.toString(), modifier = layout.modifier(SearchColumn.FRIENDS), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.LENGTH in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.LENGTH), modifier = layout.modifier(SearchColumn.LENGTH), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.QUALITY in visibleColumns) {
+                    Text(
+                        searchColumnValueText(primary, result, SearchColumn.QUALITY),
+                        modifier = layout.modifier(SearchColumn.QUALITY),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (SearchColumn.BITRATE in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.BITRATE), modifier = layout.modifier(SearchColumn.BITRATE), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.TRACK in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.TRACK), modifier = layout.modifier(SearchColumn.TRACK), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.ARTIST in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.ARTIST), modifier = layout.modifier(SearchColumn.ARTIST), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.ALBUM in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.ALBUM), modifier = layout.modifier(SearchColumn.ALBUM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.GENRE in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.GENRE), modifier = layout.modifier(SearchColumn.GENRE), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.YEAR in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.YEAR), modifier = layout.modifier(SearchColumn.YEAR), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.AUTHOR in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.AUTHOR), modifier = layout.modifier(SearchColumn.AUTHOR), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.COMPANY in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.COMPANY), modifier = layout.modifier(SearchColumn.COMPANY), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.PLATFORM in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.PLATFORM), modifier = layout.modifier(SearchColumn.PLATFORM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.DESCRIPTION in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.DESCRIPTION), modifier = layout.modifier(SearchColumn.DESCRIPTION), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (SearchColumn.FILES in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.FILES), modifier = layout.modifier(SearchColumn.FILES), style = MaterialTheme.typography.bodySmall)
+                }
+                if (SearchColumn.TRACKERS in visibleColumns) {
+                    Text(searchColumnValueText(primary, result, SearchColumn.TRACKERS), modifier = layout.modifier(SearchColumn.TRACKERS), style = MaterialTheme.typography.bodySmall)
+                }
+                Box {
+                    IconButton(onClick = {
+                        contextMenuExpanded = false
+                        menuExpanded = true
+                    }) {
+                        Icon(Icons.Rounded.MoreVert, contentDescription = "Actions")
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        menuContent()
+                    }
+                }
+            }
+            DropdownMenu(
+                expanded = contextMenuExpanded,
+                offset = contextMenuOffset,
+                onDismissRequest = { contextMenuExpanded = false }
+            ) {
+                menuContent()
             }
         }
     }
@@ -8742,16 +9011,29 @@ private fun SearchSourceDetails(controller: ComposeAppController, result: Groupe
             }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricBadge("Browse", if (source.isBrowseHostEnabled) "Available" else "Unavailable")
+            MetricBadge(
+                "Browse",
+                if (source.isBrowseHostEnabled) "Available" else "Unavailable",
+                tone = if (source.isBrowseHostEnabled) BadgeTone.CYAN else BadgeTone.ORANGE
+            )
             MetricBadge(
                 "Chat",
                 when {
                     chatFriend != null -> "Ready"
                     source.isChatEnabled -> "Sign In Required"
                     else -> "Unavailable"
+                },
+                tone = when {
+                    chatFriend != null -> BadgeTone.GREEN
+                    source.isChatEnabled -> BadgeTone.YELLOW
+                    else -> BadgeTone.ORANGE
                 }
             )
-            MetricBadge("Sharing", if (source.isSharingEnabled) "Enabled" else "Off")
+            MetricBadge(
+                "Sharing",
+                if (source.isSharingEnabled) "Enabled" else "Off",
+                tone = if (source.isSharingEnabled) BadgeTone.GREEN else BadgeTone.ORANGE
+            )
             sourceFriend?.let { MetricBadge("Friend", it.renderName) }
         }
     }
@@ -8777,13 +9059,18 @@ private fun TransfersScreen(controller: ComposeAppController) {
             Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Transfers", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MetricBadge("Downloads", controller.downloadCount().toString())
-                    MetricBadge("Uploads", controller.uploadCount().toString())
-                    MetricBadge("Active", controller.activeDownloadCount().toString())
-                    MetricBadge("Connection", friendlyName(controller.connectionStrength().name))
+                    MetricBadge("Downloads", controller.downloadCount().toString(), tone = BadgeTone.BLUE, icon = Icons.Rounded.Download)
+                    MetricBadge("Uploads", controller.uploadCount().toString(), tone = BadgeTone.VIOLET, icon = Icons.Rounded.Upload)
+                    MetricBadge("Active", controller.activeDownloadCount().toString(), tone = BadgeTone.GREEN, icon = Icons.Rounded.Check)
+                    MetricBadge(
+                        "Connection",
+                        controller.advancedConnectionStrengthLabel(),
+                        tone = connectionStrengthBadgeTone(controller.connectionStrength()),
+                        icon = connectionStrengthBadgeIcon(controller.connectionStrength())
+                    )
                     if (controller.showTotalBandwidth) {
-                        MetricBadge("Down Rate", formatRate(controller.totalDownloadBandwidth()))
-                        MetricBadge("Up Rate", formatRate(controller.totalUploadBandwidth()))
+                        MetricBadge("Down Rate", formatRate(controller.totalDownloadBandwidth()), tone = BadgeTone.CYAN, icon = Icons.Rounded.Download)
+                        MetricBadge("Up Rate", formatRate(controller.totalUploadBandwidth()), tone = BadgeTone.MAGENTA, icon = Icons.Rounded.Upload)
                     }
                 }
             }
@@ -8802,22 +9089,123 @@ private fun TransfersScreen(controller: ComposeAppController) {
                 controller.showTransferPreferences()
             }
         }
-        TransferTray(controller, embedded = true)
+        TransfersWorkspace(controller, modifier = Modifier.fillMaxSize())
     }
 }
 
 @Composable
-private fun TransferTray(controller: ComposeAppController, embedded: Boolean) {
+private fun TransfersWorkspace(controller: ComposeAppController, modifier: Modifier = Modifier) {
     val downloadsEpoch = controller.downloadsEpoch
     val uploadsEpoch = controller.uploadsEpoch
     val downloads = controller.visibleDownloads()
     val uploads = controller.visibleUploads()
-    val downloadCount = controller.downloadCount()
-    val uploadCount = controller.uploadCount()
     val selectedDownload = controller.selectedDownloadItem()
     val selectedUpload = controller.selectedUploadItem()
-    val uploadsTabVisible = controller.currentScreen == ComposeScreen.Transfers || controller.showUploadsInTray
-    val selectedIndex = if (!uploadsTabVisible || controller.trayMode == TransferTrayMode.DOWNLOADS) 0 else 1
+
+    LaunchedEffect(
+        controller.trayMode,
+        downloadsEpoch,
+        uploadsEpoch,
+        controller.downloadFilterMode,
+        controller.uploadFilterMode,
+        controller.downloadSortMode,
+        controller.uploadSortMode,
+        controller.selectedDownloadUrn,
+        controller.selectedUploadUrn
+    ) {
+        if (controller.trayMode == TransferTrayMode.DOWNLOADS) {
+            when {
+                downloads.isEmpty() -> controller.clearDownloadSelection()
+            }
+        } else {
+            when {
+                uploads.isEmpty() -> controller.clearUploadSelection()
+            }
+        }
+    }
+
+    Card(modifier = modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SemanticPrimaryTabRow(
+                tabs = listOf(
+                    SemanticTabSpec(
+                        label = "Downloads (${downloads.size})",
+                        tone = transferTrayTabTone(TransferTrayMode.DOWNLOADS),
+                        selected = controller.trayMode == TransferTrayMode.DOWNLOADS,
+                        onClick = { controller.trayMode = TransferTrayMode.DOWNLOADS }
+                    ),
+                    SemanticTabSpec(
+                        label = "Uploads (${uploads.size})",
+                        tone = transferTrayTabTone(TransferTrayMode.UPLOADS),
+                        selected = controller.trayMode == TransferTrayMode.UPLOADS,
+                        onClick = { controller.trayMode = TransferTrayMode.UPLOADS }
+                    )
+                )
+            )
+            if (controller.trayMode == TransferTrayMode.DOWNLOADS) {
+                val _ignored = downloadsEpoch
+                DownloadWorkspaceHeader(controller, selectedDownload)
+                DownloadWorkspaceSearchField(controller)
+                TransferFilterChips(
+                    current = controller.downloadFilterMode,
+                    onSelect = { controller.updateDownloadFilterMode(it) }
+                )
+                TransferList(controller, downloads)
+            } else {
+                val _ignored = uploadsEpoch
+                UploadWorkspaceHeader(controller, selectedUpload)
+                TransferFilterChips(
+                    current = controller.uploadFilterMode,
+                    onSelect = { controller.updateUploadFilterMode(it) }
+                )
+                UploadList(controller, uploads)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadWorkspaceSearchField(controller: ComposeAppController) {
+    OutlinedTextField(
+        value = controller.downloadSearchText,
+        onValueChange = { controller.updateDownloadSearchText(it) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        label = { Text("Find downloads") },
+        placeholder = { Text("Name, path, or type") },
+        leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+        trailingIcon = {
+            if (controller.downloadSearchText.isNotEmpty()) {
+                IconButton(onClick = { controller.updateDownloadSearchText("") }) {
+                    Icon(Icons.Rounded.Close, contentDescription = "Clear download search")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun TransferTray(controller: ComposeAppController) {
+    val downloads = controller.trayDownloads()
+    val uploads = controller.trayUploads()
+    val activeDownloads = downloads.filter(::isTrayActiveDownload)
+    val activeUploads = uploads.filter(::isTrayActiveUpload)
+    val problemDownloads = downloads.filter(controller::isDownloadProblemItem)
+    val problemUploads = uploads.filter(controller::isUploadProblemItem)
+    val pausedDownloads = downloads.filter { it.state == DownloadState.PAUSED }
+    val pausedUploads = uploads.filter { it.state == UploadState.PAUSED }
+    val inactiveDownloads = downloads.filterNot {
+        isTrayActiveDownload(it) || controller.isDownloadProblemItem(it) || it.state == DownloadState.PAUSED
+    }
+    val inactiveUploads = uploads.filterNot {
+        isTrayActiveUpload(it) || controller.isUploadProblemItem(it) || it.state == UploadState.PAUSED
+    }
+    var downloadProblemsExpanded by remember { mutableStateOf(false) }
+    var downloadPausedExpanded by remember { mutableStateOf(false) }
+    var downloadInactiveExpanded by remember { mutableStateOf(false) }
+    var uploadProblemsExpanded by remember { mutableStateOf(false) }
+    var uploadPausedExpanded by remember { mutableStateOf(false) }
+    var uploadInactiveExpanded by remember { mutableStateOf(false) }
     var dropTargetActive by remember { mutableStateOf(false) }
     val transferDropTarget = remember {
         object : DragAndDropTarget {
@@ -8842,28 +9230,6 @@ private fun TransferTray(controller: ComposeAppController, embedded: Boolean) {
         }
     }
 
-    LaunchedEffect(
-        controller.trayMode,
-        downloadsEpoch,
-        uploadsEpoch,
-        controller.downloadFilterMode,
-        controller.uploadFilterMode,
-        controller.downloadSortMode,
-        controller.uploadSortMode,
-        controller.selectedDownloadUrn,
-        controller.selectedUploadUrn
-    ) {
-        if (controller.trayMode == TransferTrayMode.DOWNLOADS) {
-            when {
-                downloads.isEmpty() -> controller.clearDownloadSelection()
-            }
-        } else {
-            when {
-                uploads.isEmpty() -> controller.clearUploadSelection()
-            }
-        }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxSize()
@@ -8883,66 +9249,514 @@ private fun TransferTray(controller: ComposeAppController, embedded: Boolean) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                Column {
-                    Text(
-                        if (embedded) "Transfers" else "Transfer Tray",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Transfer Tray", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text(
                         if (dropTargetActive) {
                             "Drop search results here to start downloading them."
                         } else {
-                            "Watch current downloads and uploads here."
+                            "Active transfers stay visible here while finished or slower items collapse until you need them."
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MetricBadge("Downloads", downloadCount.toString())
-                    MetricBadge("Uploads", uploadCount.toString())
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    MetricBadge("Downloads", controller.downloadCount().toString(), tone = BadgeTone.BLUE, icon = Icons.Rounded.Download)
+                    MetricBadge("Uploads", controller.uploadCount().toString(), tone = BadgeTone.VIOLET, icon = Icons.Rounded.Upload)
                     if (controller.showTotalBandwidth) {
-                        MetricBadge("Down Rate", formatRate(controller.totalDownloadBandwidth()))
-                        MetricBadge("Up Rate", formatRate(controller.totalUploadBandwidth()))
+                        MetricBadge("Down Rate", formatRate(controller.totalDownloadBandwidth()), tone = BadgeTone.CYAN, icon = Icons.Rounded.Download)
+                        MetricBadge("Up Rate", formatRate(controller.totalUploadBandwidth()), tone = BadgeTone.MAGENTA, icon = Icons.Rounded.Upload)
+                    }
+                    OutlinedButton(onClick = { controller.openTransfersWorkspace(controller.trayMode) }) {
+                        Text("Open Transfers")
                     }
                 }
             }
-            PrimaryTabRow(selectedTabIndex = selectedIndex) {
-                Tab(
-                    selected = selectedIndex == 0,
-                    onClick = { controller.trayMode = TransferTrayMode.DOWNLOADS },
-                    text = { Text("Downloads (${downloads.size})") }
-                )
-                if (uploadsTabVisible) {
-                    Tab(
-                        selected = selectedIndex == 1,
-                        onClick = { controller.trayMode = TransferTrayMode.UPLOADS },
-                        text = { Text("Uploads (${uploads.size})") }
-                    )
+
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val stacked = maxWidth < 980.dp
+                if (stacked) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        DownloadTraySection(
+                            controller = controller,
+                            activeDownloads = activeDownloads,
+                            problemDownloads = problemDownloads,
+                            pausedDownloads = pausedDownloads,
+                            inactiveDownloads = inactiveDownloads,
+                            problemsExpanded = downloadProblemsExpanded,
+                            onProblemsExpandedChange = { downloadProblemsExpanded = it },
+                            pausedExpanded = downloadPausedExpanded,
+                            onPausedExpandedChange = { downloadPausedExpanded = it },
+                            inactiveExpanded = downloadInactiveExpanded,
+                            onInactiveExpandedChange = { downloadInactiveExpanded = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                        UploadTraySection(
+                            controller = controller,
+                            activeUploads = activeUploads,
+                            problemUploads = problemUploads,
+                            pausedUploads = pausedUploads,
+                            inactiveUploads = inactiveUploads,
+                            problemsExpanded = uploadProblemsExpanded,
+                            onProblemsExpandedChange = { uploadProblemsExpanded = it },
+                            pausedExpanded = uploadPausedExpanded,
+                            onPausedExpandedChange = { uploadPausedExpanded = it },
+                            inactiveExpanded = uploadInactiveExpanded,
+                            onInactiveExpandedChange = { uploadInactiveExpanded = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        DownloadTraySection(
+                            controller = controller,
+                            activeDownloads = activeDownloads,
+                            problemDownloads = problemDownloads,
+                            pausedDownloads = pausedDownloads,
+                            inactiveDownloads = inactiveDownloads,
+                            problemsExpanded = downloadProblemsExpanded,
+                            onProblemsExpandedChange = { downloadProblemsExpanded = it },
+                            pausedExpanded = downloadPausedExpanded,
+                            onPausedExpandedChange = { downloadPausedExpanded = it },
+                            inactiveExpanded = downloadInactiveExpanded,
+                            onInactiveExpandedChange = { downloadInactiveExpanded = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                        UploadTraySection(
+                            controller = controller,
+                            activeUploads = activeUploads,
+                            problemUploads = problemUploads,
+                            pausedUploads = pausedUploads,
+                            inactiveUploads = inactiveUploads,
+                            problemsExpanded = uploadProblemsExpanded,
+                            onProblemsExpandedChange = { uploadProblemsExpanded = it },
+                            pausedExpanded = uploadPausedExpanded,
+                            onPausedExpandedChange = { uploadPausedExpanded = it },
+                            inactiveExpanded = uploadInactiveExpanded,
+                            onInactiveExpandedChange = { uploadInactiveExpanded = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
-            }
-            if (controller.trayMode == TransferTrayMode.DOWNLOADS || !uploadsTabVisible) {
-                val _ignored = downloadsEpoch
-                DownloadWorkspaceHeader(controller, selectedDownload)
-                TransferFilterChips(
-                    current = controller.downloadFilterMode,
-                    onSelect = { controller.updateDownloadFilterMode(it) }
-                )
-                TransferList(controller, downloads)
-            } else {
-                val _ignored = uploadsEpoch
-                UploadWorkspaceHeader(controller, selectedUpload)
-                TransferFilterChips(
-                    current = controller.uploadFilterMode,
-                    onSelect = { controller.updateUploadFilterMode(it) }
-                )
-                UploadList(controller, uploads)
             }
         }
     }
+}
+
+@Composable
+private fun DownloadTraySection(
+    controller: ComposeAppController,
+    activeDownloads: List<DownloadItem>,
+    problemDownloads: List<DownloadItem>,
+    pausedDownloads: List<DownloadItem>,
+    inactiveDownloads: List<DownloadItem>,
+    problemsExpanded: Boolean,
+    onProblemsExpandedChange: (Boolean) -> Unit,
+    pausedExpanded: Boolean,
+    onPausedExpandedChange: (Boolean) -> Unit,
+    inactiveExpanded: Boolean,
+    onInactiveExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Downloads", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        MetricBadge("Active", activeDownloads.size.toString(), tone = BadgeTone.GREEN, icon = Icons.Rounded.Check)
+                        MetricBadge("Total", controller.downloadCount().toString(), tone = BadgeTone.BLUE, icon = Icons.Rounded.Download)
+                        if (controller.showTotalBandwidth) {
+                            MetricBadge("Rate", formatRate(controller.totalDownloadBandwidth()), tone = BadgeTone.CYAN, icon = Icons.Rounded.Download)
+                        }
+                        if (problemDownloads.isNotEmpty()) {
+                            MetricBadge("Attention", problemDownloads.size.toString(), tone = BadgeTone.ORANGE, icon = Icons.Rounded.Warning)
+                        }
+                    }
+                }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { controller.openTransfersWorkspace(TransferTrayMode.DOWNLOADS) }) {
+                        Text("Open")
+                    }
+                    FilledTonalButton(onClick = { controller.fixStalledDownloads() }) {
+                        Text(
+                            if (controller.stalledDownloadItemCount() > 0) {
+                                "Fix Stalled (${controller.stalledDownloadItemCount()})"
+                            } else {
+                                "Fix Stalled"
+                            }
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = true)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (activeDownloads.isEmpty() && problemDownloads.isEmpty() && pausedDownloads.isEmpty() && inactiveDownloads.isEmpty()) {
+                    TransferTrayEmptyState("No downloads yet", "Downloads will appear here as they start.")
+                } else {
+                    if (activeDownloads.isNotEmpty()) {
+                        Text("Active", style = MaterialTheme.typography.labelLarge)
+                        activeDownloads.forEach { item ->
+                            DownloadTrayRow(controller, item)
+                        }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Needs Attention",
+                        count = problemDownloads.size,
+                        expanded = problemsExpanded,
+                        onExpandedChange = onProblemsExpandedChange
+                    ) {
+                        problemDownloads.forEach { item -> DownloadTrayRow(controller, item) }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Paused",
+                        count = pausedDownloads.size,
+                        expanded = pausedExpanded,
+                        onExpandedChange = onPausedExpandedChange
+                    ) {
+                        pausedDownloads.forEach { item -> DownloadTrayRow(controller, item) }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Finished & Inactive",
+                        count = inactiveDownloads.size,
+                        expanded = inactiveExpanded,
+                        onExpandedChange = onInactiveExpandedChange
+                    ) {
+                        inactiveDownloads.forEach { item -> DownloadTrayRow(controller, item) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UploadTraySection(
+    controller: ComposeAppController,
+    activeUploads: List<UploadItem>,
+    problemUploads: List<UploadItem>,
+    pausedUploads: List<UploadItem>,
+    inactiveUploads: List<UploadItem>,
+    problemsExpanded: Boolean,
+    onProblemsExpandedChange: (Boolean) -> Unit,
+    pausedExpanded: Boolean,
+    onPausedExpandedChange: (Boolean) -> Unit,
+    inactiveExpanded: Boolean,
+    onInactiveExpandedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Uploads", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        MetricBadge("Active", activeUploads.size.toString(), tone = BadgeTone.GREEN, icon = Icons.Rounded.Check)
+                        MetricBadge("Total", controller.uploadCount().toString(), tone = BadgeTone.VIOLET, icon = Icons.Rounded.Upload)
+                        if (controller.showTotalBandwidth) {
+                            MetricBadge("Rate", formatRate(controller.totalUploadBandwidth()), tone = BadgeTone.MAGENTA, icon = Icons.Rounded.Upload)
+                        }
+                        if (problemUploads.isNotEmpty()) {
+                            MetricBadge("Attention", problemUploads.size.toString(), tone = BadgeTone.ORANGE, icon = Icons.Rounded.Warning)
+                        }
+                    }
+                }
+                OutlinedButton(onClick = { controller.openTransfersWorkspace(TransferTrayMode.UPLOADS) }) {
+                    Text("Open")
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = true)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (activeUploads.isEmpty() && problemUploads.isEmpty() && pausedUploads.isEmpty() && inactiveUploads.isEmpty()) {
+                    TransferTrayEmptyState("No uploads yet", "Uploads will appear here while files are being shared.")
+                } else {
+                    if (activeUploads.isNotEmpty()) {
+                        Text("Active", style = MaterialTheme.typography.labelLarge)
+                        activeUploads.forEach { item ->
+                            UploadTrayRow(controller, item)
+                        }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Needs Attention",
+                        count = problemUploads.size,
+                        expanded = problemsExpanded,
+                        onExpandedChange = onProblemsExpandedChange
+                    ) {
+                        problemUploads.forEach { item -> UploadTrayRow(controller, item) }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Paused",
+                        count = pausedUploads.size,
+                        expanded = pausedExpanded,
+                        onExpandedChange = onPausedExpandedChange
+                    ) {
+                        pausedUploads.forEach { item -> UploadTrayRow(controller, item) }
+                    }
+                    TransferTrayExpandableGroup(
+                        title = "Finished & Inactive",
+                        count = inactiveUploads.size,
+                        expanded = inactiveExpanded,
+                        onExpandedChange = onInactiveExpandedChange
+                    ) {
+                        inactiveUploads.forEach { item -> UploadTrayRow(controller, item) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransferTrayExpandableGroup(
+    title: String,
+    count: Int,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    if (count <= 0) {
+        return
+    }
+
+    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("$title ($count)", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium)
+                TextButton(onClick = { onExpandedChange(!expanded) }) {
+                    Text(if (expanded) "Hide" else "Show")
+                }
+            }
+            if (expanded) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp), content = content)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransferTrayEmptyState(title: String, body: String) {
+    Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(12.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(title, fontWeight = FontWeight.Medium)
+            Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun DownloadTrayRow(controller: ComposeAppController, item: DownloadItem) {
+    val identity = controller.downloadItemIdentity(item)
+    val progress = downloadTransferProgress(item)
+    val secondaryText = compactDownloadTrayText(controller, item)
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { controller.openTransfersWorkspaceForDownload(item) }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FileIdentityIcon(icon = identity.icon, modifier = Modifier.size(16.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp))
+                Text(
+                    secondaryText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (controller.isDownloadProblemItem(item)) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun UploadTrayRow(controller: ComposeAppController, item: UploadItem) {
+    val identity = controller.uploadItemIdentity(item)
+    val secondaryText = compactUploadTrayText(controller, item)
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { controller.openTransfersWorkspaceForUpload(item) }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FileIdentityIcon(icon = identity.icon, modifier = Modifier.size(16.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (item.fileSize > 0L) {
+                    LinearProgressIndicator(
+                        progress = { uploadTransferProgress(item) },
+                        modifier = Modifier.fillMaxWidth().height(6.dp)
+                    )
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().height(6.dp))
+                }
+                Text(
+                    secondaryText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (controller.isUploadProblemItem(item)) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+private fun isTrayActiveDownload(item: DownloadItem): Boolean {
+    return when (item.state) {
+        DownloadState.DOWNLOADING,
+        DownloadState.RESUMING,
+        DownloadState.CONNECTING,
+        DownloadState.TRYING_AGAIN,
+        DownloadState.REMOTE_QUEUED,
+        DownloadState.LOCAL_QUEUED,
+        DownloadState.FINISHING -> true
+        DownloadState.PAUSED,
+        DownloadState.STALLED,
+        DownloadState.ERROR,
+        DownloadState.DONE,
+        DownloadState.DANGEROUS,
+        DownloadState.CANCELLED -> false
+    }
+}
+
+private fun isTrayActiveUpload(item: UploadItem): Boolean {
+    return when (item.state) {
+        UploadState.UPLOADING,
+        UploadState.QUEUED,
+        UploadState.BROWSE_HOST -> true
+        UploadState.PAUSED,
+        UploadState.REQUEST_ERROR,
+        UploadState.LIMIT_REACHED,
+        UploadState.DONE,
+        UploadState.BROWSE_HOST_DONE,
+        UploadState.CANCELED -> false
+    }
+}
+
+private fun downloadTransferProgress(item: DownloadItem): Float {
+    return when {
+        item.totalSize > 0L -> item.currentSize.toFloat() / item.totalSize.toFloat()
+        else -> item.percentComplete / 100f
+    }.coerceIn(0f, 1f)
+}
+
+private fun uploadTransferProgress(item: UploadItem): Float {
+    return if (item.fileSize > 0L) {
+        (item.totalAmountUploaded.toFloat() / item.fileSize.toFloat()).coerceIn(0f, 1f)
+    } else if (item.isFinished) {
+        1f
+    } else {
+        0f
+    }
+}
+
+private fun compactDownloadTrayText(controller: ComposeAppController, item: DownloadItem): String {
+    val status = downloadRowStatusMessage(item)
+    val parts = mutableListOf<String>()
+    if (!controller.isDownloadProblemItem(item) && !item.state.isFinished) {
+        if (item.totalSize > 0L) {
+            parts += "${formatBytes(item.currentSize)} / ${formatBytes(item.totalSize)}"
+        }
+        if (item.downloadSpeed > 0f) {
+            parts += formatRate(item.downloadSpeed)
+        }
+        formatDuration(item.remainingDownloadTime)
+            .takeIf { it.isNotBlank() && it != "0s" }
+            ?.let(parts::add)
+    }
+    if (parts.isEmpty()) {
+        parts += status
+    }
+    return parts.joinToString(" · ")
+}
+
+private fun compactUploadTrayText(controller: ComposeAppController, item: UploadItem): String {
+    val status = uploadRowStatusMessage(item)
+    val parts = mutableListOf<String>()
+    if (!controller.isUploadProblemItem(item) && !item.isFinished) {
+        if (item.fileSize > 0L) {
+            parts += "${formatBytes(minOf(item.totalAmountUploaded, item.fileSize))} / ${formatBytes(item.fileSize)}"
+        } else if (item.totalAmountUploaded > 0L) {
+            parts += formatBytes(item.totalAmountUploaded)
+        }
+        if (item.uploadSpeed > 0f) {
+            parts += formatRate(item.uploadSpeed)
+        }
+    }
+    if (parts.isEmpty()) {
+        parts += status
+    }
+    return parts.joinToString(" · ")
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -8951,17 +9765,30 @@ private fun DownloadWorkspaceHeader(controller: ComposeAppController, selected: 
     val selectedItems = controller.selectedDownloadItems()
     val jumpTargets = selected?.let(controller::downloadJumpTargets).orEmpty()
     val selectedIdentity = selected?.let(controller::downloadItemIdentity)
+    val retryableStalledCount = controller.retryableStalledDownloadCount()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(onClick = { controller.pauseAllDownloads() }) { Text("Pause Active") }
-            OutlinedButton(onClick = { controller.resumeVisibleDownloads() }) { Text("Resume Visible") }
-            OutlinedButton(onClick = { controller.clearFinishedDownloads() }) { Text("Clear Finished") }
-            TextButton(onClick = { controller.clearProblemDownloads() }) { Text("Clear Stalled") }
+            CompactFilledTonalButton(onClick = { controller.pauseAllDownloads() }) { Text("Pause Active") }
+            CompactOutlinedButton(onClick = { controller.resumeVisibleDownloads() }) { Text("Resume Visible") }
+            CompactOutlinedButton(onClick = { controller.clearFinishedDownloads() }) { Text("Clear Finished") }
+            CompactOutlinedButton(
+                onClick = { controller.fixStalledDownloads() },
+                enabled = retryableStalledCount > 0
+            ) {
+                Text(
+                    if (retryableStalledCount > 0) {
+                        "Retry Stalled ($retryableStalledCount)"
+                    } else {
+                        "Retry Stalled"
+                    }
+                )
+            }
+            CompactTextButton(onClick = { controller.clearProblemDownloads() }) { Text("Clear Stalled") }
             DownloadsHeaderMenuButton(controller)
             ColumnVisibilityMenu(
                 entries = DownloadColumn.entries.map { column ->
                     ColumnToggleEntry(
-                        label = friendlyName(column.name),
+                        label = downloadColumnLabel(column),
                         visible = column in controller.visibleDownloadColumns
                     ) {
                         controller.toggleDownloadColumn(column)
@@ -9007,26 +9834,41 @@ private fun DownloadWorkspaceHeader(controller: ComposeAppController, selected: 
                     }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         when {
-                            selectedItems.any { it.state.isPausable } -> FilledTonalButton(onClick = { controller.pauseSelectedDownloads() }) { Text("Pause") }
+                            selectedItems.any { it.state.isPausable } -> CompactFilledTonalButton(onClick = { controller.pauseSelectedDownloads() }) { Text("Pause") }
                             selectedItems.any { it.state.isResumable || (it.state == DownloadState.ERROR && it.isTryAgainEnabled) } ->
-                                FilledTonalButton(onClick = { controller.resumeSelectedDownloads() }) { Text("Resume") }
+                                CompactFilledTonalButton(onClick = { controller.resumeSelectedDownloads() }) { Text("Resume") }
                         }
                         if (selectedItems.any { it.isLaunchable }) {
-                            OutlinedButton(onClick = { controller.openSelectedDownloads() }) {
+                            CompactOutlinedButton(onClick = { controller.openSelectedDownloads() }) {
                                 Text(controller.selectedDownloadsOpenActionLabel())
                             }
                         }
-                        OutlinedButton(onClick = { controller.revealSelectedDownloads() }) { Text("Locate on Disk") }
+                        CompactOutlinedButton(onClick = { controller.revealSelectedDownloads() }) { Text("Locate on Disk") }
                         if (selectedItems.any { it.isLaunchable }) {
-                            OutlinedButton(onClick = { controller.locateSelectedDownloads() }) { Text("Locate in My Files") }
+                            CompactOutlinedButton(onClick = { controller.locateSelectedDownloads() }) { Text("Locate in My Files") }
                         }
                         if (selectedItems.size == 1) {
-                            OutlinedButton(onClick = { controller.showDownloadFileInfo(selected) }) { Text("File Info") }
-                            OutlinedButton(onClick = { controller.retryOrSearchAgainForDownload(selected) }) {
+                            CompactOutlinedButton(onClick = { controller.showDownloadFileInfo(selected) }) { Text("File Info") }
+                            CompactOutlinedButton(onClick = { controller.retryOrSearchAgainForDownload(selected) }) {
                                 Text(controller.downloadRetryActionLabel(selected))
                             }
+                            controller.ed2kLink(selected)?.let { ed2kLink ->
+                                CompactOutlinedButton(
+                                    onClick = {
+                                        copyTextToClipboard(ed2kLink)
+                                        controller.showNotice("ED2K", "Copied ED2K link to the clipboard.", OperationNoticeLevel.SUCCESS)
+                                    }
+                                ) {
+                                    Text("Copy ED2K Link")
+                                }
+                            }
+                            if (controller.canRequestMoreSources(selected)) {
+                                CompactOutlinedButton(onClick = { controller.requestMoreSources(selected) }) {
+                                    Text("More Sources")
+                                }
+                            }
                             if (controller.canChangeDownloadLocation(selected)) {
-                                OutlinedButton(onClick = { controller.changeDownloadLocation(selected) }) { Text("Change Location") }
+                                CompactOutlinedButton(onClick = { controller.changeDownloadLocation(selected) }) { Text("Change Location") }
                             }
                             BrowseSourceButton(controller, controller.downloadBrowseTargets(selected))
                             BlockUsersButton(controller, controller.downloadBlockTargets(selected))
@@ -9045,10 +9887,10 @@ private fun DownloadWorkspaceHeader(controller: ComposeAppController, selected: 
                                 onAddToCollection = controller::addSelectedDownloadsToCollection
                             )
                         }
-                        TextButton(onClick = { controller.removeSelectedDownloads() }) {
+                        CompactTextButton(onClick = { controller.removeSelectedDownloads() }) {
                             Text(controller.downloadRemoveActionLabel(selectedItems))
                         }
-                        TextButton(onClick = { controller.clearDownloadSelection() }) {
+                        CompactTextButton(onClick = { controller.clearDownloadSelection() }) {
                             Text("Clear Selection")
                         }
                     }
@@ -9066,14 +9908,14 @@ private fun UploadWorkspaceHeader(controller: ComposeAppController, selected: Up
     val selectedIdentity = selected?.let(controller::uploadItemIdentity)
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(onClick = { controller.pauseActiveUploads() }) { Text("Pause Active") }
-            OutlinedButton(onClick = { controller.resumePausedUploads() }) { Text("Resume Paused") }
-            OutlinedButton(onClick = { controller.clearFinishedUploads() }) { Text("Clear Finished") }
+            CompactFilledTonalButton(onClick = { controller.pauseActiveUploads() }) { Text("Pause Active") }
+            CompactOutlinedButton(onClick = { controller.resumePausedUploads() }) { Text("Resume Paused") }
+            CompactOutlinedButton(onClick = { controller.clearFinishedUploads() }) { Text("Clear Finished") }
             UploadsHeaderMenuButton(controller)
             ColumnVisibilityMenu(
                 entries = UploadColumn.entries.map { column ->
                     ColumnToggleEntry(
-                        label = friendlyName(column.name),
+                        label = uploadColumnLabel(column),
                         visible = column in controller.visibleUploadColumns
                     ) {
                         controller.toggleUploadColumn(column)
@@ -9119,20 +9961,20 @@ private fun UploadWorkspaceHeader(controller: ComposeAppController, selected: Up
                     }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (selectedItems.any { it.state == UploadState.UPLOADING }) {
-                            FilledTonalButton(onClick = { controller.pauseSelectedUploads() }) { Text("Pause") }
+                            CompactFilledTonalButton(onClick = { controller.pauseSelectedUploads() }) { Text("Pause") }
                         } else if (selectedItems.any { it.state == UploadState.PAUSED }) {
-                            FilledTonalButton(onClick = { controller.resumeSelectedUploads() }) { Text("Resume") }
+                            CompactFilledTonalButton(onClick = { controller.resumeSelectedUploads() }) { Text("Resume") }
                         }
                         if (selectedItems.any(controller::canOpenUploadItem)) {
-                            OutlinedButton(onClick = { controller.openSelectedUploads() }) {
+                            CompactOutlinedButton(onClick = { controller.openSelectedUploads() }) {
                                 Text(controller.selectedUploadsOpenActionLabel())
                             }
-                            OutlinedButton(onClick = { controller.revealSelectedUploads() }) { Text("Locate on Disk") }
-                            OutlinedButton(onClick = { controller.locateSelectedUploads() }) { Text("Locate in My Files") }
+                            CompactOutlinedButton(onClick = { controller.revealSelectedUploads() }) { Text("Locate on Disk") }
+                            CompactOutlinedButton(onClick = { controller.locateSelectedUploads() }) { Text("Locate in My Files") }
                         }
                         if (selectedItems.size == 1) {
                             if (controller.canOpenUploadItem(selected)) {
-                                OutlinedButton(onClick = { controller.showUploadFileInfo(selected) }) { Text("File Info") }
+                                CompactOutlinedButton(onClick = { controller.showUploadFileInfo(selected) }) { Text("File Info") }
                             }
                             BrowseSourceButton(controller, controller.uploadBrowseTargets(selected))
                             BlockUsersButton(controller, controller.uploadBlockTargets(selected))
@@ -9151,10 +9993,10 @@ private fun UploadWorkspaceHeader(controller: ComposeAppController, selected: Up
                                 onAddToCollection = controller::addSelectedUploadsToCollection
                             )
                         }
-                        TextButton(onClick = { controller.removeSelectedUploads() }) {
+                        CompactTextButton(onClick = { controller.removeSelectedUploads() }) {
                             Text(controller.uploadRemoveActionLabel(selectedItems))
                         }
-                        TextButton(onClick = { controller.clearUploadSelection() }) {
+                        CompactTextButton(onClick = { controller.clearUploadSelection() }) {
                             Text("Clear Selection")
                         }
                     }
@@ -9181,6 +10023,7 @@ private fun TransferFilterChips(current: TransferFilterMode, onSelect: (Transfer
 @Composable
 private fun TransferList(controller: ComposeAppController, items: List<DownloadItem>) {
     val tableFocusRequester = remember { FocusRequester() }
+    val orderedVisibleDownloadColumns = DownloadColumn.entries.filter { it in controller.visibleDownloadColumns }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -9196,176 +10039,119 @@ private fun TransferList(controller: ComposeAppController, items: List<DownloadI
                 )
             }
     ) {
-        HeaderContextMenuArea(
-            menuContent = {
-                DownloadSortMode.entries.forEach { mode ->
-                    DropdownMenuItem(
-                        text = { Text("Sort by ${friendlyName(mode.name)}") },
-                        onClick = {
-                            controller.toggleDownloadSort(mode)
-                            dismiss()
-                        }
-                    )
+        DesktopScrollableTable(
+            visibleColumns = orderedVisibleDownloadColumns,
+            specFor = ::downloadColumnSpec,
+            leadingWidth = 48.dp,
+            trailingWidth = 54.dp,
+            rowHorizontalPadding = 10.dp
+        ) { layout ->
+            HeaderContextMenuArea(
+                modifier = Modifier.fillMaxWidth(),
+                menuContent = {
+                    DownloadSortMode.entries.forEach { mode ->
+                        DropdownMenuItem(
+                            text = { Text("Sort by ${downloadColumnLabel(mode.asDownloadColumn())}") },
+                            onClick = {
+                                controller.toggleDownloadSort(mode)
+                                dismiss()
+                            }
+                        )
+                    }
+                    HorizontalDivider()
+                    DownloadColumn.entries.forEach { column ->
+                        DropdownMenuItem(
+                            text = {
+                                Text("${if (column in controller.visibleDownloadColumns) "Hide" else "Show"} ${downloadColumnLabel(column)}")
+                            },
+                            onClick = {
+                                controller.toggleDownloadColumn(column)
+                                dismiss()
+                            }
+                        )
+                    }
                 }
-                HorizontalDivider()
-                DownloadColumn.entries.forEach { column ->
-                    DropdownMenuItem(
-                        text = {
-                            Text("${if (column in controller.visibleDownloadColumns) "Hide" else "Show"} ${friendlyName(column.name)}")
-                        },
-                        onClick = {
-                            controller.toggleDownloadColumn(column)
-                            dismiss()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = items.isNotEmpty() && items.all { controller.downloadItemKey(it) in controller.selectedDownloadUrns },
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                controller.selectAllVisibleDownloads()
+                            } else {
+                                controller.clearDownloadSelection()
+                            }
                         }
                     )
+                    orderedVisibleDownloadColumns.forEach { column ->
+                        SortableHeaderText(
+                            label = downloadColumnLabel(column),
+                            active = controller.downloadSortMode == column.asDownloadSortMode(),
+                            descending = controller.downloadSortDescending,
+                            modifier = layout.modifier(column)
+                        ) {
+                            controller.toggleDownloadSort(column.asDownloadSortMode())
+                        }
+                    }
+                    Spacer(Modifier.width(54.dp))
                 }
             }
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = items.isNotEmpty() && items.all { it.urn.toString() in controller.selectedDownloadUrns },
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            controller.selectAllVisibleDownloads()
-                        } else {
-                            controller.clearDownloadSelection()
+            HorizontalDivider()
+            if (items.isEmpty()) {
+                val hasSearchQuery = controller.downloadSearchText.isNotBlank()
+                EmptyState(
+                    icon = Icons.Rounded.Download,
+                    title = when {
+                        hasSearchQuery -> when (controller.downloadFilterMode) {
+                            TransferFilterMode.ALL -> "No matching downloads"
+                            TransferFilterMode.ACTIVE -> "No matching active downloads"
+                            TransferFilterMode.FINISHED -> "No matching finished downloads"
+                            TransferFilterMode.STALLED -> "No matching stalled downloads"
+                        }
+
+                        else -> when (controller.downloadFilterMode) {
+                            TransferFilterMode.ALL -> "No downloads"
+                            TransferFilterMode.ACTIVE -> "No active downloads"
+                            TransferFilterMode.FINISHED -> "No finished downloads"
+                            TransferFilterMode.STALLED -> "No stalled downloads"
+                        }
+                    },
+                    body = when {
+                        hasSearchQuery -> "Try a different name, path, or type filter."
+                        else -> when (controller.downloadFilterMode) {
+                            TransferFilterMode.ALL -> "Start a download from search, a torrent file, or a link to see it here."
+                            TransferFilterMode.ACTIVE -> "Active downloads appear here."
+                            TransferFilterMode.FINISHED -> "Completed downloads stay here until you clear them."
+                            TransferFilterMode.STALLED -> "Problem downloads appear here so you can retry or remove them."
                         }
                     }
                 )
-                if (DownloadColumn.NAME in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Name",
-                        active = controller.downloadSortMode == DownloadSortMode.NAME,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.weight(1.25f)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.NAME)
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(items, key = controller::downloadItemKey) { item ->
+                        DownloadTransferRow(
+                            controller = controller,
+                            item = item,
+                            selected = controller.downloadItemKey(item) in controller.selectedDownloadUrns,
+                            primarySelected = controller.selectedDownloadUrn == controller.downloadItemKey(item),
+                            visibleColumns = controller.visibleDownloadColumns,
+                            layout = layout,
+                            onSelect = { extendSelection, toggleSelection ->
+                                controller.selectDownloadItem(item, extendSelection, toggleSelection)
+                                tableFocusRequester.requestFocus()
+                            },
+                            onToggleChecked = {
+                                controller.toggleDownloadItemChecked(item)
+                                tableFocusRequester.requestFocus()
+                            }
+                        )
+                        HorizontalDivider()
                     }
-                }
-                if (DownloadColumn.ORDER_ADDED in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Order Added",
-                        active = controller.downloadSortMode == DownloadSortMode.ORDER_ADDED,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(136.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.ORDER_ADDED)
-                    }
-                }
-                if (DownloadColumn.TIME_LEFT in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Time Left",
-                        active = controller.downloadSortMode == DownloadSortMode.TIME_LEFT,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(92.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.TIME_LEFT)
-                    }
-                }
-                if (DownloadColumn.FILE_TYPE in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "File Type",
-                        active = controller.downloadSortMode == DownloadSortMode.FILE_TYPE,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(96.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.FILE_TYPE)
-                    }
-                }
-                if (DownloadColumn.EXTENSION in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Extension",
-                        active = controller.downloadSortMode == DownloadSortMode.EXTENSION,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(92.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.EXTENSION)
-                    }
-                }
-                if (DownloadColumn.STATUS in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Status",
-                        active = controller.downloadSortMode == DownloadSortMode.STATUS,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(112.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.STATUS)
-                    }
-                }
-                if (DownloadColumn.PROGRESS in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Progress",
-                        active = controller.downloadSortMode == DownloadSortMode.PROGRESS,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(220.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.PROGRESS)
-                    }
-                }
-                if (DownloadColumn.RATE in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Rate",
-                        active = controller.downloadSortMode == DownloadSortMode.RATE,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(90.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.RATE)
-                    }
-                }
-                if (DownloadColumn.SOURCES in controller.visibleDownloadColumns) {
-                    SortableHeaderText(
-                        label = "Sources",
-                        active = controller.downloadSortMode == DownloadSortMode.SOURCES,
-                        descending = controller.downloadSortDescending,
-                        modifier = Modifier.width(72.dp)
-                    ) {
-                        controller.toggleDownloadSort(DownloadSortMode.SOURCES)
-                    }
-                }
-                Spacer(Modifier.width(54.dp))
-            }
-        }
-        HorizontalDivider()
-        if (items.isEmpty()) {
-            EmptyState(
-                icon = Icons.Rounded.Download,
-                title = when (controller.downloadFilterMode) {
-                    TransferFilterMode.ALL -> "No downloads"
-                    TransferFilterMode.ACTIVE -> "No active downloads"
-                    TransferFilterMode.FINISHED -> "No finished downloads"
-                    TransferFilterMode.STALLED -> "No stalled downloads"
-                },
-                body = when (controller.downloadFilterMode) {
-                    TransferFilterMode.ALL -> "Start a download from search, a torrent file, or a link to see it here."
-                    TransferFilterMode.ACTIVE -> "Active downloads appear here."
-                    TransferFilterMode.FINISHED -> "Completed downloads stay here until you clear them."
-                    TransferFilterMode.STALLED -> "Problem downloads appear here so you can retry or remove them."
-                }
-            )
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(items, key = { it.urn.toString() }) { item ->
-                    DownloadTransferRow(
-                        controller = controller,
-                        item = item,
-                        selected = item.urn.toString() in controller.selectedDownloadUrns,
-                        primarySelected = controller.selectedDownloadUrn == item.urn.toString(),
-                        visibleColumns = controller.visibleDownloadColumns,
-                        onSelect = { extendSelection, toggleSelection ->
-                            controller.selectDownloadItem(item, extendSelection, toggleSelection)
-                            tableFocusRequester.requestFocus()
-                        },
-                        onToggleChecked = {
-                            controller.toggleDownloadItemChecked(item)
-                            tableFocusRequester.requestFocus()
-                        }
-                    )
-                    HorizontalDivider()
                 }
             }
         }
@@ -9375,6 +10161,7 @@ private fun TransferList(controller: ComposeAppController, items: List<DownloadI
 @Composable
 private fun UploadList(controller: ComposeAppController, items: List<UploadItem>) {
     val tableFocusRequester = remember { FocusRequester() }
+    val orderedVisibleUploadColumns = UploadColumn.entries.filter { it in controller.visibleUploadColumns }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -9390,186 +10177,106 @@ private fun UploadList(controller: ComposeAppController, items: List<UploadItem>
                 )
             }
     ) {
-        HeaderContextMenuArea(
-            menuContent = {
-                UploadSortMode.entries.forEach { mode ->
-                    DropdownMenuItem(
-                        text = { Text("Sort by ${friendlyName(mode.name)}") },
-                        onClick = {
-                            controller.toggleUploadSort(mode)
-                            dismiss()
-                        }
-                    )
+        DesktopScrollableTable(
+            visibleColumns = orderedVisibleUploadColumns,
+            specFor = ::uploadColumnSpec,
+            leadingWidth = 48.dp,
+            trailingWidth = 54.dp,
+            rowHorizontalPadding = 10.dp
+        ) { layout ->
+            HeaderContextMenuArea(
+                modifier = Modifier.fillMaxWidth(),
+                menuContent = {
+                    UploadSortMode.entries.forEach { mode ->
+                        DropdownMenuItem(
+                            text = { Text("Sort by ${uploadColumnLabel(mode.asUploadColumn())}") },
+                            onClick = {
+                                controller.toggleUploadSort(mode)
+                                dismiss()
+                            }
+                        )
+                    }
+                    HorizontalDivider()
+                    UploadColumn.entries.forEach { column ->
+                        DropdownMenuItem(
+                            text = {
+                                Text("${if (column in controller.visibleUploadColumns) "Hide" else "Show"} ${uploadColumnLabel(column)}")
+                            },
+                            onClick = {
+                                controller.toggleUploadColumn(column)
+                                dismiss()
+                            }
+                        )
+                    }
                 }
-                HorizontalDivider()
-                UploadColumn.entries.forEach { column ->
-                    DropdownMenuItem(
-                        text = {
-                            Text("${if (column in controller.visibleUploadColumns) "Hide" else "Show"} ${friendlyName(column.name)}")
-                        },
-                        onClick = {
-                            controller.toggleUploadColumn(column)
-                            dismiss()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = items.isNotEmpty() && items.all { controller.uploadItemKey(it) in controller.selectedUploadUrns },
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                controller.selectAllVisibleUploads()
+                            } else {
+                                controller.clearUploadSelection()
+                            }
                         }
                     )
+                    orderedVisibleUploadColumns.forEach { column ->
+                        SortableHeaderText(
+                            label = uploadColumnLabel(column),
+                            active = controller.uploadSortMode == column.asUploadSortMode(),
+                            descending = controller.uploadSortDescending,
+                            modifier = layout.modifier(column)
+                        ) {
+                            controller.toggleUploadSort(column.asUploadSortMode())
+                        }
+                    }
+                    Spacer(Modifier.width(54.dp))
                 }
             }
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = items.isNotEmpty() && items.all { it.urn.toString() in controller.selectedUploadUrns },
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            controller.selectAllVisibleUploads()
-                        } else {
-                            controller.clearUploadSelection()
-                        }
+            HorizontalDivider()
+            if (items.isEmpty()) {
+                EmptyState(
+                    icon = Icons.Rounded.Upload,
+                    title = when (controller.uploadFilterMode) {
+                        TransferFilterMode.ALL -> "No uploads"
+                        TransferFilterMode.ACTIVE -> "No active uploads"
+                        TransferFilterMode.FINISHED -> "No finished uploads"
+                        TransferFilterMode.STALLED -> "No stalled uploads"
+                    },
+                    body = when (controller.uploadFilterMode) {
+                        TransferFilterMode.ALL -> "Uploads appear here while files or torrents are being shared."
+                        TransferFilterMode.ACTIVE -> "Active uploads appear here."
+                        TransferFilterMode.FINISHED -> "Completed uploads stay here until you clear them."
+                        TransferFilterMode.STALLED -> "Uploads with errors or stalled sessions appear here."
                     }
                 )
-                if (UploadColumn.NAME in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Name",
-                        active = controller.uploadSortMode == UploadSortMode.NAME,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.weight(1.25f)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.NAME)
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(items, key = controller::uploadItemKey) { item ->
+                        UploadTransferRow(
+                            controller = controller,
+                            item = item,
+                            selected = controller.uploadItemKey(item) in controller.selectedUploadUrns,
+                            primarySelected = controller.selectedUploadUrn == controller.uploadItemKey(item),
+                            visibleColumns = controller.visibleUploadColumns,
+                            layout = layout,
+                            onSelect = { extendSelection, toggleSelection ->
+                                controller.selectUploadItem(item, extendSelection, toggleSelection)
+                                tableFocusRequester.requestFocus()
+                            },
+                            onToggleChecked = {
+                                controller.toggleUploadItemChecked(item)
+                                tableFocusRequester.requestFocus()
+                            }
+                        )
+                        HorizontalDivider()
                     }
-                }
-                if (UploadColumn.ORDER_STARTED in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Order Started",
-                        active = controller.uploadSortMode == UploadSortMode.ORDER_STARTED,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(136.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.ORDER_STARTED)
-                    }
-                }
-                if (UploadColumn.TIME_LEFT in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Time Left",
-                        active = controller.uploadSortMode == UploadSortMode.TIME_LEFT,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(92.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.TIME_LEFT)
-                    }
-                }
-                if (UploadColumn.FILE_TYPE in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "File Type",
-                        active = controller.uploadSortMode == UploadSortMode.FILE_TYPE,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(96.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.FILE_TYPE)
-                    }
-                }
-                if (UploadColumn.EXTENSION in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Extension",
-                        active = controller.uploadSortMode == UploadSortMode.EXTENSION,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(92.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.EXTENSION)
-                    }
-                }
-                if (UploadColumn.USER_NAME in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "User Name",
-                        active = controller.uploadSortMode == UploadSortMode.USER_NAME,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(132.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.USER_NAME)
-                    }
-                }
-                if (UploadColumn.STATUS in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Status",
-                        active = controller.uploadSortMode == UploadSortMode.STATUS,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(112.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.STATUS)
-                    }
-                }
-                if (UploadColumn.UPLOADED in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Uploaded",
-                        active = controller.uploadSortMode == UploadSortMode.UPLOADED,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(220.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.UPLOADED)
-                    }
-                }
-                if (UploadColumn.RATE in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Rate",
-                        active = controller.uploadSortMode == UploadSortMode.RATE,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(90.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.RATE)
-                    }
-                }
-                if (UploadColumn.PEERS in controller.visibleUploadColumns) {
-                    SortableHeaderText(
-                        label = "Peers",
-                        active = controller.uploadSortMode == UploadSortMode.PEERS,
-                        descending = controller.uploadSortDescending,
-                        modifier = Modifier.width(72.dp)
-                    ) {
-                        controller.toggleUploadSort(UploadSortMode.PEERS)
-                    }
-                }
-                Spacer(Modifier.width(54.dp))
-            }
-        }
-        HorizontalDivider()
-        if (items.isEmpty()) {
-            EmptyState(
-                icon = Icons.Rounded.Upload,
-                title = when (controller.uploadFilterMode) {
-                    TransferFilterMode.ALL -> "No uploads"
-                    TransferFilterMode.ACTIVE -> "No active uploads"
-                    TransferFilterMode.FINISHED -> "No finished uploads"
-                    TransferFilterMode.STALLED -> "No stalled uploads"
-                },
-                body = when (controller.uploadFilterMode) {
-                    TransferFilterMode.ALL -> "Uploads appear here while files or torrents are being shared."
-                    TransferFilterMode.ACTIVE -> "Active uploads appear here."
-                    TransferFilterMode.FINISHED -> "Completed uploads stay here until you clear them."
-                    TransferFilterMode.STALLED -> "Uploads with errors or stalled sessions appear here."
-                }
-            )
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(items, key = { it.urn.toString() }) { item ->
-                    UploadTransferRow(
-                        controller = controller,
-                        item = item,
-                        selected = item.urn.toString() in controller.selectedUploadUrns,
-                        primarySelected = controller.selectedUploadUrn == item.urn.toString(),
-                        visibleColumns = controller.visibleUploadColumns,
-                        onSelect = { extendSelection, toggleSelection ->
-                            controller.selectUploadItem(item, extendSelection, toggleSelection)
-                            tableFocusRequester.requestFocus()
-                        },
-                        onToggleChecked = {
-                            controller.toggleUploadItemChecked(item)
-                            tableFocusRequester.requestFocus()
-                        }
-                    )
-                    HorizontalDivider()
                 }
             }
         }
@@ -9584,6 +10291,7 @@ private fun DownloadTransferRow(
     selected: Boolean,
     primarySelected: Boolean,
     visibleColumns: Set<DownloadColumn>,
+    layout: DesktopTableLayout<DownloadColumn>,
     onSelect: (extendSelection: Boolean, toggleSelection: Boolean) -> Unit,
     onToggleChecked: () -> Unit
 ) {
@@ -9598,7 +10306,18 @@ private fun DownloadTransferRow(
     val identity = controller.downloadItemIdentity(item)
     val statusMessage = downloadRowStatusMessage(item)
     val dragTransferData = externalFilesTransferData(controller.draggableDownloadFiles(item))
-    var menuExpanded by remember(item.urn.toString()) { mutableStateOf(false) }
+    val ed2kLink = controller.ed2kLink(item)
+    val downloadStateBadgeLabel = friendlyName(item.state.name)
+    val downloadStateTone = downloadStateBadgeTone(item.state)
+    val downloadStateIcon = downloadStateBadgeIcon(item.state)
+    val networkLabel = transferNetworkLabel(
+        isEd2k = ed2kLink != null,
+        isBitTorrent = item.downloadItemType == DownloadItem.DownloadItemType.BITTORRENT
+    )
+    val statusSupportingText = listOf(identity.subtitle, if (isPlaying) "$statusMessage · Playing now" else statusMessage)
+        .filter(String::isNotBlank)
+        .joinToString(" · ")
+    var menuExpanded by remember(controller.downloadItemKey(item)) { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -9618,15 +10337,15 @@ private fun DownloadTransferRow(
                 }
             )
             .then(
-                rememberSelectableRowModifier(
-                    rowKey = item.urn.toString(),
-                    onSelect = onSelect,
-                    onActivate = { controller.activateSelectedDownloadItem() },
-                    onContextRequest = {
-                        controller.handleDownloadContextSelection(item)
-                        menuExpanded = true
-                    }
-                )
+                    rememberSelectableRowModifier(
+                        rowKey = controller.downloadItemKey(item),
+                        onSelect = onSelect,
+                        onActivate = { controller.activateSelectedDownloadItem() },
+                        onContextRequest = {
+                            controller.handleDownloadContextSelection(item)
+                            menuExpanded = true
+                        }
+                    )
             )
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -9636,23 +10355,49 @@ private fun DownloadTransferRow(
             onCheckedChange = { onToggleChecked() }
         )
         if (DownloadColumn.NAME in visibleColumns) {
-            Row(modifier = Modifier.weight(1.25f), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(modifier = layout.modifier(DownloadColumn.NAME), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 FileIdentityIcon(icon = identity.icon, modifier = Modifier.size(18.dp))
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        listOf(identity.subtitle, if (isPlaying) "$statusMessage · Playing now" else statusMessage)
-                            .filter(String::isNotBlank)
-                            .joinToString(" · "),
-                        color = when {
-                            item.state == DownloadState.ERROR ||
-                                item.state == DownloadState.STALLED ||
-                                item.state == DownloadState.DANGEROUS -> MaterialTheme.colorScheme.error
-                            isPlaying -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        InlineStatusBadge(
+                            downloadStateBadgeLabel,
+                            tone = downloadStateTone,
+                            icon = downloadStateIcon
+                        )
+                        InlineStatusBadge(
+                            networkLabel,
+                            tone = transferNetworkBadgeTone(
+                                isEd2k = ed2kLink != null,
+                                isBitTorrent = item.downloadItemType == DownloadItem.DownloadItemType.BITTORRENT
+                            ),
+                            icon = transferNetworkBadgeIcon(
+                                isEd2k = ed2kLink != null,
+                                isBitTorrent = item.downloadItemType == DownloadItem.DownloadItemType.BITTORRENT
+                            )
+                        )
+                        if (isPlaying) {
+                            InlineStatusBadge("Playing", tone = BadgeTone.MAGENTA, icon = Icons.Rounded.PlayArrow)
+                        }
+                        Text(
+                            statusSupportingText,
+                            modifier = Modifier.weight(1f),
+                            color = when {
+                                item.state == DownloadState.ERROR ||
+                                    item.state == DownloadState.STALLED ||
+                                    item.state == DownloadState.DANGEROUS -> MaterialTheme.colorScheme.error
+                                isPlaying -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         when {
                             item.state.isPausable -> TransferInlineActionChip("Pause") {
@@ -9692,26 +10437,30 @@ private fun DownloadTransferRow(
         if (DownloadColumn.ORDER_ADDED in visibleColumns) {
             Text(
                 formatDateTimeCompact(item.startDate.time),
-                modifier = Modifier.width(136.dp),
+                modifier = layout.modifier(DownloadColumn.ORDER_ADDED),
                 style = MaterialTheme.typography.bodySmall
             )
         }
         if (DownloadColumn.TIME_LEFT in visibleColumns) {
             Text(
                 formatDuration(item.remainingDownloadTime),
-                modifier = Modifier.width(92.dp),
+                modifier = layout.modifier(DownloadColumn.TIME_LEFT),
                 style = MaterialTheme.typography.bodySmall
             )
         }
         if (DownloadColumn.FILE_TYPE in visibleColumns) {
-            Text(item.category.getSingularName(), modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
+            Text(item.category.getSingularName(), modifier = layout.modifier(DownloadColumn.FILE_TYPE), style = MaterialTheme.typography.bodySmall)
         }
         if (DownloadColumn.EXTENSION in visibleColumns) {
-            Text(fileExtensionText(item.fileName).displayFallback(), modifier = Modifier.width(92.dp), style = MaterialTheme.typography.bodySmall)
+            Text(fileExtensionText(item.fileName).displayFallback(), modifier = layout.modifier(DownloadColumn.EXTENSION), style = MaterialTheme.typography.bodySmall)
         }
         if (DownloadColumn.STATUS in visibleColumns) {
-            Column(modifier = Modifier.width(112.dp)) {
-                Text(friendlyName(item.state.name), style = MaterialTheme.typography.bodySmall)
+            Column(modifier = layout.modifier(DownloadColumn.STATUS)) {
+                InlineStatusBadge(
+                    downloadStateBadgeLabel,
+                    tone = downloadStateTone,
+                    icon = downloadStateIcon
+                )
                 Text(
                     formatDuration(item.remainingDownloadTime),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -9720,7 +10469,7 @@ private fun DownloadTransferRow(
             }
         }
         if (DownloadColumn.PROGRESS in visibleColumns) {
-            Column(modifier = Modifier.width(220.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(modifier = layout.modifier(DownloadColumn.PROGRESS), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
                 Text(
                     "${formatBytes(item.currentSize)} of ${formatBytes(item.totalSize)}",
@@ -9730,10 +10479,10 @@ private fun DownloadTransferRow(
             }
         }
         if (DownloadColumn.RATE in visibleColumns) {
-            Text(formatRate(item.downloadSpeed), modifier = Modifier.width(90.dp), style = MaterialTheme.typography.bodySmall)
+            Text(formatRate(item.downloadSpeed), modifier = layout.modifier(DownloadColumn.RATE), style = MaterialTheme.typography.bodySmall)
         }
         if (DownloadColumn.SOURCES in visibleColumns) {
-            Text(item.downloadSourceCount.toString(), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
+            Text(item.downloadSourceCount.toString(), modifier = layout.modifier(DownloadColumn.SOURCES), style = MaterialTheme.typography.bodySmall)
         }
         Box {
             IconButton(onClick = { menuExpanded = true }) {
@@ -9791,6 +10540,26 @@ private fun DownloadTransferRow(
                             controller.retryOrSearchAgainForDownload(item)
                         }
                     )
+                    ed2kLink?.let { link ->
+                        DropdownMenuItem(
+                            text = { Text("Copy ED2K Link") },
+                            leadingIcon = { Icon(Icons.Rounded.Link, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                copyTextToClipboard(link)
+                                controller.showNotice("ED2K", "Copied ED2K link to the clipboard.", OperationNoticeLevel.SUCCESS)
+                            }
+                        )
+                    }
+                    if (controller.canRequestMoreSources(item)) {
+                        DropdownMenuItem(
+                            text = { Text("Request More Sources") },
+                            onClick = {
+                                menuExpanded = false
+                                controller.requestMoreSources(item)
+                            }
+                        )
+                    }
                     if (controller.canChangeDownloadLocation(item)) {
                         DropdownMenuItem(
                             text = { Text("Change Location") },
@@ -9854,6 +10623,7 @@ private fun UploadTransferRow(
     selected: Boolean,
     primarySelected: Boolean,
     visibleColumns: Set<UploadColumn>,
+    layout: DesktopTableLayout<UploadColumn>,
     onSelect: (extendSelection: Boolean, toggleSelection: Boolean) -> Unit,
     onToggleChecked: () -> Unit
 ) {
@@ -9863,7 +10633,18 @@ private fun UploadTransferRow(
     val identity = controller.uploadItemIdentity(item)
     val statusMessage = uploadRowStatusMessage(item)
     val dragTransferData = externalFilesTransferData(controller.draggableUploadFiles(item))
-    var menuExpanded by remember(item.urn.toString()) { mutableStateOf(false) }
+    val ed2kLink = controller.ed2kLink(item)
+    val uploadStateBadgeLabel = friendlyName(item.state.name)
+    val uploadStateTone = uploadStateBadgeTone(item.state)
+    val uploadStateIcon = uploadStateBadgeIcon(item.state)
+    val networkLabel = transferNetworkLabel(
+        isEd2k = ed2kLink != null,
+        isBitTorrent = item.uploadItemType == UploadItem.UploadItemType.BITTORRENT
+    )
+    val statusSupportingText = listOf(identity.subtitle, if (isPlaying) "$statusMessage · Playing now" else statusMessage)
+        .filter(String::isNotBlank)
+        .joinToString(" · ")
+    var menuExpanded by remember(controller.uploadItemKey(item)) { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -9882,15 +10663,15 @@ private fun UploadTransferRow(
                 }
             )
             .then(
-                rememberSelectableRowModifier(
-                    rowKey = item.urn.toString(),
-                    onSelect = onSelect,
-                    onActivate = { controller.activateSelectedUploadItem() },
-                    onContextRequest = {
-                        controller.handleUploadContextSelection(item)
-                        menuExpanded = true
-                    }
-                )
+                    rememberSelectableRowModifier(
+                        rowKey = controller.uploadItemKey(item),
+                        onSelect = onSelect,
+                        onActivate = { controller.activateSelectedUploadItem() },
+                        onContextRequest = {
+                            controller.handleUploadContextSelection(item)
+                            menuExpanded = true
+                        }
+                    )
             )
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -9900,21 +10681,47 @@ private fun UploadTransferRow(
             onCheckedChange = { onToggleChecked() }
         )
         if (UploadColumn.NAME in visibleColumns) {
-            Row(modifier = Modifier.weight(1.25f), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(modifier = layout.modifier(UploadColumn.NAME), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 FileIdentityIcon(icon = identity.icon, modifier = Modifier.size(18.dp))
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        listOf(identity.subtitle, if (isPlaying) "$statusMessage · Playing now" else statusMessage)
-                            .filter(String::isNotBlank)
-                            .joinToString(" · "),
-                        color = when {
-                            item.state == UploadState.REQUEST_ERROR || item.state == UploadState.LIMIT_REACHED -> MaterialTheme.colorScheme.error
-                            isPlaying -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        InlineStatusBadge(
+                            uploadStateBadgeLabel,
+                            tone = uploadStateTone,
+                            icon = uploadStateIcon
+                        )
+                        InlineStatusBadge(
+                            networkLabel,
+                            tone = transferNetworkBadgeTone(
+                                isEd2k = ed2kLink != null,
+                                isBitTorrent = item.uploadItemType == UploadItem.UploadItemType.BITTORRENT
+                            ),
+                            icon = transferNetworkBadgeIcon(
+                                isEd2k = ed2kLink != null,
+                                isBitTorrent = item.uploadItemType == UploadItem.UploadItemType.BITTORRENT
+                            )
+                        )
+                        if (isPlaying) {
+                            InlineStatusBadge("Playing", tone = BadgeTone.MAGENTA, icon = Icons.Rounded.PlayArrow)
+                        }
+                        Text(
+                            statusSupportingText,
+                            modifier = Modifier.weight(1f),
+                            color = when {
+                                item.state == UploadState.REQUEST_ERROR || item.state == UploadState.LIMIT_REACHED -> MaterialTheme.colorScheme.error
+                                isPlaying -> MaterialTheme.colorScheme.primary
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         when (item.state) {
                             UploadState.UPLOADING -> TransferInlineActionChip("Pause") {
@@ -9948,35 +10755,39 @@ private fun UploadTransferRow(
         if (UploadColumn.ORDER_STARTED in visibleColumns) {
             Text(
                 formatDateTimeCompact(item.startTime),
-                modifier = Modifier.width(136.dp),
+                modifier = layout.modifier(UploadColumn.ORDER_STARTED),
                 style = MaterialTheme.typography.bodySmall
             )
         }
         if (UploadColumn.TIME_LEFT in visibleColumns) {
             Text(
                 formatDuration(item.remainingUploadTime),
-                modifier = Modifier.width(92.dp),
+                modifier = layout.modifier(UploadColumn.TIME_LEFT),
                 style = MaterialTheme.typography.bodySmall
             )
         }
         if (UploadColumn.FILE_TYPE in visibleColumns) {
-            Text(item.category.getSingularName(), modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
+            Text(item.category.getSingularName(), modifier = layout.modifier(UploadColumn.FILE_TYPE), style = MaterialTheme.typography.bodySmall)
         }
         if (UploadColumn.EXTENSION in visibleColumns) {
-            Text(fileExtensionText(item.fileName).displayFallback(), modifier = Modifier.width(92.dp), style = MaterialTheme.typography.bodySmall)
+            Text(fileExtensionText(item.fileName).displayFallback(), modifier = layout.modifier(UploadColumn.EXTENSION), style = MaterialTheme.typography.bodySmall)
         }
         if (UploadColumn.USER_NAME in visibleColumns) {
             Text(
                 item.renderName.displayFallback(),
-                modifier = Modifier.width(132.dp),
+                modifier = layout.modifier(UploadColumn.USER_NAME),
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
         if (UploadColumn.STATUS in visibleColumns) {
-            Column(modifier = Modifier.width(112.dp)) {
-                Text(friendlyName(item.state.name), style = MaterialTheme.typography.bodySmall)
+            Column(modifier = layout.modifier(UploadColumn.STATUS)) {
+                InlineStatusBadge(
+                    uploadStateBadgeLabel,
+                    tone = uploadStateTone,
+                    icon = uploadStateIcon
+                )
                 Text(
                     formatDuration(item.remainingUploadTime),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -9985,7 +10796,7 @@ private fun UploadTransferRow(
             }
         }
         if (UploadColumn.UPLOADED in visibleColumns) {
-            Column(modifier = Modifier.width(220.dp)) {
+            Column(modifier = layout.modifier(UploadColumn.UPLOADED)) {
                 Text(formatBytes(item.totalAmountUploaded), style = MaterialTheme.typography.bodySmall)
                 Text(
                     "Seed ratio ${if (item.seedRatio >= 0f) String.format(Locale.US, "%.2f", item.seedRatio) else "n/a"}",
@@ -9995,10 +10806,10 @@ private fun UploadTransferRow(
             }
         }
         if (UploadColumn.RATE in visibleColumns) {
-            Text(formatRate(item.uploadSpeed), modifier = Modifier.width(90.dp), style = MaterialTheme.typography.bodySmall)
+            Text(formatRate(item.uploadSpeed), modifier = layout.modifier(UploadColumn.RATE), style = MaterialTheme.typography.bodySmall)
         }
         if (UploadColumn.PEERS in visibleColumns) {
-            Text(item.numUploadConnections.toString(), modifier = Modifier.width(72.dp), style = MaterialTheme.typography.bodySmall)
+            Text(item.numUploadConnections.toString(), modifier = layout.modifier(UploadColumn.PEERS), style = MaterialTheme.typography.bodySmall)
         }
         Box {
             IconButton(onClick = { menuExpanded = true }) {
@@ -10049,6 +10860,17 @@ private fun UploadTransferRow(
                             onClick = {
                                 menuExpanded = false
                                 controller.showUploadFileInfo(item)
+                            }
+                        )
+                    }
+                    ed2kLink?.let { link ->
+                        DropdownMenuItem(
+                            text = { Text("Copy ED2K Link") },
+                            leadingIcon = { Icon(Icons.Rounded.Link, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                copyTextToClipboard(link)
+                                controller.showNotice("ED2K", "Copied ED2K link to the clipboard.", OperationNoticeLevel.SUCCESS)
                             }
                         )
                     }
@@ -11206,182 +12028,127 @@ private fun PlayerScreen(controller: ComposeAppController) {
 }
 
 @Composable
-private fun StatusBar(controller: ComposeAppController) {
+private fun ConnectionStatusOverlay(
+    controller: ComposeAppController,
+    modifier: Modifier = Modifier
+) {
     val desktopDensity = LocalDesktopDensity.current
-    val desktopType = LocalDesktopTypeScale.current
-    val downloadsEpoch = controller.downloadsEpoch
-    val uploadsEpoch = controller.uploadsEpoch
-    val currentIdentity = controller.currentPlayerIdentity()
-    val activeDownloads = controller.activeDownloadCount()
-    val activeUploads = controller.activeUploadCount()
-    val nextQueueEntry = if (controller.playerQueueIndex in controller.playerQueue.indices) {
-        controller.playerQueue.getOrNull(controller.playerQueueIndex + 1)
-    } else {
-        controller.playerQueue.firstOrNull()
-    }
-    val canPreviousTrack = controller.canPreviousTrack()
-    val canNextTrack = controller.canNextTrack()
-    val _downloads = downloadsEpoch
-    val _uploads = uploadsEpoch
-
-    Surface(tonalElevation = 4.dp, modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = desktopDensity.headerPadding, vertical = desktopDensity.statusBarPadding),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(desktopDensity.statusBarGap)
-            ) {
-                ConnectionStatusButton(controller)
-                FriendsQuickButton(controller)
-                if (controller.playerVisible && controller.playerCurrentFile != null) {
-                    HorizontalDivider(modifier = Modifier.height(28.dp).width(1.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(desktopDensity.chipGap)
-                    ) {
-                        if (canPreviousTrack) {
-                            CompactIconButton(onClick = { controller.previousTrack() }) {
-                                Icon(Icons.Rounded.SkipPrevious, contentDescription = "Previous track")
-                            }
-                        }
-                        CompactIconButton(onClick = { controller.togglePlayerPlayback() }) {
-                            Icon(
-                                if (controller.playerState == PlayerState.PLAYING || controller.playerState == PlayerState.SEEKING_PLAY) {
-                                    Icons.Rounded.Pause
-                                } else {
-                                    Icons.Rounded.PlayArrow
-                                },
-                                contentDescription = null
-                            )
-                        }
-                        if (canNextTrack) {
-                            CompactIconButton(onClick = { controller.nextTrack() }) {
-                                Icon(Icons.Rounded.SkipNext, contentDescription = "Next track")
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.clickable { controller.showCurrentPlayerInMyFilesOrPlayer() },
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            FileIdentityIcon(
-                                icon = currentIdentity?.icon,
-                                modifier = Modifier.size(18.dp),
-                                fallback = FileIconToken.AUDIO
-                            )
-                            Column {
-                                Text(
-                                    currentIdentity?.title ?: controller.playerTrackName,
-                                    style = desktopType.body,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    nextQueueEntry?.let {
-                                        if (desktopDensity.compactVertical) {
-                                            "Next: ${it.title}"
-                                        } else {
-                                            "Up next: ${it.title} · Queue from ${controller.playerQueueSourceLabel}"
-                                        }
-                                    } ?: if (controller.playerQueue.isNotEmpty()) {
-                                        if (desktopDensity.compactVertical) {
-                                            friendlyName(controller.playerState.name)
-                                        } else {
-                                            "Queue from ${controller.playerQueueSourceLabel} · ${friendlyName(controller.playerState.name)}"
-                                        }
-                                    } else {
-                                        "${currentIdentity?.subtitle ?: controller.playerCurrentFile?.name.orEmpty()} · ${friendlyName(controller.playerState.name)}"
-                                    },
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = desktopType.meta
-                                )
-                            }
-                        }
-                        CompactTextButton(onClick = { controller.selectPlayer() }) {
-                            Text("Player")
-                        }
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    compactSummary(
-                        "Downloads" to activeDownloads.toString(),
-                        "Uploads" to activeUploads.toString(),
-                        "Down" to controller.showTotalBandwidth.takeIf { it && !desktopDensity.compactVertical }?.let { formatRate(controller.totalDownloadBandwidth()) },
-                        "Up" to controller.showTotalBandwidth.takeIf { it && !desktopDensity.compactVertical }?.let { formatRate(controller.totalUploadBandwidth()) },
-                        "Exit" to controller.delayedExitState.pending.takeIf { it }?.let { controller.delayedExitSummary() }
-                    ),
-                    modifier = Modifier
-                        .padding(end = desktopDensity.statusBarGap)
-                        .weight(1f, fill = false),
-                    style = desktopType.summary,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                SharingStatusButton(controller)
-                FileProcessingStatusButton(controller)
-                if (controller.delayedExitState.pending) {
-                    CompactTextButton(onClick = { controller.cancelExitAfterTransfers() }) {
-                        Text("Cancel Exit")
-                    }
-                }
-                CompactTextButton(onClick = { controller.toggleTray() }) {
-                    Text(if (controller.trayExpanded) "Hide Tray" else "Show Tray")
-                }
-            }
-        }
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(desktopDensity.statusBarGap),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ConnectionStatusButton(controller)
+        ConnectionQuickActions(controller)
     }
 }
 
 @Composable
 private fun ConnectionStatusButton(controller: ComposeAppController) {
     val strength = controller.connectionStrength()
-    var expanded by remember(strength, controller.canRetryConnection()) { mutableStateOf(false) }
-    var verbose by remember(strength) { mutableStateOf(true) }
-
-    LaunchedEffect(strength) {
-        verbose = true
-        if (strength == org.limewire.core.api.connection.ConnectionStrength.FULL ||
-            strength == org.limewire.core.api.connection.ConnectionStrength.TURBO
-        ) {
-            delay(3000)
-            verbose = false
-        }
-    }
+    val ed2kState = controller.ed2kStatus.serverState
+    var expanded by remember(strength, ed2kState, controller.canRetryConnection()) { mutableStateOf(false) }
+    val roleLabel = controller.advancedNodeRoleBadgeLabel()
 
     Box {
-        CompactOutlinedButton(onClick = { expanded = true }) {
-            Icon(
-                when (strength) {
-                    org.limewire.core.api.connection.ConnectionStrength.NO_INTERNET -> Icons.Rounded.CloudOff
-                    org.limewire.core.api.connection.ConnectionStrength.DISCONNECTED -> Icons.Rounded.Warning
-                    org.limewire.core.api.connection.ConnectionStrength.CONNECTING -> Icons.Rounded.Sync
-                    else -> Icons.Rounded.Wifi
-                },
-                contentDescription = null
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(connectionStatusLabel(strength, verbose))
+        Surface(
+            shape = RoundedCornerShape(999.dp),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)),
+            shadowElevation = 4.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .clickable { expanded = true }
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                InlineStatusBadge(
+                    label = controller.advancedConnectionStrengthLabel(),
+                    tone = connectionStrengthBadgeTone(strength),
+                    icon = connectionStrengthBadgeIcon(strength)
+                )
+                if (strength.isOnline) {
+                    InlineStatusBadge(
+                        label = roleLabel,
+                        tone = if (roleLabel == "Ultrapeer") BadgeTone.VIOLET else BadgeTone.CYAN
+                    )
+                }
+                InlineStatusBadge(
+                    label = "ED2K ${controller.ed2kServerStatusLabel()}",
+                    tone = ed2kConnectionBadgeTone(ed2kState),
+                    icon = ed2kConnectionBadgeIcon(ed2kState)
+                )
+                Icon(
+                    Icons.Rounded.MoreVert,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             Column(
                 modifier = Modifier.widthIn(min = 280.dp, max = 360.dp).padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(connectionStatusLabel(strength, true), fontWeight = FontWeight.SemiBold)
+                Text("Network Status", fontWeight = FontWeight.SemiBold)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    InlineStatusBadge(
+                        label = controller.advancedConnectionStrengthLabel(),
+                        tone = connectionStrengthBadgeTone(strength),
+                        icon = connectionStrengthBadgeIcon(strength)
+                    )
+                    InlineStatusBadge(
+                        label = roleLabel,
+                        tone = when {
+                            !strength.isOnline -> BadgeTone.ORANGE
+                            roleLabel == "Ultrapeer" -> BadgeTone.VIOLET
+                            else -> BadgeTone.CYAN
+                        }
+                    )
+                    InlineStatusBadge(
+                        label = when (controller.friendConnectionState) {
+                            FriendConnectionEvent.Type.CONNECTED -> "Friends Online"
+                            FriendConnectionEvent.Type.CONNECTING -> "Friends Signing In"
+                            FriendConnectionEvent.Type.CONNECT_FAILED -> "Friends Attention"
+                            FriendConnectionEvent.Type.DISCONNECTED, null -> "Friends Offline"
+                        },
+                        tone = when (controller.friendConnectionState) {
+                            FriendConnectionEvent.Type.CONNECTED -> BadgeTone.GREEN
+                            FriendConnectionEvent.Type.CONNECTING -> BadgeTone.YELLOW
+                            FriendConnectionEvent.Type.CONNECT_FAILED -> BadgeTone.RED
+                            FriendConnectionEvent.Type.DISCONNECTED, null -> BadgeTone.ORANGE
+                        },
+                        icon = Icons.Rounded.Forum
+                    )
+                    InlineStatusBadge(
+                        label = "ED2K ${controller.ed2kServerStatusLabel()}",
+                        tone = ed2kConnectionBadgeTone(ed2kState),
+                        icon = ed2kConnectionBadgeIcon(ed2kState)
+                    )
+                    InlineStatusBadge(
+                        label = "Kad ${controller.ed2kKadStatusLabel()}",
+                        tone = kadConnectionBadgeTone(controller.ed2kStatus),
+                        icon = if (controller.ed2kStatus.kadState == Ed2kStatus.ConnectionState.CONNECTING) {
+                            Icons.Rounded.Sync
+                        } else {
+                            Icons.Rounded.Link
+                        }
+                    )
+                }
                 Text(
                     connectionStatusBody(strength, controller.friendConnectionState),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    controller.advancedNodeRoleText(),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -11394,7 +12161,52 @@ private fun ConnectionStatusButton(controller: ComposeAppController) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text(
+                    "ED2K server: ${controller.ed2kServerStatusLabel()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    controller.ed2kConnectedServerText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "Kad: ${controller.ed2kKadStatusLabel()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    controller.ed2kSummaryText(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(if (controller.canDisconnectEd2kServer()) "Disconnect ED2K" else "Connect ED2K") },
+                enabled = controller.canDisconnectEd2kServer() || controller.canConnectEd2kServer(),
+                onClick = {
+                    expanded = false
+                    if (controller.canDisconnectEd2kServer()) {
+                        controller.disconnectEd2kServer()
+                    } else {
+                        controller.connectAnyEd2kServer()
+                    }
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(if (controller.canDisconnectKad()) "Disconnect Kad" else "Connect Kad") },
+                enabled = controller.canDisconnectKad() || controller.canConnectKad(),
+                onClick = {
+                    expanded = false
+                    if (controller.canDisconnectKad()) {
+                        controller.disconnectKad()
+                    } else {
+                        controller.connectKad()
+                    }
+                }
+            )
             if (controller.canRetryConnection()) {
                 HorizontalDivider()
                 DropdownMenuItem(
@@ -11406,6 +12218,18 @@ private fun ConnectionStatusButton(controller: ComposeAppController) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ConnectionQuickActions(controller: ComposeAppController) {
+    if (!controller.canRetryConnection()) {
+        return
+    }
+    CompactTranslucentButton(onClick = { controller.retryConnection() }) {
+        Icon(Icons.Rounded.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(4.dp))
+        Text("Reconnect")
     }
 }
 
@@ -11429,13 +12253,72 @@ private fun FriendsQuickButton(controller: ComposeAppController) {
     }
 }
 
+private enum class BadgeTone {
+    NEUTRAL,
+    BLUE,
+    CYAN,
+    GREEN,
+    YELLOW,
+    ORANGE,
+    RED,
+    MAGENTA,
+    VIOLET
+}
+
+private data class BadgeColors(
+    val container: Color,
+    val content: Color,
+    val border: Color
+)
+
 @Composable
-private fun MetricBadge(label: String, value: String) {
+private fun metricBadgeColors(tone: BadgeTone): BadgeColors {
+    val palette = LocalThemePalette.current
+    val accent = when (tone) {
+        BadgeTone.NEUTRAL -> null
+        BadgeTone.BLUE -> palette.blue
+        BadgeTone.CYAN -> palette.cyan
+        BadgeTone.GREEN -> palette.green
+        BadgeTone.YELLOW -> palette.yellow
+        BadgeTone.ORANGE -> palette.orange
+        BadgeTone.RED -> palette.red
+        BadgeTone.MAGENTA -> palette.magenta
+        BadgeTone.VIOLET -> palette.violet
+    }
+    return if (accent == null) {
+        BadgeColors(
+            container = MaterialTheme.colorScheme.surfaceVariant,
+            content = MaterialTheme.colorScheme.onSurfaceVariant,
+            border = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+        )
+    } else {
+        val content = baseBadgeContentColor(palette)
+        BadgeColors(
+            container = accent,
+            content = content,
+            border = content.copy(alpha = 0.34f)
+        )
+    }
+}
+
+private fun baseBadgeContentColor(palette: ThemePalette): Color {
+    return palette.bg0
+}
+
+@Composable
+private fun MetricBadge(
+    label: String,
+    value: String,
+    tone: BadgeTone = BadgeTone.NEUTRAL,
+    icon: ImageVector? = null
+) {
     val desktopDensity = LocalDesktopDensity.current
     val desktopType = LocalDesktopTypeScale.current
+    val colors = metricBadgeColors(tone)
     Surface(
         shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = colors.container,
+        border = BorderStroke(1.dp, colors.border)
     ) {
         Row(
             modifier = Modifier.padding(
@@ -11445,24 +12328,157 @@ private fun MetricBadge(label: String, value: String) {
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(label, style = desktopType.badgeLabel, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
-            Text(value, style = desktopType.badgeValue, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (icon != null) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(12.dp), tint = colors.content)
+            }
+            Text(label, style = desktopType.badgeLabel, color = colors.content, maxLines = 1)
+            Text(
+                value,
+                style = desktopType.badgeValue,
+                color = if (tone == BadgeTone.NEUTRAL) MaterialTheme.colorScheme.onSurface else colors.content,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
 @Composable
-private fun InlineStatusBadge(label: String, modifier: Modifier = Modifier) {
+private fun InlineStatusBadge(
+    label: String,
+    modifier: Modifier = Modifier,
+    tone: BadgeTone = BadgeTone.NEUTRAL,
+    icon: ImageVector? = null
+) {
+    val colors = metricBadgeColors(tone)
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.75f)
+        color = colors.container,
+        border = BorderStroke(1.dp, colors.border)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(12.dp), tint = colors.content)
+            }
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.content,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+private data class SemanticTabSpec(
+    val label: String,
+    val tone: BadgeTone,
+    val selected: Boolean,
+    val onClick: () -> Unit
+)
+
+@Composable
+private fun SemanticPrimaryTabRow(
+    tabs: List<SemanticTabSpec>,
+    modifier: Modifier = Modifier
+) {
+    val desktopDensity = LocalDesktopDensity.current
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(desktopDensity.surfaceCorner),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.24f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            tabs.forEach { tab ->
+                SemanticPrimaryTab(
+                    label = tab.label,
+                    tone = tab.tone,
+                    selected = tab.selected,
+                    onClick = tab.onClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SemanticPrimaryTab(
+    label: String,
+    tone: BadgeTone,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = semanticTabColors(tone, selected)
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = colors.container,
+        tonalElevation = if (selected) 3.dp else 0.dp,
+        border = BorderStroke(1.dp, colors.border)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(role = Role.Tab, onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.content,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun semanticTabColors(tone: BadgeTone, selected: Boolean): BadgeColors {
+    return if (selected) {
+        metricBadgeColors(tone)
+    } else {
+        BadgeColors(
+            container = MaterialTheme.colorScheme.surface,
+            content = MaterialTheme.colorScheme.onSurfaceVariant,
+            border = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+        )
+    }
+}
+
+@Composable
+private fun SemanticTabLabel(
+    text: String,
+    tone: BadgeTone,
+    selected: Boolean
+) {
+    val colors = semanticTabColors(tone, selected)
+    Surface(
+        shape = RoundedCornerShape(999.dp),
+        color = colors.container,
+        border = BorderStroke(1.dp, colors.border)
     ) {
         Text(
-            label,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            text,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = colors.content,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -11508,7 +12524,7 @@ private fun BrowseSourceButton(
     val enabledTargets = targets.filter(BrowseSourceTarget::enabled)
     if (targets.size == 1) {
         val target = targets.first()
-        OutlinedButton(
+        CompactOutlinedButton(
             onClick = { controller.browseSourceTarget(target) },
             enabled = target.enabled
         ) {
@@ -11519,7 +12535,7 @@ private fun BrowseSourceButton(
 
     var expanded by remember(targets.map { it.id to it.enabled to it.label }) { mutableStateOf(false) }
     Box {
-        OutlinedButton(
+        CompactOutlinedButton(
             onClick = { expanded = true },
             enabled = enabledTargets.isNotEmpty()
         ) {
@@ -11540,7 +12556,7 @@ private fun BlockUsersButton(
         return
     }
     if (targets.size == 1) {
-        OutlinedButton(onClick = { controller.blockUsers(listOf(targets.first())) }) {
+        CompactOutlinedButton(onClick = { controller.blockUsers(listOf(targets.first())) }) {
             Text("Block User")
         }
         return
@@ -11548,7 +12564,7 @@ private fun BlockUsersButton(
 
     var expanded by remember(targets.map { it.id to it.label }) { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
+        CompactOutlinedButton(onClick = { expanded = true }) {
             Text("Block Users")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -12203,11 +13219,21 @@ private fun LibrarySharingSection(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                if (membership.publicCollection) "Public" else "Friends Only",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                InlineStatusBadge(
+                                    if (membership.publicCollection) "Public" else "Friends Only",
+                                    tone = if (membership.publicCollection) BadgeTone.BLUE else BadgeTone.VIOLET,
+                                    icon = if (membership.publicCollection) Icons.Rounded.Wifi else Icons.Rounded.Forum
+                                )
+                                InlineStatusBadge(
+                                    if (membership.ed2kPublished) "Published to ED2K/Kad" else "ED2K/Kad Off",
+                                    tone = if (membership.ed2kPublished) BadgeTone.GREEN else BadgeTone.ORANGE,
+                                    icon = if (membership.ed2kPublished) Icons.Rounded.Check else Icons.Rounded.CloudOff
+                                )
+                            }
                         }
                         TextButton(onClick = { onRemove(membership) }) {
                             Text("Remove from Collection")
@@ -12813,7 +13839,10 @@ private fun sanitizeDecimalPreferenceInput(value: String): String {
 private fun validateOpenLinkDraft(value: String): String? {
     val trimmed = value.trim()
     if (trimmed.isEmpty()) {
-        return "Enter a magnet link or torrent URL."
+        return "Enter a magnet link, ED2K link, or torrent URL."
+    }
+    if (trimmed.startsWith("ed2k://", ignoreCase = true)) {
+        return null
     }
     val uriError = runCatching { URI(trimmed) }.exceptionOrNull()?.message
     if (uriError != null) {
@@ -12822,7 +13851,7 @@ private fun validateOpenLinkDraft(value: String): String? {
     return if (trimmed.startsWith("magnet:", ignoreCase = true) || "://" in trimmed) {
         null
     } else {
-        "Enter a magnet link or a full torrent URL."
+        "Enter a magnet link, ED2K link, or a full torrent URL."
     }
 }
 
@@ -12859,7 +13888,7 @@ private class HeaderContextMenuScope(
 private fun ColumnVisibilityMenu(entries: List<ColumnToggleEntry>) {
     var expanded by remember(entries.map { it.label to it.visible }) { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
+        CompactOutlinedButton(onClick = { expanded = true }) {
             Text("Columns")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -12883,7 +13912,7 @@ private fun CollectionMenuButton(
 ) {
     var expanded by remember(collections.map { it.id to it.collectionName }) { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
+        CompactOutlinedButton(onClick = { expanded = true }) {
             Text(label)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -12902,16 +13931,12 @@ private fun CollectionMenuButton(
 
 @Composable
 private fun DownloadsHeaderMenuButton(controller: ComposeAppController) {
-    var expanded by remember(
-        controller.downloadsEpoch,
-        controller.clearDownloadsWhenFinished,
-        controller.showUploadsInTray,
-        controller.downloadSortMode,
-        controller.downloadSortDescending
-    ) { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = "Download header menu")
+        CompactOutlinedButton(onClick = { expanded = true }) {
+            Icon(Icons.Rounded.MoreVert, contentDescription = null)
+            Spacer(Modifier.width(6.dp))
+            Text("More")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
@@ -12934,7 +13959,7 @@ private fun DownloadsHeaderMenuButton(controller: ComposeAppController) {
             DropdownMenuItem(text = { Text("Sort by") }, enabled = false, onClick = {})
             DownloadSortMode.entries.forEach { mode ->
                 DropdownMenuItem(
-                    text = { Text(friendlyName(mode.name)) },
+                    text = { Text(downloadColumnLabel(mode.asDownloadColumn())) },
                     leadingIcon = {
                         if (controller.downloadSortMode == mode) {
                             Icon(Icons.Rounded.Check, contentDescription = null)
@@ -13023,16 +14048,12 @@ private fun DownloadsHeaderMenuButton(controller: ComposeAppController) {
 
 @Composable
 private fun UploadsHeaderMenuButton(controller: ComposeAppController) {
-    var expanded by remember(
-        controller.uploadsEpoch,
-        controller.clearUploadsWhenFinished,
-        controller.showUploadsInTray,
-        controller.uploadSortMode,
-        controller.uploadSortDescending
-    ) { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Rounded.MoreVert, contentDescription = "Upload header menu")
+        CompactOutlinedButton(onClick = { expanded = true }) {
+            Icon(Icons.Rounded.MoreVert, contentDescription = null)
+            Spacer(Modifier.width(6.dp))
+            Text("More")
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
@@ -13055,7 +14076,7 @@ private fun UploadsHeaderMenuButton(controller: ComposeAppController) {
             DropdownMenuItem(text = { Text("Sort by") }, enabled = false, onClick = {})
             UploadSortMode.entries.forEach { mode ->
                 DropdownMenuItem(
-                    text = { Text(friendlyName(mode.name)) },
+                    text = { Text(uploadColumnLabel(mode.asUploadColumn())) },
                     leadingIcon = {
                         if (controller.uploadSortMode == mode) {
                             Icon(Icons.Rounded.Check, contentDescription = null)
@@ -13251,7 +14272,7 @@ private fun LibraryJumpMenuButton(
 ) {
     var expanded by remember(targets.map { it.sectionId to it.label }) { mutableStateOf(false) }
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
+        CompactOutlinedButton(onClick = { expanded = true }) {
             Text(label)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -13312,13 +14333,13 @@ private fun rememberSelectableRowModifier(
     rowKey: Any,
     onSelect: (extendSelection: Boolean, toggleSelection: Boolean) -> Unit,
     onActivate: () -> Unit,
-    onContextRequest: () -> Unit
+    onContextRequest: (Offset) -> Unit
 ): Modifier {
     var pending by remember(rowKey) { mutableStateOf(PendingSelectionModifiers()) }
     return Modifier
         .onPointerEvent(PointerEventType.Press) { event ->
             when {
-                event.buttons.isSecondaryPressed -> onContextRequest()
+                event.buttons.isSecondaryPressed -> onContextRequest(event.changes.firstOrNull()?.position ?: Offset.Zero)
                 event.buttons.isPrimaryPressed -> {
                     pending = PendingSelectionModifiers(
                         extendSelection = event.keyboardModifiers.isShiftPressed,
@@ -13456,7 +14477,8 @@ private fun searchSourceFilterLabel(filter: SearchSourceFilter): String {
     return when (filter) {
         SearchSourceFilter.ALL -> "All sources"
         SearchSourceFilter.FRIENDS -> "Friend sources"
-        SearchSourceFilter.NETWORK -> "Network sources"
+        SearchSourceFilter.NETWORK -> "WireShare network"
+        SearchSourceFilter.ED2K_KAD -> "ED2K/Kad"
         SearchSourceFilter.BROWSABLE -> "Browsable"
     }
 }
@@ -13497,7 +14519,11 @@ private fun buildLibraryItemMeta(identitySubtitle: String, item: LocalFileItem, 
     return parts.filter(String::isNotBlank).joinToString(" · ")
 }
 
-private fun searchResultKey(result: GroupedSearchResult): String = result.urn.toString()
+private fun searchResultKey(result: GroupedSearchResult): String {
+    return result.urn?.toString()
+        ?: result.searchResults.firstOrNull()?.magnetURL?.takeIf(String::isNotBlank)
+        ?: result.fileName
+}
 
 private fun compactResultKey(value: String): String {
     return if (value.length <= 22) value else value.take(10) + "…" + value.takeLast(8)
@@ -13513,20 +14539,13 @@ private fun searchTypeLabel(searchType: org.limewire.core.api.search.SearchDetai
     }
 }
 
-private fun connectionStatusLabel(
-    strength: org.limewire.core.api.connection.ConnectionStrength,
-    verbose: Boolean
-): String {
+private fun connectionStatusBadgeLabel(controller: ComposeAppController): String {
+    val strength = controller.connectionStrength()
     return when (strength) {
         org.limewire.core.api.connection.ConnectionStrength.NO_INTERNET -> "No Internet"
         org.limewire.core.api.connection.ConnectionStrength.DISCONNECTED -> "Disconnected"
         org.limewire.core.api.connection.ConnectionStrength.CONNECTING -> "Connecting…"
-        org.limewire.core.api.connection.ConnectionStrength.WEAK -> if (verbose) "Limited connection" else "Connected"
-        org.limewire.core.api.connection.ConnectionStrength.WEAK_PLUS -> if (verbose) "Fair connection" else "Connected"
-        org.limewire.core.api.connection.ConnectionStrength.MEDIUM -> if (verbose) "Good connection" else "Connected"
-        org.limewire.core.api.connection.ConnectionStrength.MEDIUM_PLUS -> if (verbose) "Strong connection" else "Connected"
-        org.limewire.core.api.connection.ConnectionStrength.FULL -> if (verbose) "Fully connected" else "Connected"
-        org.limewire.core.api.connection.ConnectionStrength.TURBO -> if (verbose) "Fully connected" else "Connected"
+        else -> "Connected · ${controller.advancedNodeRoleBadgeLabel()}"
     }
 }
 
@@ -13552,6 +14571,88 @@ private fun connectionStatusBody(
         FriendConnectionEvent.Type.DISCONNECTED, null -> "Friends are signed out."
     }
     return "$networkCopy $friendsCopy"
+}
+
+private fun connectionStrengthBadgeTone(
+    strength: org.limewire.core.api.connection.ConnectionStrength
+): BadgeTone {
+    return when (strength) {
+        org.limewire.core.api.connection.ConnectionStrength.NO_INTERNET -> BadgeTone.RED
+        org.limewire.core.api.connection.ConnectionStrength.DISCONNECTED -> BadgeTone.ORANGE
+        org.limewire.core.api.connection.ConnectionStrength.CONNECTING -> BadgeTone.YELLOW
+        org.limewire.core.api.connection.ConnectionStrength.WEAK -> BadgeTone.ORANGE
+        org.limewire.core.api.connection.ConnectionStrength.WEAK_PLUS -> BadgeTone.YELLOW
+        org.limewire.core.api.connection.ConnectionStrength.MEDIUM -> BadgeTone.CYAN
+        org.limewire.core.api.connection.ConnectionStrength.MEDIUM_PLUS -> BadgeTone.BLUE
+        org.limewire.core.api.connection.ConnectionStrength.FULL -> BadgeTone.GREEN
+        org.limewire.core.api.connection.ConnectionStrength.TURBO -> BadgeTone.MAGENTA
+    }
+}
+
+private fun connectionStrengthBadgeIcon(
+    strength: org.limewire.core.api.connection.ConnectionStrength
+): ImageVector {
+    return when (strength) {
+        org.limewire.core.api.connection.ConnectionStrength.NO_INTERNET -> Icons.Rounded.CloudOff
+        org.limewire.core.api.connection.ConnectionStrength.DISCONNECTED -> Icons.Rounded.Warning
+        org.limewire.core.api.connection.ConnectionStrength.CONNECTING -> Icons.Rounded.Sync
+        else -> Icons.Rounded.Wifi
+    }
+}
+
+private fun ed2kConnectionBadgeTone(state: Ed2kStatus.ConnectionState): BadgeTone {
+    return when (state) {
+        Ed2kStatus.ConnectionState.DISCONNECTED -> BadgeTone.ORANGE
+        Ed2kStatus.ConnectionState.CONNECTING -> BadgeTone.YELLOW
+        Ed2kStatus.ConnectionState.CONNECTED -> BadgeTone.GREEN
+    }
+}
+
+private fun ed2kConnectionBadgeIcon(state: Ed2kStatus.ConnectionState): ImageVector {
+    return when (state) {
+        Ed2kStatus.ConnectionState.DISCONNECTED -> Icons.Rounded.Close
+        Ed2kStatus.ConnectionState.CONNECTING -> Icons.Rounded.Sync
+        Ed2kStatus.ConnectionState.CONNECTED -> Icons.Rounded.Check
+    }
+}
+
+private fun kadConnectionBadgeTone(status: Ed2kStatus): BadgeTone {
+    return when (status.kadBootstrapState) {
+        Ed2kStatus.KadBootstrapState.NOT_BOOTSTRAPPED -> {
+            if (status.kadState == Ed2kStatus.ConnectionState.CONNECTED) BadgeTone.YELLOW else BadgeTone.ORANGE
+        }
+        Ed2kStatus.KadBootstrapState.BOOTSTRAPPING -> BadgeTone.CYAN
+        Ed2kStatus.KadBootstrapState.BOOTSTRAPPED -> BadgeTone.GREEN
+    }
+}
+
+private fun searchCategoryTabTone(category: SearchCategory): BadgeTone {
+    return when (category) {
+        SearchCategory.ALL -> BadgeTone.BLUE
+        SearchCategory.AUDIO -> BadgeTone.MAGENTA
+        SearchCategory.VIDEO -> BadgeTone.RED
+        SearchCategory.IMAGE -> BadgeTone.VIOLET
+        SearchCategory.DOCUMENT -> BadgeTone.CYAN
+        SearchCategory.PROGRAM -> BadgeTone.ORANGE
+        SearchCategory.TORRENT -> BadgeTone.GREEN
+        SearchCategory.OTHER -> BadgeTone.YELLOW
+    }
+}
+
+private fun advancedToolsTabTone(tab: AdvancedToolsTab): BadgeTone {
+    return when (tab) {
+        AdvancedToolsTab.CONNECTIONS -> BadgeTone.CYAN
+        AdvancedToolsTab.ED2K -> BadgeTone.ORANGE
+        AdvancedToolsTab.CONSOLE -> BadgeTone.MAGENTA
+        AdvancedToolsTab.MOJITO -> BadgeTone.VIOLET
+    }
+}
+
+private fun transferTrayTabTone(mode: TransferTrayMode): BadgeTone {
+    return when (mode) {
+        TransferTrayMode.DOWNLOADS -> BadgeTone.BLUE
+        TransferTrayMode.UPLOADS -> BadgeTone.VIOLET
+    }
 }
 
 @Composable
@@ -13727,6 +14828,35 @@ private fun LibrarySortMode.asLibraryColumn(): LibraryColumn {
     }
 }
 
+private fun LibraryColumn.asLibrarySortMode(): LibrarySortMode {
+    return when (this) {
+        LibraryColumn.NAME -> LibrarySortMode.NAME
+        LibraryColumn.FILENAME -> LibrarySortMode.FILENAME
+        LibraryColumn.EXTENSION -> LibrarySortMode.EXTENSION
+        LibraryColumn.TYPE -> LibrarySortMode.TYPE
+        LibraryColumn.SIZE -> LibrarySortMode.SIZE
+        LibraryColumn.ACTIVITY -> LibrarySortMode.ACTIVITY
+        LibraryColumn.HITS -> LibrarySortMode.HITS
+        LibraryColumn.UPLOADS -> LibrarySortMode.UPLOADS
+        LibraryColumn.UPLOAD_ATTEMPTS -> LibrarySortMode.UPLOAD_ATTEMPTS
+        LibraryColumn.UPDATED -> LibrarySortMode.UPDATED
+        LibraryColumn.LOCATION -> LibrarySortMode.LOCATION
+        LibraryColumn.LENGTH -> LibrarySortMode.LENGTH
+        LibraryColumn.BITRATE -> LibrarySortMode.BITRATE
+        LibraryColumn.TRACK -> LibrarySortMode.TRACK
+        LibraryColumn.ARTIST -> LibrarySortMode.ARTIST
+        LibraryColumn.ALBUM -> LibrarySortMode.ALBUM
+        LibraryColumn.GENRE -> LibrarySortMode.GENRE
+        LibraryColumn.YEAR -> LibrarySortMode.YEAR
+        LibraryColumn.AUTHOR -> LibrarySortMode.AUTHOR
+        LibraryColumn.COMPANY -> LibrarySortMode.COMPANY
+        LibraryColumn.PLATFORM -> LibrarySortMode.PLATFORM
+        LibraryColumn.DESCRIPTION -> LibrarySortMode.DESCRIPTION
+        LibraryColumn.FILES -> LibrarySortMode.FILES
+        LibraryColumn.TRACKERS -> LibrarySortMode.TRACKERS
+    }
+}
+
 private fun SearchSortMode.asSearchColumn(): SearchColumn {
     return when (this) {
         SearchSortMode.RELEVANCE -> SearchColumn.NAME
@@ -13755,6 +14885,120 @@ private fun SearchSortMode.asSearchColumn(): SearchColumn {
     }
 }
 
+private fun SearchColumn.asSearchSortMode(): SearchSortMode {
+    return when (this) {
+        SearchColumn.NAME -> SearchSortMode.NAME
+        SearchColumn.FROM -> SearchSortMode.FROM
+        SearchColumn.FILENAME -> SearchSortMode.FILENAME
+        SearchColumn.EXTENSION -> SearchSortMode.EXTENSION
+        SearchColumn.TYPE -> SearchSortMode.TYPE
+        SearchColumn.SIZE -> SearchSortMode.SIZE
+        SearchColumn.SOURCES -> SearchSortMode.SOURCES
+        SearchColumn.FRIENDS -> SearchSortMode.FRIENDS
+        SearchColumn.LENGTH -> SearchSortMode.LENGTH
+        SearchColumn.QUALITY -> SearchSortMode.QUALITY
+        SearchColumn.BITRATE -> SearchSortMode.BITRATE
+        SearchColumn.TRACK -> SearchSortMode.TRACK
+        SearchColumn.ARTIST -> SearchSortMode.ARTIST
+        SearchColumn.ALBUM -> SearchSortMode.ALBUM
+        SearchColumn.GENRE -> SearchSortMode.GENRE
+        SearchColumn.YEAR -> SearchSortMode.YEAR
+        SearchColumn.AUTHOR -> SearchSortMode.AUTHOR
+        SearchColumn.COMPANY -> SearchSortMode.COMPANY
+        SearchColumn.PLATFORM -> SearchSortMode.PLATFORM
+        SearchColumn.DESCRIPTION -> SearchSortMode.DESCRIPTION
+        SearchColumn.FILES -> SearchSortMode.FILES
+        SearchColumn.TRACKERS -> SearchSortMode.TRACKERS
+    }
+}
+
+private fun DownloadColumn.asDownloadSortMode(): DownloadSortMode {
+    return when (this) {
+        DownloadColumn.NAME -> DownloadSortMode.NAME
+        DownloadColumn.ORDER_ADDED -> DownloadSortMode.ORDER_ADDED
+        DownloadColumn.TIME_LEFT -> DownloadSortMode.TIME_LEFT
+        DownloadColumn.FILE_TYPE -> DownloadSortMode.FILE_TYPE
+        DownloadColumn.EXTENSION -> DownloadSortMode.EXTENSION
+        DownloadColumn.STATUS -> DownloadSortMode.STATUS
+        DownloadColumn.PROGRESS -> DownloadSortMode.PROGRESS
+        DownloadColumn.RATE -> DownloadSortMode.RATE
+        DownloadColumn.SOURCES -> DownloadSortMode.SOURCES
+    }
+}
+
+private fun DownloadSortMode.asDownloadColumn(): DownloadColumn {
+    return when (this) {
+        DownloadSortMode.NAME -> DownloadColumn.NAME
+        DownloadSortMode.ORDER_ADDED -> DownloadColumn.ORDER_ADDED
+        DownloadSortMode.TIME_LEFT -> DownloadColumn.TIME_LEFT
+        DownloadSortMode.FILE_TYPE -> DownloadColumn.FILE_TYPE
+        DownloadSortMode.EXTENSION -> DownloadColumn.EXTENSION
+        DownloadSortMode.STATUS -> DownloadColumn.STATUS
+        DownloadSortMode.PROGRESS -> DownloadColumn.PROGRESS
+        DownloadSortMode.RATE -> DownloadColumn.RATE
+        DownloadSortMode.SOURCES -> DownloadColumn.SOURCES
+    }
+}
+
+private fun UploadColumn.asUploadSortMode(): UploadSortMode {
+    return when (this) {
+        UploadColumn.NAME -> UploadSortMode.NAME
+        UploadColumn.ORDER_STARTED -> UploadSortMode.ORDER_STARTED
+        UploadColumn.TIME_LEFT -> UploadSortMode.TIME_LEFT
+        UploadColumn.FILE_TYPE -> UploadSortMode.FILE_TYPE
+        UploadColumn.EXTENSION -> UploadSortMode.EXTENSION
+        UploadColumn.USER_NAME -> UploadSortMode.USER_NAME
+        UploadColumn.STATUS -> UploadSortMode.STATUS
+        UploadColumn.UPLOADED -> UploadSortMode.UPLOADED
+        UploadColumn.RATE -> UploadSortMode.RATE
+        UploadColumn.PEERS -> UploadSortMode.PEERS
+    }
+}
+
+private fun UploadSortMode.asUploadColumn(): UploadColumn {
+    return when (this) {
+        UploadSortMode.NAME -> UploadColumn.NAME
+        UploadSortMode.ORDER_STARTED -> UploadColumn.ORDER_STARTED
+        UploadSortMode.TIME_LEFT -> UploadColumn.TIME_LEFT
+        UploadSortMode.FILE_TYPE -> UploadColumn.FILE_TYPE
+        UploadSortMode.EXTENSION -> UploadColumn.EXTENSION
+        UploadSortMode.USER_NAME -> UploadColumn.USER_NAME
+        UploadSortMode.STATUS -> UploadColumn.STATUS
+        UploadSortMode.UPLOADED -> UploadColumn.UPLOADED
+        UploadSortMode.RATE -> UploadColumn.RATE
+        UploadSortMode.PEERS -> UploadColumn.PEERS
+    }
+}
+
+private fun downloadColumnLabel(column: DownloadColumn): String {
+    return when (column) {
+        DownloadColumn.NAME -> "Name"
+        DownloadColumn.ORDER_ADDED -> "Added"
+        DownloadColumn.TIME_LEFT -> "ETA"
+        DownloadColumn.FILE_TYPE -> "Type"
+        DownloadColumn.EXTENSION -> "Ext"
+        DownloadColumn.STATUS -> "Status"
+        DownloadColumn.PROGRESS -> "Progress"
+        DownloadColumn.RATE -> "Rate"
+        DownloadColumn.SOURCES -> "Sources"
+    }
+}
+
+private fun uploadColumnLabel(column: UploadColumn): String {
+    return when (column) {
+        UploadColumn.NAME -> "Name"
+        UploadColumn.ORDER_STARTED -> "Started"
+        UploadColumn.TIME_LEFT -> "ETA"
+        UploadColumn.FILE_TYPE -> "Type"
+        UploadColumn.EXTENSION -> "Ext"
+        UploadColumn.USER_NAME -> "User"
+        UploadColumn.STATUS -> "Status"
+        UploadColumn.UPLOADED -> "Uploaded"
+        UploadColumn.RATE -> "Rate"
+        UploadColumn.PEERS -> "Peers"
+    }
+}
+
 private fun libraryColumnLabel(category: Category?, column: LibraryColumn): String {
     return when (column) {
         LibraryColumn.FILENAME -> "Filename"
@@ -13780,13 +15024,23 @@ private fun libraryColumnLabel(category: Category?, column: LibraryColumn): Stri
 
 private fun searchColumnLabel(category: SearchCategory, column: SearchColumn): String {
     return when (column) {
-        SearchColumn.FROM -> "From"
-        SearchColumn.FILENAME -> "Filename"
+        SearchColumn.NAME -> when (category) {
+            SearchCategory.AUDIO,
+            SearchCategory.VIDEO,
+            SearchCategory.DOCUMENT -> "Title"
+            else -> "Name"
+        }
+        SearchColumn.TYPE -> "Type"
+        SearchColumn.FROM -> "Source"
+        SearchColumn.FILENAME -> "File Name"
         SearchColumn.EXTENSION -> "Extension"
+        SearchColumn.SIZE -> "Size"
+        SearchColumn.SOURCES -> "Sources"
+        SearchColumn.FRIENDS -> "Friend Sources"
         SearchColumn.LENGTH -> "Length"
         SearchColumn.QUALITY -> "Quality"
         SearchColumn.BITRATE -> "Bitrate"
-        SearchColumn.TRACK -> "Track"
+        SearchColumn.TRACK -> "Track No."
         SearchColumn.ARTIST -> "Artist"
         SearchColumn.ALBUM -> "Album"
         SearchColumn.GENRE -> "Genre"
@@ -13795,9 +15049,8 @@ private fun searchColumnLabel(category: SearchCategory, column: SearchColumn): S
         SearchColumn.COMPANY -> "Company"
         SearchColumn.PLATFORM -> "Platform"
         SearchColumn.DESCRIPTION -> "Description"
-        SearchColumn.FILES -> "Files"
+        SearchColumn.FILES -> "File Count"
         SearchColumn.TRACKERS -> "Trackers"
-        else -> friendlyName(column.name)
     }
 }
 
@@ -13884,7 +15137,43 @@ private fun fileExtensionText(fileName: String): String {
 private fun searchSourceText(result: GroupedSearchResult): String {
     return result.friends.firstOrNull()?.renderName?.displayFallback()
         ?: result.sources.firstOrNull()?.friendPresence?.friend?.renderName?.displayFallback()
-        ?: if (result.isAnonymous) "P2P" else "Network"
+        ?: if (result.urn?.toString()?.startsWith("urn:ed2k:") == true) "ED2K/Kad" else if (result.isAnonymous) "P2P" else "Network"
+}
+
+private fun searchSourceBadgeTone(result: GroupedSearchResult): BadgeTone {
+    return when {
+        result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> BadgeTone.GREEN
+        result.urn?.toString()?.startsWith("urn:ed2k:") == true -> BadgeTone.ORANGE
+        result.isAnonymous -> BadgeTone.VIOLET
+        else -> BadgeTone.CYAN
+    }
+}
+
+private fun searchSourceBadgeIcon(result: GroupedSearchResult): ImageVector {
+    return when {
+        result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> Icons.Rounded.Forum
+        result.urn?.toString()?.startsWith("urn:ed2k:") == true -> Icons.Rounded.Link
+        else -> Icons.Rounded.Wifi
+    }
+}
+
+private fun localAvailabilityBadgeTone(label: String): BadgeTone {
+    return when (label) {
+        "In My Files" -> BadgeTone.GREEN
+        "In Collection" -> BadgeTone.BLUE
+        "In Downloads" -> BadgeTone.CYAN
+        "Downloading" -> BadgeTone.YELLOW
+        else -> BadgeTone.NEUTRAL
+    }
+}
+
+private fun localAvailabilityBadgeIcon(label: String): ImageVector {
+    return when (label) {
+        "In My Files", "In Collection" -> Icons.Rounded.Folder
+        "In Downloads" -> Icons.Rounded.Check
+        "Downloading" -> Icons.Rounded.Sync
+        else -> Icons.Rounded.Info
+    }
 }
 
 private fun metadataDurationText(value: Any?): String {
@@ -14007,6 +15296,30 @@ private fun downloadRowStatusMessage(item: DownloadItem): String {
     }
 }
 
+private fun downloadStateBadgeTone(state: DownloadState): BadgeTone {
+    return when (state) {
+        DownloadState.DONE -> BadgeTone.GREEN
+        DownloadState.DOWNLOADING -> BadgeTone.CYAN
+        DownloadState.CONNECTING, DownloadState.RESUMING, DownloadState.FINISHING -> BadgeTone.BLUE
+        DownloadState.LOCAL_QUEUED, DownloadState.REMOTE_QUEUED, DownloadState.TRYING_AGAIN -> BadgeTone.YELLOW
+        DownloadState.PAUSED -> BadgeTone.ORANGE
+        DownloadState.STALLED, DownloadState.CANCELLED -> BadgeTone.ORANGE
+        DownloadState.ERROR, DownloadState.DANGEROUS -> BadgeTone.RED
+    }
+}
+
+private fun downloadStateBadgeIcon(state: DownloadState): ImageVector {
+    return when (state) {
+        DownloadState.DONE -> Icons.Rounded.Check
+        DownloadState.DOWNLOADING -> Icons.Rounded.Download
+        DownloadState.CONNECTING, DownloadState.RESUMING, DownloadState.FINISHING, DownloadState.TRYING_AGAIN -> Icons.Rounded.Sync
+        DownloadState.LOCAL_QUEUED, DownloadState.REMOTE_QUEUED -> Icons.Rounded.MoreVert
+        DownloadState.PAUSED -> Icons.Rounded.Pause
+        DownloadState.STALLED, DownloadState.ERROR, DownloadState.DANGEROUS -> Icons.Rounded.Warning
+        DownloadState.CANCELLED -> Icons.Rounded.Close
+    }
+}
+
 private fun uploadRowStatusMessage(item: UploadItem): String {
     return when (item.state) {
         UploadState.BROWSE_HOST,
@@ -14035,6 +15348,28 @@ private fun uploadRowStatusMessage(item: UploadItem): String {
     }
 }
 
+private fun uploadStateBadgeTone(state: UploadState): BadgeTone {
+    return when (state) {
+        UploadState.UPLOADING -> BadgeTone.MAGENTA
+        UploadState.DONE, UploadState.BROWSE_HOST_DONE -> BadgeTone.GREEN
+        UploadState.BROWSE_HOST, UploadState.QUEUED -> BadgeTone.CYAN
+        UploadState.PAUSED, UploadState.CANCELED -> BadgeTone.ORANGE
+        UploadState.REQUEST_ERROR, UploadState.LIMIT_REACHED -> BadgeTone.RED
+    }
+}
+
+private fun uploadStateBadgeIcon(state: UploadState): ImageVector {
+    return when (state) {
+        UploadState.UPLOADING -> Icons.Rounded.Upload
+        UploadState.DONE, UploadState.BROWSE_HOST_DONE -> Icons.Rounded.Check
+        UploadState.BROWSE_HOST -> Icons.Rounded.Search
+        UploadState.QUEUED -> Icons.Rounded.Sync
+        UploadState.PAUSED -> Icons.Rounded.Pause
+        UploadState.REQUEST_ERROR, UploadState.LIMIT_REACHED -> Icons.Rounded.Warning
+        UploadState.CANCELED -> Icons.Rounded.Close
+    }
+}
+
 private fun queueStatusMessage(remaining: Long): String {
     return if (remaining == DownloadItem.UNKNOWN_TIME) {
         "Waiting..."
@@ -14048,6 +15383,30 @@ private fun countLabel(count: Int, singular: String, plural: String = "${singula
         "1 $singular"
     } else {
         "$count $plural"
+    }
+}
+
+private fun transferNetworkLabel(isEd2k: Boolean, isBitTorrent: Boolean): String {
+    return when {
+        isEd2k -> "ED2K/Kad"
+        isBitTorrent -> "BitTorrent"
+        else -> "Gnutella"
+    }
+}
+
+private fun transferNetworkBadgeTone(isEd2k: Boolean, isBitTorrent: Boolean): BadgeTone {
+    return when {
+        isEd2k -> BadgeTone.ORANGE
+        isBitTorrent -> BadgeTone.VIOLET
+        else -> BadgeTone.BLUE
+    }
+}
+
+private fun transferNetworkBadgeIcon(isEd2k: Boolean, isBitTorrent: Boolean): ImageVector {
+    return when {
+        isEd2k -> Icons.Rounded.Link
+        isBitTorrent -> Icons.Rounded.Sync
+        else -> Icons.Rounded.Wifi
     }
 }
 
@@ -14170,8 +15529,8 @@ private fun searchEmptyStateTitle(tab: SearchTabSession, filteredOut: Boolean): 
         null -> Unit
     }
     return when (tab.searchType) {
-        SearchDetails.SearchType.KEYWORD -> "Searching…"
-        SearchDetails.SearchType.WHATS_NEW -> "Looking for what's new…"
+        SearchDetails.SearchType.KEYWORD -> if (tab.searchRunning) "Searching…" else "Search paused"
+        SearchDetails.SearchType.WHATS_NEW -> if (tab.searchRunning) "Looking for what's new…" else "Search paused"
         SearchDetails.SearchType.SINGLE_BROWSE -> "Waiting for shared files"
         SearchDetails.SearchType.MULTIPLE_BROWSE -> "Waiting for source libraries"
         SearchDetails.SearchType.ALL_FRIENDS_BROWSE -> "Waiting for friends' libraries"
@@ -14188,8 +15547,20 @@ private fun searchEmptyStateBody(tab: SearchTabSession, filteredOut: Boolean): S
         }
     }
     return when (tab.searchType) {
-        SearchDetails.SearchType.KEYWORD -> "Results will appear here as they arrive."
-        SearchDetails.SearchType.WHATS_NEW -> "Looking for the latest results in this category."
+        SearchDetails.SearchType.KEYWORD ->
+            if (tab.searchRunning) {
+                "Results will appear here as they arrive."
+            } else {
+                "Use Search Again to keep the current results and continue looking, or Restart Search to start fresh."
+            }
+
+        SearchDetails.SearchType.WHATS_NEW ->
+            if (tab.searchRunning) {
+                "Looking for the latest results in this category."
+            } else {
+                "Use Search Again to keep the current results and continue looking, or Restart Search to start fresh."
+            }
+
         SearchDetails.SearchType.SINGLE_BROWSE -> "This friend's shared files will appear here when the browse responds."
         SearchDetails.SearchType.MULTIPLE_BROWSE -> "Shared libraries will appear here as sources respond."
         SearchDetails.SearchType.ALL_FRIENDS_BROWSE -> "Friends' shared libraries will appear here as they respond."
@@ -14226,6 +15597,118 @@ private fun libraryEmptyStateBody(hasFilters: Boolean, activeSection: LibrarySec
         hasFilters -> "Clear the text or category filter to widen this section."
         activeSection?.isShared == true -> "Add files from My Files or import files into this collection."
         else -> "Add files to My Files or change the category filter to see more."
+    }
+}
+
+private fun libraryColumnSpec(column: LibraryColumn): DesktopTableColumnSpec {
+    return when (column) {
+        LibraryColumn.NAME -> DesktopTableColumnSpec(priority = 0, minWidth = 320.dp, preferredWidth = 420.dp, flexWeight = 1f)
+        LibraryColumn.TYPE -> DesktopTableColumnSpec(priority = 1, minWidth = 108.dp)
+        LibraryColumn.FILENAME -> DesktopTableColumnSpec(priority = 2, minWidth = 188.dp)
+        LibraryColumn.EXTENSION -> DesktopTableColumnSpec(priority = 3, minWidth = 96.dp)
+        LibraryColumn.SIZE -> DesktopTableColumnSpec(priority = 4, minWidth = 96.dp, alignment = TextAlign.End)
+        LibraryColumn.ACTIVITY -> DesktopTableColumnSpec(priority = 5, minWidth = 136.dp)
+        LibraryColumn.HITS -> DesktopTableColumnSpec(priority = 6, minWidth = 76.dp, alignment = TextAlign.End)
+        LibraryColumn.UPLOADS -> DesktopTableColumnSpec(priority = 7, minWidth = 84.dp, alignment = TextAlign.End)
+        LibraryColumn.UPLOAD_ATTEMPTS -> DesktopTableColumnSpec(priority = 8, minWidth = 142.dp, alignment = TextAlign.End)
+        LibraryColumn.UPDATED -> DesktopTableColumnSpec(priority = 9, minWidth = 120.dp)
+        LibraryColumn.LOCATION -> DesktopTableColumnSpec(priority = 10, minWidth = 220.dp)
+        LibraryColumn.LENGTH -> DesktopTableColumnSpec(priority = 11, minWidth = 92.dp)
+        LibraryColumn.BITRATE -> DesktopTableColumnSpec(priority = 12, minWidth = 92.dp)
+        LibraryColumn.TRACK -> DesktopTableColumnSpec(priority = 13, minWidth = 76.dp, alignment = TextAlign.End)
+        LibraryColumn.ARTIST -> DesktopTableColumnSpec(priority = 14, minWidth = 132.dp)
+        LibraryColumn.ALBUM -> DesktopTableColumnSpec(priority = 15, minWidth = 132.dp)
+        LibraryColumn.GENRE -> DesktopTableColumnSpec(priority = 16, minWidth = 108.dp)
+        LibraryColumn.YEAR -> DesktopTableColumnSpec(priority = 17, minWidth = 76.dp, alignment = TextAlign.End)
+        LibraryColumn.AUTHOR -> DesktopTableColumnSpec(priority = 18, minWidth = 132.dp)
+        LibraryColumn.COMPANY -> DesktopTableColumnSpec(priority = 19, minWidth = 132.dp)
+        LibraryColumn.PLATFORM -> DesktopTableColumnSpec(priority = 20, minWidth = 112.dp)
+        LibraryColumn.DESCRIPTION -> DesktopTableColumnSpec(priority = 21, minWidth = 220.dp)
+        LibraryColumn.FILES -> DesktopTableColumnSpec(priority = 22, minWidth = 72.dp, alignment = TextAlign.End)
+        LibraryColumn.TRACKERS -> DesktopTableColumnSpec(priority = 23, minWidth = 90.dp, alignment = TextAlign.End)
+    }
+}
+
+private fun searchColumnSpec(column: SearchColumn): DesktopTableColumnSpec {
+    return when (column) {
+        SearchColumn.NAME -> DesktopTableColumnSpec(priority = 0, minWidth = 320.dp, preferredWidth = 420.dp, flexWeight = 1f)
+        SearchColumn.TYPE -> DesktopTableColumnSpec(priority = 1, minWidth = 108.dp)
+        SearchColumn.FROM -> DesktopTableColumnSpec(priority = 2, minWidth = 148.dp)
+        SearchColumn.FILENAME -> DesktopTableColumnSpec(priority = 3, minWidth = 188.dp)
+        SearchColumn.EXTENSION -> DesktopTableColumnSpec(priority = 4, minWidth = 96.dp)
+        SearchColumn.SIZE -> DesktopTableColumnSpec(priority = 5, minWidth = 96.dp, alignment = TextAlign.End)
+        SearchColumn.SOURCES -> DesktopTableColumnSpec(priority = 6, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.FRIENDS -> DesktopTableColumnSpec(priority = 7, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.LENGTH -> DesktopTableColumnSpec(priority = 8, minWidth = 92.dp)
+        SearchColumn.QUALITY -> DesktopTableColumnSpec(priority = 9, minWidth = 126.dp)
+        SearchColumn.BITRATE -> DesktopTableColumnSpec(priority = 10, minWidth = 92.dp)
+        SearchColumn.TRACK -> DesktopTableColumnSpec(priority = 11, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.ARTIST -> DesktopTableColumnSpec(priority = 12, minWidth = 132.dp)
+        SearchColumn.ALBUM -> DesktopTableColumnSpec(priority = 13, minWidth = 132.dp)
+        SearchColumn.GENRE -> DesktopTableColumnSpec(priority = 14, minWidth = 108.dp)
+        SearchColumn.YEAR -> DesktopTableColumnSpec(priority = 15, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.AUTHOR -> DesktopTableColumnSpec(priority = 16, minWidth = 132.dp)
+        SearchColumn.COMPANY -> DesktopTableColumnSpec(priority = 17, minWidth = 132.dp)
+        SearchColumn.PLATFORM -> DesktopTableColumnSpec(priority = 18, minWidth = 112.dp)
+        SearchColumn.DESCRIPTION -> DesktopTableColumnSpec(priority = 19, minWidth = 220.dp)
+        SearchColumn.FILES -> DesktopTableColumnSpec(priority = 20, minWidth = 72.dp, alignment = TextAlign.End)
+        SearchColumn.TRACKERS -> DesktopTableColumnSpec(priority = 21, minWidth = 90.dp, alignment = TextAlign.End)
+    }
+}
+
+private fun downloadColumnSpec(column: DownloadColumn): DesktopTableColumnSpec {
+    return when (column) {
+        DownloadColumn.NAME -> DesktopTableColumnSpec(priority = 0, minWidth = 340.dp, preferredWidth = 440.dp, flexWeight = 1f)
+        DownloadColumn.ORDER_ADDED -> DesktopTableColumnSpec(priority = 1, minWidth = 148.dp)
+        DownloadColumn.TIME_LEFT -> DesktopTableColumnSpec(priority = 2, minWidth = 96.dp)
+        DownloadColumn.FILE_TYPE -> DesktopTableColumnSpec(priority = 3, minWidth = 108.dp)
+        DownloadColumn.EXTENSION -> DesktopTableColumnSpec(priority = 4, minWidth = 96.dp)
+        DownloadColumn.STATUS -> DesktopTableColumnSpec(priority = 5, minWidth = 140.dp)
+        DownloadColumn.PROGRESS -> DesktopTableColumnSpec(priority = 6, minWidth = 240.dp)
+        DownloadColumn.RATE -> DesktopTableColumnSpec(priority = 7, minWidth = 96.dp, alignment = TextAlign.End)
+        DownloadColumn.SOURCES -> DesktopTableColumnSpec(priority = 8, minWidth = 80.dp, alignment = TextAlign.End)
+    }
+}
+
+private fun uploadColumnSpec(column: UploadColumn): DesktopTableColumnSpec {
+    return when (column) {
+        UploadColumn.NAME -> DesktopTableColumnSpec(priority = 0, minWidth = 340.dp, preferredWidth = 440.dp, flexWeight = 1f)
+        UploadColumn.ORDER_STARTED -> DesktopTableColumnSpec(priority = 1, minWidth = 148.dp)
+        UploadColumn.TIME_LEFT -> DesktopTableColumnSpec(priority = 2, minWidth = 96.dp)
+        UploadColumn.FILE_TYPE -> DesktopTableColumnSpec(priority = 3, minWidth = 108.dp)
+        UploadColumn.EXTENSION -> DesktopTableColumnSpec(priority = 4, minWidth = 96.dp)
+        UploadColumn.USER_NAME -> DesktopTableColumnSpec(priority = 5, minWidth = 148.dp)
+        UploadColumn.STATUS -> DesktopTableColumnSpec(priority = 6, minWidth = 140.dp)
+        UploadColumn.UPLOADED -> DesktopTableColumnSpec(priority = 7, minWidth = 240.dp)
+        UploadColumn.RATE -> DesktopTableColumnSpec(priority = 8, minWidth = 96.dp, alignment = TextAlign.End)
+        UploadColumn.PEERS -> DesktopTableColumnSpec(priority = 9, minWidth = 80.dp, alignment = TextAlign.End)
+    }
+}
+
+private fun connectionColumnSpec(column: ConnectionColumn): DesktopTableColumnSpec {
+    return when (column) {
+        ConnectionColumn.HOST -> DesktopTableColumnSpec(priority = 0, minWidth = 280.dp, preferredWidth = 340.dp, flexWeight = 1f)
+        ConnectionColumn.STATUS -> DesktopTableColumnSpec(priority = 1, minWidth = 128.dp)
+        ConnectionColumn.MESSAGES_IO,
+        ConnectionColumn.MESSAGES_IN,
+        ConnectionColumn.MESSAGES_OUT -> DesktopTableColumnSpec(priority = 2, minWidth = 136.dp)
+        ConnectionColumn.BANDWIDTH_IO,
+        ConnectionColumn.BANDWIDTH_IN,
+        ConnectionColumn.BANDWIDTH_OUT -> DesktopTableColumnSpec(priority = 3, minWidth = 148.dp)
+        ConnectionColumn.DROPPED_IO,
+        ConnectionColumn.DROPPED_IN,
+        ConnectionColumn.DROPPED_OUT,
+        ConnectionColumn.QRP_PERCENT,
+        ConnectionColumn.QRP_EMPTY -> DesktopTableColumnSpec(priority = 4, minWidth = 124.dp)
+        ConnectionColumn.PROTOCOL -> DesktopTableColumnSpec(priority = 5, minWidth = 124.dp)
+        ConnectionColumn.VENDOR_VERSION -> DesktopTableColumnSpec(priority = 6, minWidth = 196.dp)
+        ConnectionColumn.TIME -> DesktopTableColumnSpec(priority = 7, minWidth = 96.dp)
+        ConnectionColumn.COMPRESSED_IO,
+        ConnectionColumn.COMPRESSED_IN,
+        ConnectionColumn.COMPRESSED_OUT,
+        ConnectionColumn.SSL_OVERHEAD_IO,
+        ConnectionColumn.SSL_OVERHEAD_IN,
+        ConnectionColumn.SSL_OVERHEAD_OUT -> DesktopTableColumnSpec(priority = 8, minWidth = 152.dp)
     }
 }
 

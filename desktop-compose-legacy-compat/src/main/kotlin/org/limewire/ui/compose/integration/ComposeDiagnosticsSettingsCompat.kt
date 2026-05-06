@@ -1,6 +1,6 @@
 package org.limewire.ui.compose.integration
 
-import org.limewire.ui.swing.settings.BugSettings
+import org.limewire.ui.desktop.settings.BugSettings
 import java.io.File
 
 fun legacySwingComposeDiagnosticsSettings(): ComposeDiagnosticsSettings {

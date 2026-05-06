@@ -26,7 +26,6 @@ dependencies {
     implementation project(':mojito')
     implementation project(':mojito-ui')
     implementation project(':setting')
-    implementation project(':swingui')
 
     implementation 'net.java.dev.glazedlists:glazedlists_java15:1.9.1'
 }

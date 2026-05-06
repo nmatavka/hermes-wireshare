@@ -8,8 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.Icon;
-
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.junit.Test;
 import org.limewire.friend.api.FriendConnectionConfiguration;
@@ -118,11 +116,6 @@ public class ConnectionConfigurationFactoryTest {
 
         @Override
         public Object getAttribute(String key) {
-            return null;
-        }
-
-        @Override
-        public Icon getIcon() {
             return null;
         }
 

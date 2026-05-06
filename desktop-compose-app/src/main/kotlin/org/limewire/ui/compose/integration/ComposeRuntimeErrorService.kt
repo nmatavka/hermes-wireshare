@@ -9,7 +9,10 @@ import org.limewire.util.NotImplementedException
 import org.limewire.util.ThreadUtils
 import com.sun.jna.Callback
 import com.sun.jna.Native
+import java.awt.AWTEvent
+import java.awt.EventQueue
 import java.awt.IllegalComponentStateException
+import java.awt.Toolkit
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -21,6 +24,7 @@ import java.util.Date
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 private const val SWING_PACKAGE_PREFIX = "javax" + ".swing."
 private const val SWING_REPAINT_MANAGER = SWING_PACKAGE_PREFIX + "RepaintManager"
@@ -81,6 +85,7 @@ class CoreComposeRuntimeErrorService(
         activeService = this
         ErrorService.setErrorCallback(ComposeErrorCallback(this))
         Thread.setDefaultUncaughtExceptionHandler(ComposeUncaughtExceptionHandler(this))
+        installEventQueueCatcher()
         System.setProperty(
             "sun.awt.exception.handler",
             ComposeEventDispatchErrorCatcher::class.java.name
@@ -210,13 +215,42 @@ class CoreComposeRuntimeErrorService(
         fatal: Boolean,
         source: Source
     ) {
+        if (isDuplicate(problem, threadName, detail, fatal)) {
+            return
+        }
         val report = buildReport(problem, threadName, detail, fatal)
+        persistLatestDiagnosticReport(report)
         logLocallyIfEnabled(report)
         if (startupCapture && !fatal && source != Source.ERROR_SERVICE) {
             startupErrors += report
             return
         }
         dispatch(report)
+    }
+
+    private fun installEventQueueCatcher() {
+        if (!eventQueueInstalled.compareAndSet(false, true)) {
+            return
+        }
+        runCatching {
+            Toolkit.getDefaultToolkit().systemEventQueue.push(
+                object : EventQueue() {
+                    override fun dispatchEvent(event: AWTEvent) {
+                        try {
+                            super.dispatchEvent(event)
+                        } catch (problem: Throwable) {
+                            if (problem is ThreadDeath) {
+                                throw problem
+                            }
+                            handleEventDispatchThrowable(problem)
+                        }
+                    }
+                }
+            )
+        }.onFailure { failure ->
+            System.err.println("Unable to install Compose event queue error catcher")
+            System.err.println(failure.stackTraceToString())
+        }
     }
 
     private fun dispatch(report: ComposeRuntimeErrorReport) {
@@ -302,6 +336,53 @@ class CoreComposeRuntimeErrorService(
         } finally {
             output?.close()
         }
+    }
+
+    private fun persistLatestDiagnosticReport(report: ComposeRuntimeErrorReport) {
+        val configuredLogFile = diagnosticsSettings.bugLogFile()
+        val targetDirectory = configuredLogFile.parentFile ?: configuredLogFile.absoluteFile.parentFile ?: File(".")
+        val target = File(targetDirectory, "latest-crash.txt")
+        runCatching {
+            FileUtils.setWriteable(target)
+            saveDiagnosticReport(target, report)
+            System.err.println("Saved crash report to ${target.absolutePath}")
+        }
+    }
+
+    private fun isDuplicate(
+        problem: Throwable,
+        threadName: String,
+        detail: String?,
+        fatal: Boolean
+    ): Boolean {
+        val fingerprint = buildString {
+            append(problem.javaClass.name)
+            append('|')
+            append(problem.message)
+            append('|')
+            append(threadName)
+            append('|')
+            append(detail)
+            append('|')
+            append(fatal)
+            problem.stackTrace.take(3).forEach { element ->
+                append('|')
+                append(element.className)
+                append('#')
+                append(element.methodName)
+                append(':')
+                append(element.lineNumber)
+            }
+        }
+        val now = System.currentTimeMillis()
+        val previous = lastErrorFingerprint.get()
+        val previousAt = lastErrorFingerprintAt.get()
+        if (previous == fingerprint && now - previousAt < 1500L) {
+            return true
+        }
+        lastErrorFingerprint.set(fingerprint)
+        lastErrorFingerprintAt.set(now)
+        return false
     }
 
     private fun matchesIgnoredUncaughtTrace(problem: Throwable): Boolean {
@@ -407,6 +488,9 @@ class CoreComposeRuntimeErrorService(
         private val localLogSeparator = "-----------------\n".toByteArray()
         private val localLogWriteLock = Any()
         private val uncaughtHandlerActive = AtomicBoolean(false)
+        private val eventQueueInstalled = AtomicBoolean(false)
+        private val lastErrorFingerprint = AtomicReference<String?>(null)
+        private val lastErrorFingerprintAt = AtomicLong(0L)
 
         @Volatile
         private var activeService: CoreComposeRuntimeErrorService? = null
