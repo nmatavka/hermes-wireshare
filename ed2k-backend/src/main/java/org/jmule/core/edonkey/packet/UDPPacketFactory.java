@@ -148,9 +148,10 @@ public class UDPPacketFactory {
 	}
 	
 	public static UDPPacket getSources2Request(List<FileHash> fileHashList, List<Long> sizeList){
-		UDPPacket packet = new UDPPacket(fileHashList.size()*(16 + 4 + 8),PROTO_EDONKEY_SERVER_UDP);
+		int requestCount = Math.min(fileHashList.size(), sizeList.size());
+		UDPPacket packet = new UDPPacket(requestCount*(16 + 4 + 8),PROTO_EDONKEY_SERVER_UDP);
 		packet.setCommand(OP_GLOBGETSOURCES2);
-		for(int i = 0;i<fileHashList.size();i++) {
+		for(int i = 0;i<requestCount;i++) {
 			FileHash hash = fileHashList.get(i);
 			long size = sizeList.get(i);
 			packet.insertData(hash.getHash());

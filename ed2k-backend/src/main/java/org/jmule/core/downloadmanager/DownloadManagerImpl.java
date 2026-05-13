@@ -275,11 +275,14 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 				List<Long> size_list = new ArrayList<Long>();
 				while ((!global_sources_queue.isEmpty()) && (hash_list.size() < ED2KConstants.GLOBAL_FILE_SOURCES_QUERY_ITERATION)) {
 					FileHash hash = global_sources_queue.poll();
+					if (hash == null)
+						continue;
 					used_hash.add(hash);
 					if (!last_global_sarch.containsKey(hash)) {
 						try {
+							long fileSize = getDownload(hash).getFileSize();
 							hash_list.add(hash);
-							size_list.add(getDownload(hash).getFileSize());
+							size_list.add(fileSize);
 						} catch (DownloadManagerException e) {
 							e.printStackTrace();
 						}
