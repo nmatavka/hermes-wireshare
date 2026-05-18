@@ -256,7 +256,11 @@ public final class SwingUiSettings extends LimeProps {
 
     /** Persisted Compose Desktop search workspace columns. */
     public static final StringSetting COMPOSE_SEARCH_VISIBLE_COLUMNS =
-        FACTORY.createStringSetting("COMPOSE_SEARCH_VISIBLE_COLUMNS", "NAME,TYPE,SIZE,SOURCES,FRIENDS");
+        FACTORY.createStringSetting("COMPOSE_SEARCH_VISIBLE_COLUMNS", "NAME,MARKER,TYPE,SIZE,SOURCES,FRIENDS");
+
+    /** One-time migration marker for showing the colored search marker column on existing installs. */
+    public static final BooleanSetting COMPOSE_SEARCH_MARKER_COLUMN_MIGRATED =
+        FACTORY.createBooleanSetting("COMPOSE_SEARCH_MARKER_COLUMN_MIGRATED", false);
 
     /** Persisted Compose Desktop search workspace sort key. */
     public static final StringSetting COMPOSE_SEARCH_SORT_KEY =
@@ -361,11 +365,11 @@ public final class SwingUiSettings extends LimeProps {
     
     /** True if DOCUMENTS files are added by default when adding a folder. */
     public static final BooleanSetting CATEGORY_DOCUMENTS_DEFAULT =
-        FACTORY.createBooleanSetting("MANAGE_DOCUMENTS_FILES", false);
+        FACTORY.createBooleanSetting("MANAGE_DOCUMENTS_FILES", true);
     
     /** True if PROGRAMS files are added by default when adding a folder. */
     public static final BooleanSetting CATEGORY_PROGRAMS_DEFAULT =
-        FACTORY.createBooleanSetting("MANAGE_PROGRAMS_FILES", false);
+        FACTORY.createBooleanSetting("MANAGE_PROGRAMS_FILES", true);
     
     /** Returns all categories that should be selected by default when adding a folder. */
     public static Collection<Category> getDefaultSelectedCategories() {

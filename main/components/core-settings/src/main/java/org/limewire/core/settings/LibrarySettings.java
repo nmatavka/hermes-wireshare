@@ -8,11 +8,11 @@ public class LibrarySettings extends LimeProps {
     
     /** True if documents can be shared with gnutella. */
     public static final BooleanSetting ALLOW_DOCUMENT_GNUTELLA_SHARING =
-        FACTORY.createBooleanSetting("DOCUMENT_SHARING_ENABLED", false);
+        FACTORY.createBooleanSetting("DOCUMENT_SHARING_ENABLED", true);
     
     /** True if programs are allowed in the library at all. */
     public static final BooleanSetting ALLOW_PROGRAMS =
-        FACTORY.createBooleanSetting("PROGRAMS_ALLOWED", false);
+        FACTORY.createBooleanSetting("PROGRAMS_ALLOWED", true);
     
     /** The current version of the library. */
     public static final StringSetting VERSION =

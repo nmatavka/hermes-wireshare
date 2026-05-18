@@ -2,6 +2,7 @@ package org.limewire.ui.compose
 
 enum class SearchSortMode {
     RELEVANCE,
+    MARKER,
     TYPE,
     NAME,
     FROM,
@@ -28,6 +29,7 @@ enum class SearchSortMode {
 
 enum class SearchColumn {
     NAME,
+    MARKER,
     TYPE,
     FROM,
     FILENAME,

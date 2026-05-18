@@ -20,6 +20,9 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.search.frostwire.WireShareFrostWireSearchBackend;
+import org.limewire.search.frostwire.WireShareFrostWireSearchListener;
+import org.limewire.search.frostwire.WireShareFrostWireSearchProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -59,8 +62,10 @@ public class CoreSearch implements Search, SearchListener {
      */
     volatile byte[] searchGuid;
     private final TorrentWebSearchFactory torrentWebSearchFactory;
+    private final WireShareFrostWireSearchBackend frostWireSearchBackend;
     
     private volatile Search torrentWebSearch;
+    private volatile WireShareFrostWireSearchBackend.WireShareFrostWireSearchSession frostWireSearch;
 
     @Inject
     public CoreSearch(@Assisted SearchDetails searchDetails,
@@ -72,7 +77,8 @@ public class CoreSearch implements Search, SearchListener {
             LimeXMLDocumentFactory xmlDocumentFactory,
             AdvancedQueryStringBuilder compositeQueryBuilder,
             RemoteFileDescAdapter.Factory remoteFileDescAdapterFactory,
-            TorrentWebSearchFactory googleTorrentSearchFactory) {
+            TorrentWebSearchFactory googleTorrentSearchFactory,
+            WireShareFrostWireSearchBackend frostWireSearchBackend) {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
@@ -82,6 +88,7 @@ public class CoreSearch implements Search, SearchListener {
         this.compositeQueryBuilder = compositeQueryBuilder;
         this.remoteFileDescAdapterFactory = remoteFileDescAdapterFactory;
         this.torrentWebSearchFactory = googleTorrentSearchFactory;
+        this.frostWireSearchBackend = frostWireSearchBackend;
     }
     
     @Override
@@ -156,6 +163,25 @@ public class CoreSearch implements Search, SearchListener {
                 friendSearcher.doSearch(searchDetails, friendSearchListener);
             }
         });        
+
+        if (SearchSettings.USE_FROSTWIRE_WEB_SEARCH.getValue()
+                && query != null
+                && query.trim().length() > 0) {
+            frostWireSearch = frostWireSearchBackend.search(query, searchDetails.getSearchCategory(), new WireShareFrostWireSearchListener() {
+                @Override
+                public void onResults(Collection<? extends SearchResult> results) {
+                    CoreSearch.this.handleSearchResults(CoreSearch.this, results);
+                }
+
+                @Override
+                public void onProviderStopped(WireShareFrostWireSearchProvider provider) {
+                }
+
+                @Override
+                public void onProviderError(WireShareFrostWireSearchProvider provider, String message) {
+                }
+            });
+        }
         
         if (initial 
                 && SearchSettings.USE_TORRENT_WEB_SEARCH.getValue()
@@ -194,6 +220,9 @@ public class CoreSearch implements Search, SearchListener {
         
         if (torrentWebSearch != null) {
             torrentWebSearch.stop();
+        }
+        if (frostWireSearch != null) {
+            frostWireSearch.stop();
         }
         
         searchEventBroadcaster.broadcast(new SearchEvent(this, SearchEvent.Type.STOPPED));

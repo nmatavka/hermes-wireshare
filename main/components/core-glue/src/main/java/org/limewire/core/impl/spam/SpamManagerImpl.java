@@ -46,6 +46,9 @@ public class SpamManagerImpl implements SpamManager {
         // this can be an instance of a copy on write array list, so only iterating
         // over it is safe and assumptions about its size can be wrong
         for (SearchResult searchResult : searchResults) {
+            if (!(searchResult instanceof RemoteFileDescAdapter)) {
+                continue;
+            }
             RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter) searchResult;
             RemoteFileDesc remoteFileDesc = remoteFileDescAdapter.getRfd();
             remoteFileDescs.add(remoteFileDesc);

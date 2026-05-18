@@ -425,7 +425,38 @@ public final class SearchSettings extends LimeProps {
      * Whether torrent web search should be used or not.
      */
     public static final BooleanSetting USE_TORRENT_WEB_SEARCH =
-        FACTORY.createRemoteBooleanSetting("USE_TORRENT_WEB_SEARCH", true);
+        FACTORY.createRemoteBooleanSetting("USE_TORRENT_WEB_SEARCH", false);
+
+    /**
+     * Whether the FrostWire-derived provider fanout should add web/media/torrent results.
+     */
+    public static final BooleanSetting USE_FROSTWIRE_WEB_SEARCH =
+        FACTORY.createBooleanSetting("USE_FROSTWIRE_WEB_SEARCH", true);
+
+    public static final BooleanSetting FROSTWIRE_SEARCH_YT_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_YT_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_INTERNET_ARCHIVE_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_INTERNET_ARCHIVE_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_IDOPE_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_IDOPE_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_KNABEN_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_KNABEN_ENABLED", false);
+    public static final BooleanSetting FROSTWIRE_SEARCH_MAGNETDL_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_MAGNETDL_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_NYAA_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_NYAA_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_ONE337X_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_ONE337X_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_TPB_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_TPB_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_TORRENTZ2_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_TORRENTZ2_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_TORRENTSCSV_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_TORRENTSCSV_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_SOUNDCLOUD_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_SOUNDCLOUD_ENABLED", true);
+    public static final BooleanSetting FROSTWIRE_SEARCH_FROSTCLICK_ENABLED =
+        FACTORY.createBooleanSetting("FROSTWIRE_SEARCH_FROSTCLICK_ENABLED", true);
     
     /**
      * Torrent websearch uri.

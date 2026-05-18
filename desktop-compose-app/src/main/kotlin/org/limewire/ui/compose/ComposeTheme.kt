@@ -121,9 +121,14 @@ internal data class ThemePalette(
 
 internal val LocalThemePalette = staticCompositionLocalOf { SELENIZED_LIGHT_PALETTE }
 
+// WireShare intentionally swaps the UI roles for blue and violet while keeping
+// each theme palette's eight canonical accent values intact.
+internal val ThemePalette.blueRoleColor: Color get() = violet
+internal val ThemePalette.violetRoleColor: Color get() = blue
+
 private fun paletteToLightScheme(palette: ThemePalette): ColorScheme {
     return lightColorScheme(
-        primary = palette.blue,
+        primary = palette.blueRoleColor,
         onPrimary = palette.bg0,
         primaryContainer = palette.bg1,
         onPrimaryContainer = palette.fg1,
@@ -132,7 +137,7 @@ private fun paletteToLightScheme(palette: ThemePalette): ColorScheme {
         onSecondary = palette.bg0,
         secondaryContainer = palette.bg1,
         onSecondaryContainer = palette.fg1,
-        tertiary = palette.violet,
+        tertiary = palette.violetRoleColor,
         onTertiary = palette.bg0,
         tertiaryContainer = palette.bg1,
         onTertiaryContainer = palette.fg1,
@@ -142,7 +147,7 @@ private fun paletteToLightScheme(palette: ThemePalette): ColorScheme {
         onSurface = palette.fg1,
         surfaceVariant = palette.bg1,
         onSurfaceVariant = palette.fg0,
-        surfaceTint = palette.blue,
+        surfaceTint = palette.blueRoleColor,
         inverseSurface = palette.fg1,
         inverseOnSurface = palette.bg0,
         error = palette.red,
@@ -157,7 +162,7 @@ private fun paletteToLightScheme(palette: ThemePalette): ColorScheme {
 
 private fun paletteToDarkScheme(palette: ThemePalette): ColorScheme {
     return darkColorScheme(
-        primary = palette.blue,
+        primary = palette.blueRoleColor,
         onPrimary = palette.bg0,
         primaryContainer = palette.bg2,
         onPrimaryContainer = palette.fg1,
@@ -166,7 +171,7 @@ private fun paletteToDarkScheme(palette: ThemePalette): ColorScheme {
         onSecondary = palette.bg0,
         secondaryContainer = palette.bg2,
         onSecondaryContainer = palette.fg1,
-        tertiary = palette.violet,
+        tertiary = palette.violetRoleColor,
         onTertiary = palette.bg0,
         tertiaryContainer = palette.bg2,
         onTertiaryContainer = palette.fg1,
@@ -176,7 +181,7 @@ private fun paletteToDarkScheme(palette: ThemePalette): ColorScheme {
         onSurface = palette.fg1,
         surfaceVariant = palette.bg1,
         onSurfaceVariant = palette.fg0,
-        surfaceTint = palette.blue,
+        surfaceTint = palette.blueRoleColor,
         inverseSurface = palette.fg1,
         inverseOnSurface = palette.bg0,
         error = palette.red,

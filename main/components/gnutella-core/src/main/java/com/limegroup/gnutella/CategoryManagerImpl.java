@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.file.CategoryManager;
+import org.limewire.core.api.file.FileKind;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
@@ -23,141 +26,100 @@ import com.google.inject.Singleton;
 
 @Singleton
 class CategoryManagerImpl implements CategoryManager {
-    
-    /** A secondary category class designed to deal with the fact that programs is split up. */
+
+    /** A secondary category class designed to preserve protocol-era program filters. */
     private enum InternalCategory {
-        AUDIO(Category.AUDIO), 
+        AUDIO(Category.AUDIO),
         VIDEO(Category.VIDEO),
         IMAGE(Category.IMAGE),
-        DOCUMENT(Category.DOCUMENT), 
+        DOCUMENT(Category.DOCUMENT),
         PROGRAM_OSX_LINUX(Category.PROGRAM),
         PROGRAM_WINDOWS(Category.PROGRAM),
         PROGRAM_ALL(Category.PROGRAM),
         OTHER(Category.OTHER),
         TORRENT(Category.TORRENT);
-        
+
         private final Category category;
+
         InternalCategory(Category category) {
             this.category = category;
         }
-        
-        Category getCategory() { return category; }
-        
+
+        Category getCategory() {
+            return category;
+        }
+
         static InternalCategory fromCategory(Category category) {
-            switch(category) {
+            switch (category) {
             case AUDIO:
-                return InternalCategory.AUDIO;
+                return AUDIO;
             case DOCUMENT:
-                return InternalCategory.DOCUMENT;
+                return DOCUMENT;
             case IMAGE:
-                return InternalCategory.IMAGE;
+                return IMAGE;
             case PROGRAM:
-                return InternalCategory.PROGRAM_ALL;
+                return PROGRAM_ALL;
             case VIDEO:
-                return InternalCategory.VIDEO;
+                return VIDEO;
             case OTHER:
-                return InternalCategory.OTHER;
-            case  TORRENT:
-                return InternalCategory.TORRENT;
+                return OTHER;
+            case TORRENT:
+                return TORRENT;
             default:
                 throw new IllegalArgumentException(category.toString());
             }
         }
     }
-    
-    /** Map between internal category && built in extensions.  */
-    private final Map<InternalCategory, Collection<String>> builtInExtensionMap;
-    /** Map between internal category && reference to combined extensions (built-in & remote) */
+
+    private static final List<FileKind> PRIMARY_FILE_KIND_ORDER = Arrays.asList(
+        FileKind.TORRENT,
+        FileKind.EXEC,
+        FileKind.MODEL_3D,
+        FileKind.WEB,
+        FileKind.BOOK,
+        FileKind.SHEET,
+        FileKind.SLIDE,
+        FileKind.TEXT,
+        FileKind.AUDIO,
+        FileKind.VIDEO,
+        FileKind.IMAGE,
+        FileKind.FONT,
+        FileKind.CODE,
+        FileKind.ARCHIVE
+    );
+
+    private static final Collection<String> OSX_LINUX_EXEC_EXTENSIONS =
+        extensions("bin", "command", "sh", "bash", "csh", "fish", "ksh", "zsh");
+
+    private static final Collection<String> WINDOWS_EXEC_EXTENSIONS =
+        extensions("exe", "msi", "bin", "cmd", "com", "bat", "crx");
+
+    private static final Map<FileKind, Collection<String>> BUILT_IN_FILE_KIND_EXTENSIONS =
+        buildBuiltInFileKindExtensions();
+
+    private final Map<FileKind, AtomicReference<Collection<String>>> fileKindExtensionMap;
+    private final Map<FileKind, Predicate<String>> fileKindPredicateMap;
+    private final AtomicReference<Map<String, FileKind>> primaryFileKindByExtension =
+        new AtomicReference<Map<String, FileKind>>();
     private final Map<InternalCategory, AtomicReference<Collection<String>>> extensionMap;
-    /** Map between internal category && predicate that refers to combined extensions. */
     private final Map<InternalCategory, Predicate<String>> predicateMap;
-    /** Map between internal category && setting that is associated with that category. */
     private final Map<InternalCategory, StringArraySetting> settingMap;
-    
-    
+
     CategoryManagerImpl() {
-        builtInExtensionMap = new EnumMap<InternalCategory, Collection<String>>(
-                InternalCategory.class);
-
-        builtInExtensionMap.put(InternalCategory.DOCUMENT, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("123", "abw", "accdb", "accde", "accdr",
-                "accdt", "ans", "asc", "asp", "bdr", "chm", "css", "csv", "dat", "db", "dif",
-                "diz", "doc", "docm", "docx", "dotm", "dotx", "dvi", "eml", "eps", "epsf", "fm",
-                "grv", "gsa", "gts", "hlp", "htm", "html", "idb", "idx", "iif", "info", "js",
-                "jsp", "kfl", "kwd", "latex", "lif", "lit", "log", "man", "mcw", "mht", "mhtml",
-                "mny", "msg", "obi", "odp", "ods", "odt", "ofx", "one", "onepkg", "ost", "pages",
-                "pdf", "php", "pot", "potm", "potx", "pps", "ppsm", "ppsx", "ppt", "pptm", "pptx",
-                "ps", "pub", "qba", "qbb", "qdb", "qbi", "qbm", "qbw", "qbx", "qdf", "qel", "qfp",
-                "qpd", "qph", "qmd", "qsd", "rtf", "scd", "sdc", "sdd", "sdp", "sdw", "shw",
-                "sldx", "sxc", "sxd", "sxp", "sxw", "t01", "t02", "t03", "t04", "t05", "t06",
-                "t07", "t08", "t09", "t98", "t99", "ta0", "ta1", "ta2", "ta3", "ta4", "ta5", "ta6",
-                "ta7", "ta8", "ta9", "tax", "tax2008", "tex", "texi", "toc", "tsv", "tvl", "txf",
-                "txt", "wk1", "wk3", "wk4", "wks", "wp", "wp5", "wpd", "wps", "wri", "xhtml",
-                "xlam", "xls", "xlsb", "xlsm", "xlsx", "xltm", "xltx", "xml", "xsf", "xsn", "qfx",
-                "qif", "bud", "ofc", "pst", "mbf", "mn1", "mn2", "mn3", "mn4", "mn5", "mn6", "mn7",
-                "mn8", "mn9", "m10", "m11", "m12", "m13", "m14", "m15", "m16", "boe", "box", "bri",
-                "cnm", "dbx", "eml", "emlx", "idb", "idx", "maildb", "mbg", "mbs", "mbx", "mht",
-                "msb", "msf", "msg", "nws", "pmi", "pmm", "pmx", "tbb", "toc", "vfb", "zmc", "stw",
-                "odm", "ott", "wpt").build());
-
-        builtInExtensionMap.put(InternalCategory.AUDIO, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("mp3", "mpa", "mp1", "mpga", "mp2", "ra", "rm",
-                "ram", "rmj", "wma", "wav", "m4a", "m4p", "lqt", "ogg", "med", "aif", "aiff",
-                "aifc", "au", "snd", "s3m", "aud", "mid", "midi", "rmi", "mod", "kar", "ac3",
-                "shn", "fla", "flac", "cda", "mka").build());
-
-        builtInExtensionMap.put(InternalCategory.VIDEO, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("mpg", "mpeg", "mpe", "mng", "mpv", "m1v",
-                "vob", "mpv2", "mp2v", "m2p", "m2v", "m4v", "mpgv", "vcd", "mp4", "dv", "dvd", "div",
-                "divx", "dvx", "smi", "smil", "rv", "rmm", "rmvb", "avi", "asf", "asx", "wmv",
-                "qt", "mov", "fli", "flc", "flx", "flv", "wml", "vrml", "swf", "dcr", "jve", "nsv",
-                "mkv", "ogm", "cdg", "srt", "sub", "flv", "ogv", "webm").build());
-
-        builtInExtensionMap.put(InternalCategory.IMAGE, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("gif", "png", "bmp", "jpg", "jpeg", "jpe",
-                "jif", "jiff", "jfif", "tif", "tiff", "iff", "lbm", "ilbm", "mac", "drw", "pct",
-                "img", "bmp", "dib", "rle", "ico", "ani", "icl", "cur", "emf", "wmf", "pcx", "pcd",
-                "tga", "pic", "fig", "psd", "wpg", "dcx", "cpt", "mic", "pbm", "pnm", "ppm", "xbm",
-                "xpm", "xwd", "sgi", "fax", "rgb", "ras").build());
-
-        builtInExtensionMap
-                .put(InternalCategory.PROGRAM_OSX_LINUX, ImmutableSortedSet.orderedBy(
-                        String.CASE_INSENSITIVE_ORDER).add("app", "bin", "mdb", "sh", "csh", "awk",
-                        "pl", "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz", "taz",
-                        "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg", "iso",
-                        "jnlp", "rar", "sh").build());
-
-        builtInExtensionMap.put(InternalCategory.PROGRAM_WINDOWS, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("mdb", "exe", "zip", "jar", "cab", "msi", "msp",
-                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "iso", "jnlp", "bat",
-                "lnk", "vbs").build());
-        
-        builtInExtensionMap.put(InternalCategory.TORRENT, ImmutableSortedSet.orderedBy(
-                String.CASE_INSENSITIVE_ORDER).add("torrent").build());
+        fileKindExtensionMap = new EnumMap<FileKind, AtomicReference<Collection<String>>>(FileKind.class);
+        for (FileKind fileKind : FileKind.values()) {
+            if (fileKind != FileKind.OTHER) {
+                fileKindExtensionMap.put(fileKind, new AtomicReference<Collection<String>>());
+            }
+        }
 
         extensionMap = new EnumMap<InternalCategory, AtomicReference<Collection<String>>>(InternalCategory.class);
-        for(InternalCategory category : InternalCategory.values()) {
-            // Do it for everything other than OTHER
-            if(category != InternalCategory.OTHER) {
+        for (InternalCategory category : InternalCategory.values()) {
+            if (category != InternalCategory.OTHER) {
                 extensionMap.put(category, new AtomicReference<Collection<String>>());
             }
         }
-        
-        predicateMap = new EnumMap<InternalCategory, Predicate<String>>(InternalCategory.class);
-        // Add all predicates that are in the extension map
-        for(Map.Entry<InternalCategory, AtomicReference<Collection<String>>> entry : extensionMap.entrySet()) {
-            predicateMap.put(entry.getKey(), new CollectionPredicate(entry.getValue()));
-        }
-        // Then add one for OTHER too
-        predicateMap.put(InternalCategory.OTHER, new Predicate<String>() {
-            public boolean apply(String input) {
-                // This would be a terrible implementation for other categories,
-                // but for OTHER it is OK because all we can do is say,
-                // "do i belong in another category?... if not -> other"
-                return getCategoryForExtension(input) == Category.OTHER;
-            };
-        });
-        
+
         settingMap = new EnumMap<InternalCategory, StringArraySetting>(InternalCategory.class);
         settingMap.put(InternalCategory.AUDIO, LibrarySettings.ADDITIONAL_AUDIO_EXTS);
         settingMap.put(InternalCategory.DOCUMENT, LibrarySettings.ADDITIONAL_DOCUMENT_EXTS);
@@ -166,92 +128,185 @@ class CategoryManagerImpl implements CategoryManager {
         settingMap.put(InternalCategory.PROGRAM_WINDOWS, LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS);
         settingMap.put(InternalCategory.VIDEO, LibrarySettings.ADDITIONAL_VIDEO_EXTS);
         settingMap.put(InternalCategory.TORRENT, LibrarySettings.ADDITIONAL_TORRENT_EXTS);
-        
+
+        fileKindPredicateMap = new EnumMap<FileKind, Predicate<String>>(FileKind.class);
+        for (final FileKind fileKind : FileKind.values()) {
+            fileKindPredicateMap.put(fileKind, new Predicate<String>() {
+                @Override
+                public boolean apply(String input) {
+                    return getFileKindForExtension(input) == fileKind;
+                }
+            });
+        }
+
+        predicateMap = new EnumMap<InternalCategory, Predicate<String>>(InternalCategory.class);
+        for (final InternalCategory category : InternalCategory.values()) {
+            predicateMap.put(category, new Predicate<String>() {
+                @Override
+                public boolean apply(String input) {
+                    return matchesInternalCategory(input, category);
+                }
+            });
+        }
+
         rebuildExtensions();
     }
-    
-    /** Rebuilds all extensions so that they contain both built-in & simpp extensions. */
-    private void rebuildExtensions() {
-        // Redo every category that has a setting associated with it.
-        for(Map.Entry<InternalCategory, StringArraySetting> entry : settingMap.entrySet()) {
-            InternalCategory category = entry.getKey();
-            StringArraySetting remote = entry.getValue();
-            AtomicReference<Collection<String>> combinedMap = extensionMap.get(category);
-            assert combinedMap != null && remote != null && category != null;
-            combinedMap.set(combineAndCleanup(category, remote.get()));
-        }
-        
-        // And then rebuild the combined PROGRAM category that has both.
-        extensionMap.get(InternalCategory.PROGRAM_ALL).set(
-            ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER)
-                .addAll(extensionMap.get(InternalCategory.PROGRAM_OSX_LINUX).get())
-                .addAll(extensionMap.get(InternalCategory.PROGRAM_WINDOWS).get()).build());
-    }
-    
-    private Collection<String> combineAndCleanup(InternalCategory category, String[] remote) {
-        Set<String> remoteSet = new TreeSet<String>(Arrays.asList(remote));
-        
-        // remove everything that's built-in
-        for(Collection<String> builtIn : builtInExtensionMap.values()) {
-            remoteSet.removeAll(builtIn);
-        }
 
-        // Remove the stuff from the other remote extensions,
-        // otherwise we can end up with two different categories having
-        // the same extension
-        for(Map.Entry<InternalCategory, StringArraySetting> entry : settingMap.entrySet()) {
-            // If our category doesn't match the setting's category, then remove
-            // all extensions from that setting.
-            if(category.getCategory() != entry.getKey().getCategory()) {
-                remoteSet.removeAll(Arrays.asList(entry.getValue().get()));
+    private void rebuildExtensions() {
+        Map<FileKind, Set<String>> mutableFileKindExtensions = new EnumMap<FileKind, Set<String>>(FileKind.class);
+        for (FileKind fileKind : FileKind.values()) {
+            if (fileKind != FileKind.OTHER) {
+                mutableFileKindExtensions.put(fileKind, new TreeSet<String>(String.CASE_INSENSITIVE_ORDER));
+                Collection<String> builtIn = BUILT_IN_FILE_KIND_EXTENSIONS.get(fileKind);
+                if (builtIn != null) {
+                    mutableFileKindExtensions.get(fileKind).addAll(builtIn);
+                }
             }
         }
-        
-        Collection<String> builtIn = builtInExtensionMap.get(category);
-        assert builtIn != null;
 
-        // Build the combined map by using the built in & the remaining extensions
-        return ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER).
-            addAll(builtIn).addAll(remoteSet).build();
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.AUDIO, LibrarySettings.ADDITIONAL_AUDIO_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.VIDEO, LibrarySettings.ADDITIONAL_VIDEO_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.IMAGE, LibrarySettings.ADDITIONAL_IMAGE_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.TEXT, LibrarySettings.ADDITIONAL_DOCUMENT_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.EXEC, LibrarySettings.ADDITIONAL_PROGRAM_OSX_LINUX_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.EXEC, LibrarySettings.ADDITIONAL_PROGRAM_WINDOWS_EXTS);
+        addRemoteExtensions(mutableFileKindExtensions, FileKind.TORRENT, LibrarySettings.ADDITIONAL_TORRENT_EXTS);
+
+        for (Map.Entry<FileKind, Set<String>> entry : mutableFileKindExtensions.entrySet()) {
+            fileKindExtensionMap.get(entry.getKey()).set(immutableExtensions(entry.getValue()));
+        }
+
+        Map<String, FileKind> primaryKinds = buildPrimaryFileKindMap();
+        primaryFileKindByExtension.set(primaryKinds);
+        rebuildBroadCategoryExtensions(primaryKinds);
+    }
+
+    private void addRemoteExtensions(Map<FileKind, Set<String>> extensions, FileKind fileKind, StringArraySetting setting) {
+        Set<String> target = extensions.get(fileKind);
+        if (target == null) {
+            return;
+        }
+        for (String extension : setting.get()) {
+            String normalized = normalizeExtension(extension);
+            if (normalized.length() > 0) {
+                target.add(normalized);
+            }
+        }
+    }
+
+    private Map<String, FileKind> buildPrimaryFileKindMap() {
+        Map<String, FileKind> primaryKinds = new LinkedHashMap<String, FileKind>();
+        for (FileKind fileKind : PRIMARY_FILE_KIND_ORDER) {
+            Collection<String> extensions = fileKindExtensionMap.get(fileKind).get();
+            for (String extension : extensions) {
+                String normalized = normalizeExtension(extension);
+                if (normalized.length() > 0 && !primaryKinds.containsKey(normalized)) {
+                    primaryKinds.put(normalized, fileKind);
+                }
+            }
+        }
+        return Collections.unmodifiableMap(primaryKinds);
+    }
+
+    private void rebuildBroadCategoryExtensions(Map<String, FileKind> primaryKinds) {
+        Map<InternalCategory, Set<String>> broad = new EnumMap<InternalCategory, Set<String>>(InternalCategory.class);
+        for (InternalCategory category : extensionMap.keySet()) {
+            broad.put(category, new TreeSet<String>(String.CASE_INSENSITIVE_ORDER));
+        }
+
+        for (Map.Entry<String, FileKind> entry : primaryKinds.entrySet()) {
+            String extension = entry.getKey();
+            FileKind fileKind = entry.getValue();
+            Category category = fileKind.getBroadCategory();
+            if (category == Category.PROGRAM) {
+                broad.get(InternalCategory.PROGRAM_ALL).add(extension);
+                if (OSX_LINUX_EXEC_EXTENSIONS.contains(extension)) {
+                    broad.get(InternalCategory.PROGRAM_OSX_LINUX).add(extension);
+                }
+                if (WINDOWS_EXEC_EXTENSIONS.contains(extension)) {
+                    broad.get(InternalCategory.PROGRAM_WINDOWS).add(extension);
+                }
+            } else {
+                InternalCategory internalCategory = InternalCategory.fromCategory(category);
+                Set<String> extensions = broad.get(internalCategory);
+                if (extensions != null) {
+                    extensions.add(extension);
+                }
+            }
+        }
+
+        for (Map.Entry<InternalCategory, StringArraySetting> entry : settingMap.entrySet()) {
+            Set<String> extensions = broad.get(entry.getKey());
+            if (extensions != null) {
+                for (String extension : entry.getValue().get()) {
+                    String normalized = normalizeExtension(extension);
+                    if (normalized.length() > 0) {
+                        extensions.add(normalized);
+                    }
+                }
+            }
+        }
+
+        broad.get(InternalCategory.PROGRAM_ALL).addAll(broad.get(InternalCategory.PROGRAM_OSX_LINUX));
+        broad.get(InternalCategory.PROGRAM_ALL).addAll(broad.get(InternalCategory.PROGRAM_WINDOWS));
+
+        for (Map.Entry<InternalCategory, Set<String>> entry : broad.entrySet()) {
+            extensionMap.get(entry.getKey()).set(immutableExtensions(entry.getValue()));
+        }
     }
 
     @Override
     public Category getCategoryForExtension(String extension) {
-        // note: the extension sets are all case insensitive,
-        // so... no lowercasing required.
-        for(Map.Entry<InternalCategory, AtomicReference<Collection<String>>> entry : extensionMap.entrySet()) {
-            Collection<String> collection = entry.getValue().get();
-            if(collection.contains(extension)) {
-                return entry.getKey().getCategory();
-            }
-        }
-        // If it matched nothing, it matches OTHER.
-        return Category.OTHER;
+        return getFileKindForExtension(extension).getBroadCategory();
     }
-    
+
     @Override
     public Category getCategoryForFilename(String filename) {
-        String extension = FileUtils.getFileExtension(filename);
-        return getCategoryForExtension(extension);
+        return getFileKindForFilename(filename).getBroadCategory();
     }
 
     @Override
     public Category getCategoryForFile(File file) {
-        // note: the extension sets are all case insensitive,
-        // so... no lowercasing required.        
-        String extension = FileUtils.getFileExtension(file);
-        return getCategoryForExtension(extension);
+        return getFileKindForFile(file).getBroadCategory();
+    }
+
+    @Override
+    public FileKind getFileKindForExtension(String extension) {
+        FileKind fileKind = primaryFileKindByExtension.get().get(normalizeExtension(extension));
+        return fileKind == null ? FileKind.OTHER : fileKind;
+    }
+
+    @Override
+    public FileKind getFileKindForFilename(String filename) {
+        if (filename == null) {
+            return FileKind.OTHER;
+        }
+        return getFileKindForExtension(extensionForFilename(filename));
+    }
+
+    @Override
+    public FileKind getFileKindForFile(File file) {
+        if (file == null) {
+            return FileKind.OTHER;
+        }
+        return getFileKindForFilename(file.getName());
     }
 
     @Override
     public Collection<String> getExtensionsForCategory(Category category) {
         AtomicReference<Collection<String>> ref = extensionMap.get(InternalCategory.fromCategory(category));
-        if(ref != null) {
+        if (ref != null) {
             return ref.get();
         } else {
             assert category == Category.OTHER;
             return Collections.emptySet();
         }
+    }
+
+    @Override
+    public Collection<String> getExtensionsForFileKind(FileKind fileKind) {
+        AtomicReference<Collection<String>> ref = fileKindExtensionMap.get(fileKind);
+        return ref == null ? Collections.<String>emptySet() : ref.get();
     }
 
     @Override
@@ -268,33 +323,126 @@ class CategoryManagerImpl implements CategoryManager {
     public Predicate<String> getWindowsProgramsFilter() {
         return predicateMap.get(InternalCategory.PROGRAM_WINDOWS);
     }
-    
-    private static final class CollectionPredicate implements Predicate<String> {
-        private final AtomicReference<Collection<String>> delegate;
-        
-        public CollectionPredicate(AtomicReference<Collection<String>> set) {
-            this.delegate = set;
-        }
-        
-        @Override
-        public boolean apply(String input) {
-            return delegate.get().contains(input);
-        }
-    }
 
     @Override
     public boolean containsCategory(Category category, List<String> paths) {
-  
         if (paths == null) {
             return false;
         }
-        
-        for ( String path : paths ) {
+
+        for (String path : paths) {
             if (getCategoryForFilename(path) == category) {
                 return true;
             }
         }
-        
+
         return false;
+    }
+
+    private boolean matchesInternalCategory(String extension, InternalCategory category) {
+        if (category == InternalCategory.OTHER) {
+            return getCategoryForExtension(extension) == Category.OTHER;
+        }
+        AtomicReference<Collection<String>> ref = extensionMap.get(category);
+        return ref != null && ref.get().contains(normalizeExtension(extension));
+    }
+
+    private String extensionForFilename(String filename) {
+        String normalizedName = filename.trim().toLowerCase(Locale.US);
+        for (String extension : primaryFileKindByExtension.get().keySet()) {
+            if (extension.indexOf('.') >= 0 && normalizedName.endsWith("." + extension)) {
+                return extension;
+            }
+        }
+        return FileUtils.getFileExtension(filename);
+    }
+
+    private static String normalizeExtension(String extension) {
+        if (extension == null) {
+            return "";
+        }
+        String normalized = extension.trim().toLowerCase(Locale.US);
+        while (normalized.startsWith(".")) {
+            normalized = normalized.substring(1);
+        }
+        return normalized;
+    }
+
+    private static Collection<String> immutableExtensions(Collection<String> extensions) {
+        return ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER)
+            .addAll(extensions)
+            .build();
+    }
+
+    private static Collection<String> extensions(String... extensions) {
+        return ImmutableSortedSet.orderedBy(String.CASE_INSENSITIVE_ORDER)
+            .add(extensions)
+            .build();
+    }
+
+    private static Map<FileKind, Collection<String>> buildBuiltInFileKindExtensions() {
+        Map<FileKind, Collection<String>> map = new EnumMap<FileKind, Collection<String>>(FileKind.class);
+        map.put(FileKind.MODEL_3D, extensions(
+            "3ds", "f3d", "3mf", "smt", "stp", "step", "stl", "obj", "gcode", "scad"
+        ));
+        map.put(FileKind.ARCHIVE, extensions(
+            "7z", "a", "aar", "apk", "ar", "bz2", "br", "cab", "cpio", "deb", "dmg", "egg",
+            "gz", "iso", "jar", "lha", "lz", "lz4", "lzma", "lzo", "mar", "pea", "rar", "rpm",
+            "s7z", "shar", "tar", "tbz2", "tgz", "tlz", "txz", "war", "whl", "xpi", "zip",
+            "zipx", "zst", "xz", "pak"
+        ));
+        map.put(FileKind.AUDIO, extensions(
+            "aac", "aiff", "ape", "au", "flac", "gsm", "it", "m3u", "m4a", "mid", "mod",
+            "mp3", "mpa", "ogg", "opus", "pls", "ra", "s3m", "sid", "wav", "wma", "xm"
+        ));
+        map.put(FileKind.BOOK, extensions(
+            "mobi", "epub", "azw1", "azw3", "azw4", "azw6", "azw", "cbr", "cbz"
+        ));
+        map.put(FileKind.CODE, extensions(
+            "1.ada", "2.ada", "ada", "adb", "ads", "asm", "asp", "aspx", "bas", "bash",
+            "bat", "c++", "c", "cbl", "cc", "class", "clj", "cob", "cpp", "cs", "csh",
+            "cxx", "d", "diff", "dll", "e", "el", "f", "f77", "f90", "fish", "for", "fth",
+            "ftn", "go", "groovy", "h", "hh", "hpp", "hs", "htm", "html", "hxx", "inc",
+            "java", "js", "json", "jsp", "jsx", "ksh", "kt", "kts", "lhs", "lisp", "lua",
+            "m", "m4", "nim", "patch", "php", "php3", "php4", "php5", "phtml", "pl", "po",
+            "pp", "prql", "py", "ps1", "psd1", "psm1", "ps1xml", "psc1", "pssc", "psrc",
+            "r", "rb", "rs", "s", "scala", "sh", "sql", "swg", "swift", "v", "vb",
+            "vcxproj", "wll", "xcodeproj", "xml", "xll", "zig", "zsh"
+        ));
+        map.put(FileKind.EXEC, extensions(
+            "exe", "msi", "bin", "cmd", "com", "command", "sh", "bat", "crx", "bash",
+            "csh", "fish", "ksh", "zsh"
+        ));
+        map.put(FileKind.FONT, extensions(
+            "eot", "otf", "ttf", "woff", "woff2"
+        ));
+        map.put(FileKind.IMAGE, extensions(
+            "3dm", "3ds", "max", "avif", "bmp", "dds", "gif", "heic", "heif", "jpg",
+            "jpeg", "jxl", "png", "psd", "xcf", "tga", "thm", "tif", "tiff", "yuv",
+            "ai", "eps", "ps", "svg", "dwg", "dxf", "gpx", "kml", "kmz", "webp"
+        ));
+        map.put(FileKind.SHEET, extensions(
+            "ods", "xls", "xlsx", "csv", "tsv", "ics", "vcf"
+        ));
+        map.put(FileKind.SLIDE, extensions(
+            "ppt", "pptx", "odp"
+        ));
+        map.put(FileKind.TEXT, extensions(
+            "doc", "docx", "ebook", "log", "md", "msg", "odt", "org", "pages", "pdf",
+            "rtf", "rst", "tex", "txt", "wpd", "wps"
+        ));
+        map.put(FileKind.VIDEO, extensions(
+            "3g2", "3gp", "aaf", "asf", "avchd", "avi", "car", "dav", "drc", "flv",
+            "m2v", "m2ts", "m4p", "m4v", "mkv", "mng", "mov", "mp2", "mp4", "mpe",
+            "mpeg", "mpg", "mpv", "mts", "mxf", "nsv", "ogv", "ogm", "ogx", "qt",
+            "rm", "rmvb", "roq", "srt", "svi", "vob", "webm", "wmv", "xba", "yuv"
+        ));
+        map.put(FileKind.WEB, extensions(
+            "asp", "aspx", "css", "htm", "html", "inc", "js", "jsp", "jsx", "less",
+            "php", "php3", "php4", "php5", "phtml", "scss", "ts", "tsx", "wasm"
+        ));
+        map.put(FileKind.TORRENT, extensions("torrent"));
+        map.put(FileKind.OTHER, Collections.<String>emptySet());
+        return Collections.unmodifiableMap(map);
     }
 }

@@ -216,17 +216,27 @@ public class CoreDownloadListManager implements DownloadListManager {
     }
 
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
-            List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) {
+            List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) throws DownloadException {
 	    List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(searchResults.size());
         Set<IpPort> alts = new IpPortSet();
         
         // size of searchResults can change, so iterate over list and make no
         // assumptions about its size
         for (SearchResult result : searchResults) {
+            if (!(result instanceof RemoteFileDescAdapter)) {
+                continue;
+            }
             RemoteFileDescAdapter rfdAdapter = (RemoteFileDescAdapter) result;
             rfds.add(rfdAdapter.getRfd());
             alts.addAll(rfdAdapter.getAlts());
-        }        
+        }
+
+        if (rfds.isEmpty()) {
+            throw new DownloadException(
+                    DownloadException.ErrorCode.DOWNLOAD_NOT_SUPPORTED,
+                    null,
+                    "This search result does not provide a Gnutella download source.");
+        }
         
         // Iterate through RFDs and remove matching alts.
         // Also store the first SHA1 capable RFD for collecting alts.

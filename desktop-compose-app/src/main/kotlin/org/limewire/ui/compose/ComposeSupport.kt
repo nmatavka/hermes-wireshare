@@ -5,6 +5,7 @@ import ca.odell.glazedlists.EventList
 import ca.odell.glazedlists.event.ListEventListener
 import java.awt.EventQueue
 import java.beans.PropertyChangeListener
+import java.lang.reflect.InvocationTargetException
 import java.util.IdentityHashMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -14,6 +15,18 @@ internal fun runOnUi(block: () -> Unit) {
         block()
     } else {
         EventQueue.invokeLater(block)
+    }
+}
+
+internal fun runOnUiBlocking(block: () -> Unit) {
+    if (EventQueue.isDispatchThread()) {
+        block()
+        return
+    }
+    try {
+        EventQueue.invokeAndWait(block)
+    } catch (failure: InvocationTargetException) {
+        throw failure.targetException
     }
 }
 

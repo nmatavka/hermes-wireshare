@@ -6,6 +6,7 @@ import com.google.inject.Injector
 import com.google.inject.Key
 import com.google.inject.Stage
 import com.google.inject.TypeLiteral
+import com.google.inject.name.Names
 import com.limegroup.gnutella.ActiveLimeWireCheck
 import com.limegroup.gnutella.LifecycleManager
 import com.limegroup.gnutella.LimeCoreGlue
@@ -79,6 +80,7 @@ import org.limewire.util.SystemUtils
 import org.limewire.core.impl.CoreGlueModule
 import org.limewire.ed2k.api.Ed2kService
 import org.limewire.ed2k.backend.Ed2kModule
+import java.util.concurrent.ScheduledExecutorService
 import kotlin.system.exitProcess
 
 object ComposeBootstrap {
@@ -87,37 +89,50 @@ object ComposeBootstrap {
         val systemMessageService = CoreComposeSystemMessageService()
         runtimeErrorService.install()
         systemMessageService.install()
+        val controller = try {
+            createController(args, runtimeErrorService, systemMessageService)
+        } catch (failure: Throwable) {
+            showFatalStartupError(runtimeErrorService, failure)
+        }
         try {
-            val controller = createController(args, runtimeErrorService, systemMessageService)
             application {
                 WireShareDesktopApp(controller, ::exitApplication)
             }
         } catch (failure: Throwable) {
-            runtimeErrorService.finishStartupCapture(replay = false)
-            val startupProblem = when (failure) {
-                is ComposeStartupFailureException -> failure.cause ?: failure
-                else -> failure
+            runtimeErrorService.install()
+            Thread.getDefaultUncaughtExceptionHandler()?.uncaughtException(Thread.currentThread(), failure)
+                ?: System.err.println(failure.stackTraceToString())
+        }
+    }
+
+    private fun showFatalStartupError(
+        runtimeErrorService: ComposeRuntimeErrorService,
+        failure: Throwable
+    ): Nothing {
+        runtimeErrorService.finishStartupCapture(replay = false)
+        val startupProblem = when (failure) {
+            is ComposeStartupFailureException -> failure.cause ?: failure
+            else -> failure
+        }
+        val report = runtimeErrorService.fatalStartupReport(
+            problem = startupProblem,
+            detail = fatalStartupDetail(failure)
+        )
+        runCatching {
+            application {
+                FatalStartupErrorApp(
+                    report = report,
+                    runtimeErrorService = runtimeErrorService,
+                    filePicker = AwtDesktopFilePicker(),
+                    onQuit = ::exitApplication
+                )
             }
-            val report = runtimeErrorService.fatalStartupReport(
-                problem = startupProblem,
-                detail = fatalStartupDetail(failure)
-            )
-            runCatching {
-                application {
-                    FatalStartupErrorApp(
-                        report = report,
-                        runtimeErrorService = runtimeErrorService,
-                        filePicker = AwtDesktopFilePicker(),
-                        onQuit = ::exitApplication
-                    )
-                }
-                exitProcess(1)
-            }.getOrElse {
-                System.err.println(report.title)
-                report.detail?.takeIf(String::isNotBlank)?.let(System.err::println)
-                System.err.println(report.bugReport)
-                exitProcess(1)
-            }
+            exitProcess(1)
+        }.getOrElse {
+            System.err.println(report.title)
+            report.detail?.takeIf(String::isNotBlank)?.let(System.err::println)
+            System.err.println(report.bugReport)
+            exitProcess(1)
         }
     }
 
@@ -151,7 +166,9 @@ object ComposeBootstrap {
             legacyComposeSwingCompatModule()
         )
         GuiceUtils.loadEagerSingletons(injector)
+        runtimeErrorService.install()
         injector.getInstance(LimeCoreGlue::class.java).install()
+        runtimeErrorService.install()
         validateEarlyCore(injector)
 
         val localizationService = SwingComposeLocalizationService()
@@ -257,13 +274,17 @@ object ComposeBootstrap {
                 injector.getInstance(UploadListManager::class.java)
             ),
             settingsService = composeSettingsService,
-            localizationService = localizationService
+            localizationService = localizationService,
+            backgroundExecutor = injector.getInstance(
+                Key.get(ScheduledExecutorService::class.java, Names.named("backgroundExecutor"))
+            )
         )
 
         injector.getInstance(GuiCallbackService::class.java).setGuiCallback(ComposeGuiCallback(controller))
         DesktopIntegration.register()
         controller.prepareStartupMessageRouting()
         startCoreServices(injector)
+        runtimeErrorService.install()
         startupSettings.ensureRunOnStartupConfigured()
         controller.activate()
         DesktopIntegration.attach(controller)

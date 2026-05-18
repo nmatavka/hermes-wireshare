@@ -14,6 +14,7 @@ public final class ErrorService {
      * {@link System#out}.
      */
     private volatile static ErrorCallback _errorCallback = new PrintStreamErrorCallback(System.out);
+    private volatile static ErrorCallback _protectedErrorCallback = null;
 
     /**
      * Private constructor to ensure this class cannot be instantiated.
@@ -24,7 +25,21 @@ public final class ErrorService {
     /**
      * Sets the <tt>ErrorCallback</tt> class to use.
      */
-    public static void setErrorCallback(ErrorCallback callback) {
+    public static synchronized void setErrorCallback(ErrorCallback callback) {
+        if (_protectedErrorCallback != null && callback != _protectedErrorCallback) {
+            System.err.println("Ignoring attempt to replace protected error callback with " + callback.getClass().getName());
+            return;
+        }
+        _errorCallback = callback;
+    }
+
+    /**
+     * Installs an error callback that should remain authoritative for this app
+     * session. Compose uses this to prevent removed Swing-era crash reporters
+     * from re-registering themselves and opening a second modal.
+     */
+    public static synchronized void setProtectedErrorCallback(ErrorCallback callback) {
+        _protectedErrorCallback = callback;
         _errorCallback = callback;
     }
 

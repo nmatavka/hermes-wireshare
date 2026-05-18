@@ -172,12 +172,19 @@ data class AddToLibraryDefaultsDraft(
     val programs: Boolean
 )
 
+data class FrostWireSearchProviderDraft(
+    val key: String,
+    val label: String,
+    val enabled: Boolean
+)
+
 data class SearchPreferencesDraft(
     val defaultCategory: SearchCategory,
     val showSmartSuggestions: Boolean,
     val keepSearchHistory: Boolean,
     val groupSimilarResults: Boolean,
-    val useTorrentWebSearch: Boolean,
+    val useFrostWireSearch: Boolean,
+    val frostWireSearchProviders: List<FrostWireSearchProviderDraft> = emptyList(),
     val filterAdultContent: Boolean,
     val hostFilters: HostFilterPreferencesDraft,
     val blockedKeywords: List<String>,

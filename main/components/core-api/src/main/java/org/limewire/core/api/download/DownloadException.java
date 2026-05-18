@@ -77,7 +77,13 @@ public class DownloadException extends IOException {
         /**
          * Thrown when the user tries to download an already uploading torrent file. 
          */
-        FILE_ALREADY_UPLOADING
+        FILE_ALREADY_UPLOADING,
+
+        /**
+         * Thrown when a search result is visible but needs a resolver or helper
+         * before it can be downloaded by the current backend.
+         */
+        DOWNLOAD_NOT_SUPPORTED
     }
 
     /**

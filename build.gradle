@@ -16,6 +16,8 @@ def hostOs = OperatingSystem.current()
 def hostArch = (System.getProperty('os.arch') ?: '').toLowerCase(Locale.ROOT)
 def isArm64 = hostArch == 'aarch64' || hostArch == 'arm64'
 def isX86_64 = hostArch == 'amd64' || hostArch == 'x86_64'
+// Avoid the HotSpot AArch64 C1 OSR crash seen on older JDK 21 runtimes (for example JDK-8335662 backported in 21.0.8).
+def arm64HotSpotOsrWorkaroundArg = '-XX:-UseOnStackReplacement'
 def appleExtensionsJarName = 'Apple' + 'JavaExtensions'
 def factoryProviderToken = 'FactoryProvider' + '.newFactory'
 def guiceInternalToken = ['com', 'google', 'inject', 'internal'].join('.')
@@ -230,6 +232,7 @@ legacyExplicitArtifacts.putAll([
     'httpclient'         : 'org.apache.httpcomponents:httpclient:4.5.14',
     'httpcore'           : 'org.apache.httpcomponents:httpcore:4.4.16',
     'httpcore-nio'       : 'org.apache.httpcomponents:httpcore-nio:4.4.16',
+    'hsqldb'             : 'hsqldb:hsqldb:1.8.0.10',
     'icu4j'              : 'com.ibm.icu:icu4j:76.1',
     'jaudiotagger'       : 'net.jthink:jaudiotagger:2.2.5',
     'jcip-annotations'   : 'net.jcip:jcip-annotations:1.0',
@@ -611,6 +614,9 @@ tasks.register('packageMacAppImage', Exec) {
             command += ['--mac-signing-keychain', macosCodesignKeychain.get()]
         }
     }
+    if (isArm64) {
+        command += ['--java-options', arm64HotSpotOsrWorkaroundArg]
+    }
     commandLine(command)
 }
 
@@ -678,9 +684,13 @@ project(':desktop-compose-app') {
 
             if (hostOs.isMacOsX()) {
                 dependsOn rootProject.tasks.named('prepareMacRuntimePayload')
-                jvmArgs(
+                def macRunJvmArgs = [
                     "-Djava.library.path=${macRuntimePayloadDir.get().asFile.toPath().resolve('lib/native').toFile().absolutePath}"
-                )
+                ]
+                if (isArm64) {
+                    macRunJvmArgs += arm64HotSpotOsrWorkaroundArg
+                }
+                jvmArgs(macRunJvmArgs)
             }
         }
 
@@ -688,9 +698,12 @@ project(':desktop-compose-app') {
             tasks.named('startScripts').configure {
                 dependsOn rootProject.tasks.named('prepareMacRuntimePayload')
                 doLast {
+                    def defaultJvmOpts = isArm64
+                        ? 'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native -XX:-UseOnStackReplacement"'
+                        : 'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
                     unixScript.text = unixScript.text.replace(
                         'DEFAULT_JVM_OPTS=""',
-                        'DEFAULT_JVM_OPTS="-Djava.library.path=$APP_HOME/lib/native"'
+                        defaultJvmOpts
                     )
                 }
             }
@@ -993,12 +1006,46 @@ tasks.register('verifyNoJed2kBuildDependency') {
     }
 }
 
+tasks.register('verifyNoFrostWireSearchBuildDependency') {
+    group = 'verification'
+    description = 'Fails if the active build still depends on the donor FrostWire source tree.'
+
+    def trackedFiles = files(
+        rootProject.file('settings.gradle'),
+        rootProject.file('build.gradle'),
+        rootProject.file('desktop-compose-app/build.gradle'),
+        rootProject.file('main/components/core-glue/ivy.xml'),
+        rootProject.file('frostwire-search-backend/build.gradle')
+    )
+    inputs.files(trackedFiles)
+
+    doLast {
+        def violations = []
+        def forbiddenProjectToken = "project(':frostwire" + "-master')"
+        def forbiddenSourceTokenUnix = 'frostwire' + '-master/src'
+        def forbiddenSourceTokenWindows = 'frostwire' + '-master\\src'
+        trackedFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            if (text.contains(forbiddenProjectToken) || text.contains(forbiddenSourceTokenUnix) || text.contains(forbiddenSourceTokenWindows)) {
+                violations << "${rootProject.relativePath(file)} still references frostwire-master"
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "FrostWire donor boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
 tasks.named('check') {
     dependsOn tasks.named('verifyDependencyHygiene')
     dependsOn tasks.named('verifyNoVendoredJarUsage')
     dependsOn tasks.named('verifyNoLegacySwingBuildWiring')
     dependsOn tasks.named('verifyNoJmuleBuildDependency')
     dependsOn tasks.named('verifyNoJed2kBuildDependency')
+    dependsOn tasks.named('verifyNoFrostWireSearchBuildDependency')
 }
 
 tasks.register('run') {

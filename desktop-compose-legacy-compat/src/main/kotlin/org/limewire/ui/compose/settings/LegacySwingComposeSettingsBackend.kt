@@ -45,6 +45,7 @@ import org.limewire.ui.compose.FileAssociationPromptState
 import org.limewire.ui.compose.FriendLoginDraft
 import org.limewire.ui.compose.FriendLoginOption
 import org.limewire.ui.compose.FriendsNotificationsPreferencesDraft
+import org.limewire.ui.compose.FrostWireSearchProviderDraft
 import org.limewire.ui.compose.FriendsPaneLayoutPreferences
 import org.limewire.ui.compose.HostFilterPreferencesDraft
 import org.limewire.ui.compose.ITunesPreferencesDraft
@@ -176,6 +177,43 @@ class LegacySwingComposeSettingsBackend(
     private val runOnStartupPlatform: ComposeRunOnStartupPlatform = LegacySwingComposeRunOnStartupPlatform,
     private val fileAssociationPlatform: ComposeFileAssociationPlatform = LegacySwingComposeFileAssociationPlatform
 ) : ComposeSettingsService {
+    private data class FrostWireSearchProviderSetting(
+        val label: String,
+        val setting: BooleanSetting
+    )
+
+    private val frostWireSearchProviderSettings = listOf(
+        FrostWireSearchProviderSetting("YT", SearchSettings.FROSTWIRE_SEARCH_YT_ENABLED),
+        FrostWireSearchProviderSetting("Archive.org", SearchSettings.FROSTWIRE_SEARCH_INTERNET_ARCHIVE_ENABLED),
+        FrostWireSearchProviderSetting("idope", SearchSettings.FROSTWIRE_SEARCH_IDOPE_ENABLED),
+        FrostWireSearchProviderSetting("Knaben", SearchSettings.FROSTWIRE_SEARCH_KNABEN_ENABLED),
+        FrostWireSearchProviderSetting("magnetdl", SearchSettings.FROSTWIRE_SEARCH_MAGNETDL_ENABLED),
+        FrostWireSearchProviderSetting("Nyaa", SearchSettings.FROSTWIRE_SEARCH_NYAA_ENABLED),
+        FrostWireSearchProviderSetting("1337x", SearchSettings.FROSTWIRE_SEARCH_ONE337X_ENABLED),
+        FrostWireSearchProviderSetting("TPB", SearchSettings.FROSTWIRE_SEARCH_TPB_ENABLED),
+        FrostWireSearchProviderSetting("torrentz2", SearchSettings.FROSTWIRE_SEARCH_TORRENTZ2_ENABLED),
+        FrostWireSearchProviderSetting("TorrentsCSV", SearchSettings.FROSTWIRE_SEARCH_TORRENTSCSV_ENABLED),
+        FrostWireSearchProviderSetting("SoundCloud", SearchSettings.FROSTWIRE_SEARCH_SOUNDCLOUD_ENABLED),
+        FrostWireSearchProviderSetting("FrostClick", SearchSettings.FROSTWIRE_SEARCH_FROSTCLICK_ENABLED)
+    )
+
+    private fun frostWireSearchProviderDrafts(): List<FrostWireSearchProviderDraft> {
+        return frostWireSearchProviderSettings.map { provider ->
+            FrostWireSearchProviderDraft(
+                key = provider.setting.key,
+                label = provider.label,
+                enabled = provider.setting.value
+            )
+        }
+    }
+
+    private fun applyFrostWireSearchProviderDrafts(drafts: List<FrostWireSearchProviderDraft>) {
+        val enabledByKey = drafts.associate { it.key to it.enabled }
+        frostWireSearchProviderSettings.forEach { provider ->
+            enabledByKey[provider.setting.key]?.let(provider.setting::setValue)
+        }
+    }
+
     override fun loadPreferences(): PreferencesDraft {
         val autoLoginConfigured = friendLoginStore?.preferredLoginDraft()?.autoLogin == true
         return PreferencesDraft(
@@ -184,7 +222,8 @@ class LegacySwingComposeSettingsBackend(
                 showSmartSuggestions = SwingUiSettings.SHOW_SMART_SUGGESTIONS.getValue(),
                 keepSearchHistory = SwingUiSettings.KEEP_SEARCH_HISTORY.getValue(),
                 groupSimilarResults = SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue(),
-                useTorrentWebSearch = SearchSettings.USE_TORRENT_WEB_SEARCH.getValue(),
+                useFrostWireSearch = SearchSettings.USE_FROSTWIRE_WEB_SEARCH.getValue(),
+                frostWireSearchProviders = frostWireSearchProviderDrafts(),
                 filterAdultContent = FilterSettings.FILTER_ADULT.getValue(),
                 hostFilters = HostFilterPreferencesDraft(
                     enabled = FilterSettings.USE_NETWORK_FILTER.getValue(),
@@ -302,7 +341,8 @@ class LegacySwingComposeSettingsBackend(
         SwingUiSettings.SHOW_SMART_SUGGESTIONS.setValue(draft.search.showSmartSuggestions)
         SwingUiSettings.KEEP_SEARCH_HISTORY.setValue(draft.search.keepSearchHistory)
         SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(draft.search.groupSimilarResults)
-        SearchSettings.USE_TORRENT_WEB_SEARCH.setValue(draft.search.useTorrentWebSearch)
+        SearchSettings.USE_FROSTWIRE_WEB_SEARCH.setValue(draft.search.useFrostWireSearch)
+        applyFrostWireSearchProviderDrafts(draft.search.frostWireSearchProviders)
         FilterSettings.FILTER_ADULT.setValue(draft.search.filterAdultContent)
         FilterSettings.USE_NETWORK_FILTER.setValue(draft.search.hostFilters.enabled)
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.set(normalizeHostEntries(draft.search.hostFilters.blockedHosts).toTypedArray())
@@ -659,11 +699,23 @@ class LegacySwingComposeSettingsBackend(
     }
 
     override fun loadSearchLayoutPreferences(): SearchLayoutPreferences {
+        val visibleColumns = parseEnumSet(
+            SwingUiSettings.COMPOSE_SEARCH_VISIBLE_COLUMNS.get(),
+            SearchColumn.entries.toList()
+        ).let { columns ->
+            if (SwingUiSettings.COMPOSE_SEARCH_MARKER_COLUMN_MIGRATED.getValue()) {
+                columns
+            } else {
+                val migratedColumns = columns + SearchColumn.MARKER
+                SwingUiSettings.COMPOSE_SEARCH_VISIBLE_COLUMNS.set(
+                    joinEnumNames(SearchColumn.entries.toList(), migratedColumns)
+                )
+                SwingUiSettings.COMPOSE_SEARCH_MARKER_COLUMN_MIGRATED.setValue(true)
+                migratedColumns
+            }
+        }
         return SearchLayoutPreferences(
-            visibleColumns = parseEnumSet(
-                SwingUiSettings.COMPOSE_SEARCH_VISIBLE_COLUMNS.get(),
-                SearchColumn.entries.toList()
-            ),
+            visibleColumns = visibleColumns,
             sortMode = parseEnum(
                 SwingUiSettings.COMPOSE_SEARCH_SORT_KEY.get(),
                 SearchSortMode.RELEVANCE

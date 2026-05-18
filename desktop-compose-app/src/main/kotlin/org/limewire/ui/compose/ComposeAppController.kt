@@ -31,6 +31,7 @@ import org.limewire.core.api.download.DownloadListManager
 import org.limewire.core.api.download.DownloadState
 import org.limewire.core.api.endpoint.RemoteHost
 import org.limewire.core.api.file.CategoryManager
+import org.limewire.core.api.file.FileKind
 import org.limewire.core.api.library.FileProcessingEvent
 import org.limewire.core.api.library.LibraryData
 import org.limewire.core.api.library.LibraryManager
@@ -78,6 +79,7 @@ import org.limewire.friend.api.FriendConnection
 import org.limewire.friend.api.FriendConnectionEvent
 import org.limewire.friend.api.FriendException
 import org.limewire.friend.api.FriendPresence
+import org.limewire.friend.api.Network
 import org.limewire.player.api.PlayerState
 import org.limewire.ui.compose.integration.BrowseRequest
 import org.limewire.ui.compose.integration.ComposeBrowseService
@@ -126,6 +128,8 @@ import java.net.MalformedURLException
 import java.net.URI
 import java.net.URL
 import java.util.Locale
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import org.limewire.util.CommonUtils
 import org.limewire.util.FileUtils
@@ -147,6 +151,7 @@ enum class SearchSourceFilter {
     ALL,
     FRIENDS,
     NETWORK,
+    WEB_SEARCH,
     ED2K_KAD,
     BROWSABLE
 }
@@ -338,13 +343,17 @@ class ComposeAppController(
     private val trayService: ComposeTrayService,
     private val delayedExitService: ComposeDelayedExitService,
     private val settingsService: ComposeSettingsService,
-    private val localizationService: ComposeLocalizationService
+    private val localizationService: ComposeLocalizationService,
+    private val backgroundExecutor: ScheduledExecutorService
 ) {
     companion object {
         private const val DEFAULT_LIBRARY_SECTION_ID = "library"
         private const val BULK_SEARCH_DOWNLOAD_CHUNK_SIZE = 24
+        private const val STARTUP_GNUTELLA_CONNECT_MAX_ATTEMPTS = 8
+        private const val STARTUP_GNUTELLA_CONNECT_RETRY_DELAY_MS = 2_500L
         private val LEGACY_SEARCH_COLUMNS = setOf(
             SearchColumn.NAME,
+            SearchColumn.MARKER,
             SearchColumn.TYPE,
             SearchColumn.SIZE,
             SearchColumn.SOURCES,
@@ -401,6 +410,7 @@ class ComposeAppController(
         var alreadyDownloading: Int = 0,
         var alreadyUploading: Int = 0,
         var nameConflicts: Int = 0,
+        var unsupportedWeb: Int = 0,
         var failed: Int = 0,
         var firstFailureMessage: String? = null
     )
@@ -437,6 +447,9 @@ class ComposeAppController(
         val sourceCount: Int,
         val friendsCount: Int,
         val singleSourceFriendName: String?,
+        val markerRank: Int,
+        val markerLabel: String,
+        val sourceFamilyRank: Int,
         val sourceLabel: String,
         val size: Long,
         val length: Long,
@@ -525,9 +538,12 @@ class ComposeAppController(
     private var startupRuntimeErrorsFlushed = false
     private var startupSystemWarningsShown = false
     private var startupGnutellaConnectAttempted = false
+    private var startupGnutellaConnectAttempts = 0
     private var systemMessageListenerAttached = false
     private val librarySectionStates = mutableMapOf<String, LibrarySectionViewState>()
     private val downloadCompletionStates = mutableMapOf<String, Boolean>()
+    private var downloadLifecycleRefreshRunning = false
+    private var downloadLifecycleRefreshPending = false
     private var advancedConsoleCloseable: AutoCloseable? = null
     private var advancedMojitoVisualizerSession: ComposeMojitoVisualizerSession? = null
     private val advancedConsoleDelayBuffer = StringBuilder()
@@ -797,6 +813,7 @@ class ComposeAppController(
     var currentScreen by mutableStateOf<ComposeScreen>(ComposeScreen.Library)
     var selectedLibrarySectionId by mutableStateOf(DEFAULT_LIBRARY_SECTION_ID)
     var libraryCategoryFilter by mutableStateOf<Category?>(null)
+    var libraryFileKindFilter by mutableStateOf<FileKind?>(null)
     var libraryFilterText by mutableStateOf("")
     var librarySortMode by mutableStateOf(defaultLibraryLayout.sortMode)
     var librarySortDescending by mutableStateOf(defaultLibraryLayout.sortDescending)
@@ -999,14 +1016,17 @@ class ComposeAppController(
         ed2kService.addListener(ed2kListener)
         closeables += AutoCloseable { ed2kService.removeListener(ed2kListener) }
         closeables += AutoCloseable { clearPublicDocumentWarningBindings() }
-        bindEventLists()
-        syncEd2kDownloads()
-        syncEd2kUploads()
-        syncEd2kStatus()
-        primeDownloadCompletionState()
+        runOnUiBlocking {
+            bindEventLists()
+            syncEd2kDownloads()
+            syncEd2kUploads()
+            syncEd2kStatus()
+            primeDownloadCompletionState()
+        }
         bindPlayer()
         bindFriends()
         rebuildLibrarySections()
+        syncPublicDocumentWarningBindings()
         selectLibrarySection(selectedLibrarySectionId)
         syncDesktopShellState()
         beginStartupWorkflows()
@@ -2498,6 +2518,7 @@ class ComposeAppController(
         refreshSearchTabPresentation(session)
         searchTabs.add(0, session)
         currentScreen = ComposeScreen.Search(session.id)
+        session.ed2kSessionId?.let(::syncEd2kSearchSession)
     }
 
     fun selectSearchTab(tabId: Long) {
@@ -3108,6 +3129,7 @@ class ComposeAppController(
                 val filter = libraryFilterText.trim().lowercase(Locale.US)
                 val filtered = libraryItems.filter { item ->
                     (libraryCategoryFilter == null || item.category == libraryCategoryFilter) &&
+                        (libraryFileKindFilter == null || categoryManager.getFileKindForFile(item.file) == libraryFileKindFilter) &&
                         (filter.isEmpty() || matchesLibraryFilter(item, filter))
                 }
                 LibraryVisibilityCache(visibleItems = sortLibraryItems(filtered))
@@ -3336,20 +3358,43 @@ class ComposeAppController(
         if (startupGnutellaConnectAttempted) {
             return
         }
-        EventQueue.invokeLater {
-            if (startupGnutellaConnectAttempted) {
-                return@invokeLater
+        if (!ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
+            return
+        }
+        startupGnutellaConnectAttempted = true
+        scheduleStartupGnutellaConnectAttempt(0L)
+    }
+
+    private fun scheduleStartupGnutellaConnectAttempt(delayMs: Long) {
+        val attempt = Runnable {
+            EventQueue.invokeLater {
+                attemptStartupGnutellaConnect()
             }
-            if (!ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
-                return@invokeLater
-            }
-            startupGnutellaConnectAttempted = true
-            if (connectionManager.isConnected || displayedConnectionStrength() == ConnectionStrength.CONNECTING) {
-                return@invokeLater
-            }
-            runCatching {
+        }
+        if (delayMs <= 0L) {
+            attempt.run()
+        } else {
+            backgroundExecutor.schedule(attempt, delayMs, TimeUnit.MILLISECONDS)
+        }
+    }
+
+    private fun attemptStartupGnutellaConnect() {
+        if (shuttingDown.get() || !ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
+            return
+        }
+        if (connectionManager.isConnected || displayedConnectionStrength() == ConnectionStrength.CONNECTING) {
+            return
+        }
+        startupGnutellaConnectAttempts += 1
+        runCatching {
+            if (startupGnutellaConnectAttempts == 1) {
                 connectionManager.connect()
+            } else {
+                connectionManager.restart()
             }
+        }
+        if (startupGnutellaConnectAttempts < STARTUP_GNUTELLA_CONNECT_MAX_ATTEMPTS) {
+            scheduleStartupGnutellaConnectAttempt(STARTUP_GNUTELLA_CONNECT_RETRY_DELAY_MS)
         }
     }
 
@@ -3802,7 +3847,8 @@ class ComposeAppController(
         )
     }
 
-    fun hasActiveLibraryFilters(): Boolean = libraryFilterText.isNotBlank() || libraryCategoryFilter != null
+    fun hasActiveLibraryFilters(): Boolean =
+        libraryFilterText.isNotBlank() || libraryCategoryFilter != null || libraryFileKindFilter != null
 
     fun selectedLibraryItemsPlayInPlayer(): Boolean {
         val items = selectedLibraryItems()
@@ -4113,6 +4159,30 @@ class ComposeAppController(
 
     fun uploadItemIdentity(item: UploadItem): FileIdentityPresentation {
         return fileAppearanceService.presentation(item)
+    }
+
+    fun fileKindLabel(fileName: String?): String {
+        return fileKindLabel(fileName?.let(categoryManager::getFileKindForFilename) ?: FileKind.OTHER)
+    }
+
+    fun fileKindLabel(fileKind: FileKind): String {
+        return when (fileKind) {
+            FileKind.MODEL_3D -> tr("3D")
+            FileKind.ARCHIVE -> tr("Archive")
+            FileKind.AUDIO -> tr("Audio")
+            FileKind.BOOK -> tr("Book")
+            FileKind.CODE -> tr("Code")
+            FileKind.EXEC -> tr("Executable")
+            FileKind.FONT -> tr("Font")
+            FileKind.IMAGE -> tr("Image")
+            FileKind.SHEET -> tr("Sheet")
+            FileKind.SLIDE -> tr("Slide")
+            FileKind.TEXT -> tr("Text")
+            FileKind.VIDEO -> tr("Video")
+            FileKind.WEB -> tr("Web")
+            FileKind.TORRENT -> tr("Torrent")
+            FileKind.OTHER -> tr("Other")
+        }
     }
 
     fun currentPlayerIdentity(): FileIdentityPresentation? {
@@ -4598,8 +4668,12 @@ class ComposeAppController(
     }
 
     fun clearLibraryFilters() {
-        updateLibraryFilterText("")
-        selectLibraryCategory(null)
+        libraryFilterText = ""
+        libraryCategoryFilter = null
+        libraryFileKindFilter = null
+        invalidateLibraryVisibilityCache()
+        rememberLibrarySectionState()
+        syncLiveLibraryQueueIfNeeded()
     }
 
     fun toggleLibraryFiltersVisible() {
@@ -4633,6 +4707,9 @@ class ComposeAppController(
 
     fun selectLibraryCategory(category: Category?) {
         libraryCategoryFilter = category
+        if (category != null && libraryFileKindFilter?.broadCategory != category) {
+            libraryFileKindFilter = null
+        }
         invalidateLibraryVisibilityCache()
         if (visibleLibraryColumns.all { it in LEGACY_LIBRARY_COLUMNS }) {
             visibleLibraryColumns = visibleLibraryColumns + defaultAdditionalLibraryColumns(category)
@@ -4641,6 +4718,20 @@ class ComposeAppController(
         }
         rememberLibrarySectionState()
         syncLiveLibraryQueueIfNeeded()
+    }
+
+    fun selectLibraryFileKind(fileKind: FileKind?) {
+        libraryFileKindFilter = fileKind
+        invalidateLibraryVisibilityCache()
+        rememberLibrarySectionState()
+        syncLiveLibraryQueueIfNeeded()
+    }
+
+    fun libraryFileKindOptions(): List<FileKind?> {
+        val category = libraryCategoryFilter
+        return listOf<FileKind?>(null) + displayFileKinds.filter { fileKind ->
+            category == null || fileKind.broadCategory == category
+        }
     }
 
     fun moveLibrarySelection(delta: Int) {
@@ -5331,6 +5422,10 @@ class ComposeAppController(
             addSearchDownload(tab, result)
             noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
+            if (isUnsupportedWebDownload(failure, result)) {
+                showNotice(tr("Download"), unsupportedWebDownloadMessage(), OperationNoticeLevel.INFO)
+                return
+            }
             handleDownloadException(
                 searchDownloadAction(tab, result),
                 failure,
@@ -5350,6 +5445,10 @@ class ComposeAppController(
             addSearchDownload(tab, result, saveFile, false)
             noteTransferActivity(TransferTrayMode.DOWNLOADS)
         } catch (failure: DownloadException) {
+            if (isUnsupportedWebDownload(failure, result)) {
+                showNotice(tr("Download"), unsupportedWebDownloadMessage(), OperationNoticeLevel.INFO)
+                return
+            }
             handleDownloadException(
                 searchDownloadAction(tab, result),
                 failure,
@@ -5453,15 +5552,19 @@ class ComposeAppController(
                         }
                     }
                 } catch (retryFailure: DownloadException) {
-                    recordBulkSearchDownloadFailure(summary, retryFailure)
+                    recordBulkSearchDownloadFailure(summary, retryFailure, result)
                     return
                 }
             }
-            recordBulkSearchDownloadFailure(summary, failure)
+            recordBulkSearchDownloadFailure(summary, failure, result)
         }
     }
 
-    private fun recordBulkSearchDownloadFailure(summary: BulkSearchDownloadSummary, failure: DownloadException) {
+    private fun recordBulkSearchDownloadFailure(
+        summary: BulkSearchDownloadSummary,
+        failure: DownloadException,
+        result: GroupedSearchResult
+    ) {
         when (failure.errorCode) {
             DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING -> summary.alreadyDownloading += 1
             DownloadException.ErrorCode.FILE_ALREADY_UPLOADING -> summary.alreadyUploading += 1
@@ -5469,6 +5572,16 @@ class ComposeAppController(
             DownloadException.ErrorCode.FILE_ALREADY_EXISTS,
             DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO -> summary.nameConflicts += 1
             DownloadException.ErrorCode.DOWNLOAD_CANCELLED -> Unit
+            DownloadException.ErrorCode.DOWNLOAD_NOT_SUPPORTED -> {
+                if (isWebSearchResult(result)) {
+                    summary.unsupportedWeb += 1
+                } else {
+                    summary.failed += 1
+                    if (summary.firstFailureMessage == null) {
+                        summary.firstFailureMessage = downloadErrorMessage(failure)
+                    }
+                }
+            }
             else -> {
                 summary.failed += 1
                 if (summary.firstFailureMessage == null) {
@@ -5493,6 +5606,7 @@ class ComposeAppController(
             if (summary.alreadyDownloading > 0) add(tr("{0} already in transfers", summary.alreadyDownloading))
             if (summary.alreadyUploading > 0) add(tr("{0} already seeding", summary.alreadyUploading))
             if (summary.nameConflicts > 0) add(tr("{0} skipped for existing filenames", summary.nameConflicts))
+            if (summary.unsupportedWeb > 0) add(tr("{0} web/media result(s) skipped", summary.unsupportedWeb))
             if (summary.failed > 0) add(tr("{0} couldn't start", summary.failed))
         }
         if (parts.isEmpty()) {
@@ -5504,6 +5618,10 @@ class ComposeAppController(
             if (summary.nameConflicts > 0) {
                 append(". ")
                 append(tr("Change duplicate download handling in Preferences, or retry individual items with Download As."))
+            }
+            if (summary.unsupportedWeb > 0) {
+                append(" ")
+                append(unsupportedWebDownloadMessage())
             }
             summary.firstFailureMessage?.let { failureMessage ->
                 if (summary.failed > 0) {
@@ -5703,11 +5821,14 @@ class ComposeAppController(
         if (tab.results.any { it.friends.isNotEmpty() }) {
             filters += SearchSourceFilter.FRIENDS
         }
-        if (tab.results.any { it.friends.isEmpty() && !isEd2kSearchResult(it) }) {
+        if (tab.results.any { it.friends.isEmpty() && !isEd2kSearchResult(it) && !isWebSearchResult(it) }) {
             filters += SearchSourceFilter.NETWORK
         }
         if (tab.results.any(::isEd2kSearchResult)) {
             filters += SearchSourceFilter.ED2K_KAD
+        }
+        if (tab.results.any(::isWebSearchResult)) {
+            filters += SearchSourceFilter.WEB_SEARCH
         }
         if (tab.results.any { result -> result.searchResults.any { it.source.isBrowseHostEnabled } }) {
             filters += SearchSourceFilter.BROWSABLE
@@ -5907,6 +6028,11 @@ class ComposeAppController(
         val userComparator = when (tab.sortMode) {
             SearchSortMode.RELEVANCE -> compareBy<SearchSortSnapshot> { it.relevance }
                 .thenBy { it.nameSortKey }
+            SearchSortMode.MARKER -> compareBy<SearchSortSnapshot> { it.markerRank }
+                .thenBy { it.sourceFamilyRank }
+                .thenBy { it.markerLabel }
+                .thenBy { it.sourceLabel }
+                .thenBy { it.nameSortKey }
             SearchSortMode.TYPE -> compareBy<SearchSortSnapshot> { it.categoryName }
                 .thenBy { it.nameSortKey }
             SearchSortMode.NAME -> searchNameSnapshotComparator(presentationCategory)
@@ -5965,10 +6091,14 @@ class ComposeAppController(
         val activeComparator = if (tab.sortDescending) userComparator.reversed() else userComparator
         return ComposePerformanceTracker.measure("search.sortVisibleResults") {
             val sorted = snapshots.sortedWith { left, right ->
+                val localPresort = if (tab.sortMode == SearchSortMode.MARKER) {
+                    0
+                } else {
+                    compareValues(left.localRank, right.localRank)
+                }
                 compareValues(left.spamRank, right.spamRank)
                     .takeIf { it != 0 }
-                    ?: compareValues(left.localRank, right.localRank)
-                        .takeIf { it != 0 }
+                    ?: localPresort.takeIf { it != 0 }
                     ?: activeComparator.compare(left, right)
             }
             sorted.map(SearchSortSnapshot::result)
@@ -5984,7 +6114,7 @@ class ComposeAppController(
             SearchSortSnapshot(
                 result = result,
                 relevance = result.relevance,
-                categoryName = searchSortText(result) { candidate -> candidate.category.getSingularName() },
+                categoryName = searchSortText(result) { candidate -> fileKindLabel(candidate.fileName) },
                 nameSortKey = searchNameSortKey(result, presentationCategory),
                 baseName = searchBaseName(result),
                 fileNameLower = result.fileName.lowercase(Locale.US),
@@ -5992,6 +6122,9 @@ class ComposeAppController(
                 sourceCount = result.sources.size,
                 friendsCount = result.friends.size,
                 singleSourceFriendName = singleSourceFriendName(result),
+                markerRank = searchMarkerRank(result),
+                markerLabel = searchMarkerLabel(result),
+                sourceFamilyRank = searchSourceFamilyRank(result),
                 sourceLabel = searchSourceLabel(result),
                 size = primarySize(result),
                 length = searchSortLong(result, FilePropertyKey.LENGTH),
@@ -6087,6 +6220,24 @@ class ComposeAppController(
 
     private fun isEd2kSearchResult(result: GroupedSearchResult): Boolean {
         return result is Ed2kGroupedSearchResultView || result.urn?.toString()?.startsWith("urn:ed2k:") == true
+    }
+
+    private fun isWebSearchResult(result: GroupedSearchResult): Boolean {
+        return result.searchResults.any(::isWebSearchResult) ||
+            result.sources.any { it.friendPresence?.friend?.network?.type == Network.Type.WEBSEARCH }
+    }
+
+    private fun isUnsupportedWebDownload(failure: DownloadException, result: GroupedSearchResult): Boolean {
+        return failure.errorCode == DownloadException.ErrorCode.DOWNLOAD_NOT_SUPPORTED && isWebSearchResult(result)
+    }
+
+    private fun unsupportedWebDownloadMessage(): String {
+        return tr("Some web/media providers return browse or metadata results that need to be opened or resolved before WireShare can download them.")
+    }
+
+    private fun isWebSearchResult(result: SearchResult): Boolean {
+        return result.source.friendPresence?.friend?.network?.type == Network.Type.WEBSEARCH ||
+            result.getProperty(FilePropertyKey.USERAGENT)?.toString()?.startsWith("FrostWire:") == true
     }
 
     fun isEd2kDownloadItem(item: DownloadItem): Boolean {
@@ -6513,10 +6664,15 @@ class ComposeAppController(
     }
 
     fun clearFinishedDownloads() {
+        val finishedItems = allDownloads().filter { it.state.isFinished }.toList()
+        val finishedKeys = finishedItems.map(::downloadSelectionKey).toSet()
+        finishedItems
+            .filter(::isEd2kDownloadItem)
+            .forEach(::removeDownloadItem)
         downloadListManager.clearFinished()
-        if (downloadFilterMode == TransferFilterMode.FINISHED) {
+        selectedDownloadUrns.removeAll(finishedKeys)
+        if (selectedDownloadUrn in finishedKeys || downloadFilterMode == TransferFilterMode.FINISHED) {
             selectedDownloadUrn = null
-            selectedDownloadUrns.clear()
             downloadSelectionAnchorUrn = null
         }
     }
@@ -6759,8 +6915,19 @@ class ComposeAppController(
     }
 
     fun removeDownloadItem(item: DownloadItem) {
-        item.cancel()
-        if (!isEd2kDownloadItem(item)) {
+        if (isEd2kDownloadItem(item)) {
+            runCatching {
+                ed2kService.removeDownload(item)
+                syncEd2kDownloads()
+            }.onFailure { failure ->
+                showNotice(
+                    tr("ED2K"),
+                    failure.message ?: tr("WireShare could not remove this ED2K download."),
+                    OperationNoticeLevel.ERROR
+                )
+            }
+        } else {
+            item.cancel()
             downloadListManager.remove(item)
         }
         val selectionKey = downloadSelectionKey(item)
@@ -7007,10 +7174,15 @@ class ComposeAppController(
     }
 
     fun clearFinishedUploads() {
+        val finishedItems = allUploads().filter { it.state.isFinished || it.isFinished }.toList()
+        val finishedKeys = finishedItems.map(::uploadSelectionKey).toSet()
+        finishedItems
+            .filter(::isEd2kUploadItem)
+            .forEach(::removeUploadItem)
         uploadListManager.clearFinished()
-        if (uploadFilterMode == TransferFilterMode.FINISHED) {
+        selectedUploadUrns.removeAll(finishedKeys)
+        if (selectedUploadUrn in finishedKeys || uploadFilterMode == TransferFilterMode.FINISHED) {
             selectedUploadUrn = null
-            selectedUploadUrns.clear()
             uploadSelectionAnchorUrn = null
         }
     }
@@ -7180,10 +7352,21 @@ class ComposeAppController(
     }
 
     fun removeUploadItem(item: UploadItem) {
-        if (!item.isFinished) {
-            item.cancel()
-        }
-        if (!isEd2kUploadItem(item)) {
+        if (isEd2kUploadItem(item)) {
+            runCatching {
+                ed2kService.removeUpload(item)
+                syncEd2kUploads()
+            }.onFailure { failure ->
+                showNotice(
+                    tr("ED2K"),
+                    failure.message ?: tr("WireShare could not remove this ED2K upload."),
+                    OperationNoticeLevel.ERROR
+                )
+            }
+        } else {
+            if (!item.isFinished) {
+                item.cancel()
+            }
             uploadListManager.remove(item)
         }
         val selectionKey = uploadSelectionKey(item)
@@ -8341,6 +8524,7 @@ class ComposeAppController(
         librarySectionStates[sectionId] = LibrarySectionViewState(
             filterText = libraryFilterText,
             category = libraryCategoryFilter,
+            fileKind = libraryFileKindFilter,
             sortMode = librarySortMode,
             sortDescending = librarySortDescending,
             selectedItemPath = selectedLibraryItemPath,
@@ -8353,10 +8537,11 @@ class ComposeAppController(
     private fun clearAllLibraryFilters() {
         libraryFilterText = ""
         libraryCategoryFilter = null
+        libraryFileKindFilter = null
         invalidateLibraryVisibilityCache()
         librarySectionStates.keys.toList().forEach { sectionId ->
             val state = librarySectionStates[sectionId] ?: return@forEach
-            librarySectionStates[sectionId] = state.copy(filterText = "", category = null)
+            librarySectionStates[sectionId] = state.copy(filterText = "", category = null, fileKind = null)
         }
         rememberLibrarySectionState()
         syncLiveLibraryQueueIfNeeded()
@@ -8366,9 +8551,11 @@ class ComposeAppController(
         val state = librarySectionStates[sectionId] ?: LibrarySectionViewState()
         libraryFilterText = state.filterText
         libraryCategoryFilter = state.category
+        libraryFileKindFilter = state.fileKind
         if (!libraryFiltersVisible) {
             libraryFilterText = ""
             libraryCategoryFilter = null
+            libraryFileKindFilter = null
         }
         librarySortMode = state.sortMode
         librarySortDescending = state.sortDescending
@@ -8555,6 +8742,7 @@ class ComposeAppController(
         val shouldClear = files.any { file ->
             file.isDirectory ||
                 (libraryCategoryFilter != null && categoryManager.getCategoryForFile(file) != libraryCategoryFilter) ||
+                (libraryFileKindFilter != null && categoryManager.getFileKindForFile(file) != libraryFileKindFilter) ||
                 (filterText.isNotEmpty() && !matchesLibraryImportFilter(file, filterText))
         }
         if (shouldClear) {
@@ -8569,7 +8757,8 @@ class ComposeAppController(
             FileUtils.getFileExtension(file.name),
             file.absolutePath,
             categoryManager.getCategoryForFile(file).getPluralName(),
-            categoryManager.getCategoryForFile(file).getSingularName()
+            categoryManager.getCategoryForFile(file).getSingularName(),
+            fileKindLabel(file.name)
         ).any { it.lowercase(Locale.US).contains(filter) }
     }
 
@@ -8604,13 +8793,7 @@ class ComposeAppController(
     fun showLibraryKnownTypesDialog() {
         libraryKnownTypesDialog = LibraryKnownTypesDialogState(
             title = tr("Known File Types"),
-            groups = listOf(
-                knownFileTypeGroup(Category.AUDIO, tr("Audio")),
-                knownFileTypeGroup(Category.VIDEO, tr("Video")),
-                knownFileTypeGroup(Category.IMAGE, tr("Images")),
-                knownFileTypeGroup(Category.DOCUMENT, tr("Documents")),
-                knownFileTypeGroup(Category.PROGRAM, tr("Programs"))
-            ),
+            groups = displayFileKinds.map(::knownFileKindGroup),
             otherMessage = tr("Unknown file extensions are treated as Other. Add a custom extension in Advanced when you want to include uncategorized files right away.")
         )
     }
@@ -8623,8 +8806,37 @@ class ComposeAppController(
         }
         libraryKnownTypesDialog = LibraryKnownTypesDialogState(
             title = title,
-            groups = listOf(knownFileTypeGroup(category, label)),
+            groups = displayFileKinds
+                .filter { it.broadCategory == category }
+                .map(::knownFileKindGroup)
+                .ifEmpty { listOf(knownFileTypeGroup(category, label)) },
             otherMessage = tr("Unknown file extensions stay in Other until you explicitly classify or include them.")
+        )
+    }
+
+    private val displayFileKinds = listOf(
+        FileKind.MODEL_3D,
+        FileKind.ARCHIVE,
+        FileKind.AUDIO,
+        FileKind.BOOK,
+        FileKind.CODE,
+        FileKind.EXEC,
+        FileKind.FONT,
+        FileKind.IMAGE,
+        FileKind.SHEET,
+        FileKind.SLIDE,
+        FileKind.TEXT,
+        FileKind.VIDEO,
+        FileKind.WEB,
+        FileKind.TORRENT
+    )
+
+    private fun knownFileKindGroup(fileKind: FileKind): KnownFileTypeGroup {
+        return KnownFileTypeGroup(
+            label = fileKindLabel(fileKind),
+            extensions = categoryManager.getExtensionsForFileKind(fileKind)
+                .map { ".$it" }
+                .sortedBy { it.lowercase(Locale.US) }
         )
     }
 
@@ -8654,7 +8866,7 @@ class ComposeAppController(
                     while (changes.next()) {
                         if (changes.type == ListEvent.INSERT || changes.type == ListEvent.UPDATE) {
                             val item = changes.sourceList[changes.index]
-                            if (item.category == Category.DOCUMENT) {
+                            if (requiresPublicSharingWarning(item.category)) {
                                 runOnUi { maybeShowDocumentSharingWarning() }
                                 break
                             }
@@ -8666,6 +8878,9 @@ class ComposeAppController(
                     list.swingModel.removeListEventListener(listener)
                 }
             }
+        }
+        if (desiredPublicLists.values.any(::containsFilesRequiringPublicSharingWarning)) {
+            runOnUi { maybeShowDocumentSharingWarning() }
         }
     }
 
@@ -8684,26 +8899,48 @@ class ComposeAppController(
             return
         }
         documentSharingWarningDialog = DocumentSharingWarningDialogState(
-            title = tr("Document Sharing Warning"),
-            message = tr("Shared documents can include confidential or personal information. Continue sharing documents publicly only if you are sure they are safe to expose."),
-            continueLabel = tr("Continue Sharing"),
-            unshareLabel = tr("Unshare All"),
+            title = tr("Public Sharing Warning"),
+            message = tr("Public documents and programs may expose private information or executable files. Continue sharing them publicly only if you trust the files and intend them to be visible."),
+            continueLabel = tr("Keep Sharing"),
+            unshareLabel = tr("Unshare Documents/Programs"),
             onContinue = {
                 settingsService.setWarnSharingDocumentsWithWorldEnabled(false)
                 documentSharingWarningDialog = null
             },
             onUnshareAll = {
                 settingsService.setWarnSharingDocumentsWithWorldEnabled(true)
-                settingsService.removeDocumentsFromPublicLists()
+                removeFilesRequiringPublicSharingWarningFromPublicLists()
                 documentSharingWarningDialog = null
                 showNotice(
                     tr("Collections"),
-                    tr("Removed documents from public collections."),
+                    tr("Removed public documents and programs from public collections."),
                     OperationNoticeLevel.INFO
                 )
             },
             onDismiss = { documentSharingWarningDialog = null }
         )
+    }
+
+    private fun requiresPublicSharingWarning(category: Category): Boolean {
+        return category == Category.DOCUMENT || category == Category.PROGRAM
+    }
+
+    private fun containsFilesRequiringPublicSharingWarning(list: SharedFileList): Boolean {
+        return snapshotEventList(list.swingModel).any { item ->
+            requiresPublicSharingWarning(item.category)
+        }
+    }
+
+    private fun removeFilesRequiringPublicSharingWarningFromPublicLists() {
+        sharedLists
+            .filter { it.isPublic }
+            .forEach { list ->
+                val files = snapshotEventList(list.swingModel)
+                    .filter { item -> requiresPublicSharingWarning(item.category) }
+                    .map { it.file }
+                    .distinct()
+                removeFilesFromLocalList(list, files)
+            }
     }
 
     private fun removeLibraryItemsFromLibrary(items: List<LocalFileItem>) {
@@ -9015,17 +9252,35 @@ class ComposeAppController(
     }
 
     private fun handleDownloadLifecycleChanges() {
-        val currentKeys = mutableSetOf<String>()
-        allDownloads().forEach { item ->
-            val key = downloadSelectionKey(item)
-            currentKeys += key
-            val finished = item.state.isFinished
-            val previousFinished = downloadCompletionStates.put(key, finished)
-            if (previousFinished == false && finished) {
-                maybeShowDownloadCompletedNotification(item)
-            }
+        if (downloadLifecycleRefreshRunning) {
+            downloadLifecycleRefreshPending = true
+            return
         }
-        downloadCompletionStates.keys.retainAll(currentKeys)
+        downloadLifecycleRefreshRunning = true
+        try {
+            do {
+                downloadLifecycleRefreshPending = false
+                val previousStates = LinkedHashMap(downloadCompletionStates)
+                val nextStates = LinkedHashMap<String, Boolean>()
+                val completedDownloads = mutableListOf<DownloadItem>()
+
+                allDownloads().forEach { item ->
+                    val key = downloadSelectionKey(item)
+                    val finished = item.state.isFinished
+                    nextStates[key] = finished
+                    if (previousStates[key] == false && finished) {
+                        completedDownloads += item
+                    }
+                }
+
+                downloadCompletionStates.clear()
+                downloadCompletionStates.putAll(nextStates)
+                completedDownloads.forEach(::maybeShowDownloadCompletedNotification)
+            } while (downloadLifecycleRefreshPending)
+        } finally {
+            downloadLifecycleRefreshRunning = false
+            downloadLifecycleRefreshPending = false
+        }
     }
 
     private fun maybeShowDownloadCompletedNotification(item: DownloadItem) {
@@ -9124,6 +9379,7 @@ class ComposeAppController(
             val source = searchResult.source
             val fields = listOfNotNull(
                 searchSourceLabel(result),
+                fileKindLabel(searchResult.fileName),
                 searchResult.fileExtension,
                 searchResult.fileName,
                 searchResult.fileNameWithoutExtension,
@@ -9235,8 +9491,14 @@ class ComposeAppController(
         }
     }
 
+    private fun snapshotGroupedSearchResults(result: GroupedSearchResult): List<SearchResult> {
+        return result.searchResults.toList()
+    }
+
     private fun searchFacetValues(result: GroupedSearchResult, facet: SearchPropertyFacet): Set<Pair<String, String>> {
-        return result.searchResults.flatMap { searchFacetValues(it, facet) }.toSet()
+        return snapshotGroupedSearchResults(result)
+            .flatMap { searchFacetValues(it, facet) }
+            .toSet()
     }
 
     private fun searchFacetValues(candidate: SearchResult, facet: SearchPropertyFacet): List<Pair<String, String>> {
@@ -9265,11 +9527,7 @@ class ComposeAppController(
     }
 
     private fun searchFileTypeLabel(candidate: SearchResult): String? {
-        val extension = candidate.fileExtension.trim().lowercase(Locale.US)
-        if (extension.isBlank()) {
-            return null
-        }
-        return fileAppearanceService.mimeDescription(extension) ?: extension.uppercase(Locale.US)
+        return fileKindLabel(candidate.fileName)
     }
 
     private fun buildFacetOptions(
@@ -9355,7 +9613,7 @@ class ComposeAppController(
 
     private fun searchPropertyFacetsForCategory(category: SearchCategory): List<SearchPropertyFacet> {
         return when (category) {
-            SearchCategory.ALL -> listOf(SearchPropertyFacet.EXTENSION)
+            SearchCategory.ALL -> listOf(SearchPropertyFacet.FILE_TYPE, SearchPropertyFacet.EXTENSION)
             SearchCategory.AUDIO -> listOf(
                 SearchPropertyFacet.ARTIST,
                 SearchPropertyFacet.ALBUM,
@@ -9405,7 +9663,7 @@ class ComposeAppController(
     private fun searchPropertyFacetLabel(facet: SearchPropertyFacet): String {
         return when (facet) {
             SearchPropertyFacet.EXTENSION -> tr("Extension")
-            SearchPropertyFacet.FILE_TYPE -> tr("File Type")
+            SearchPropertyFacet.FILE_TYPE -> tr("Kind")
             SearchPropertyFacet.ARTIST -> tr("Artist")
             SearchPropertyFacet.ALBUM -> tr("Album")
             SearchPropertyFacet.GENRE -> tr("Genre")
@@ -9889,8 +10147,9 @@ class ComposeAppController(
         val sourceCounts = linkedMapOf<SearchSourceFilter, Int>()
         var anyFriendCount = 0
         base.forEach { result ->
+            val groupedResults = snapshotGroupedSearchResults(result)
             val categories = LinkedHashSet<SearchCategory>()
-            result.searchResults.forEach { searchResult ->
+            groupedResults.forEach { searchResult ->
                 categories += SearchCategory.forCategory(searchResult.category)
             }
             categories.forEach { category ->
@@ -9925,12 +10184,14 @@ class ComposeAppController(
     }
 
     private fun matchesSearchSourceFilter(result: GroupedSearchResult, filter: SearchSourceFilter): Boolean {
+        val groupedResults = snapshotGroupedSearchResults(result)
         return when (filter) {
             SearchSourceFilter.ALL -> true
             SearchSourceFilter.FRIENDS -> result.friends.isNotEmpty()
-            SearchSourceFilter.NETWORK -> result.friends.isEmpty() && !isEd2kSearchResult(result)
+            SearchSourceFilter.NETWORK -> result.friends.isEmpty() && !isEd2kSearchResult(result) && !isWebSearchResult(result)
+            SearchSourceFilter.WEB_SEARCH -> isWebSearchResult(result)
             SearchSourceFilter.ED2K_KAD -> isEd2kSearchResult(result)
-            SearchSourceFilter.BROWSABLE -> result.searchResults.any { it.source.isBrowseHostEnabled }
+            SearchSourceFilter.BROWSABLE -> groupedResults.any { it.source.isBrowseHostEnabled }
         }
     }
 
@@ -9957,6 +10218,7 @@ class ComposeAppController(
             SearchSourceFilter.ALL -> tr("All sources")
             SearchSourceFilter.FRIENDS -> tr("Friend sources")
             SearchSourceFilter.NETWORK -> tr("WireShare network")
+            SearchSourceFilter.WEB_SEARCH -> tr("Web/media search")
             SearchSourceFilter.ED2K_KAD -> tr("ED2K/Kad")
             SearchSourceFilter.BROWSABLE -> tr("Browsable")
         }
@@ -10012,9 +10274,59 @@ class ComposeAppController(
     }
 
     private fun searchSourceLabel(result: GroupedSearchResult): String {
-        return result.friends.firstOrNull()?.renderName?.takeIf(String::isNotBlank)?.lowercase(Locale.US)
+        return webSearchProviderLabel(result)?.lowercase(Locale.US)
+            ?: result.friends.firstOrNull()?.renderName?.takeIf(String::isNotBlank)?.lowercase(Locale.US)
             ?: result.sources.firstOrNull()?.friendPresence?.friend?.renderName?.takeIf(String::isNotBlank)?.lowercase(Locale.US)
-            ?: if (result.isAnonymous) tr("P2P").lowercase(Locale.US) else tr("Network").lowercase(Locale.US)
+            ?: if (isEd2kSearchResult(result)) tr("ED2K/Kad").lowercase(Locale.US) else null
+            ?: if (result.isAnonymous) tr("Gnutella").lowercase(Locale.US) else tr("Network").lowercase(Locale.US)
+    }
+
+    private fun webSearchProviderLabel(result: GroupedSearchResult): String? {
+        return result.searchResults.asSequence()
+            .mapNotNull { it.getProperty(FilePropertyKey.USERAGENT)?.toString() }
+            .firstOrNull { it.startsWith("FrostWire:") }
+            ?.removePrefix("FrostWire:")
+            ?.takeIf(String::isNotBlank)
+            ?: result.sources.asSequence()
+                .mapNotNull { it.friendPresence?.friend }
+                .firstOrNull { it.network?.type == Network.Type.WEBSEARCH }
+                ?.renderName
+                ?.takeIf(String::isNotBlank)
+    }
+
+    private fun searchMarkerRank(result: GroupedSearchResult): Int {
+        return when (searchLocalAvailability(result).availabilityLabel) {
+            tr("In My Files") -> 0
+            tr("In Collection") -> 1
+            tr("In Downloads") -> 2
+            tr("Downloading") -> 3
+            else -> 4 + searchSourceFamilyRank(result)
+        }
+    }
+
+    private fun searchMarkerLabel(result: GroupedSearchResult): String {
+        return searchLocalAvailability(result).availabilityLabel
+            ?: searchSourceFamilyLabel(result)
+    }
+
+    private fun searchSourceFamilyRank(result: GroupedSearchResult): Int {
+        return when {
+            result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> 0
+            result.isAnonymous && !isEd2kSearchResult(result) && !isWebSearchResult(result) -> 1
+            isEd2kSearchResult(result) -> 2
+            isWebSearchResult(result) -> 3
+            else -> 4
+        }
+    }
+
+    private fun searchSourceFamilyLabel(result: GroupedSearchResult): String {
+        return when {
+            result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> tr("Friend")
+            result.isAnonymous && !isEd2kSearchResult(result) && !isWebSearchResult(result) -> tr("Gnutella")
+            isEd2kSearchResult(result) -> tr("ED2K/Kad")
+            isWebSearchResult(result) -> tr("Web")
+            else -> tr("Network")
+        }
     }
 
     private fun searchAudioTitleKey(result: GroupedSearchResult): String {
@@ -10168,6 +10480,7 @@ class ComposeAppController(
             addAll(
                 listOf(
                     SearchColumn.NAME,
+                    SearchColumn.MARKER,
                     SearchColumn.FROM,
                     SearchColumn.FILENAME,
                     SearchColumn.EXTENSION,
@@ -10206,6 +10519,7 @@ class ComposeAppController(
             addAll(
                 listOf(
                     SearchSortMode.RELEVANCE,
+                    SearchSortMode.MARKER,
                     SearchSortMode.NAME,
                     SearchSortMode.FROM,
                     SearchSortMode.FILENAME,
@@ -10536,6 +10850,7 @@ class ComposeAppController(
             SearchSortMode.TRACKERS -> true
 
             SearchSortMode.NAME,
+            SearchSortMode.MARKER,
             SearchSortMode.FILENAME,
             SearchSortMode.EXTENSION,
             SearchSortMode.TYPE,
@@ -10839,7 +11154,7 @@ class ComposeAppController(
                 .thenBy { it.fileName.lowercase(Locale.US) }
             LibrarySortMode.EXTENSION -> compareBy<LocalFileItem> { libraryExtension(it) }
                 .thenBy { libraryBaseName(it) }
-            LibrarySortMode.TYPE -> compareBy<LocalFileItem> { it.category.name }.thenBy { it.fileName.lowercase(Locale.US) }
+            LibrarySortMode.TYPE -> compareBy<LocalFileItem> { fileKindLabel(it.fileName).lowercase(Locale.US) }.thenBy { it.fileName.lowercase(Locale.US) }
             LibrarySortMode.SIZE -> compareBy<LocalFileItem> { it.size }.thenBy { it.fileName.lowercase(Locale.US) }
             LibrarySortMode.ACTIVITY -> compareBy<LocalFileItem> { it.numHits + it.numUploads }.thenBy { it.fileName.lowercase(Locale.US) }
             LibrarySortMode.HITS -> compareBy<LocalFileItem> { it.numHits }.thenBy { it.fileName.lowercase(Locale.US) }
@@ -10882,7 +11197,7 @@ class ComposeAppController(
                 timeLeft = item.remainingDownloadTime,
                 percentComplete = item.percentComplete,
                 name = (item.title ?: item.fileName).lowercase(Locale.US),
-                fileType = item.category.getSingularName().lowercase(Locale.US),
+                fileType = fileKindLabel(item.fileName).lowercase(Locale.US),
                 extension = FileUtils.getFileExtension(item.fileName).lowercase(Locale.US),
                 rate = item.downloadSpeed,
                 sources = item.downloadSourceCount
@@ -10921,7 +11236,7 @@ class ComposeAppController(
                 timeLeft = item.remainingUploadTime,
                 uploaded = item.totalAmountUploaded,
                 name = item.fileName.lowercase(Locale.US),
-                fileType = item.category.getSingularName().lowercase(Locale.US),
+                fileType = fileKindLabel(item.fileName).lowercase(Locale.US),
                 extension = FileUtils.getFileExtension(item.fileName).lowercase(Locale.US),
                 rate = item.uploadSpeed,
                 peers = item.numUploadConnections,
@@ -11159,6 +11474,11 @@ class ComposeAppController(
                 showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.INFO)
             }
 
+            DownloadException.ErrorCode.DOWNLOAD_NOT_SUPPORTED -> {
+                showNotice(tr("Download"), downloadErrorMessage(failure), OperationNoticeLevel.WARNING)
+                action.downloadCanceled(failure)
+            }
+
             DownloadException.ErrorCode.FILE_ALREADY_EXISTS,
             DownloadException.ErrorCode.FILE_IS_ALREADY_DOWNLOADED_TO -> {
                 val target = failure.file
@@ -11384,6 +11704,9 @@ class ComposeAppController(
                 tr("That torrent is already seeding from your library.")
             DownloadException.ErrorCode.FILE_ALREADY_DOWNLOADING ->
                 tr("That item is already in your transfers.")
+            DownloadException.ErrorCode.DOWNLOAD_NOT_SUPPORTED ->
+                failure.message?.takeIf { it.isNotBlank() }
+                    ?: tr("This search result needs another resolver before WireShare can download it.")
         }
     }
 

@@ -10,6 +10,7 @@ import org.limewire.core.api.download.DownloadPiecesInfo
 import org.limewire.core.api.Category
 import org.limewire.core.api.FilePropertyKey
 import org.limewire.core.api.download.DownloadItem
+import org.limewire.core.api.file.FileKind
 import org.limewire.core.api.library.LocalFileItem
 import org.limewire.core.api.search.Search
 import org.limewire.core.api.search.SearchCategory
@@ -249,6 +250,7 @@ class SearchTabSession(
 data class LibrarySectionViewState(
     val filterText: String = "",
     val category: Category? = null,
+    val fileKind: FileKind? = null,
     val sortMode: LibrarySortMode = LibrarySortMode.NAME,
     val sortDescending: Boolean = false,
     val selectedItemPath: String? = null,

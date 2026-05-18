@@ -37,6 +37,15 @@ public interface CategoryManager {
     
     /** Returns the category that best matches the given file. */
     Category getCategoryForFile(File file);
+
+    /** Returns the narrow file kind that best matches the given extension. */
+    FileKind getFileKindForExtension(String extension);
+
+    /** Returns the narrow file kind that best matches the given filename. */
+    FileKind getFileKindForFilename(String filename);
+
+    /** Returns the narrow file kind that best matches the given file. */
+    FileKind getFileKindForFile(File file);
     
     /**
      * @return if any given file is of the category of type.
@@ -45,5 +54,8 @@ public interface CategoryManager {
     
     /** Gets all extensions for a given category. */
     Collection<String> getExtensionsForCategory(Category category);
+
+    /** Gets all built-in and configured extensions for a narrow file kind. */
+    Collection<String> getExtensionsForFileKind(FileKind fileKind);
 
 }

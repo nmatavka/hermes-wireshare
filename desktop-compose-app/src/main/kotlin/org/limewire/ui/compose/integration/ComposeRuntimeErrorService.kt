@@ -70,6 +70,9 @@ class CoreComposeRuntimeErrorService(
     private val listeners = CopyOnWriteArrayList<ComposeRuntimeErrorService.Listener>()
     private val startupErrors = CopyOnWriteArrayList<ComposeRuntimeErrorReport>()
     private val nextReportId = AtomicLong(1L)
+    private val errorCallback = ComposeErrorCallback(this)
+    private val uncaughtExceptionHandler = ComposeUncaughtExceptionHandler(this)
+    private val callbackUncaughtExceptionHandler = ComposeCallbackUncaughtExceptionHandler(this)
 
     @Volatile
     private var startupCapture = false
@@ -78,20 +81,18 @@ class CoreComposeRuntimeErrorService(
     private var installed = false
 
     override fun install() {
-        if (installed) {
-            return
-        }
-        installed = true
         activeService = this
-        ErrorService.setErrorCallback(ComposeErrorCallback(this))
-        Thread.setDefaultUncaughtExceptionHandler(ComposeUncaughtExceptionHandler(this))
-        installEventQueueCatcher()
+        reassertGlobalHandlers()
+        if (!installed) {
+            installed = true
+            installEventQueueCatcher()
+        }
         System.setProperty(
             "sun.awt.exception.handler",
             ComposeEventDispatchErrorCatcher::class.java.name
         )
         runCatching {
-            Native.setCallbackExceptionHandler(ComposeCallbackUncaughtExceptionHandler(this))
+            Native.setCallbackExceptionHandler(callbackUncaughtExceptionHandler)
         }.onFailure { failure ->
             System.err.println(failure.stackTraceToString())
         }
@@ -124,12 +125,15 @@ class CoreComposeRuntimeErrorService(
     }
 
     override fun fatalStartupReport(problem: Throwable, detail: String?): ComposeRuntimeErrorReport {
-        return buildReport(
+        val report = buildReport(
             problem = problem,
             threadName = Thread.currentThread().name,
             detail = detail,
             fatal = true
         )
+        persistLatestDiagnosticReport(report)
+        logLocallyIfEnabled(report)
+        return report
     }
 
     override fun saveDiagnosticReport(target: File, report: ComposeRuntimeErrorReport) {
@@ -257,6 +261,15 @@ class CoreComposeRuntimeErrorService(
         listeners.forEach { listener ->
             runCatching { listener.onRuntimeError(report) }
         }
+    }
+
+    private fun reassertGlobalHandlers() {
+        ErrorService.setProtectedErrorCallback(errorCallback)
+        Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler)
+        System.setProperty(
+            "sun.awt.exception.handler",
+            ComposeEventDispatchErrorCatcher::class.java.name
+        )
     }
 
     private fun buildReport(

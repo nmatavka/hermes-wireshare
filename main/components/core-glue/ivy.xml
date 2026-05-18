@@ -28,6 +28,7 @@
         <dependency org="org.limewire" name="core-settings" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="bittorrent-api" rev="latest.integration" conf="compile,runtime"/>
         <dependency org="org.limewire" name="libtorrent" rev="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="frostwire-search-backend" rev="latest.integration" conf="compile,runtime"/>
 
         <dependency org="none" name="google-collect" rev="${google-collect.version}" conf="compile,runtime"/>        
         <dependency org="none" name="glazedlists" rev="${glazedlists.version}" conf="compile,runtime"/>
@@ -39,6 +40,7 @@
         <dependency org="none" name="httpcore" rev="${httpcore.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpcore-nio" rev="${httpcore-nio.version}" conf="compile,runtime"/>
         <dependency org="none" name="httpclient" rev="${httpclient.version}" conf="compile,runtime"/>
+        <dependency org="none" name="hsqldb" rev="${hsqldb.version}" conf="compile,runtime"/>
         <dependency org="none" name="commons-codec" rev="${commons-codec.version}" conf="compile,runtime"/>
         <dependency org="none" name="jcip-annotations" rev="${jcip-annotations.version}" conf="compile,runtime"/>
         <dependency org="none" name="json" rev="${json.version}" conf="compile,runtime"/>       

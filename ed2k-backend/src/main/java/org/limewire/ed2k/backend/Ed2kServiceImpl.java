@@ -106,6 +106,7 @@ import org.jmule.core.servermanager.ServerManagerListener;
 import org.jmule.core.sharingmanager.CompletedFile;
 import org.jmule.core.sharingmanager.SharingManager;
 import org.jmule.core.uploadmanager.UploadManager;
+import org.jmule.core.uploadmanager.InternalUploadManager;
 import org.jmule.core.uploadmanager.UploadSession;
 
 import com.google.inject.Inject;
@@ -114,6 +115,9 @@ import com.google.inject.Inject;
 class Ed2kServiceImpl implements Ed2kService {
 
     private static final long SYNC_INTERVAL_MS = 1500L;
+    private static final long STARTUP_AUTO_CONNECT_DELAY_MS = 5000L;
+    private static final long SEARCH_RESUBMIT_INTERVAL_MS = 5000L;
+    private static final long JMULE_INFINITY_ETA_SECONDS = 31536000L;
 
     private final CategoryManager categoryManager;
     private final SharedFileListManager sharedFileListManager;
@@ -138,15 +142,17 @@ class Ed2kServiceImpl implements Ed2kService {
 
         @Override
         public void resultArrived(org.jmule.core.searchmanager.SearchResult searchResult) {
-            final String queryText = normalizeQuery(searchResult.getSearchQuery().getQuery());
-            List<Ed2kSearchSessionImpl> sessions = searchSessionsByQuery.get(queryText);
+            List<Ed2kSearchSessionImpl> sessions = sessionsForSearchResult(searchResult);
             if (sessions == null || sessions.isEmpty()) {
                 return;
             }
             boolean changed = false;
             for (SearchResultItem item : searchResult.getSearchResultItemList()) {
                 for (Ed2kSearchSessionImpl session : sessions) {
-                    changed |= session.addResult(item);
+                    try {
+                        changed |= session.addResult(item);
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
             if (changed) {
@@ -188,6 +194,7 @@ class Ed2kServiceImpl implements Ed2kService {
             }
             lastServerStatusDetail = "Connected to " + describeServer(server);
             fireStatusChanged();
+            retrySearchesAfterNetworkReady();
         }
         @Override public void disconnected(Server server) {
             lastServerStatusDetail = server == null ? "Disconnected from ED2K server." : "Disconnected from " + describeServer(server);
@@ -223,7 +230,10 @@ class Ed2kServiceImpl implements Ed2kService {
     };
     private final JKadListener kadListener = new JKadListener() {
         @Override public void JKadIsConnecting() { fireStatusChanged(); }
-        @Override public void JKadIsConnected() { fireStatusChanged(); }
+        @Override public void JKadIsConnected() {
+            fireStatusChanged();
+            retrySearchesAfterNetworkReady();
+        }
         @Override public void JKadIsDisconnected() { fireStatusChanged(); }
     };
     private final PropertyChangeListener sharedRootsListener = new PropertyChangeListener() {
@@ -358,13 +368,7 @@ class Ed2kServiceImpl implements Ed2kService {
             }
             sessions.add(session);
         }
-        try {
-            SearchQuery searchQuery = new SearchQuery(query, SearchQueryType.SERVER_KAD);
-            core.getSearchManager().search(searchQuery);
-        } catch (RuntimeException failure) {
-            session.setRunning(false);
-            session.setFailed(true, failure.getMessage());
-        }
+        submitSearch(session, true);
         fireSearchChanged(sessionId);
         return session;
     }
@@ -380,14 +384,48 @@ class Ed2kServiceImpl implements Ed2kService {
         }
         session.setRunning(true);
         session.setFailed(false, null);
+        submitSearch(session, true);
+        fireSearchChanged(sessionId);
+        return session;
+    }
+
+    private void submitSearch(Ed2kSearchSessionImpl session, boolean force) {
+        if (session == null) {
+            return;
+        }
+        JMuleCore activeCore = core;
+        if (activeCore == null) {
+            session.setRunning(false);
+            session.setFailed(true, "ED2K/Kad backend is not running.");
+            return;
+        }
+        if (!force && !session.canSubmitAgain(System.currentTimeMillis(), SEARCH_RESUBMIT_INTERVAL_MS)) {
+            return;
+        }
         try {
-            core.getSearchManager().search(new SearchQuery(session.getQuery(), SearchQueryType.SERVER_KAD));
+            session.markSubmitted();
+            session.setRunning(true);
+            session.setFailed(false, null);
+            activeCore.getSearchManager().search(new SearchQuery(session.getQuery(), SearchQueryType.SERVER_KAD));
+            activeCore.getSearchManager().search(new SearchQuery(session.getQuery(), SearchQueryType.GLOBAL));
         } catch (RuntimeException failure) {
             session.setRunning(false);
             session.setFailed(true, failure.getMessage());
         }
-        fireSearchChanged(sessionId);
-        return session;
+    }
+
+    private void retrySearchesAfterNetworkReady() {
+        JMuleCore activeCore = core;
+        if (!running || activeCore == null || searchSessionsById.isEmpty()) {
+            return;
+        }
+        for (Ed2kSearchSessionImpl session : searchSessionsById.values()) {
+            if (!session.shouldRetryWhenNetworkReady()) {
+                continue;
+            }
+            submitSearch(session, false);
+            fireSearchChanged(session.getId());
+        }
     }
 
     @Override
@@ -405,6 +443,7 @@ class Ed2kServiceImpl implements Ed2kService {
                     searchSessionsByQuery.remove(key);
                     if (core != null) {
                         core.getSearchManager().removeSearch(new SearchQuery(session.getQuery(), SearchQueryType.SERVER_KAD));
+                        core.getSearchManager().removeSearch(new SearchQuery(session.getQuery(), SearchQueryType.GLOBAL));
                     }
                 }
             }
@@ -429,6 +468,47 @@ class Ed2kServiceImpl implements Ed2kService {
         synchronized (uploadItems) {
             return new ArrayList<UploadItem>(uploadItems.values());
         }
+    }
+
+    @Override
+    public void removeDownload(DownloadItem item) throws Exception {
+        FileHash fileHash = fileHashFor(item);
+        if (fileHash == null) {
+            return;
+        }
+        String key = normalizeFileHash(fileHash);
+        if (core != null && core.getDownloadManager().hasDownload(fileHash)) {
+            core.getDownloadManager().cancelDownload(fileHash);
+        }
+        WireShareEd2kPaths.clearPreferredTarget(key);
+        boolean removed;
+        synchronized (downloadItems) {
+            removed = downloadItems.remove(key) != null;
+        }
+        if (removed) {
+            fireDownloadsChanged();
+        }
+        synchronizeTransfers();
+    }
+
+    @Override
+    public void removeUpload(UploadItem item) throws Exception {
+        FileHash fileHash = fileHashFor(item);
+        if (fileHash == null) {
+            return;
+        }
+        String key = normalizeFileHash(fileHash);
+        if (core != null && core.getUploadManager().hasUpload(fileHash)) {
+            ((InternalUploadManager) core.getUploadManager()).removeUpload(fileHash);
+        }
+        boolean removed;
+        synchronized (uploadItems) {
+            removed = uploadItems.remove(key) != null;
+        }
+        if (removed) {
+            fireUploadsChanged();
+        }
+        synchronizeTransfers();
     }
 
     @Override
@@ -481,11 +561,16 @@ class Ed2kServiceImpl implements Ed2kService {
     @Override
     public void connectAnyServer() throws Exception {
         ensureRunning();
-        if (core.getServerManager().getServersCount() == 0) {
+        ServerManager serverManager = core.getServerManager();
+        if (connectLastKnownServer(serverManager)) {
+            fireStatusChanged();
+            return;
+        }
+        if (serverManager.getServersCount() == 0) {
             throw new JMuleCoreException("No ED2K servers are loaded. Import server.met first.");
         }
         lastServerStatusDetail = "Trying available ED2K servers.";
-        core.getServerManager().connect();
+        serverManager.connect();
         fireStatusChanged();
     }
 
@@ -668,15 +753,32 @@ class Ed2kServiceImpl implements Ed2kService {
     }
 
     private void beginStartupAutoConnect() {
+        ScheduledExecutorService executor = poller;
+        if (executor == null || executor.isShutdown()) {
+            attemptStartupAutoConnect();
+            return;
+        }
+        executor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                attemptStartupAutoConnect();
+            }
+        }, STARTUP_AUTO_CONNECT_DELAY_MS, TimeUnit.MILLISECONDS);
+    }
+
+    private void attemptStartupAutoConnect() {
         JMuleCore activeCore = core;
         if (!running || activeCore == null) {
             return;
         }
 
         try {
-            if (activeCore.getServerManager().getServersCount() > 0 && !activeCore.getServerManager().isConnected()) {
-                lastServerStatusDetail = "Trying available ED2K servers.";
-                activeCore.getServerManager().connect();
+            ServerManager serverManager = activeCore.getServerManager();
+            if (serverManager.getStatus() == ServerManager.Status.DISCONNECTED && !serverManager.isConnected()) {
+                if (!connectLastKnownServer(serverManager) && serverManager.getServersCount() > 0) {
+                    lastServerStatusDetail = "Trying available ED2K servers.";
+                    serverManager.connect();
+                }
             }
         } catch (Throwable ignored) {
         }
@@ -689,6 +791,21 @@ class Ed2kServiceImpl implements Ed2kService {
             }
         } catch (Throwable ignored) {
         }
+    }
+
+    private boolean connectLastKnownServer(ServerManager serverManager) throws Exception {
+        String address = WireShareEd2kPaths.lastConnectedServerAddress();
+        int port = WireShareEd2kPaths.lastConnectedServerPort();
+        if (address == null || address.trim().isEmpty() || port <= 0) {
+            return false;
+        }
+        Server server = serverManager.getServer(address.trim(), port);
+        if (server == null) {
+            server = serverManager.newServer(address.trim(), port);
+        }
+        lastServerStatusDetail = "Connecting to last ED2K server " + describeServer(server);
+        serverManager.connect(server);
+        return true;
     }
 
     private void updateSharedRoots() {
@@ -913,6 +1030,26 @@ class Ed2kServiceImpl implements Ed2kService {
         }
     }
 
+    private List<Ed2kSearchSessionImpl> sessionsForSearchResult(org.jmule.core.searchmanager.SearchResult searchResult) {
+        if (searchResult == null || searchResult.getSearchResultItemList() == null) {
+            return Collections.emptyList();
+        }
+        SearchQuery query = searchResult.getSearchQuery();
+        if (query != null) {
+            List<Ed2kSearchSessionImpl> sessions = searchSessionsByQuery.get(normalizeQuery(query.getQuery()));
+            if (sessions != null && !sessions.isEmpty()) {
+                return new ArrayList<Ed2kSearchSessionImpl>(sessions);
+            }
+        }
+        List<Ed2kSearchSessionImpl> runningSessions = new ArrayList<Ed2kSearchSessionImpl>();
+        for (Ed2kSearchSessionImpl session : searchSessionsById.values()) {
+            if (session.isRunning()) {
+                runningSessions.add(session);
+            }
+        }
+        return runningSessions.size() == 1 ? runningSessions : Collections.<Ed2kSearchSessionImpl>emptyList();
+    }
+
     private String normalizeQuery(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.US);
     }
@@ -1037,6 +1174,13 @@ class Ed2kServiceImpl implements Ed2kService {
             return null;
         }
         return new ED2KFileLink(((Ed2kDownloadItem) item).getEd2kLink()).getFileHash();
+    }
+
+    private FileHash fileHashFor(UploadItem item) throws ED2KLinkMalformedException {
+        if (!(item instanceof Ed2kUploadItem)) {
+            return null;
+        }
+        return new ED2KFileLink(((Ed2kUploadItem) item).getEd2kLink()).getFileHash();
     }
 
     private File downloadLinkedResource(String address, String suffix) throws IOException {
@@ -1185,6 +1329,7 @@ class Ed2kServiceImpl implements Ed2kService {
         private boolean running;
         private boolean failed;
         private String failureMessage;
+        private long lastSubmittedAt;
 
         private Ed2kSearchSessionImpl(String id, String query, CategoryManager categoryManager) {
             this.id = id;
@@ -1231,13 +1376,28 @@ class Ed2kServiceImpl implements Ed2kService {
             this.failureMessage = message;
         }
 
+        private synchronized void markSubmitted() {
+            lastSubmittedAt = System.currentTimeMillis();
+        }
+
+        private synchronized boolean canSubmitAgain(long now, long minimumDelayMs) {
+            return lastSubmittedAt <= 0L || now - lastSubmittedAt >= minimumDelayMs;
+        }
+
+        private synchronized boolean shouldRetryWhenNetworkReady() {
+            return (running || failed) && results.isEmpty();
+        }
+
         private synchronized void clear() {
             results.clear();
             resultsByUrn.clear();
         }
 
         private synchronized boolean addResult(SearchResultItem item) {
-            Ed2kSearchResultAdapter searchResult = new Ed2kSearchResultAdapter(item, categoryManager);
+            Ed2kSearchResultAdapter searchResult = Ed2kSearchResultAdapter.create(item, categoryManager);
+            if (searchResult == null) {
+                return false;
+            }
             String key = searchResult.getUrn().toString();
             Ed2kGroupedSearchResultAdapter grouped = resultsByUrn.get(key);
             if (grouped == null) {
@@ -1309,16 +1469,40 @@ class Ed2kServiceImpl implements Ed2kService {
         private final RemoteHost remoteHost;
         private final Map<FilePropertyKey, Object> properties = new LinkedHashMap<FilePropertyKey, Object>();
 
+        private static Ed2kSearchResultAdapter create(SearchResultItem item, CategoryManager categoryManager) {
+            if (item == null || item.getFileHash() == null) {
+                return null;
+            }
+            return new Ed2kSearchResultAdapter(item, categoryManager);
+        }
+
         private Ed2kSearchResultAdapter(SearchResultItem item, CategoryManager categoryManager) {
-            this.ed2kLink = item.getAsED2KLink().getAsString();
-            this.fileName = item.getFileName();
-            this.size = item.getFileSize();
+            FileHash hash = item.getFileHash();
+            this.fileName = safeSearchFileName(item, hash);
+            this.size = safeSearchFileSize(item);
             this.category = categoryManager.getCategoryForFilename(fileName);
-            this.urn = new Ed2kSyntheticUrn("urn:ed2k:" + item.getFileHash().toString().toLowerCase(Locale.US));
+            this.urn = new Ed2kSyntheticUrn("urn:ed2k:" + hash.toString().toLowerCase(Locale.US));
+            this.ed2kLink = new ED2KFileLink(fileName, size, hash).getAsString();
             this.remoteHost = new Ed2kRemoteHost();
             properties.put(FilePropertyKey.NAME, fileName);
             properties.put(FilePropertyKey.FILE_SIZE, Long.valueOf(size));
             properties.put(FilePropertyKey.DESCRIPTION, "ED2K/Kad");
+        }
+
+        private static String safeSearchFileName(SearchResultItem item, FileHash hash) {
+            String name = item.getFileName();
+            if (name != null && !name.trim().isEmpty()) {
+                return name.trim();
+            }
+            return "ed2k-" + hash.toString().toLowerCase(Locale.US);
+        }
+
+        private static long safeSearchFileSize(SearchResultItem item) {
+            try {
+                return Math.max(0L, item.getFileSize());
+            } catch (Throwable ignored) {
+                return 0L;
+            }
         }
 
         @Override public String getEd2kLink() { return ed2kLink; }
@@ -1680,7 +1864,7 @@ class Ed2kServiceImpl implements Ed2kService {
     }
 
     private static long normalizeEta(long eta) {
-        return eta < 0 ? DownloadItem.UNKNOWN_TIME : eta;
+        return eta < 0 || eta >= JMULE_INFINITY_ETA_SECONDS ? DownloadItem.UNKNOWN_TIME : eta;
     }
 
     private static String extensionOf(String fileName) {

@@ -12,6 +12,7 @@ import org.limewire.core.impl.search.torrentweb.TorrentUriPrioritizerImpl;
 import org.limewire.core.impl.search.torrentweb.TorrentUriStore;
 import org.limewire.core.impl.search.torrentweb.TorrentWebSearch;
 import org.limewire.core.impl.search.torrentweb.TorrentWebSearchFactory;
+import org.limewire.core.impl.search.frostwire.FrostWireSearchDownloadItemFactory;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -43,6 +44,7 @@ public class CoreGlueSearchModule extends AbstractModule {
         bind(TorrentUriStore.class).to(TorrentUriDatabaseStore.class);
         bind(TorrentRobotsTxtStore.class).to(TorrentUriDatabaseStore.class);
         bind(TorrentRobotsTxt.class).to(TorrentRobotsTxtImpl.class);
+        bind(FrostWireSearchDownloadItemFactory.class).asEagerSingleton();
     }
 
 }

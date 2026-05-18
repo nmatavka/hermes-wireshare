@@ -37,6 +37,7 @@ public class MagnetOptions implements Serializable {
     public static final String MAGNET = "magnet:?";
 
     private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
 
     /**
      * The string to prefix download files with in the rare case that we don't
@@ -493,7 +494,8 @@ public class MagnetOptions implements Serializable {
     private List<String> getPotentialURLs(List<String> strings) {
         List<String> ret = new ArrayList<String>();
         for (String str : strings) {
-            if (str.toLowerCase(Locale.US).startsWith(HTTP))
+            String lower = str.toLowerCase(Locale.US);
+            if (lower.startsWith(HTTP) || lower.startsWith(HTTPS))
                 ret.add(str);
         }
         return ret;

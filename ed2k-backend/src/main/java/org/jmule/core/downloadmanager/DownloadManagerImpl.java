@@ -1074,23 +1074,33 @@ class DownloadManagerImpl extends JMuleAbstractManager implements InternalDownlo
 					continue;
 				}
 				
-				while(!file_part_to_check.isEmpty()) {
-					DownloadSession session =  file_part_to_check.poll();
+					while(!file_part_to_check.isEmpty()) {
+						DownloadSession session =  file_part_to_check.poll();
+						if (session == null)
+							continue;
+						try {
+							List<Integer> broken_parts = session.sharedFile.checkFilePartsIntegrity();
+							if (broken_parts.size()!=0)
+								session.download_strategy.processPartCheckResult(broken_parts);
+						} catch (Throwable cause) {
+							cause.printStackTrace();
+						}
+					}
 					
-					List<Integer> broken_parts = session.sharedFile.checkFilePartsIntegrity();
-					if (broken_parts.size()!=0)
-						session.download_strategy.processPartCheckResult(broken_parts);
-				}
-				
-				while(!complete_file_to_check.isEmpty()) {
-					DownloadSession session = complete_file_to_check.poll();
-					
-					List<Integer> result = session.sharedFile.checkFullFileIntegrity();
-					if (result.size() != 0)
-						session.download_strategy.processFileCheckResult(result);
-					else
-						session.completeDownload();
-				}
+					while(!complete_file_to_check.isEmpty()) {
+						DownloadSession session = complete_file_to_check.poll();
+						if (session == null)
+							continue;
+						try {
+							List<Integer> result = session.sharedFile.checkFullFileIntegrity();
+							if (result.size() != 0)
+								session.download_strategy.processFileCheckResult(result);
+							else
+								session.completeDownload();
+						} catch (Throwable cause) {
+							cause.printStackTrace();
+						}
+					}
 				
 			}
 		}

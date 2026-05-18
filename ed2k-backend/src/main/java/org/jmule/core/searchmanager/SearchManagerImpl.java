@@ -94,8 +94,10 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 	private JMThread global_search_thread = null;
 
 	private SearchQuery server_search_query 		= null;
+	private SearchQuery last_server_search_query 	= null;
 	private SearchQuery kad_search_query 			= null;
 	private SearchQuery global_search_query 		= null;
+	private SearchQuery last_global_search_query 	= null;
 
 	SearchManagerImpl() {
 		server_search_task = new JMTimerTask() {
@@ -116,6 +118,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 					if (!server_search_request_queue.isEmpty())
 						if (server_manager.isConnected()) {
 								server_search_query = server_search_request_queue.poll();
+								last_server_search_query = server_search_query;
 								_network_manager.doSearchOnServer(server_search_query);
 								notifySearchStarted(server_search_query);
 								last_server_search_request = System.currentTimeMillis();
@@ -135,6 +138,7 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 						if (!global_search_request_queue.isEmpty())
 						if ((global_search_thread==null) || (!global_search_thread.isAlive())) {
 							global_search_query = global_search_request_queue.poll();
+							last_global_search_query = global_search_query;
 							global_search_thread = new JMThread() {
 								boolean loop = true;
 								public void run() {
@@ -366,15 +370,21 @@ public class SearchManagerImpl extends JMuleAbstractManager implements InternalS
 	}
 
 	public void receivedServerSearchResult(SearchResultItemList resultList) {
-		SearchResult searchResult = new SearchResult(resultList,server_search_query, server_manager.getConnectedServer());
-		search_result_list.put(server_search_query, searchResult);
+		SearchQuery searchQuery = server_search_query != null ? server_search_query : last_server_search_query;
+		if (searchQuery == null)
+			return;
+		SearchResult searchResult = new SearchResult(resultList, searchQuery, server_manager.getConnectedServer());
+		search_result_list.put(searchQuery, searchResult);
 		notifySearchArrived(searchResult);
 		if (searchResult.getSearchQuery().getQueryType() != SearchQueryType.SERVER_KAD)
 			notifySearchCompleted(searchResult.searchQuery);
 	}
 	
 	public void receivedServerUDPSearchResult(SearchResultItemList resultList) {
-		SearchResult search_result = new SearchResult(resultList, global_search_query);
+		SearchQuery searchQuery = global_search_query != null ? global_search_query : last_global_search_query;
+		if (searchQuery == null)
+			return;
+		SearchResult search_result = new SearchResult(resultList, searchQuery);
 		notifySearchArrived(search_result);
 	}
 

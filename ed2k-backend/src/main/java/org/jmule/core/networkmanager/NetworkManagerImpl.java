@@ -77,6 +77,7 @@ import static org.jmule.core.utils.Misc.getByteBuffer;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
@@ -1360,7 +1361,13 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void serverConnectingFailed(Throwable cause) {
 		ServerConnectionMonitor old_monitor = server_connection_monitor;
 		server_connection_monitor=null;
+		if (old_monitor == null)
+			return;
 		old_monitor.JMStop();
+		try {
+			old_monitor.getServerConnection().disconnect();
+		} catch (NetworkManagerException ignored) {
+		}
 		if (server_packet_processor != null)
 			server_packet_processor.JMStop();
 		_server_manager.serverConnectingFailed(old_monitor.getServerConnection().getIPAddress(),old_monitor.getServerConnection().getPort(), cause);
@@ -1370,6 +1377,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 	public void serverDisconnected() {
 		ServerConnectionMonitor old_monitor = server_connection_monitor;
 		server_connection_monitor = null;
+		if (old_monitor == null)
+			return;
 		old_monitor.JMStop();
 		
 		_server_manager.serverDisconnected(old_monitor.getServerConnection().getIPAddress(),old_monitor.getServerConnection().getPort());
@@ -2381,32 +2390,37 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				
 				case OP_GLOBSEARCHRES : {
 					SearchResultItemList search_results = new SearchResultItemList();
-					//while(packet_content.hasRemaining()) {
-						byte[] byte_file_hash = new byte[16];
-						packet_content.get(byte_file_hash);
-						byte[] client_id = new byte[4];
-						packet_content.get(client_id);
-						short clientPort = packet_content.getShort();
-						SearchResultItem result = new SearchResultItem(new FileHash(byte_file_hash), new ClientID(client_id), clientPort);
-						int tag_count = packet_content.getInt();
-						for (int j = 0; j < tag_count; j++) {
-							Tag tag = TagScanner.scanTag(packet_content);
-							result.addTag(tag);
-						}
-						// transform Server's file rating into eMule file rating
-						if (result.hasTag(FT_FILERATING)) {
-							Tag tag = result.getTag(FT_FILERATING);
-							try {
-								int data = (Integer) tag.getValue();
-								data = Convert.byteToInt(Misc.getByte(data, 0));
-								int rating_value = data / SERVER_SEARCH_RATIO;
-								tag.setValue(rating_value);
-							} catch (Throwable e) {
-								e.printStackTrace();
+					while(packet_content.remaining() >= 26) {
+						try {
+							byte[] byte_file_hash = new byte[16];
+							packet_content.get(byte_file_hash);
+							byte[] client_id = new byte[4];
+							packet_content.get(client_id);
+							short clientPort = packet_content.getShort();
+							SearchResultItem result = new SearchResultItem(new FileHash(byte_file_hash), new ClientID(client_id), clientPort);
+							int tag_count = packet_content.getInt();
+							for (int j = 0; j < tag_count; j++) {
+								Tag tag = TagScanner.scanTag(packet_content);
+								result.addTag(tag);
 							}
+							// transform Server's file rating into eMule file rating
+							if (result.hasTag(FT_FILERATING)) {
+								Tag tag = result.getTag(FT_FILERATING);
+								try {
+									int data = (Integer) tag.getValue();
+									data = Convert.byteToInt(Misc.getByte(data, 0));
+									int rating_value = data / SERVER_SEARCH_RATIO;
+									tag.setValue(rating_value);
+								} catch (Throwable e) {
+									e.printStackTrace();
+								}
+							}
+							search_results.add(result);
+						} catch (Throwable e) {
+							e.printStackTrace();
+							break;
 						}
-						search_results.add(result);
-					//}
+					}
 					_search_manager.receivedServerUDPSearchResult(search_results);
 					break;
 				}
@@ -3317,6 +3331,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		private Selector serverSelector;
 		private volatile boolean loop = true;
 		JMServerConnection serverConnection;
+		private volatile long connectionStartedAt;
 		
 		private Queue<Packet> send_queue = new ConcurrentLinkedQueue<Packet>();
 		private volatile boolean sendSequence = false;
@@ -3371,6 +3386,7 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 			try {
 				serverSelector = Selector.open();
 				this.serverConnection = connection;
+				this.connectionStartedAt = System.currentTimeMillis();
 				loop = true;
 				connection.setStatus(ConnectionStatus.CONNECTING);
 				JMuleSocketChannel serverChannel = new JMuleSocketChannel(SocketChannel.open());
@@ -3388,17 +3404,25 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 		
 		public void JMStop() {
 			loop = false;
-			serverSelector.wakeup();
-			try {
-				serverSelector.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			Selector selector = serverSelector;
+			if (selector != null) {
+				selector.wakeup();
+				try {
+					selector.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		public void run() {
 			while (loop) {
 				int selectCount = 0;
+
+				if (isServerHandshakeTimedOut()) {
+					serverConnectingFailed(serverConnectionTimeoutException());
+					return;
+				}
 				
 				if (sendSequence) {
 					try {
@@ -3412,6 +3436,11 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 					selectCount = serverSelector.select(SERVER_CONNECTION_MONITOR_SELECT);
 				} catch (IOException e1) {
 					e1.printStackTrace();
+				}
+
+				if (isServerHandshakeTimedOut()) {
+					serverConnectingFailed(serverConnectionTimeoutException());
+					return;
 				}
 
 				if (sendSequence) {
@@ -3440,8 +3469,8 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 								continue;
 							} catch (IOException e) {
 								e.printStackTrace();
-								serverDisconnected();
-								continue;
+								serverConnectingFailed(e);
+								return;
 							}
 						}
 					} else
@@ -3519,6 +3548,19 @@ public class NetworkManagerImpl extends JMuleAbstractManager implements Internal
 				e.printStackTrace();
 			}
 			serverConnection.setStatus(ConnectionStatus.DISCONNECTED);
+		}
+
+		private boolean isServerHandshakeTimedOut() {
+			return serverConnection != null
+					&& serverConnection.getStatus() != ConnectionStatus.DISCONNECTED
+					&& _server_manager.getStatus() == org.jmule.core.servermanager.ServerManager.Status.CONNECTING
+					&& (System.currentTimeMillis() - connectionStartedAt) >= ConfigurationManager.SERVER_CONNECTING_TIMEOUT;
+		}
+
+		private SocketTimeoutException serverConnectionTimeoutException() {
+			String address = serverConnection == null ? "unknown" : serverConnection.getIPAddress();
+			int port = serverConnection == null ? 0 : serverConnection.getPort();
+			return new SocketTimeoutException("Timed out connecting to ED2K server " + address + ":" + port);
 		}
 	}
 	

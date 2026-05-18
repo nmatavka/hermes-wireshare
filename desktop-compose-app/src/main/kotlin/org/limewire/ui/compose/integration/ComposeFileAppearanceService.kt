@@ -4,6 +4,7 @@ import org.limewire.core.api.Category
 import org.limewire.core.api.FilePropertyKey
 import org.limewire.core.api.download.DownloadItem
 import org.limewire.core.api.file.CategoryManager
+import org.limewire.core.api.file.FileKind
 import org.limewire.core.api.library.LocalFileItem
 import org.limewire.core.api.library.PropertiableFile
 import org.limewire.core.api.search.SearchResult
@@ -44,7 +45,8 @@ data class FileIconPresentation(
 data class FileIdentityPresentation(
     val title: String,
     val subtitle: String,
-    val icon: FileIconPresentation
+    val icon: FileIconPresentation,
+    val kindLabel: String = ""
 )
 
 interface ComposeFileAppearanceService {
@@ -63,7 +65,8 @@ class CoreComposeFileAppearanceService(
         return FileIdentityPresentation(
             title = itemHeading(item),
             subtitle = itemSubtitle(item),
-            icon = itemIcon(item)
+            icon = itemIcon(item),
+            kindLabel = fileKindLabel(item.fileName)
         )
     }
 
@@ -71,7 +74,8 @@ class CoreComposeFileAppearanceService(
         return FileIdentityPresentation(
             title = searchHeading(result),
             subtitle = searchSubtitle(result),
-            icon = iconForFileName(result.fileName, result.category)
+            icon = iconForFileName(result.fileName, result.category),
+            kindLabel = fileKindLabel(result.fileName)
         )
     }
 
@@ -80,7 +84,8 @@ class CoreComposeFileAppearanceService(
         return FileIdentityPresentation(
             title = title,
             subtitle = subtitle,
-            icon = iconForFile(file, resolvedCategory)
+            icon = iconForFile(file, resolvedCategory),
+            kindLabel = fileKindLabel(file.name)
         )
     }
 
@@ -91,7 +96,8 @@ class CoreComposeFileAppearanceService(
             ?.trim()
             ?.lowercase(Locale.US)
             .orEmpty()
-        return iconForExtension(normalizedExtension, resolvedCategory)
+        val fileKind = fileName?.let(categoryManager::getFileKindForFilename) ?: FileKind.OTHER
+        return iconForExtension(normalizedExtension, fileKind, resolvedCategory)
     }
 
     override fun iconForCategory(category: Category?): FileIconPresentation {
@@ -103,7 +109,7 @@ class CoreComposeFileAppearanceService(
         if (normalized.isBlank()) {
             return null
         }
-        return friendlyExtensionDescription(normalized)
+        return friendlyExtensionDescription(normalized, categoryManager.getFileKindForExtension(normalized))
             ?: tr("{0} file", normalized.uppercase(currentLocale()))
     }
 
@@ -179,20 +185,68 @@ class CoreComposeFileAppearanceService(
         return iconForFileName(fileName, category)
     }
 
-    private fun iconForExtension(extension: String, category: Category): FileIconPresentation {
+    private fun iconForExtension(extension: String, fileKind: FileKind, category: Category): FileIconPresentation {
         val badge = extensionBadge(extension)
-        return when {
-            extension in PLAYLIST_EXTENSIONS -> FileIconPresentation(FileIconToken.PLAYLIST, badge)
-            extension == "pdf" -> FileIconPresentation(FileIconToken.PDF, badge)
-            extension in SPREADSHEET_EXTENSIONS -> FileIconPresentation(FileIconToken.SPREADSHEET, badge)
-            extension in PRESENTATION_EXTENSIONS -> FileIconPresentation(FileIconToken.PRESENTATION, badge)
-            extension in TEXT_EXTENSIONS -> FileIconPresentation(FileIconToken.TEXT, badge)
-            extension in CODE_EXTENSIONS -> FileIconPresentation(FileIconToken.CODE, badge)
-            extension in ARCHIVE_EXTENSIONS -> FileIconPresentation(FileIconToken.ARCHIVE, badge)
-            extension in PROGRAM_EXTENSIONS -> FileIconPresentation(FileIconToken.PROGRAM, badge)
-            else -> FileIconPresentation(categoryToken(category), badge.takeIf {
+        return when (fileKind) {
+            FileKind.AUDIO -> FileIconPresentation(
+                if (extension in PLAYLIST_EXTENSIONS) FileIconToken.PLAYLIST else FileIconToken.AUDIO,
+                badge
+            )
+            FileKind.VIDEO -> FileIconPresentation(FileIconToken.VIDEO, badge)
+            FileKind.IMAGE -> FileIconPresentation(FileIconToken.IMAGE, badge)
+            FileKind.MODEL_3D -> FileIconPresentation(FileIconToken.IMAGE, badge)
+            FileKind.ARCHIVE -> FileIconPresentation(FileIconToken.ARCHIVE, badge)
+            FileKind.BOOK -> FileIconPresentation(FileIconToken.TEXT, badge)
+            FileKind.CODE,
+            FileKind.WEB -> FileIconPresentation(FileIconToken.CODE, badge)
+            FileKind.EXEC -> FileIconPresentation(FileIconToken.PROGRAM, badge)
+            FileKind.FONT -> FileIconPresentation(FileIconToken.TEXT, badge)
+            FileKind.SHEET -> FileIconPresentation(FileIconToken.SPREADSHEET, badge)
+            FileKind.SLIDE -> FileIconPresentation(FileIconToken.PRESENTATION, badge)
+            FileKind.TEXT -> FileIconPresentation(if (extension == "pdf") FileIconToken.PDF else FileIconToken.TEXT, badge)
+            FileKind.TORRENT -> FileIconPresentation(FileIconToken.TORRENT, badge)
+            FileKind.OTHER -> FileIconPresentation(categoryToken(category), badge.takeIf {
                 category == Category.DOCUMENT || category == Category.OTHER || category == Category.PROGRAM
             })
+        }
+    }
+
+    private fun fileKindLabel(fileName: String?): String {
+        return fileName
+            ?.let(categoryManager::getFileKindForFilename)
+            ?.displayName
+            ?: FileKind.OTHER.displayName
+    }
+
+    private fun friendlyExtensionDescription(extension: String, fileKind: FileKind): String? {
+        return when (fileKind) {
+            FileKind.MODEL_3D -> tr("3D model")
+            FileKind.ARCHIVE -> tr("Archive")
+            FileKind.AUDIO -> if (extension in PLAYLIST_EXTENSIONS) tr("Playlist") else tr("Audio")
+            FileKind.BOOK -> tr("Book")
+            FileKind.CODE -> when (extension) {
+                "json" -> tr("JSON file")
+                "xml" -> tr("XML file")
+                "md" -> tr("Markdown document")
+                else -> tr("Code file")
+            }
+            FileKind.EXEC -> tr("Executable")
+            FileKind.FONT -> tr("Font")
+            FileKind.IMAGE -> tr("Image")
+            FileKind.SHEET -> tr("Spreadsheet")
+            FileKind.SLIDE -> tr("Presentation")
+            FileKind.TEXT -> when (extension) {
+                "pdf" -> tr("PDF document")
+                "doc", "docx", "odt", "pages" -> tr("Document")
+                else -> tr("Text document")
+            }
+            FileKind.VIDEO -> tr("Video")
+            FileKind.WEB -> when (extension) {
+                "html", "htm" -> tr("Web page")
+                else -> tr("Web file")
+            }
+            FileKind.TORRENT -> tr("Torrent")
+            FileKind.OTHER -> null
         }
     }
 
@@ -408,30 +462,6 @@ class CoreComposeFileAppearanceService(
         return tr(unit.pattern, formatter.format(bytes / unit.divisor))
     }
 
-    private fun friendlyExtensionDescription(extension: String): String? {
-        return when (extension) {
-            "pdf" -> tr("PDF document")
-            in PLAYLIST_EXTENSIONS -> tr("Playlist")
-            in ARCHIVE_EXTENSIONS -> tr("Archive")
-            in SPREADSHEET_EXTENSIONS -> tr("Spreadsheet")
-            in PRESENTATION_EXTENSIONS -> tr("Presentation")
-            in TEXT_EXTENSIONS -> tr("Text document")
-            in CODE_EXTENSIONS -> when (extension) {
-                "html", "htm" -> tr("Web page")
-                "json" -> tr("JSON file")
-                "xml" -> tr("XML file")
-                "yaml", "yml" -> tr("YAML file")
-                "md" -> tr("Markdown document")
-                else -> tr("Code file")
-            }
-
-            "doc", "docx", "odt", "pages" -> tr("Document")
-            "epub", "mobi" -> tr("eBook")
-            "apk", "app", "appx", "deb", "dmg", "exe", "msi", "pkg", "rpm" -> tr("App installer")
-            else -> null
-        }
-    }
-
     private fun currentLocale(): Locale {
         return runCatching { ComposeLocalization.service.currentLocale() }.getOrDefault(Locale.getDefault())
     }
@@ -450,15 +480,5 @@ class CoreComposeFileAppearanceService(
         private const val TERABYTE = GIGABYTE * 1024L
 
         private val PLAYLIST_EXTENSIONS = setOf("cue", "m3u", "m3u8", "pls", "xspf")
-        private val ARCHIVE_EXTENSIONS = setOf("7z", "bz2", "gz", "rar", "tar", "tgz", "tbz", "xz", "zip")
-        private val SPREADSHEET_EXTENSIONS = setOf("csv", "numbers", "ods", "tsv", "xls", "xlsx")
-        private val PRESENTATION_EXTENSIONS = setOf("key", "odp", "ppt", "pptx")
-        private val TEXT_EXTENSIONS = setOf("cfg", "conf", "ini", "log", "md", "nfo", "rtf", "txt")
-        private val CODE_EXTENSIONS = setOf(
-            "c", "cc", "cpp", "css", "go", "h", "hpp", "htm", "html", "java", "js",
-            "json", "kt", "kts", "php", "py", "rb", "rs", "sh", "sql", "swift",
-            "ts", "tsx", "xml", "yaml", "yml"
-        )
-        private val PROGRAM_EXTENSIONS = setOf("apk", "app", "appx", "bat", "cmd", "deb", "dmg", "exe", "jar", "msi", "pkg", "rpm")
     }
 }

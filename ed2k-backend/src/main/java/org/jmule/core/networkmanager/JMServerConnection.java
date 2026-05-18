@@ -59,7 +59,9 @@ public class JMServerConnection extends JMConnection {
 	}
 	
 	String getIPAddress() {
-		return remote_inet_socket_address.getAddress().getHostAddress();
+		return remote_inet_socket_address.getAddress() == null
+				? remote_inet_socket_address.getHostString()
+				: remote_inet_socket_address.getAddress().getHostAddress();
 	}
 	
 	int getPort() {

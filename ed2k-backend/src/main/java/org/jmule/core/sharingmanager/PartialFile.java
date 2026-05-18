@@ -423,11 +423,11 @@ public class PartialFile extends SharedFile {
 	public List<Integer> checkFilePartsIntegrity() {
 		if (!hasHashSet()) {
 			if (ED2KConstants.PARTSIZE < length())
-				return Collections.EMPTY_LIST;
-			return Collections.EMPTY_LIST;
+				return Collections.emptyList();
+			return Collections.emptyList();
 		}
 		if (checkedParts.length == 0)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		List<Integer> result = new ArrayList<Integer>();
 		for (int i = 0; i < checkedParts.length; i++) {
 			if (!checkedParts[i]) {
@@ -452,15 +452,25 @@ public class PartialFile extends SharedFile {
 	
 	private boolean checkPartIntegrity(int partID) {
 		long start = PARTSIZE*partID;
+		long remainingFileBytes = length() - start;
+		if (remainingFileBytes <= 0 || partID < 0 || partID >= hashSet.size())
+			return false;
+		int expectedLength = (int)Math.min(PARTSIZE, remainingFileBytes);
 		MD4 msgDigest = new MD4();
 		
-		ByteBuffer partData = Misc.getByteBuffer(PARTSIZE);
+		ByteBuffer partData = Misc.getByteBuffer(expectedLength);
 		msgDigest.reset();
 		try {
 			synchronized (lock) {
+				if (readChannel.size() < start + expectedLength)
+					return false;
 				readChannel.position(start);
-				int count = readChannel.read(partData);
-				partData.limit(count);
+				while (partData.hasRemaining()) {
+					int count = readChannel.read(partData);
+					if (count <= 0)
+						return false;
+				}
+				partData.flip();
 				msgDigest.update(partData);
 			}
 			
@@ -469,12 +479,9 @@ public class PartialFile extends SharedFile {
 			
 			msgDigest.finalDigest(hashset);
 			
-			if (!Arrays.equals(hashSet.get(partID),hashset.array())) {
-				return false;
-			}
-			return true;
+			return Arrays.equals(hashSet.get(partID),hashset.array());
 			
-		} catch (IOException e) {
+		} catch (IOException | RuntimeException e) {
 			
 			return false;
 			

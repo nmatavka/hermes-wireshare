@@ -7,7 +7,11 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -81,25 +85,25 @@ import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
+import androidx.compose.material3.Button as MaterialButton
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalButton as MaterialFilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedButton as MaterialOutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
@@ -109,7 +113,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextButton as MaterialTextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -134,6 +138,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
@@ -197,6 +202,7 @@ import org.limewire.core.api.upload.UploadItem
 import org.limewire.core.api.upload.UploadState
 import org.limewire.friend.api.ChatState
 import org.limewire.friend.api.FriendConnectionEvent
+import org.limewire.friend.api.Network
 import org.limewire.player.api.PlayerState
 import org.limewire.ui.compose.integration.ComposeDropPayload
 import org.limewire.ui.compose.integration.FileIconPresentation
@@ -383,6 +389,338 @@ private val LocalDesktopTypeScale = staticCompositionLocalOf {
     )
 }
 
+private enum class CompactButtonTone {
+    FILLED,
+    TONAL,
+    OUTLINED,
+    TEXT,
+    TRANSLUCENT
+}
+
+private data class CompactButtonColors(
+    val container: Color,
+    val content: Color,
+    val border: Color? = null
+)
+
+@Composable
+private fun compactButtonColors(
+    tone: CompactButtonTone,
+    enabled: Boolean,
+    hovered: Boolean,
+    pressed: Boolean
+): CompactButtonColors {
+    val palette = LocalThemePalette.current
+    val scheme = MaterialTheme.colorScheme
+    val accent = when {
+        pressed -> palette.green
+        hovered -> palette.magenta
+        else -> scheme.primary
+    }
+    val washAlpha = when {
+        pressed -> 0.20f
+        hovered -> 0.12f
+        else -> 0f
+    }
+
+    if (!enabled) {
+        return when (tone) {
+            CompactButtonTone.FILLED,
+            CompactButtonTone.TONAL,
+            CompactButtonTone.TRANSLUCENT -> CompactButtonColors(
+                container = scheme.surfaceVariant.copy(alpha = 0.36f),
+                content = scheme.onSurfaceVariant.copy(alpha = 0.58f)
+            )
+            CompactButtonTone.OUTLINED -> CompactButtonColors(
+                container = Color.Transparent,
+                content = scheme.onSurfaceVariant.copy(alpha = 0.58f),
+                border = scheme.outline.copy(alpha = 0.34f)
+            )
+            CompactButtonTone.TEXT -> CompactButtonColors(
+                container = Color.Transparent,
+                content = scheme.onSurfaceVariant.copy(alpha = 0.58f)
+            )
+        }
+    }
+
+    return when (tone) {
+        CompactButtonTone.FILLED -> CompactButtonColors(
+            container = if (hovered || pressed) accent else scheme.primary,
+            content = palette.bg0
+        )
+        CompactButtonTone.TONAL -> CompactButtonColors(
+            container = if (hovered || pressed) accent.copy(alpha = washAlpha) else scheme.surfaceVariant.copy(alpha = 0.72f),
+            content = if (hovered || pressed) accent else scheme.onSurface
+        )
+        CompactButtonTone.TRANSLUCENT -> CompactButtonColors(
+            container = if (hovered || pressed) accent.copy(alpha = washAlpha) else scheme.surfaceVariant.copy(alpha = 0.46f),
+            content = if (hovered || pressed) accent else scheme.onSurface
+        )
+        CompactButtonTone.OUTLINED -> CompactButtonColors(
+            container = Color.Transparent,
+            content = accent,
+            border = if (hovered || pressed) accent else scheme.outline
+        )
+        CompactButtonTone.TEXT -> CompactButtonColors(
+            container = Color.Transparent,
+            content = accent
+        )
+    }
+}
+
+@Composable
+private fun Button(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.shape,
+    colors: ButtonColors? = null,
+    elevation: ButtonElevation? = ButtonDefaults.buttonElevation(),
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+    val appColors = compactButtonColors(CompactButtonTone.FILLED, enabled, hovered, pressed)
+    MaterialButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors ?: ButtonDefaults.buttonColors(
+            containerColor = appColors.container,
+            contentColor = appColors.content,
+            disabledContainerColor = appColors.container,
+            disabledContentColor = appColors.content
+        ),
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = source,
+        content = content
+    )
+}
+
+@Composable
+private fun FilledTonalButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.filledTonalShape,
+    colors: ButtonColors? = null,
+    elevation: ButtonElevation? = ButtonDefaults.filledTonalButtonElevation(),
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+    val appColors = compactButtonColors(CompactButtonTone.TONAL, enabled, hovered, pressed)
+    MaterialFilledTonalButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors ?: ButtonDefaults.filledTonalButtonColors(
+            containerColor = appColors.container,
+            contentColor = appColors.content,
+            disabledContainerColor = appColors.container,
+            disabledContentColor = appColors.content
+        ),
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = source,
+        content = content
+    )
+}
+
+@Composable
+private fun OutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.outlinedShape,
+    colors: ButtonColors? = null,
+    elevation: ButtonElevation? = null,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+    val appColors = compactButtonColors(CompactButtonTone.OUTLINED, enabled, hovered, pressed)
+    MaterialOutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors ?: ButtonDefaults.outlinedButtonColors(
+            containerColor = appColors.container,
+            contentColor = appColors.content,
+            disabledContainerColor = appColors.container,
+            disabledContentColor = appColors.content
+        ),
+        elevation = elevation,
+        border = border ?: BorderStroke(1.dp, appColors.border ?: MaterialTheme.colorScheme.outline),
+        contentPadding = contentPadding,
+        interactionSource = source,
+        content = content
+    )
+}
+
+@Composable
+private fun TextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.textShape,
+    colors: ButtonColors? = null,
+    elevation: ButtonElevation? = null,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    val source = interactionSource ?: remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+    val appColors = compactButtonColors(CompactButtonTone.TEXT, enabled, hovered, pressed)
+    MaterialTextButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors ?: ButtonDefaults.textButtonColors(
+            containerColor = appColors.container,
+            contentColor = appColors.content,
+            disabledContainerColor = appColors.container,
+            disabledContentColor = appColors.content
+        ),
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = source,
+        content = content
+    )
+}
+
+@Composable
+private fun FilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    AppChip(
+        selected = selected,
+        onClick = onClick,
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon
+    )
+}
+
+@Composable
+private fun AssistChip(
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    AppChip(
+        selected = false,
+        onClick = onClick,
+        label = label,
+        modifier = modifier,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon
+    )
+}
+
+@Composable
+private fun AppChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    val source = remember { MutableInteractionSource() }
+    val hovered by source.collectIsHoveredAsState()
+    val pressed by source.collectIsPressedAsState()
+    val palette = LocalThemePalette.current
+    val scheme = MaterialTheme.colorScheme
+    val accent = when {
+        pressed -> palette.green
+        hovered -> palette.magenta
+        selected -> scheme.primary
+        else -> scheme.onSurfaceVariant
+    }
+    val container = when {
+        !enabled -> scheme.surfaceVariant.copy(alpha = 0.28f)
+        selected -> accent
+        else -> Color.Transparent
+    }
+    val content = when {
+        !enabled -> scheme.onSurfaceVariant.copy(alpha = 0.52f)
+        selected -> palette.bg0
+        else -> accent
+    }
+    val border = when {
+        !enabled -> scheme.outline.copy(alpha = 0.24f)
+        selected -> accent
+        hovered || pressed -> accent
+        else -> scheme.outline.copy(alpha = 0.58f)
+    }
+    Surface(
+        modifier = modifier
+            .hoverable(source, enabled = enabled)
+            .clickable(
+                interactionSource = source,
+                indication = null,
+                enabled = enabled,
+                role = Role.Button,
+                onClick = onClick
+            ),
+        shape = RoundedCornerShape(999.dp),
+        color = container,
+        contentColor = content,
+        border = BorderStroke(1.dp, border)
+    ) {
+        CompositionLocalProvider(LocalContentColor provides content) {
+            Row(
+                modifier = Modifier
+                    .defaultMinSize(minHeight = 32.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                leadingIcon?.invoke()
+                label()
+                trailingIcon?.invoke()
+            }
+        }
+    }
+}
+
 @Composable
 private fun CompactOutlinedButton(
     onClick: () -> Unit,
@@ -391,10 +729,22 @@ private fun CompactOutlinedButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val desktopDensity = LocalDesktopDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
+    val colors = compactButtonColors(CompactButtonTone.OUTLINED, enabled, hovered, pressed)
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
         enabled = enabled,
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = colors.container,
+            contentColor = colors.content,
+            disabledContainerColor = colors.container,
+            disabledContentColor = colors.content
+        ),
+        border = BorderStroke(1.dp, colors.border ?: MaterialTheme.colorScheme.outline),
+        interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
         content = content
     )
@@ -408,10 +758,21 @@ private fun CompactFilledTonalButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val desktopDensity = LocalDesktopDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
+    val colors = compactButtonColors(CompactButtonTone.TONAL, enabled, hovered, pressed)
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
         enabled = enabled,
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = colors.container,
+            contentColor = colors.content,
+            disabledContainerColor = colors.container,
+            disabledContentColor = colors.content
+        ),
+        interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
         content = content
     )
@@ -425,16 +786,21 @@ private fun CompactTranslucentButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val desktopDensity = LocalDesktopDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
+    val colors = compactButtonColors(CompactButtonTone.TRANSLUCENT, enabled, hovered, pressed)
     FilledTonalButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
         enabled = enabled,
         colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
-            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+            containerColor = colors.container,
+            contentColor = colors.content,
+            disabledContainerColor = colors.container,
+            disabledContentColor = colors.content
         ),
+        interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
         content = content
     )
@@ -448,10 +814,21 @@ private fun CompactButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val desktopDensity = LocalDesktopDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
+    val colors = compactButtonColors(CompactButtonTone.FILLED, enabled, hovered, pressed)
     Button(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
         enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colors.container,
+            contentColor = colors.content,
+            disabledContainerColor = colors.container,
+            disabledContentColor = colors.content
+        ),
+        interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
         content = content
     )
@@ -465,10 +842,21 @@ private fun CompactTextButton(
     content: @Composable RowScope.() -> Unit
 ) {
     val desktopDensity = LocalDesktopDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val hovered by interactionSource.collectIsHoveredAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
+    val colors = compactButtonColors(CompactButtonTone.TEXT, enabled, hovered, pressed)
     TextButton(
         onClick = onClick,
         modifier = modifier.defaultMinSize(minHeight = desktopDensity.controlHeight),
         enabled = enabled,
+        colors = ButtonDefaults.textButtonColors(
+            containerColor = colors.container,
+            contentColor = colors.content,
+            disabledContainerColor = colors.container,
+            disabledContentColor = colors.content
+        ),
+        interactionSource = interactionSource,
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
         content = content
     )
@@ -636,6 +1024,8 @@ private data class DesktopTableColumnSpec(
 
 private data class DesktopTableLayout<C>(
     val tableWidth: Dp,
+    val leadingWidth: Dp,
+    val trailingWidth: Dp,
     private val columnWidths: Map<C, Dp>
 ) {
     fun width(column: C): Dp = columnWidths.getValue(column)
@@ -681,6 +1071,8 @@ private fun <C> resolveDesktopTableLayout(
     }
     return DesktopTableLayout(
         tableWidth = targetTableWidth,
+        leadingWidth = leadingWidth,
+        trailingWidth = trailingWidth,
         columnWidths = widths
     )
 }
@@ -2583,7 +2975,7 @@ private fun LibraryFileInfoDialog(controller: ComposeAppController, state: Libra
                     title = identity.title,
                     subtitle = identity.subtitle,
                     icon = identity.icon,
-                    tertiary = "${item.category.getSingularName()} · ${formatBytes(item.size)}"
+                    tertiary = "${identity.kindLabel} · ${item.category.getSingularName()} · ${formatBytes(item.size)}"
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilledTonalButton(onClick = {
@@ -2645,6 +3037,7 @@ private fun LibraryFileInfoDialog(controller: ComposeAppController, state: Libra
                         }
                     }
                     InfoField("Path", item.file.absolutePath)
+                    InfoField("Kind", identity.kindLabel)
                     InfoField("Category", item.category.getSingularName())
                     InfoField("Size", formatBytes(item.size))
                     InfoField("Created", formatDate(item.creationTime))
@@ -2731,7 +3124,7 @@ private fun SearchFileInfoDialog(controller: ComposeAppController, state: Search
                     title = identity.title,
                     subtitle = identity.subtitle,
                     icon = identity.icon,
-                    tertiary = "${primary?.category?.getSingularName() ?: "File"} · ${primary?.size?.let(::formatBytes) ?: "Unknown"}"
+                    tertiary = "${identity.kindLabel} · ${primary?.category?.getSingularName() ?: "File"} · ${primary?.size?.let(::formatBytes) ?: "Unknown"}"
                 )
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilledTonalButton(onClick = { controller.activeSearchTab()?.let { controller.downloadSearchResult(it, result) } }) {
@@ -2773,6 +3166,7 @@ private fun SearchFileInfoDialog(controller: ComposeAppController, state: Search
                         }
                     }
                 }
+                InfoField("Kind", identity.kindLabel)
                 InfoField("Category", primary?.category?.getSingularName() ?: "File")
                 InfoField("Size", primary?.size?.let(::formatBytes) ?: "Unknown")
                 InfoField("Sources", result.sources.size.toString())
@@ -2893,7 +3287,7 @@ private fun DownloadFileInfoDialog(controller: ComposeAppController, state: Down
         InfoField("URN", item.urn?.toString() ?: "Unavailable")
         InfoField("Sources", item.downloadSourceCount.toString())
         InfoField("Download Rate", formatRate(item.downloadSpeed))
-        InfoField("Remaining", formatDuration(item.remainingDownloadTime))
+        InfoField(downloadTimeFieldLabel(item), downloadTimeText(item))
         InfoField("Started", formatDate(item.startDate.time))
         if (item.errorState != DownloadItem.ErrorState.NONE) {
             InfoField("Error", item.errorState.message)
@@ -3154,8 +3548,41 @@ private fun PreferencesDialog(controller: ComposeAppController) {
                                     PreferenceToggle("Group similar results", draft.search.groupSimilarResults) {
                                         draft = draft.copy(search = draft.search.copy(groupSimilarResults = it))
                                     }
-                                    PreferenceToggle("Use torrent web search", draft.search.useTorrentWebSearch) {
-                                        draft = draft.copy(search = draft.search.copy(useTorrentWebSearch = it))
+                                    PreferenceToggle(
+                                        "Use FrostWire web/media search",
+                                        draft.search.useFrostWireSearch,
+                                        supportingText = "Search FrostWire-style web providers and merge those results with WireShare network results."
+                                    ) {
+                                        draft = draft.copy(search = draft.search.copy(useFrostWireSearch = it))
+                                    }
+                                    if (draft.search.useFrostWireSearch && draft.search.frostWireSearchProviders.isNotEmpty()) {
+                                        PreferenceActionRow(
+                                            title = "FrostWire providers",
+                                            description = "Enable or quiet individual web/media search engines."
+                                        ) {
+                                            Text(
+                                                "${draft.search.frostWireSearchProviders.count { it.enabled }} enabled",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            draft.search.frostWireSearchProviders.forEach { provider ->
+                                                FilterChip(
+                                                    selected = provider.enabled,
+                                                    onClick = {
+                                                        draft = draft.copy(
+                                                            search = draft.search.copy(
+                                                                frostWireSearchProviders = draft.search.frostWireSearchProviders.map {
+                                                                    if (it.key == provider.key) it.copy(enabled = !it.enabled) else it
+                                                                }
+                                                            )
+                                                        )
+                                                    },
+                                                    label = { Text(provider.label) }
+                                                )
+                                            }
+                                        }
                                     }
                                     PreferenceToggle("Filter adult content", draft.search.filterAdultContent) {
                                         draft = draft.copy(search = draft.search.copy(filterAdultContent = it))
@@ -6360,6 +6787,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
     val selectedItems = controller.selectedLibraryItems()
     val selectedItem = controller.selectedLibraryItem()
     val categories = remember { listOf<Category?>(null) + Category.values().toList() }
+    val fileKindOptions = controller.libraryFileKindOptions()
     val tableFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(
@@ -6368,6 +6796,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
         controller.selectedLibraryItemPath,
         controller.libraryFilterText,
         controller.libraryCategoryFilter,
+        controller.libraryFileKindFilter,
         controller.librarySortMode,
         controller.librarySortDescending
     ) {
@@ -6721,7 +7150,8 @@ private fun LibraryScreen(controller: ComposeAppController) {
                             FilterChip(
                                 selected = controller.libraryFiltersVisible,
                                 onClick = { controller.toggleLibraryFiltersVisible() },
-                                label = { Text("Filter") }
+                                label = { Text("Filter") },
+                                modifier = Modifier.defaultMinSize(minHeight = desktopDensity.controlHeight)
                             )
                             ColumnVisibilityMenu(
                                 entries = availableLibraryColumns.map { column ->
@@ -6874,23 +7304,43 @@ private fun LibraryScreen(controller: ComposeAppController) {
                                     }
                                 }
                             )
-                            if (controller.libraryFilterText.isNotEmpty() || controller.libraryCategoryFilter != null) {
+                            if (controller.hasActiveLibraryFilters()) {
                                 CompactOutlinedButton(onClick = { controller.clearLibraryFilters() }) {
                                     Text("Clear Filters")
                                 }
                             }
                         }
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(desktopDensity.chipGap),
-                            verticalArrangement = Arrangement.spacedBy(desktopDensity.chipGap)
-                        ) {
-                            categories.forEach { category ->
-                                val selected = controller.libraryCategoryFilter == category
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { controller.selectLibraryCategory(category) },
-                                    label = { Text(category?.getPluralName() ?: "All") }
-                                )
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Category", style = desktopType.label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(desktopDensity.chipGap),
+                                verticalArrangement = Arrangement.spacedBy(desktopDensity.chipGap)
+                            ) {
+                                categories.forEach { category ->
+                                    val selected = controller.libraryCategoryFilter == category
+                                    FilterChip(
+                                        selected = selected,
+                                        onClick = { controller.selectLibraryCategory(category) },
+                                        label = { Text(category?.getPluralName() ?: "All") }
+                                    )
+                                }
+                            }
+                        }
+                        if (fileKindOptions.size > 1) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("Kind", style = desktopType.label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(desktopDensity.chipGap),
+                                    verticalArrangement = Arrangement.spacedBy(desktopDensity.chipGap)
+                                ) {
+                                    fileKindOptions.forEach { fileKind ->
+                                        FilterChip(
+                                            selected = controller.libraryFileKindFilter == fileKind,
+                                            onClick = { controller.selectLibraryFileKind(fileKind) },
+                                            label = { Text(fileKind?.let(controller::fileKindLabel) ?: "Any Kind") }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -6923,7 +7373,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Text(identity.title, fontWeight = FontWeight.SemiBold)
                                                     Text(
-                                                        "${selectedItem.category.getSingularName()} · ${formatBytes(selectedItem.size)} · ${buildLibraryItemMeta(identity.subtitle, selectedItem, currentFile == selectedItem.file && playerState in setOf(PlayerState.PLAYING, PlayerState.SEEKING_PLAY, PlayerState.PAUSED))}",
+                                                        "${identity.kindLabel} · ${selectedItem.category.getSingularName()} · ${formatBytes(selectedItem.size)} · ${buildLibraryItemMeta(identity.subtitle, selectedItem, currentFile == selectedItem.file && playerState in setOf(PlayerState.PLAYING, PlayerState.SEEKING_PLAY, PlayerState.PAUSED))}",
                                                         style = desktopType.summary,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
@@ -7136,7 +7586,7 @@ private fun LibraryScreen(controller: ComposeAppController) {
 
 @Composable
 private fun RuntimeErrorDialog(controller: ComposeAppController, report: ComposeRuntimeErrorReport) {
-    var showDetails by remember(report.id) { mutableStateOf(false) }
+    var showDetails by remember(report.id) { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = { controller.dismissRuntimeErrorDialog(report.id) },
@@ -7273,7 +7723,7 @@ private fun FileRow(
                 }
             }
             if (LibraryColumn.TYPE in visibleColumns) {
-                Text(item.category.getSingularName(), modifier = layout.modifier(LibraryColumn.TYPE), style = MaterialTheme.typography.bodySmall)
+                Text(controller.fileKindLabel(item.fileName), modifier = layout.modifier(LibraryColumn.TYPE), style = MaterialTheme.typography.bodySmall)
             }
             if (LibraryColumn.FILENAME in visibleColumns) {
                 Text(
@@ -7716,27 +8166,33 @@ private fun SearchResultsWorkspace(
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(
-                                    checked = results.isNotEmpty() && results.all { searchResultKey(it) in tab.selectedResultKeys },
-                                    onCheckedChange = { checked ->
-                                        if (checked) {
-                                            controller.selectAllVisibleSearchResults(tab)
-                                        } else {
-                                            controller.clearSearchSelection(tab)
+                                Box(
+                                    modifier = Modifier.width(layout.leadingWidth),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Checkbox(
+                                        checked = results.isNotEmpty() && results.all { searchResultKey(it) in tab.selectedResultKeys },
+                                        onCheckedChange = { checked ->
+                                            if (checked) {
+                                                controller.selectAllVisibleSearchResults(tab)
+                                            } else {
+                                                controller.clearSearchSelection(tab)
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
                                 orderedVisibleSearchColumns.forEach { column ->
                                     SortableHeaderText(
                                         label = searchColumnLabel(presentationCategory, column),
                                         active = tab.sortMode.asSearchColumn() == column && tab.sortMode != SearchSortMode.RELEVANCE,
                                         descending = tab.sortDescending,
-                                        modifier = layout.modifier(column)
+                                        modifier = layout.modifier(column),
+                                        textAlign = searchColumnSpec(column).alignment
                                     ) {
                                         controller.toggleSearchSort(tab, column.asSearchSortMode())
                                     }
                                 }
-                                Spacer(Modifier.width(54.dp))
+                                Spacer(Modifier.width(layout.trailingWidth))
                             }
                         }
                         HorizontalDivider()
@@ -7749,7 +8205,7 @@ private fun SearchResultsWorkspace(
                                     controller = controller,
                                     tab = tab,
                                     result = result,
-                                    visibleColumns = visibleSearchColumns,
+                                    visibleColumns = orderedVisibleSearchColumns,
                                     layout = layout,
                                     selected = searchResultKey(result) in tab.selectedResultKeys,
                                     primarySelected = searchResultKey(result) == selectedResult?.let(::searchResultKey),
@@ -8420,7 +8876,7 @@ private fun SearchResultRow(
     controller: ComposeAppController,
     tab: SearchTabSession,
     result: GroupedSearchResult,
-    visibleColumns: Set<SearchColumn>,
+    visibleColumns: List<SearchColumn>,
     layout: DesktopTableLayout<SearchColumn>,
     selected: Boolean,
     primarySelected: Boolean,
@@ -8611,144 +9067,106 @@ private fun SearchResultRow(
                     )
         }
         Box {
+            @Composable
+            fun SearchCellText(
+                column: SearchColumn,
+                text: String,
+                maxLines: Int = 1,
+                overflow: TextOverflow = TextOverflow.Ellipsis
+            ) {
+                Text(
+                    text,
+                    modifier = layout.modifier(column),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = maxLines,
+                    overflow = overflow,
+                    textAlign = searchColumnSpec(column).alignment
+                )
+            }
+
+            @Composable
+            fun SearchCell(column: SearchColumn) {
+                when (column) {
+                    SearchColumn.NAME -> {
+                        Row(modifier = layout.modifier(SearchColumn.NAME), verticalAlignment = Alignment.CenterVertically) {
+                            FileIdentityIcon(
+                                icon = identity.icon,
+                                modifier = Modifier.size(18.dp),
+                                fallback = FileIconToken.OTHER
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    if (SearchColumn.MARKER !in visibleColumns) {
+                                        SearchMarkerBadges(result, availabilityLabel)
+                                    }
+                                    Text(
+                                        buildSearchMetadata(identity.subtitle, primary, result),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    SearchColumn.MARKER -> {
+                        FlowRow(
+                            modifier = layout.modifier(SearchColumn.MARKER),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            SearchMarkerBadges(result, availabilityLabel)
+                        }
+                    }
+                    SearchColumn.TYPE -> SearchCellText(column, controller.fileKindLabel(primary?.fileName ?: result.fileName))
+                    SearchColumn.FROM -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.FILENAME -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.EXTENSION -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.SIZE -> SearchCellText(column, primary?.size?.let(::formatBytes) ?: "Unknown")
+                    SearchColumn.SOURCES -> SearchCellText(column, result.sources.size.toString())
+                    SearchColumn.FRIENDS -> SearchCellText(column, result.friends.size.toString())
+                    SearchColumn.LENGTH -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.QUALITY -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.BITRATE -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.TRACK -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.ARTIST -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.ALBUM -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.GENRE -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.YEAR -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.AUTHOR -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.COMPANY -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.PLATFORM -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.DESCRIPTION -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.FILES -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                    SearchColumn.TRACKERS -> SearchCellText(column, searchColumnValueText(primary, result, column))
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = selected,
-                    onCheckedChange = { onToggleChecked() }
-                )
-                if (SearchColumn.NAME in visibleColumns) {
-                    Row(modifier = layout.modifier(SearchColumn.NAME), verticalAlignment = Alignment.CenterVertically) {
-                        FileIdentityIcon(
-                            icon = identity.icon,
-                            modifier = Modifier.size(18.dp),
-                            fallback = FileIconToken.OTHER
-                        )
-                        Spacer(Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text(identity.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                InlineStatusBadge(
-                                    searchSourceText(result),
-                                    tone = searchSourceBadgeTone(result),
-                                    icon = searchSourceBadgeIcon(result)
-                                )
-                                Text(
-                                    buildSearchMetadata(identity.subtitle, primary, result),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                availabilityLabel?.let { label ->
-                                    InlineStatusBadge(
-                                        label = label,
-                                        tone = localAvailabilityBadgeTone(label),
-                                        icon = localAvailabilityBadgeIcon(label)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                if (SearchColumn.TYPE in visibleColumns) {
-                    Text(
-                        primary?.category?.getSingularName() ?: "File",
-                        modifier = layout.modifier(SearchColumn.TYPE),
-                        style = MaterialTheme.typography.bodySmall
+                Box(
+                    modifier = Modifier.width(layout.leadingWidth),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = { onToggleChecked() }
                     )
                 }
-                if (SearchColumn.FROM in visibleColumns) {
-                    Text(
-                        searchColumnValueText(primary, result, SearchColumn.FROM),
-                        modifier = layout.modifier(SearchColumn.FROM),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                visibleColumns.forEach { column ->
+                    SearchCell(column)
                 }
-                if (SearchColumn.FILENAME in visibleColumns) {
-                    Text(
-                        searchColumnValueText(primary, result, SearchColumn.FILENAME),
-                        modifier = layout.modifier(SearchColumn.FILENAME),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (SearchColumn.EXTENSION in visibleColumns) {
-                    Text(
-                        searchColumnValueText(primary, result, SearchColumn.EXTENSION),
-                        modifier = layout.modifier(SearchColumn.EXTENSION),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                if (SearchColumn.SIZE in visibleColumns) {
-                    Text(
-                        primary?.size?.let(::formatBytes) ?: "Unknown",
-                        modifier = layout.modifier(SearchColumn.SIZE),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                if (SearchColumn.SOURCES in visibleColumns) {
-                    Text(result.sources.size.toString(), modifier = layout.modifier(SearchColumn.SOURCES), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.FRIENDS in visibleColumns) {
-                    Text(result.friends.size.toString(), modifier = layout.modifier(SearchColumn.FRIENDS), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.LENGTH in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.LENGTH), modifier = layout.modifier(SearchColumn.LENGTH), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.QUALITY in visibleColumns) {
-                    Text(
-                        searchColumnValueText(primary, result, SearchColumn.QUALITY),
-                        modifier = layout.modifier(SearchColumn.QUALITY),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (SearchColumn.BITRATE in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.BITRATE), modifier = layout.modifier(SearchColumn.BITRATE), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.TRACK in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.TRACK), modifier = layout.modifier(SearchColumn.TRACK), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.ARTIST in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.ARTIST), modifier = layout.modifier(SearchColumn.ARTIST), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.ALBUM in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.ALBUM), modifier = layout.modifier(SearchColumn.ALBUM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.GENRE in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.GENRE), modifier = layout.modifier(SearchColumn.GENRE), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.YEAR in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.YEAR), modifier = layout.modifier(SearchColumn.YEAR), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.AUTHOR in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.AUTHOR), modifier = layout.modifier(SearchColumn.AUTHOR), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.COMPANY in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.COMPANY), modifier = layout.modifier(SearchColumn.COMPANY), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.PLATFORM in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.PLATFORM), modifier = layout.modifier(SearchColumn.PLATFORM), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.DESCRIPTION in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.DESCRIPTION), modifier = layout.modifier(SearchColumn.DESCRIPTION), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (SearchColumn.FILES in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.FILES), modifier = layout.modifier(SearchColumn.FILES), style = MaterialTheme.typography.bodySmall)
-                }
-                if (SearchColumn.TRACKERS in visibleColumns) {
-                    Text(searchColumnValueText(primary, result, SearchColumn.TRACKERS), modifier = layout.modifier(SearchColumn.TRACKERS), style = MaterialTheme.typography.bodySmall)
-                }
-                Box {
+                Box(
+                    modifier = Modifier.width(layout.trailingWidth),
+                    contentAlignment = Alignment.Center
+                ) {
                     IconButton(onClick = {
                         contextMenuExpanded = false
                         menuExpanded = true
@@ -9730,7 +10148,7 @@ private fun compactDownloadTrayText(controller: ComposeAppController, item: Down
         if (item.downloadSpeed > 0f) {
             parts += formatRate(item.downloadSpeed)
         }
-        formatDuration(item.remainingDownloadTime)
+        formatRemainingTransferDuration(item.remainingDownloadTime)
             .takeIf { it.isNotBlank() && it != "0s" }
             ?.let(parts::add)
     }
@@ -9757,6 +10175,51 @@ private fun compactUploadTrayText(controller: ComposeAppController, item: Upload
         parts += status
     }
     return parts.joinToString(" · ")
+}
+
+private fun downloadTimeFieldLabel(item: DownloadItem): String {
+    return if (item.state.isFinished) "Elapsed" else "Remaining"
+}
+
+private fun downloadTimeText(item: DownloadItem): String {
+    return if (item.state.isFinished) {
+        finishedDownloadElapsedTime(item)
+    } else {
+        formatRemainingTransferDuration(item.remainingDownloadTime)
+    }
+}
+
+private fun finishedDownloadElapsedTime(item: DownloadItem): String {
+    val startMillis = item.startDate?.time ?: return "unknown"
+    val finishMillis = completedDownloadTimestamp(item)
+    if (startMillis <= 0L || finishMillis <= 0L || finishMillis < startMillis) {
+        return "unknown"
+    }
+    return formatDuration((finishMillis - startMillis) / 1000L)
+}
+
+private fun completedDownloadTimestamp(item: DownloadItem): Long {
+    val completedFileTimestamp = runCatching {
+        item.completeFiles
+            ?.asSequence()
+            ?.filter(File::exists)
+            ?.map(File::lastModified)
+            ?.filter { it > 0L }
+            ?.maxOrNull()
+    }.getOrNull()
+    if (completedFileTimestamp != null && completedFileTimestamp > 0L) {
+        return completedFileTimestamp
+    }
+    return runCatching {
+        item.saveFile
+            ?.takeIf(File::exists)
+            ?.lastModified()
+            ?.takeIf { it > 0L }
+    }.getOrNull() ?: 0L
+}
+
+private fun formatRemainingTransferDuration(value: Long): String {
+    return if (value == ED2K_INFINITY_ETA_SECONDS) "unknown" else formatDuration(value)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -10443,7 +10906,7 @@ private fun DownloadTransferRow(
         }
         if (DownloadColumn.TIME_LEFT in visibleColumns) {
             Text(
-                formatDuration(item.remainingDownloadTime),
+                downloadTimeText(item),
                 modifier = layout.modifier(DownloadColumn.TIME_LEFT),
                 style = MaterialTheme.typography.bodySmall
             )
@@ -10462,7 +10925,7 @@ private fun DownloadTransferRow(
                     icon = downloadStateIcon
                 )
                 Text(
-                    formatDuration(item.remainingDownloadTime),
+                    downloadTimeText(item),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -11201,6 +11664,7 @@ private const val CHAT_PAUSE_DELAY_MS = 3_000L
 private const val CHAT_OUTGOING_GROUP_GAP_MS = 60_000L
 private const val CHAT_SOFT_WRAP_RUN_LIMIT = 24
 private const val CHAT_LINK_ANNOTATION_TAG = "chat-link"
+private const val ED2K_INFINITY_ETA_SECONDS = 365L * 24L * 60L * 60L
 
 private sealed interface ConversationTimelineItem {
     val key: String
@@ -12276,14 +12740,14 @@ private fun metricBadgeColors(tone: BadgeTone): BadgeColors {
     val palette = LocalThemePalette.current
     val accent = when (tone) {
         BadgeTone.NEUTRAL -> null
-        BadgeTone.BLUE -> palette.blue
+        BadgeTone.BLUE -> palette.blueRoleColor
         BadgeTone.CYAN -> palette.cyan
         BadgeTone.GREEN -> palette.green
         BadgeTone.YELLOW -> palette.yellow
         BadgeTone.ORANGE -> palette.orange
         BadgeTone.RED -> palette.red
         BadgeTone.MAGENTA -> palette.magenta
-        BadgeTone.VIOLET -> palette.violet
+        BadgeTone.VIOLET -> palette.violetRoleColor
     }
     return if (accent == null) {
         BadgeColors(
@@ -14413,12 +14877,14 @@ private fun SortableHeaderText(
     active: Boolean,
     descending: Boolean,
     modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Start,
     onClick: () -> Unit
 ) {
     Text(
         text = if (active) "$label ${if (descending) "↓" else "↑"}" else label,
         modifier = modifier.clickable(onClick = onClick),
         fontWeight = FontWeight.SemiBold,
+        textAlign = textAlign,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
     )
@@ -14478,6 +14944,7 @@ private fun searchSourceFilterLabel(filter: SearchSourceFilter): String {
         SearchSourceFilter.ALL -> "All sources"
         SearchSourceFilter.FRIENDS -> "Friend sources"
         SearchSourceFilter.NETWORK -> "WireShare network"
+        SearchSourceFilter.WEB_SEARCH -> "Web/media search"
         SearchSourceFilter.ED2K_KAD -> "ED2K/Kad"
         SearchSourceFilter.BROWSABLE -> "Browsable"
     }
@@ -14860,6 +15327,7 @@ private fun LibraryColumn.asLibrarySortMode(): LibrarySortMode {
 private fun SearchSortMode.asSearchColumn(): SearchColumn {
     return when (this) {
         SearchSortMode.RELEVANCE -> SearchColumn.NAME
+        SearchSortMode.MARKER -> SearchColumn.MARKER
         SearchSortMode.NAME -> SearchColumn.NAME
         SearchSortMode.FROM -> SearchColumn.FROM
         SearchSortMode.FILENAME -> SearchColumn.FILENAME
@@ -14888,6 +15356,7 @@ private fun SearchSortMode.asSearchColumn(): SearchColumn {
 private fun SearchColumn.asSearchSortMode(): SearchSortMode {
     return when (this) {
         SearchColumn.NAME -> SearchSortMode.NAME
+        SearchColumn.MARKER -> SearchSortMode.MARKER
         SearchColumn.FROM -> SearchSortMode.FROM
         SearchColumn.FILENAME -> SearchSortMode.FILENAME
         SearchColumn.EXTENSION -> SearchSortMode.EXTENSION
@@ -14974,7 +15443,7 @@ private fun downloadColumnLabel(column: DownloadColumn): String {
     return when (column) {
         DownloadColumn.NAME -> "Name"
         DownloadColumn.ORDER_ADDED -> "Added"
-        DownloadColumn.TIME_LEFT -> "ETA"
+        DownloadColumn.TIME_LEFT -> "Time"
         DownloadColumn.FILE_TYPE -> "Type"
         DownloadColumn.EXTENSION -> "Ext"
         DownloadColumn.STATUS -> "Status"
@@ -15030,6 +15499,7 @@ private fun searchColumnLabel(category: SearchCategory, column: SearchColumn): S
             SearchCategory.DOCUMENT -> "Title"
             else -> "Name"
         }
+        SearchColumn.MARKER -> "Marker"
         SearchColumn.TYPE -> "Type"
         SearchColumn.FROM -> "Source"
         SearchColumn.FILENAME -> "File Name"
@@ -15091,6 +15561,7 @@ private fun searchColumnValueText(
     column: SearchColumn
 ): String {
     return when (column) {
+        SearchColumn.MARKER -> searchMarkerText(result)
         SearchColumn.FROM -> searchSourceText(result)
         SearchColumn.FILENAME -> primary?.fileNameWithoutExtension?.displayFallback()
             ?: fileNameWithoutExtension(result.fileName).displayFallback()
@@ -15135,13 +15606,58 @@ private fun fileExtensionText(fileName: String): String {
 }
 
 private fun searchSourceText(result: GroupedSearchResult): String {
-    return result.friends.firstOrNull()?.renderName?.displayFallback()
+    return webSearchProviderText(result)?.displayFallback()
+        ?: result.friends.firstOrNull()?.renderName?.displayFallback()
         ?: result.sources.firstOrNull()?.friendPresence?.friend?.renderName?.displayFallback()
-        ?: if (result.urn?.toString()?.startsWith("urn:ed2k:") == true) "ED2K/Kad" else if (result.isAnonymous) "P2P" else "Network"
+        ?: if (result.urn?.toString()?.startsWith("urn:ed2k:") == true) "ED2K/Kad" else if (result.isAnonymous) "Gnutella" else "Network"
+}
+
+private fun isWebSearchResult(result: GroupedSearchResult): Boolean {
+    return result.searchResults.any(::isWebSearchResult) ||
+        result.sources.any { it.friendPresence?.friend?.network?.type == Network.Type.WEBSEARCH }
+}
+
+private fun isWebSearchResult(result: SearchResult): Boolean {
+    return result.source.friendPresence?.friend?.network?.type == Network.Type.WEBSEARCH ||
+        result.getProperty(FilePropertyKey.USERAGENT)?.toString()?.startsWith("FrostWire:") == true
+}
+
+private fun webSearchProviderText(result: GroupedSearchResult): String? {
+    return result.searchResults.asSequence()
+        .mapNotNull { it.getProperty(FilePropertyKey.USERAGENT)?.toString() }
+        .firstOrNull { it.startsWith("FrostWire:") }
+        ?.removePrefix("FrostWire:")
+        ?.takeIf(String::isNotBlank)
+        ?: result.sources.asSequence()
+            .mapNotNull { it.friendPresence?.friend }
+            .firstOrNull { it.network?.type == Network.Type.WEBSEARCH }
+            ?.renderName
+            ?.takeIf(String::isNotBlank)
+}
+
+@Composable
+private fun SearchMarkerBadges(result: GroupedSearchResult, availabilityLabel: String?) {
+    InlineStatusBadge(
+        searchSourceText(result),
+        tone = searchSourceBadgeTone(result),
+        icon = searchSourceBadgeIcon(result)
+    )
+    availabilityLabel?.let { label ->
+        InlineStatusBadge(
+            label = label,
+            tone = localAvailabilityBadgeTone(label),
+            icon = localAvailabilityBadgeIcon(label)
+        )
+    }
+}
+
+private fun searchMarkerText(result: GroupedSearchResult): String {
+    return searchSourceText(result)
 }
 
 private fun searchSourceBadgeTone(result: GroupedSearchResult): BadgeTone {
     return when {
+        isWebSearchResult(result) -> BadgeTone.MAGENTA
         result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> BadgeTone.GREEN
         result.urn?.toString()?.startsWith("urn:ed2k:") == true -> BadgeTone.ORANGE
         result.isAnonymous -> BadgeTone.VIOLET
@@ -15151,6 +15667,7 @@ private fun searchSourceBadgeTone(result: GroupedSearchResult): BadgeTone {
 
 private fun searchSourceBadgeIcon(result: GroupedSearchResult): ImageVector {
     return when {
+        isWebSearchResult(result) -> Icons.Rounded.Search
         result.friends.isNotEmpty() || result.sources.any { it.friendPresence?.friend != null } -> Icons.Rounded.Forum
         result.urn?.toString()?.startsWith("urn:ed2k:") == true -> Icons.Rounded.Link
         else -> Icons.Rounded.Wifi
@@ -15632,27 +16149,28 @@ private fun libraryColumnSpec(column: LibraryColumn): DesktopTableColumnSpec {
 private fun searchColumnSpec(column: SearchColumn): DesktopTableColumnSpec {
     return when (column) {
         SearchColumn.NAME -> DesktopTableColumnSpec(priority = 0, minWidth = 320.dp, preferredWidth = 420.dp, flexWeight = 1f)
-        SearchColumn.TYPE -> DesktopTableColumnSpec(priority = 1, minWidth = 108.dp)
-        SearchColumn.FROM -> DesktopTableColumnSpec(priority = 2, minWidth = 148.dp)
-        SearchColumn.FILENAME -> DesktopTableColumnSpec(priority = 3, minWidth = 188.dp)
-        SearchColumn.EXTENSION -> DesktopTableColumnSpec(priority = 4, minWidth = 96.dp)
-        SearchColumn.SIZE -> DesktopTableColumnSpec(priority = 5, minWidth = 96.dp, alignment = TextAlign.End)
-        SearchColumn.SOURCES -> DesktopTableColumnSpec(priority = 6, minWidth = 76.dp, alignment = TextAlign.End)
-        SearchColumn.FRIENDS -> DesktopTableColumnSpec(priority = 7, minWidth = 76.dp, alignment = TextAlign.End)
-        SearchColumn.LENGTH -> DesktopTableColumnSpec(priority = 8, minWidth = 92.dp)
-        SearchColumn.QUALITY -> DesktopTableColumnSpec(priority = 9, minWidth = 126.dp)
-        SearchColumn.BITRATE -> DesktopTableColumnSpec(priority = 10, minWidth = 92.dp)
-        SearchColumn.TRACK -> DesktopTableColumnSpec(priority = 11, minWidth = 76.dp, alignment = TextAlign.End)
-        SearchColumn.ARTIST -> DesktopTableColumnSpec(priority = 12, minWidth = 132.dp)
-        SearchColumn.ALBUM -> DesktopTableColumnSpec(priority = 13, minWidth = 132.dp)
-        SearchColumn.GENRE -> DesktopTableColumnSpec(priority = 14, minWidth = 108.dp)
-        SearchColumn.YEAR -> DesktopTableColumnSpec(priority = 15, minWidth = 76.dp, alignment = TextAlign.End)
-        SearchColumn.AUTHOR -> DesktopTableColumnSpec(priority = 16, minWidth = 132.dp)
-        SearchColumn.COMPANY -> DesktopTableColumnSpec(priority = 17, minWidth = 132.dp)
-        SearchColumn.PLATFORM -> DesktopTableColumnSpec(priority = 18, minWidth = 112.dp)
-        SearchColumn.DESCRIPTION -> DesktopTableColumnSpec(priority = 19, minWidth = 220.dp)
-        SearchColumn.FILES -> DesktopTableColumnSpec(priority = 20, minWidth = 72.dp, alignment = TextAlign.End)
-        SearchColumn.TRACKERS -> DesktopTableColumnSpec(priority = 21, minWidth = 90.dp, alignment = TextAlign.End)
+        SearchColumn.MARKER -> DesktopTableColumnSpec(priority = 1, minWidth = 176.dp)
+        SearchColumn.TYPE -> DesktopTableColumnSpec(priority = 2, minWidth = 108.dp)
+        SearchColumn.FROM -> DesktopTableColumnSpec(priority = 3, minWidth = 148.dp)
+        SearchColumn.FILENAME -> DesktopTableColumnSpec(priority = 4, minWidth = 188.dp)
+        SearchColumn.EXTENSION -> DesktopTableColumnSpec(priority = 5, minWidth = 96.dp)
+        SearchColumn.SIZE -> DesktopTableColumnSpec(priority = 6, minWidth = 96.dp, alignment = TextAlign.End)
+        SearchColumn.SOURCES -> DesktopTableColumnSpec(priority = 7, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.FRIENDS -> DesktopTableColumnSpec(priority = 8, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.LENGTH -> DesktopTableColumnSpec(priority = 9, minWidth = 92.dp)
+        SearchColumn.QUALITY -> DesktopTableColumnSpec(priority = 10, minWidth = 126.dp)
+        SearchColumn.BITRATE -> DesktopTableColumnSpec(priority = 11, minWidth = 92.dp)
+        SearchColumn.TRACK -> DesktopTableColumnSpec(priority = 12, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.ARTIST -> DesktopTableColumnSpec(priority = 13, minWidth = 132.dp)
+        SearchColumn.ALBUM -> DesktopTableColumnSpec(priority = 14, minWidth = 132.dp)
+        SearchColumn.GENRE -> DesktopTableColumnSpec(priority = 15, minWidth = 108.dp)
+        SearchColumn.YEAR -> DesktopTableColumnSpec(priority = 16, minWidth = 76.dp, alignment = TextAlign.End)
+        SearchColumn.AUTHOR -> DesktopTableColumnSpec(priority = 17, minWidth = 132.dp)
+        SearchColumn.COMPANY -> DesktopTableColumnSpec(priority = 18, minWidth = 132.dp)
+        SearchColumn.PLATFORM -> DesktopTableColumnSpec(priority = 19, minWidth = 112.dp)
+        SearchColumn.DESCRIPTION -> DesktopTableColumnSpec(priority = 20, minWidth = 220.dp)
+        SearchColumn.FILES -> DesktopTableColumnSpec(priority = 21, minWidth = 72.dp, alignment = TextAlign.End)
+        SearchColumn.TRACKERS -> DesktopTableColumnSpec(priority = 22, minWidth = 90.dp, alignment = TextAlign.End)
     }
 }
 
@@ -15848,12 +16366,14 @@ private fun formatTorrentRate(bytesPerSecond: Float): String {
     return formatRate(bytesPerSecond / 1024f)
 }
 
+@Composable
 private fun torrentPieceColor(cell: TorrentPieceCellPresentation): Color {
+    val palette = LocalThemePalette.current
     return when (cell.state) {
         TorrentPieceCellState.DOWNLOADED -> Color(0xFF2E7D32)
         TorrentPieceCellState.PARTIAL -> Color(0xFF43A047).copy(alpha = 0.35f + 0.65f * cell.intensity.coerceIn(0f, 1f))
         TorrentPieceCellState.AVAILABLE -> Color(0xFFF9A825)
-        TorrentPieceCellState.ACTIVE -> Color(0xFF1E88E5)
+        TorrentPieceCellState.ACTIVE -> palette.blueRoleColor
         TorrentPieceCellState.UNAVAILABLE -> Color(0xFF757575)
     }
 }

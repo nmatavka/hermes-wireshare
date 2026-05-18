@@ -33,6 +33,10 @@ public interface Ed2kService {
 
     List<UploadItem> getUploads();
 
+    void removeDownload(DownloadItem item) throws Exception;
+
+    void removeUpload(UploadItem item) throws Exception;
+
     Ed2kStatus getStatus();
 
     List<Ed2kServerRecord> getServers();

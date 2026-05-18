@@ -851,6 +851,7 @@ def modules = [
     'desktop-compose-contracts': 'desktop-compose-contracts',
     'desktop-compose-legacy-compat': 'desktop-compose-legacy-compat',
     'desktop-compose-app': 'desktop-compose-app',
+    'frostwire-search-backend': 'frostwire-search-backend',
     'ed2k-api'      : 'ed2k-api',
     'ed2k-backend'  : 'ed2k-backend',
     'bittorrent-api': 'main/components/bittorrent-api',
