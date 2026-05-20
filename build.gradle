@@ -3,6 +3,7 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JvmVendorSpec
 
 plugins {
     id 'base'
@@ -12,12 +13,50 @@ plugins {
 }
 
 def javaLanguageVersion = 21
+def releaseAppName = 'WireShare'
+def releaseAppId = 'org.teamhermes.WireShare'
+def releaseVendor = 'Hermes'
+def releaseAppVersion = '7.0'
+def windowsUpgradeUuid = '5CAFE0D2-ABB3-4F01-8CFE-C564E00C09EC'
+group = releaseAppId
+version = releaseAppVersion
+
 def hostOs = OperatingSystem.current()
 def hostArch = (System.getProperty('os.arch') ?: '').toLowerCase(Locale.ROOT)
 def isArm64 = hostArch == 'aarch64' || hostArch == 'arm64'
 def isX86_64 = hostArch == 'amd64' || hostArch == 'x86_64'
+def localJbrRoot = new File(System.getProperty('user.home'), '.gradle/jdks')
+def macArm64RunJavaHomeOverride = providers.gradleProperty('wireShareMacArm64RunJavaHome').orNull
+def macArm64RunJbrSelector = providers.gradleProperty('wireShareMacArm64RunJbrSelector').orNull
+def macArm64RunDefaultJbrSelector = '21.0.10'
+def macArm64RunJbrDirectories = localJbrRoot.isDirectory()
+    ? (localJbrRoot.listFiles()
+        ?.findAll { candidate ->
+            candidate.isDirectory()
+                && candidate.name.startsWith('jbr')
+                && candidate.name.contains('21.')
+                && candidate.name.contains('-osx-aarch64-')
+        } ?: [])
+    : []
+def macArm64RunPreferredJbrDirectories = macArm64RunJbrDirectories.findAll { candidate ->
+    candidate.name.contains(macArm64RunJbrSelector ?: macArm64RunDefaultJbrSelector)
+}
+def macArm64RunJbrJava = macArm64RunJavaHomeOverride != null
+    ? new File(macArm64RunJavaHomeOverride, 'bin/java')
+    : ((macArm64RunPreferredJbrDirectories.isEmpty() ? macArm64RunJbrDirectories : macArm64RunPreferredJbrDirectories)
+            .sort { left, right -> left.name <=> right.name }
+            ?.collect { candidate -> new File(candidate, 'Contents/Home/bin/java') }
+            ?.findAll { candidate -> candidate.canExecute() }
+            ?.last())
 // Avoid the HotSpot AArch64 C1 OSR crash seen on older JDK 21 runtimes (for example JDK-8335662 backported in 21.0.8).
 def arm64HotSpotOsrWorkaroundArg = '-XX:-UseOnStackReplacement'
+def macArm64RunUsesTier1Jit = providers.gradleProperty('wireShareMacArm64RunTier1')
+    .map { it.toBoolean() }
+    .getOrElse(false)
+def macArm64RunUsesEd2kCompileExclude = providers.gradleProperty('wireShareMacArm64RunEd2kCompileExclude')
+    .map { it.toBoolean() }
+    .getOrElse(false)
+def macArm64RunEd2kCompileExcludePattern = 'org/limewire/ed2k/backend/Ed2kServiceImpl*.*()'
 def appleExtensionsJarName = 'Apple' + 'JavaExtensions'
 def factoryProviderToken = 'FactoryProvider' + '.newFactory'
 def guiceInternalToken = ['com', 'google', 'inject', 'internal'].join('.')
@@ -36,6 +75,18 @@ def macosCodesignKeychain = providers.gradleProperty('macosCodesignKeychain')
     .orElse(providers.environmentVariable('MACOS_CODESIGN_KEYCHAIN'))
 def macosNotaryProfile = providers.gradleProperty('macosNotaryProfile')
     .orElse(providers.environmentVariable('MACOS_NOTARY_PROFILE'))
+def windowsSignToolPath = providers.gradleProperty('windowsSignToolPath')
+    .orElse(providers.environmentVariable('WINDOWS_SIGNTOOL_PATH'))
+def windowsCodesignCertificatePath = providers.gradleProperty('windowsCodesignCertificatePath')
+    .orElse(providers.environmentVariable('WINDOWS_CODESIGN_CERTIFICATE_PATH'))
+def windowsCodesignCertificatePassword = providers.gradleProperty('windowsCodesignCertificatePassword')
+    .orElse(providers.environmentVariable('WINDOWS_CODESIGN_CERTIFICATE_PASSWORD'))
+def windowsCodesignCertificateThumbprint = providers.gradleProperty('windowsCodesignCertificateThumbprint')
+    .orElse(providers.environmentVariable('WINDOWS_CODESIGN_CERTIFICATE_THUMBPRINT'))
+def windowsTimestampUrl = providers.gradleProperty('windowsTimestampUrl')
+    .orElse(providers.environmentVariable('WINDOWS_TIMESTAMP_URL'))
+    .orElse('http://timestamp.digicert.com')
+def windowsSigningConfigured = windowsCodesignCertificatePath.isPresent() || windowsCodesignCertificateThumbprint.isPresent()
 
 def legacySkippedDependencies = [
     'AnimatedTransitions',
@@ -279,7 +330,7 @@ configure(subprojects.findAll { !['jlibtorrent', 'android-app', 'desktop-compose
     apply plugin: 'java-library'
 
     group = 'org.limewire'
-    version = '7.0'
+    version = releaseAppVersion
 
     java {
         toolchain {
@@ -455,7 +506,19 @@ def hostNativeJarFile = managedJlibtorrentUsePublishedNatives
 def macRuntimePayloadDir = layout.buildDirectory.dir('macos/runtime-payload')
 def macAppInputDir = layout.buildDirectory.dir('macos/app-input')
 def macAppImageDir = layout.buildDirectory.dir('macos/app-image')
+def macDmgDir = layout.buildDirectory.dir('macos/dmg')
 def macNotaryZipFile = layout.buildDirectory.file('macos/WireShare-mac.zip')
+def windowsAppInputDir = layout.buildDirectory.dir('windows/app-input')
+def windowsMsiDir = layout.buildDirectory.dir('windows/msi')
+def packageAssociationsDir = layout.buildDirectory.dir('packaging/associations')
+def torrentAssociationFile = packageAssociationsDir.map { dir -> new File(dir.asFile, 'torrent.properties') }
+def flatpakRootDir = layout.buildDirectory.dir("flatpak/${releaseAppId}")
+def flatpakFilesDir = flatpakRootDir.map { dir -> new File(dir.asFile, 'files') }
+def flatpakRuntimeImageDir = layout.buildDirectory.dir('flatpak/jre')
+def flatpakBuildDir = flatpakRootDir.map { dir -> new File(dir.asFile, 'build-dir') }
+def flatpakRepoDir = flatpakRootDir.map { dir -> new File(dir.asFile, 'repo') }
+def flatpakManifestFile = flatpakRootDir.map { dir -> new File(dir.asFile, "${releaseAppId}.yaml") }
+def flatpakBundleFile = layout.buildDirectory.file("distributions/${releaseAppName}-${releaseAppVersion}-linux-${isArm64 ? 'arm64' : 'x64'}.flatpak")
 
 project(':jlibtorrent') {
     tasks.withType(Test).configureEach {
@@ -582,18 +645,37 @@ tasks.register('stageMacAppInput', Sync) {
     into(macAppInputDir)
 }
 
+tasks.register('writeJpackageFileAssociations') {
+    def outputFile = torrentAssociationFile
+    outputs.file(outputFile)
+
+    doLast {
+        def associationFile = outputFile.get()
+        associationFile.parentFile.mkdirs()
+        associationFile.text = """extension=torrent
+mime-type=application/x-bittorrent
+description=BitTorrent metadata
+"""
+    }
+}
+
 tasks.register('packageMacAppImage', Exec) {
     onlyIf { hostOs.isMacOsX() }
     dependsOn tasks.named('stageMacAppInput')
+    dependsOn tasks.named('writeJpackageFileAssociations')
 
     def outputDir = macAppImageDir.get().asFile
     def inputDir = macAppInputDir.get().asFile
     def jpackageBinary = new File(javaHomePath.get(), 'bin/jpackage').absolutePath
     def iconFile = rootDir.toPath().resolve('main/lib/resources/osx/wireshare.icns').toFile()
+    def torrentAssociation = torrentAssociationFile.get()
 
     doFirst {
         delete(outputDir)
         outputDir.mkdirs()
+        if (!macosCodesignIdentity.isPresent()) {
+            logger.lifecycle("Building unsigned ${releaseAppName}.app because no macOS codesign identity is configured.")
+        }
     }
 
     def command = [
@@ -601,12 +683,13 @@ tasks.register('packageMacAppImage', Exec) {
         '--type', 'app-image',
         '--dest', outputDir.absolutePath,
         '--input', inputDir.absolutePath,
-        '--name', 'WireShare',
+        '--name', releaseAppName,
         '--main-jar', 'WireShare.jar',
-        '--app-version', project.version.toString(),
-        '--vendor', 'Hermes',
-        '--mac-package-identifier', 'com.wireshare.gnutella',
+        '--app-version', releaseAppVersion,
+        '--vendor', releaseVendor,
+        '--mac-package-identifier', releaseAppId,
         '--icon', iconFile.absolutePath,
+        '--file-associations', torrentAssociation.absolutePath,
     ]
     if (macosCodesignIdentity.isPresent()) {
         command += ['--mac-sign', '--mac-signing-key-user-name', macosCodesignIdentity.get()]
@@ -671,6 +754,310 @@ tasks.register('notarizeMacAppImage') {
     }
 }
 
+tasks.register('packageMacDmg', Exec) {
+    onlyIf { hostOs.isMacOsX() }
+    dependsOn(macosCodesignIdentity.isPresent() && macosNotaryProfile.isPresent()
+        ? tasks.named('notarizeMacAppImage')
+        : tasks.named('packageMacAppImage'))
+
+    def outputDir = macDmgDir.get().asFile
+    def appBundle = macAppImageDir.map { dir -> new File(dir.asFile, "${releaseAppName}.app") }
+    def jpackageBinary = new File(javaHomePath.get(), 'bin/jpackage').absolutePath
+
+    doFirst {
+        delete(outputDir)
+        outputDir.mkdirs()
+        if (!macosCodesignIdentity.isPresent()) {
+            logger.lifecycle("Building unsigned ${releaseAppName}.dmg because no macOS codesign identity is configured.")
+        } else if (!macosNotaryProfile.isPresent()) {
+            logger.lifecycle("Building signed but unnotarized ${releaseAppName}.dmg because no macOS notary profile is configured.")
+        }
+    }
+
+    commandLine(
+        jpackageBinary,
+        '--type', 'dmg',
+        '--dest', outputDir.absolutePath,
+        '--app-image', appBundle.get().absolutePath,
+        '--name', releaseAppName,
+        '--app-version', releaseAppVersion,
+        '--vendor', releaseVendor,
+        '--mac-package-identifier', releaseAppId
+    )
+}
+
+tasks.register('stageWindowsAppInput', Sync) {
+    onlyIf { hostOs.isWindows() && isX86_64 }
+    dependsOn tasks.named('wireShareJar')
+
+    from(rootProject.layout.projectDirectory.file('WireShare.jar'))
+    into(windowsAppInputDir)
+}
+
+tasks.register('packageWindowsMsi', Exec) {
+    onlyIf { hostOs.isWindows() && isX86_64 }
+    dependsOn tasks.named('stageWindowsAppInput')
+    dependsOn tasks.named('writeJpackageFileAssociations')
+
+    def outputDir = windowsMsiDir.get().asFile
+    def inputDir = windowsAppInputDir.get().asFile
+    def jpackageBinary = new File(javaHomePath.get(), 'bin/jpackage').absolutePath
+    def iconFile = rootDir.toPath().resolve('nativelibs/windows/WireShare.ico').toFile()
+    def torrentAssociation = torrentAssociationFile.get()
+
+    doFirst {
+        delete(outputDir)
+        outputDir.mkdirs()
+        if (!windowsSigningConfigured) {
+            logger.lifecycle("Building unsigned ${releaseAppName}.msi because no Windows signing certificate is configured.")
+        }
+    }
+
+    commandLine(
+        jpackageBinary,
+        '--type', 'msi',
+        '--dest', outputDir.absolutePath,
+        '--input', inputDir.absolutePath,
+        '--name', releaseAppName,
+        '--main-jar', 'WireShare.jar',
+        '--app-version', releaseAppVersion,
+        '--vendor', releaseVendor,
+        '--icon', iconFile.absolutePath,
+        '--install-dir', releaseAppName,
+        '--win-dir-chooser',
+        '--win-menu',
+        '--win-menu-group', releaseAppName,
+        '--win-shortcut',
+        '--win-upgrade-uuid', windowsUpgradeUuid,
+        '--file-associations', torrentAssociation.absolutePath
+    )
+}
+
+tasks.register('signWindowsMsi') {
+    onlyIf { hostOs.isWindows() && isX86_64 && windowsSigningConfigured }
+    dependsOn tasks.named('packageWindowsMsi')
+
+    doLast {
+        def msiFiles = fileTree(windowsMsiDir.get().asFile).matching {
+            include '*.msi'
+        }.files.sort()
+        if (msiFiles.isEmpty()) {
+            throw new GradleException("No MSI files were produced in ${windowsMsiDir.get().asFile}")
+        }
+
+        msiFiles.each { File msiFile ->
+            def command = [
+                windowsSignToolPath.orNull ?: 'signtool',
+                'sign',
+                '/fd', 'SHA256',
+                '/tr', windowsTimestampUrl.get(),
+                '/td', 'SHA256',
+            ]
+            if (windowsCodesignCertificatePath.isPresent()) {
+                command += ['/f', windowsCodesignCertificatePath.get()]
+                if (windowsCodesignCertificatePassword.isPresent()) {
+                    command += ['/p', windowsCodesignCertificatePassword.get()]
+                }
+            } else {
+                command += ['/sha1', windowsCodesignCertificateThumbprint.get()]
+            }
+            command += [msiFile.absolutePath]
+            exec {
+                commandLine(command)
+            }
+        }
+    }
+}
+
+tasks.register('buildLinuxFlatpakRuntime', Exec) {
+    onlyIf { hostOs.isLinux() && (isX86_64 || isArm64) }
+
+    def jlinkBinary = new File(javaHomePath.get(), 'bin/jlink').absolutePath
+    def runtimeDir = flatpakRuntimeImageDir.get().asFile
+    def runtimeModules = [
+        'java.base',
+        'java.compiler',
+        'java.datatransfer',
+        'java.desktop',
+        'java.instrument',
+        'java.logging',
+        'java.management',
+        'java.naming',
+        'java.net.http',
+        'java.prefs',
+        'java.rmi',
+        'java.scripting',
+        'java.security.jgss',
+        'java.security.sasl',
+        'java.sql',
+        'java.xml',
+        'jdk.charsets',
+        'jdk.crypto.ec',
+        'jdk.localedata',
+        'jdk.unsupported',
+        'jdk.zipfs',
+    ].join(',')
+
+    outputs.dir(runtimeDir)
+
+    doFirst {
+        delete(runtimeDir)
+        runtimeDir.parentFile.mkdirs()
+    }
+
+    commandLine(
+        jlinkBinary,
+        '--output', runtimeDir.absolutePath,
+        '--add-modules', runtimeModules,
+        '--strip-debug',
+        '--no-header-files',
+        '--no-man-pages'
+    )
+}
+
+tasks.register('stageLinuxFlatpakFiles', Sync) {
+    onlyIf { hostOs.isLinux() && (isX86_64 || isArm64) }
+    dependsOn tasks.named('wireShareJar')
+    dependsOn tasks.named('buildLinuxFlatpakRuntime')
+
+    into(flatpakFilesDir)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(rootProject.layout.projectDirectory.file('WireShare.jar'))
+    from(flatpakRuntimeImageDir) {
+        into 'jre'
+    }
+    from(rootDir.toPath().resolve('nativelibs/linux').toFile()) {
+        into 'lib64'
+        include '*.so'
+        include '*.so.*'
+    }
+
+    [16, 20, 22, 24, 32, 36, 40, 48, 64, 72, 96, 128, 192, 256, 384, 512, 1024].each { size ->
+        from(rootDir.toPath().resolve("main/lib/resources/linux/wsicon_${size}.png").toFile()) {
+            into "hicolor/${size}x${size}/apps"
+            rename { "${releaseAppId}.png" }
+        }
+        from(rootDir.toPath().resolve("main/lib/resources/linux/dload_${size}.png").toFile()) {
+            into "hicolor/${size}x${size}/status"
+            rename { "${releaseAppId}.XferDone.png" }
+        }
+    }
+
+    doLast {
+        def filesDir = flatpakFilesDir.get()
+        def launcher = new File(filesDir, 'WireShare.sh')
+        launcher.text = """#!/usr/bin/env bash
+set -euo pipefail
+
+JAVA_ARGS=()
+case "\$(uname -m)" in
+  arm64|aarch64)
+    JAVA_ARGS+=(${arm64HotSpotOsrWorkaroundArg})
+    ;;
+esac
+
+exec /app/jre/bin/java "\${JAVA_ARGS[@]}" -Djava.library.path=/app/lib -jar /app/share/${releaseAppName}/WireShare.jar "\$@"
+"""
+        launcher.setExecutable(true, false)
+
+        def desktopFile = new File(filesDir, "applications/${releaseAppId}.desktop")
+        desktopFile.parentFile.mkdirs()
+        desktopFile.text = """[Desktop Entry]
+Type=Application
+Version=1.0
+Name=${releaseAppName}
+Exec=${releaseAppName} %U
+Icon=${releaseAppId}
+Terminal=false
+Categories=Network;FileTransfer;P2P;
+MimeType=application/x-bittorrent;application/torrent;application/x-torrent;x-scheme-handler/magnet;x-scheme-handler/ed2k;
+"""
+    }
+}
+
+tasks.register('writeLinuxFlatpakManifest') {
+    onlyIf { hostOs.isLinux() && (isX86_64 || isArm64) }
+    dependsOn tasks.named('stageLinuxFlatpakFiles')
+
+    outputs.file(flatpakManifestFile)
+
+    doLast {
+        def manifestFile = flatpakManifestFile.get()
+        manifestFile.parentFile.mkdirs()
+        manifestFile.text = """id: ${releaseAppId}
+branch: stable
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: ${releaseAppName}
+modules:
+  - name: wireshare
+    buildsystem: simple
+    sources:
+      - type: dir
+        path: ./files
+    build-commands:
+      - install -Dm755 WireShare.sh /app/bin/${releaseAppName}
+      - install -Dm644 WireShare.jar /app/share/${releaseAppName}/WireShare.jar
+      - mkdir -p /app/jre
+      - cp -a jre/. /app/jre/
+      - mkdir -p /app/lib
+      - if [ -d lib64 ]; then cp -a lib64/. /app/lib/; fi
+      - mkdir -p /app/share/icons
+      - cp -a hicolor /app/share/icons/
+      - install -Dm644 applications/${releaseAppId}.desktop /app/share/applications/${releaseAppId}.desktop
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=pulseaudio
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.Notifications
+"""
+    }
+}
+
+tasks.register('packageLinuxFlatpak') {
+    onlyIf { hostOs.isLinux() && (isX86_64 || isArm64) }
+    dependsOn tasks.named('writeLinuxFlatpakManifest')
+    outputs.file(flatpakBundleFile)
+
+    doLast {
+        def manifestFile = flatpakManifestFile.get()
+        def buildDir = flatpakBuildDir.get()
+        def repoDir = flatpakRepoDir.get()
+        def bundleFile = flatpakBundleFile.get().asFile
+
+        delete(buildDir)
+        delete(repoDir)
+        bundleFile.parentFile.mkdirs()
+        bundleFile.delete()
+
+        exec {
+            commandLine(
+                'flatpak-builder',
+                '--force-clean',
+                '--repo', repoDir.absolutePath,
+                buildDir.absolutePath,
+                manifestFile.absolutePath
+            )
+        }
+        exec {
+            commandLine(
+                'flatpak',
+                'build-bundle',
+                repoDir.absolutePath,
+                bundleFile.absolutePath,
+                releaseAppId,
+                'stable'
+            )
+        }
+    }
+}
+
 project(':desktop-compose-app') {
     pluginManager.withPlugin('application') {
         dependencies {
@@ -683,12 +1070,36 @@ project(':desktop-compose-app') {
             dependsOn hostNativeJarTask
 
             if (hostOs.isMacOsX()) {
+                if (isArm64) {
+                    if (macArm64RunJbrJava != null) {
+                        // Prefer a locally installed JetBrains Runtime for desktop `run` on Apple Silicon.
+                        // Compose Desktop is exercised most heavily against JBR, and Temurin 21.0.11 still
+                        // produced intermittent HotSpot crashes across multiple UI/background threads here.
+                        executable = macArm64RunJbrJava.absolutePath
+                    } else {
+                        // Fall back to a maintained Java 21 toolchain instead of inheriting an older host JVM
+                        // (for example Oracle 21+35), which has already hit multiple AArch64 HotSpot crashes.
+                        javaLauncher = javaToolchains.launcherFor {
+                            languageVersion = JavaLanguageVersion.of(javaLanguageVersion)
+                            vendor = JvmVendorSpec.ADOPTIUM
+                        }
+                    }
+                }
                 dependsOn rootProject.tasks.named('prepareMacRuntimePayload')
                 def macRunJvmArgs = [
                     "-Djava.library.path=${macRuntimePayloadDir.get().asFile.toPath().resolve('lib/native').toFile().absolutePath}"
                 ]
                 if (isArm64) {
                     macRunJvmArgs += arm64HotSpotOsrWorkaroundArg
+                    if (macArm64RunUsesTier1Jit) {
+                        // Fall back to the simpler C1 tier if the selected runtime still crashes on Apple Silicon.
+                        macRunJvmArgs += '-XX:TieredStopAtLevel=1'
+                    }
+                    if (macArm64RunUsesEd2kCompileExclude) {
+                        // Keep the ED2K polling and adapter-refresh path interpreted as an opt-in fallback.
+                        macRunJvmArgs += '-XX:CompileCommand=quiet'
+                        macRunJvmArgs += "-XX:CompileCommand=exclude,${macArm64RunEd2kCompileExcludePattern}"
+                    }
                 }
                 jvmArgs(macRunJvmArgs)
             }
@@ -740,9 +1151,17 @@ project(':desktop-compose-app') {
     }
 }
 
+def desktopComposeAppProject = project(':desktop-compose-app')
+def desktopComposeRuntimeClasspath = desktopComposeAppProject.provider {
+    desktopComposeAppProject.configurations.runtimeClasspath
+}
+def desktopComposeMainOutput = desktopComposeAppProject.provider {
+    desktopComposeAppProject.sourceSets.main.output
+}
+
 tasks.register('wireShareJar', Jar) {
-    dependsOn project(':desktop-compose-app').tasks.named('classes')
-    dependsOn project(':desktop-compose-app').configurations.runtimeClasspath
+    dependsOn desktopComposeAppProject.tasks.named('classes')
+    dependsOn desktopComposeRuntimeClasspath
     dependsOn hostNativeJarTask
     if (hostOs.isMacOsX()) {
         dependsOn tasks.named('prepareMacRuntimePayload')
@@ -760,12 +1179,12 @@ tasks.register('wireShareJar', Jar) {
         )
     }
 
-    from(project(':desktop-compose-app').sourceSets.main.output)
+    from({ desktopComposeMainOutput.get() })
     from({
-        project(':desktop-compose-app').configurations.runtimeClasspath
+        desktopComposeRuntimeClasspath.get()
             .filter { file -> file.exists() }
             .findAll { file -> !hostOs.isMacOsX() || file.name != hostNativeJarFile.get().asFile.name }
-            .collect { file -> file.isDirectory() ? file : zipTree(file) }
+            .collect { file -> file.isDirectory() ? file : rootProject.zipTree(file) }
     })
     if (hostOs.isMacOsX()) {
         from(macRuntimePayloadDir)
@@ -773,6 +1192,23 @@ tasks.register('wireShareJar', Jar) {
     from(rootDir.toPath().resolve('main/lib/resources/linux').toFile())
     from(rootDir.toPath().resolve('main/lib/resources/osx').toFile())
     from(rootDir.toPath().resolve('main/lib/resources/windows').toFile())
+}
+
+tasks.register('packageDesktopRelease') {
+    group = 'distribution'
+    description = 'Builds the host-specific WireShare desktop release package: DMG on macOS, MSI on Windows, Flatpak on Linux.'
+
+    if (hostOs.isMacOsX()) {
+        dependsOn tasks.named('packageMacDmg')
+    } else if (hostOs.isWindows() && isX86_64) {
+        dependsOn(windowsSigningConfigured ? tasks.named('signWindowsMsi') : tasks.named('packageWindowsMsi'))
+    } else if (hostOs.isLinux() && (isX86_64 || isArm64)) {
+        dependsOn tasks.named('packageLinuxFlatpak')
+    } else {
+        doFirst {
+            throw new GradleException("Unsupported desktop release host: ${hostOs.name()}/${hostArch}")
+        }
+    }
 }
 
 tasks.register('buildAndroid') {

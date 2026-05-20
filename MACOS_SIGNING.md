@@ -6,7 +6,7 @@ This repo now has an opt-in macOS signing pipeline for desktop release artifacts
 
 - Keep local development builds easy.
 - Let release builders sign all staged macOS native libraries.
-- Produce a signed `WireShare.app` app image from the canonical `WireShare.jar`.
+- Produce a signed `WireShare.app` app image and DMG from the canonical `WireShare.jar`.
 - Support notarization and stapling with Apple's `notarytool`.
 
 ## jlibtorrent Mode
@@ -64,12 +64,23 @@ The Gradle build reads these from either Gradle properties or environment variab
 - `notarizeMacAppImage`
   Zips the generated app image, submits it with `notarytool`, waits for completion, then staples the ticket.
 
+- `packageMacDmg`
+  Builds `build/macos/dmg/WireShare-*.dmg` from the signed or unsigned app image.
+
 ## Typical Release Flow
 
 Build a signed app image:
 
 ```bash
 ./gradlew packageMacAppImage \
+  -PmacosCodesignIdentity="Developer ID Application: Your Name (TEAMID)" \
+  -PmacosCodesignKeychain="$HOME/Library/Keychains/login.keychain-db"
+```
+
+Build a DMG:
+
+```bash
+./gradlew packageMacDmg \
   -PmacosCodesignIdentity="Developer ID Application: Your Name (TEAMID)" \
   -PmacosCodesignKeychain="$HOME/Library/Keychains/login.keychain-db"
 ```
@@ -94,6 +105,7 @@ Notarize and staple:
 ## Notes
 
 - If signing properties are not present, the build still works, but macOS natives remain unsigned.
+- The macOS bundle/package identifier is `org.teamhermes.WireShare`.
 - The build prefers freshly compiled helper dylibs over older checked-in copies when both exist.
 - `WireShare.jar` is marked as a multi-release jar so Java 21 can see versioned classes from bundled dependencies like `dnsjava`.
 - For reproducible release behavior, prefer the default published `jlibtorrent` mode over source-head mode.

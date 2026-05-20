@@ -1,9 +1,9 @@
-id: org.team_hermes.WireShare
-branch: 6.0
+id: org.teamhermes.WireShare
+branch: stable
 runtime: org.freedesktop.Platform
-runtime-version: 19.08
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
-command: /app/WireShare.sh
+command: WireShare
 modules:
   - name: wireshare
     buildsystem: simple
@@ -13,24 +13,25 @@ modules:
     # - type: git
     # - url : https://bitbucket.org/nmatavka/hermes-wireshare-flatpak.git
     build-commands:
-      - install WireShare.sh /app/WireShare.sh
-      - install WireShare.jar /app/WireShare.jar
-      - mkdir -p /app/share/icons/
-      - cp -r hicolor /app/share/icons
-      - cp -r jre-linux /app/jre
-      - cp -r lib64 /app/lib
-      - mkdir -p /app/share
-      - cp -r applications /app/share/applications
+      - install -Dm755 WireShare.sh /app/bin/WireShare
+      - install -Dm644 WireShare.jar /app/share/WireShare/WireShare.jar
+      - mkdir -p /app/jre
+      - cp -a jre-linux/. /app/jre/
+      - mkdir -p /app/lib
+      - cp -a lib64/. /app/lib/
+      - mkdir -p /app/share/icons
+      - cp -a hicolor /app/share/icons/
+      - for icon in /app/share/icons/hicolor/*/org.team_hermes.WireShare.png; do cp "$icon" "${icon%/*}/org.teamhermes.WireShare.png"; done
+      - for icon in /app/share/icons/hicolor/*/org.team_hermes.XferDone.png; do cp "$icon" "${icon%/*}/org.teamhermes.WireShare.XferDone.png"; done
+      - install -Dm644 applications/org.teamhermes.WireShare.desktop /app/share/applications/org.teamhermes.WireShare.desktop
 finish-args:
-  - --env=PATH=/app/jre/bin:/usr/bin
   - --share=ipc
-  - --socket=pulseaudio
-  - --device=dri
   - --share=network
+  - --socket=pulseaudio
+  - --socket=wayland
   - --socket=fallback-x11
+  - --device=dri
   - --filesystem=home
-       
-
-
+  - --talk-name=org.freedesktop.Notifications
 
 

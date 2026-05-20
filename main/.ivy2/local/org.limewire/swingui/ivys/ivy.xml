@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="org.limewire" module="swingui" revision="20260407073034" status="integration" publication="20260407073034"/>
+    <configurations>
+        <conf name="default" visibility="public" description="runtime dependencies and master artifact can be used with this conf" extends="runtime,master"/>
+		<conf name="master" visibility="public" description="the default published configuration of any artifact."/>
+		<conf name="compile" visibility="public" description="this is the default scope, used if none is specified. Compile dependencies are available in all classpaths."/>
+		<conf name="provided" visibility="public" description="this is much like compile, but indicates you expect the JDK or a container to provide it. It is only available on the compilation classpath, and is not transitive."/>
+		<conf name="runtime" visibility="public" description="this scope indicates that the dependency is not required for compilation, but is for execution. It is in the runtime classpath, but not the compile classpath." extends="compile"/>
+		<conf name="system" visibility="public" description="this scope is similar to provided except that you have to provide the JAR which contains it explicitly. The artifact is always available and is not looked up in a repository."/>
+		<conf name="sources" visibility="public" description="this configuration contains the source artifact of this module, if any."/>
+		<conf name="javadoc" visibility="public" description="this configuration contains the javadoc artifact of this module, if any."/>
+		<conf name="optional" visibility="public" description="contains all optional dependencies"/>
+    </configurations>
+    <publications>
+        <artifact name="swingui" conf="master"/>
+    </publications>
+    <dependencies defaultconfmapping="compile->master(*);runtime->runtime(*),master(*)">
+        <!-- compile & runtime dependencies. -->
+        <dependency org="org.limewire" name="friend" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="common" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="io" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="nio" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/> 
+        <dependency org="org.limewire" name="net" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-api" rev="20260407073033" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="collection" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="setting" rev="20260407073033" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="core-settings" rev="20260407073033" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="xmpp-api" rev="20260407073032" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="player-api" rev="20260407073033" revConstraint="latest.integration" conf="compile,runtime"/>
+        <dependency org="org.limewire" name="bittorrent-api" rev="20260407073033" revConstraint="latest.integration" conf="compile,runtime"/>
+
+        <dependency org="none" name="compile/AppleJavaExtensions" rev="" conf="compile"/>
+        <dependency org="none" name="fmj" rev="4-9-2010" conf="compile,runtime"/>
+        <dependency org="none" name="osx/asm" rev="3.1" conf="compile,runtime"/>
+        <dependency org="none" name="osx/cglib" rev="2.2" conf="compile,runtime"/>
+        <dependency org="none" name="osx/rococoa-core" rev="20091217-1" conf="compile,runtime"/>
+        <dependency org="none" name="osx/rococoa-cocoa" rev="20091217-1" conf="compile,runtime"/>
+        <dependency org="none" name="osx/slf4j-api" rev="1.5.8" conf="compile,runtime"/>
+        <dependency org="none" name="osx/slf4j-jdk14" rev="1.5.8" conf="compile,runtime"/>
+        <dependency org="none" name="foxtrot-core" rev="3.0" conf="compile,runtime"/>
+        <dependency org="none" name="google-collect" rev="1.0-rc2" conf="compile,runtime"/>
+        <dependency org="none" name="guice-assistedinject" rev="snapshot20090814" conf="compile,runtime"/>
+        <dependency org="none" name="swingx" rev="1.0" conf="compile,runtime"/>
+        <dependency org="none" name="AppFramework" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="mozswing" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="mozdom4java" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaInterfaces" rev="1.9" conf="compile,runtime"/>
+        <dependency org="none" name="MozillaGlue" rev="1.9" conf="compile,runtime"/>
+        <dependency org="none" name="jna" rev="3.2.4" conf="compile,runtime"/>
+        <dependency org="none" name="jdic" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="gettext-commons" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="miglayout" rev="3.7-swing" conf="compile,runtime"/>
+        <dependency org="none" name="mp3spi" rev="1.9.4.1" conf="compile,runtime"/>
+        <dependency org="none" name="jxlayer" rev="4.0" conf="compile,runtime"/>
+        <dependency org="none" name="log4j" rev="20100504" conf="compile,runtime"/>
+        <dependency org="none" name="commons-logging" rev="" conf="compile,runtime"/>
+        <dependency org="none" name="guice" rev="2.0-snapshot20090814" conf="compile,runtime"/>
+        <dependency org="none" name="glazedlists" rev="snapshot20090628_java15" conf="compile,runtime"/>
+        <dependency org="none" name="httpclient" rev="4.1-alpha1-r821939" conf="compile,runtime"/>
+        <dependency org="none" name="TimingFramework" rev="1.0" conf="compile,runtime"/>
+        <dependency org="none" name="AnimatedTransitions" rev="0.11" conf="compile,runtime"/>
+                
+        <!-- runtime dependencies. -->
+        <dependency org="none" name="messages" rev="" conf="runtime"/>
+    </dependencies>
+</ivy-module>

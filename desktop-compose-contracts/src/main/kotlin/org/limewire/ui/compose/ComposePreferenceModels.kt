@@ -266,6 +266,8 @@ data class FriendsNotificationsPreferencesDraft(
 enum class ComposeAppearance(val label: String) {
     SOLARIZED_LIGHT("Solarized Light"),
     SOLARIZED_DARK("Solarized Dark"),
+    OKSOLAR_LIGHT("OKSolar Light"),
+    OKSOLAR_DARK("OKSolar Dark"),
     SELENIZED_DARK("Selenized Dark"),
     SELENIZED_BLACK("Selenized Black"),
     SELENIZED_LIGHT("Selenized Light"),

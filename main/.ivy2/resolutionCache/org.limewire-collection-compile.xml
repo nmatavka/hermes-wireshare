@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.limewire"
+		module="collection"
+		revision="working@pandora.local"
+
+		conf="compile"
+		confs="default, master, compile, provided, runtime, system, sources, javadoc, optional"
+		date="20260407073032"/>
+	<dependencies>
+		<module organisation="none" name="glazedlists">
+			<revision name="snapshot20090628_java15" status="release" pubdate="20260407073032" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="2">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/glazedlists/ivy-snapshot20090628_java15.xml" searched="true"/>
+				<caller organisation="org.limewire" name="collection" conf="compile" rev="snapshot20090628_java15" rev-constraint-default="snapshot20090628_java15" rev-constraint-dynamic="snapshot20090628_java15" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="glazedlists" type="jar" ext="jar" status="no" details="" size="845652" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/glazedlists-snapshot20090628_java15.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/glazedlists-snapshot20090628_java15.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="common">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="true" default="false" conf="master(*), master" position="0">
+				<metadata-artifact status="no" details="" size="2407" time="0" searched="true" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="collection" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="common" type="jar" ext="jar" status="no" details="" size="540872" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/jars/common.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/jars/common.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="commons-logging">
+			<revision name="" status="release" pubdate="20260407073032" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="1">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/commons-logging/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="collection" conf="compile" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="commons-logging" type="jar" ext="jar" status="no" details="" size="59154" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+	</dependencies>
+</ivy-report>

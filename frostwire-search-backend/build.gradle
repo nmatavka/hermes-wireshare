@@ -1,0 +1,57 @@
+dependencies {
+    implementation project(':core-api')
+    implementation project(':core-settings')
+    implementation project(':friend')
+    implementation project(':gnutella-core')
+    implementation project(':setting')
+    implementation project(':common')
+
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.google.re2j:re2j:1.7'
+    implementation 'commons-io:commons-io:2.17.0'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+}
+
+def frostWireSearchBoundaryFiles = fileTree(projectDir) {
+    include 'src/main/java/**/*.java'
+    include 'src/main/resources/**'
+    exclude '**/build/**'
+}
+
+def forbiddenFrostWireSearchTokens = [
+    'frostwire-master/',
+    'com.limegroup.gnutella.gui.',
+    'com.frostwire.android.',
+    'javax.swing.',
+    'org.eclipse.swt.',
+    'org.jdesktop.',
+    'android.',
+]
+
+tasks.register('verifyFrostWireSearchBoundary') {
+    group = 'verification'
+    description = 'Fails if the FrostWire search transplant reaches back into donor UI/app code or donor paths.'
+    inputs.files(frostWireSearchBoundaryFiles)
+
+    doLast {
+        def violations = []
+        frostWireSearchBoundaryFiles.files.findAll { it.exists() && it.isFile() }.sort().each { file ->
+            String text = file.getText('UTF-8')
+            forbiddenFrostWireSearchTokens.each { token ->
+                if (text.contains(token)) {
+                    violations << "${token}: ${project.relativePath(file)}"
+                }
+            }
+        }
+
+        if (!violations.isEmpty()) {
+            throw new GradleException(
+                "FrostWire search boundary check failed:\n - " + violations.unique().sort().join('\n - ')
+            )
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyFrostWireSearchBoundary')
+}

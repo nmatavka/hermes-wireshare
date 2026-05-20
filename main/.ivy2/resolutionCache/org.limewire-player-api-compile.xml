@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.limewire"
+		module="player-api"
+		revision="working@pandora.local"
+
+		conf="compile"
+		confs="default, master, compile, provided, runtime, system, sources, javadoc, optional"
+		date="20260407073033"/>
+	<dependencies>
+		<module organisation="none" name="fmj">
+			<revision name="4-9-2010" status="release" pubdate="20260407073033" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="0">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/fmj/ivy-4-9-2010.xml" searched="true"/>
+				<caller organisation="org.limewire" name="player-api" conf="compile" rev="4-9-2010" rev-constraint-default="4-9-2010" rev-constraint-dynamic="4-9-2010" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="fmj" type="jar" ext="jar" status="no" details="" size="1362634" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/fmj-4-9-2010.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/fmj-4-9-2010.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+	</dependencies>
+</ivy-report>

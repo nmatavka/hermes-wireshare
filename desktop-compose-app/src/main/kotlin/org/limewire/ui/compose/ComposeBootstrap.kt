@@ -87,18 +87,21 @@ object ComposeBootstrap {
     fun launch(args: Array<String>) {
         val runtimeErrorService = CoreComposeRuntimeErrorService()
         val systemMessageService = CoreComposeSystemMessageService()
+        val startupSplash = StartupSplash.show()
         runtimeErrorService.install()
         systemMessageService.install()
         val controller = try {
             createController(args, runtimeErrorService, systemMessageService)
         } catch (failure: Throwable) {
+            startupSplash?.close()
             showFatalStartupError(runtimeErrorService, failure)
         }
         try {
             application {
-                WireShareDesktopApp(controller, ::exitApplication)
+                WireShareDesktopApp(controller, ::exitApplication, startupSplash)
             }
         } catch (failure: Throwable) {
+            startupSplash?.close()
             runtimeErrorService.install()
             Thread.getDefaultUncaughtExceptionHandler()?.uncaughtException(Thread.currentThread(), failure)
                 ?: System.err.println(failure.stackTraceToString())

@@ -1,77 +1,91 @@
-# Draft ignore list for a temporary push mirror.
-# Keep this aligned with the GitHub repo ignore rules, plus a few mirror-only
-# exclusions for borrowed source trees and generated external checkouts.
-
-# macOS
-.DS_Store
-
-# Logs
-log/
-*.log
-
-# Top-level build outputs
-/build/
-/WireShare.jar
-
-# Gradle / Java transient outputs
 .gradle/
+build/
 **/build/
+.kotlin/
+.konan/
+.cache/
+out/
 **/out/
-**/classes/
-**/tmp/
+target/
+**/target/
+dist/
+**/dist/
+tmp/
+temp/
+.tmp/
 local.properties
 
-# Archives / packaged artefacts
+# Canonical/generated desktop payloads and release packages.
+WireShare.jar
 *.jar
-!gradle/wrapper/*.jar
+*.dmg
+*.flatpak
+*.msi
+*.pkg
+*.app/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.tbz2
+*.txz
+*.7z
 
-# Flatpak build/cache output
-/org.team_hermes.WireShare/.flatpak-builder/
-/org.team_hermes.WireShare/build-dir/
+# Compiled JVM/native intermediates.
+*.class
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.dSYM/
+*.dSYM.zip
 
-# Optional: generated Flatpak staging payload
-/org.team_hermes.WireShare/files/
+# JVM crash dumps, heap dumps, and replay diagnostics.
+java_pid*.hprof
+hs_err_pid*.log
+replay_pid*.log
+latest-crash.txt
+*.dump
+*.trace
 
-# Common editor / IDE noise
-.idea/
-.vscode/
+# Native/library build outputs that can easily exceed Git hosting limits.
+jlibtorrent/swig/bin/
+jlibtorrent/swig/build/
+jlibtorrent/swig/dist/
+
+# Flatpak staging trees generated outside the root build directory.
+org.team_hermes.WireShare/
+.flatpak-builder/
+
+# Donor/source-drop trees are import sources only. Do not vendor them.
+frostwire-master/
+jed2k-master/
+jmule/
+jMule/
+jmule2/
+
+# Android local/generated state and credentials.
+android-app/.externalNativeBuild/
+android-app/captures/
+android-app/google-services.json
+android-app/libs/
+
+# macOS/editor noise.
+.DS_Store
 *.iml
-*.ipr
-*.iws
+.idea/
+
+# Temporary/editor backup files.
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.rej
+*~
+.#*
 *.swp
 *.swo
-*~
 
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
 
-# Test / report artefacts
-coverage/
-reports/
-all
-
-# jlibtorrent native build output
-/jlibtorrent/swig/bin/
-/jlibtorrent/build/
-
-# Managed/generated upstream checkouts used only during local builds
-/.gradle/external/
-
-# Borrowed source trees not intended for the push mirror
-/frostwire-master/
-/jlibtorrent/
-
-# Explicitly retired third-party jar paths, if they ever reappear locally
-/main/lib/jars/MozillaGlue-1.9.jar
-/main/lib/jars/MozillaInterfaces-1.9.jar
-/main/lib/jars/mozswing.jar
-/main/lib/jars/mozdom4java.jar
-/main/lib/jars/htmlcleaner-2.1.jar
-/main/lib/jars/jdic.jar
-
-# Local dependency caches / package-manager state
-.ivy2/
-.m2/
-/main/.ivy2/

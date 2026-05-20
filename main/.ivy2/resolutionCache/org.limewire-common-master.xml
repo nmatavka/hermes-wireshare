@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.limewire"
+		module="common"
+		revision="working@pandora.local"
+
+		conf="master"
+		confs="default, master, compile, provided, runtime, system, sources, javadoc, optional"
+		date="20260407073031"/>
+	<dependencies>
+	</dependencies>
+</ivy-report>

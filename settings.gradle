@@ -166,6 +166,149 @@ def ensureManagedGitCloneAtRef = { File managedDir, String repoUrl, String ref, 
     }
 }
 
+def isManagedExternalCheckout = { File dir ->
+    def externalRoot = new File(rootDir, '.gradle/external').canonicalFile
+    def candidate = dir.canonicalFile
+    candidate == externalRoot || candidate.path.startsWith(externalRoot.path + File.separator)
+}
+
+def replaceTextIfPresent = { File file, String from, String to ->
+    if (!file.exists()) {
+        return false
+    }
+    def text = file.getText('UTF-8')
+    if (!text.contains(from)) {
+        return false
+    }
+    file.setText(text.replace(from, to), 'UTF-8')
+    true
+}
+
+def patchManagedJlibtorrentGradleCompatibility = { File managedDir ->
+    if (!isManagedExternalCheckout(managedDir)) {
+        return
+    }
+
+    def buildFile = new File(managedDir, 'build.gradle')
+    if (!buildFile.exists()) {
+        return
+    }
+
+    def text = buildFile.getText('UTF-8')
+    def updated = text.replace("group 'com.frostwire'", "group = 'com.frostwire'")
+    def deprecatedArchivesBlock = """artifacts {
+    archives sourcesJar
+    archives javadocJar
+    archives nativeMacOSArm64Jar
+    archives nativeMacOSX86_64Jar
+    archives nativeWindowsX86_64Jar
+    archives nativeLinuxX86_64Jar
+    archives nativeLinuxArm64Jar
+    archives nativeAndroidArmJar
+    archives nativeAndroidX86Jar
+    archives nativeAndroidArm64Jar
+    archives nativeAndroidX64Jar
+}
+"""
+    def assembleDependenciesBlock = """tasks.named('assemble') {
+    dependsOn tasks.named('sourcesJar')
+    dependsOn tasks.named('javadocJar')
+    dependsOn tasks.named('nativeMacOSArm64Jar')
+    dependsOn tasks.named('nativeMacOSX86_64Jar')
+    dependsOn tasks.named('nativeWindowsX86_64Jar')
+    dependsOn tasks.named('nativeLinuxX86_64Jar')
+    dependsOn tasks.named('nativeLinuxArm64Jar')
+    dependsOn tasks.named('nativeAndroidArmJar')
+    dependsOn tasks.named('nativeAndroidX86Jar')
+    dependsOn tasks.named('nativeAndroidArm64Jar')
+    dependsOn tasks.named('nativeAndroidX64Jar')
+}
+"""
+    updated = updated.replace(deprecatedArchivesBlock, assembleDependenciesBlock)
+
+    if (updated != text) {
+        buildFile.setText(updated, 'UTF-8')
+    }
+}
+
+def patchManagedSmackGradleCompatibility = { File managedDir ->
+    if (!isManagedExternalCheckout(managedDir)) {
+        return
+    }
+
+    def patched = false
+    patched |= replaceTextIfPresent(
+        new File(managedDir, 'smack-integration-test/build.gradle'),
+        "implementation group: 'commons-io', name: 'commons-io', version: \"\$commonsIoVersion\"",
+        "implementation \"commons-io:commons-io:\$commonsIoVersion\""
+    )
+    patched |= replaceTextIfPresent(
+        new File(managedDir, 'smack-openpgp/build.gradle'),
+        "testImplementation group: 'commons-io', name: 'commons-io', version: \"\$commonsIoVersion\"",
+        "testImplementation \"commons-io:commons-io:\$commonsIoVersion\""
+    )
+
+    def conventionFile = new File(
+        managedDir,
+        'build-logic/src/main/groovy/org.igniterealtime.smack.java-common-conventions.gradle'
+    )
+    if (conventionFile.exists()) {
+        def text = conventionFile.getText('UTF-8')
+        text = text.replace("""				'project': project,
+""", "")
+        if (!text.contains("properties.put('project', project.path)")) {
+            text = text.replace("properties.put('project', project)", "properties.put('project', project.path)")
+            text = text.replace(
+                """	bundle {
+""",
+                """	bundle {
+		properties.put('project', project.path)
+"""
+            )
+        }
+        def insertionPoint = """configurations {
+	testRuntime
+}
+"""
+        def baselinePatch = """configurations {
+	testRuntime
+}
+	configurations.named('baseline') {
+		canBeConsumed = false
+	}
+	dependencies {
+		baseline files(rootProject.layout.projectDirectory.file('version'))
+	}
+	"""
+        if (text.contains(insertionPoint) && !text.contains("baseline files(rootProject.layout.projectDirectory.file('version'))")) {
+            def updatedText = text
+            if (updatedText.contains("baseline files()")) {
+                updatedText = updatedText.replace("baseline files()", "baseline files(rootProject.layout.projectDirectory.file('version'))")
+            } else if (updatedText.contains("configurations.named('baseline')")) {
+                updatedText = updatedText.replace("""configurations.named('baseline') {
+	canBeConsumed = false
+}
+""", """configurations.named('baseline') {
+	canBeConsumed = false
+}
+dependencies {
+	baseline files(rootProject.layout.projectDirectory.file('version'))
+}
+""")
+            } else {
+                updatedText = updatedText.replace(insertionPoint, baselinePatch)
+            }
+            conventionFile.setText(updatedText, 'UTF-8')
+            patched = true
+        } else if (text != conventionFile.getText('UTF-8')) {
+            conventionFile.setText(text, 'UTF-8')
+            patched = true
+        }
+    }
+
+    patched
+}
+
 def resolveManagedJlibtorrentProjectDir = {
     def overrideDir = providers.gradleProperty('frostwireJlibtorrentDir').orNull
     if (overrideDir) {
@@ -307,6 +450,7 @@ def resolveManagedJlibtorrentProjectDir = {
 }
 
 def managedJlibtorrentProjectDir = resolveManagedJlibtorrentProjectDir()
+patchManagedJlibtorrentGradleCompatibility(managedJlibtorrentProjectDir)
 
 def resolveManagedJlibtorrentVersion = {
     if (gradle.ext.has('managedJlibtorrentVersion')) {
@@ -446,6 +590,7 @@ def resolveManagedSmackProjectDir = {
 }
 
 def managedSmackProjectDir = resolveManagedSmackProjectDir()
+patchManagedSmackGradleCompatibility(managedSmackProjectDir)
 def managedSmackVersionFile = new File(managedSmackProjectDir, 'version')
 if (!managedSmackVersionFile.exists() || managedSmackVersionFile.text.trim().isEmpty()) {
     throw new GradleException("Managed Smack checkout is missing a usable version file: ${managedSmackVersionFile}")

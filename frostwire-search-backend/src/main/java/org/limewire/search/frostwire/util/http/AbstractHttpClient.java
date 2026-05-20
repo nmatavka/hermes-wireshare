@@ -1,0 +1,224 @@
+/*
+ *     Created by Angel Leon (@gubatron), Alden Torres (aldenml)
+ *     Copyright (c) 2011-2026, FrostWire(R). All rights reserved.
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.limewire.search.frostwire.util.http;
+
+import org.limewire.search.frostwire.util.Logger;
+import org.limewire.search.frostwire.util.UserAgentGenerator;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author gubatron
+ * @author aldenml
+ */
+public abstract class AbstractHttpClient implements HttpClient {
+    protected static final int DEFAULT_TIMEOUT = 10000;
+    protected static final String DEFAULT_USER_AGENT = UserAgentGenerator.getUserAgent();
+    private static final Logger LOG = Logger.getLogger(AbstractHttpClient.class);
+    protected HttpClientListener listener;
+    protected boolean canceled = false;
+
+    protected static void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
+    protected static void copyMultiMap(Map<String, List<String>> origin, Map<String, List<String>> destination) {
+        if (origin == null || destination == null) {
+            return;
+        }
+        for (String key : origin.keySet()) {
+            destination.put(key, origin.get(key));
+        }
+    }
+
+    @Override
+    public HttpClientListener getListener() {
+        return listener;
+    }
+
+    @Override
+    public void setListener(HttpClientListener listener) {
+        this.listener = listener;
+    }
+
+    @Override
+    public void onCancel() {
+        if (getListener() != null) {
+            try {
+                getListener().onCancel(this);
+            } catch (Exception e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public void onData(byte[] b, int i, int n) {
+        if (getListener() != null) {
+            getListener().onData(this, b, 0, n);
+        }
+    }
+
+    @Override
+    public void onError(Exception e) {
+        if (getListener() != null) {
+            try {
+                getListener().onError(this, e);
+            } catch (Exception e2) {
+                LOG.warn(e2.getMessage());
+            }
+        } else {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onComplete() {
+        if (getListener() != null) {
+            try {
+                getListener().onComplete(this);
+            } catch (Exception e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    abstract public int head(String url, int connectTimeoutInMillis, Map<String, List<String>> outputHeaders) throws IOException;
+
+    @Override
+    public String get(String url) throws IOException {
+        return get(url, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT);
+    }
+
+    @Override
+    public String get(String url, int timeoutInMillis) throws IOException {
+        return get(url, timeoutInMillis, DEFAULT_USER_AGENT);
+    }
+
+    @Override
+    public String get(String url, int timeout, String userAgent) throws IOException {
+        return get(url, timeout, userAgent, null, null);
+    }
+
+    @Override
+    public String get(String url, int timeout, String userAgent, String referrer, String cookie) throws IOException {
+        return get(url, timeout, userAgent, referrer, cookie, null);
+    }
+
+    @Override
+    abstract public String get(String url, int timeout, String userAgent, String referrer, String cookie, Map<String, String> customHeaders) throws IOException;
+
+    @Override
+    public byte[] getBytes(String url) {
+        return getBytes(url, DEFAULT_TIMEOUT);
+    }
+
+    @Override
+    public byte[] getBytes(String url, int timeout) {
+        return getBytes(url, timeout, null);
+    }
+
+    @Override
+    public byte[] getBytes(String url, int timeout, String referrer) {
+        return getBytes(url, timeout, DEFAULT_USER_AGENT, referrer);
+    }
+
+    @Override
+    public byte[] getBytes(String url, int timeout, String userAgent, String referrer) {
+        return getBytes(url, timeout, userAgent, referrer, null);
+    }
+
+    @Override
+    abstract public byte[] getBytes(String url, int timeout, String userAgent, String referrer, String cookies);
+
+    @Override
+    public void save(String url, File file) throws IOException {
+        save(url, file, false, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT);
+    }
+
+    @Override
+    public void save(String url, File file, boolean resume) throws IOException {
+        save(url, file, resume, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT);
+    }
+
+    @Override
+    public void save(String url, File file, boolean resume, Map<String, String> extraHeaders) throws IOException {
+        save(url, file, resume, DEFAULT_TIMEOUT, DEFAULT_USER_AGENT, null, extraHeaders);
+    }
+
+    @Override
+    public void save(String url, File file, boolean resume, int timeout, String userAgent) throws IOException {
+        save(url, file, resume, timeout, userAgent, null);
+    }
+
+    @Override
+    public void save(String url, File file, boolean resume, int timeout, String userAgent, String referrer) throws IOException {
+        save(url, file, resume, timeout, userAgent, referrer, null);
+    }
+
+    @Override
+    abstract public void save(String url, File file, boolean resume, int timeout, String userAgent, String referrer, Map<String, String> extraHeaders) throws IOException;
+
+    @Override
+    abstract public String post(String url, int timeout, String userAgent, Map<String, String> formData) throws IOException;
+
+    @Override
+    public String post(String url, int timeout, String userAgent, String content, boolean gzip) throws IOException {
+        return post(url, timeout, userAgent, content, "text/plain", gzip);
+    }
+
+    abstract public String post(String url, int timeout, String userAgent, String content, String postContentType, boolean gzip) throws IOException;
+
+    @Override
+    public void cancel() {
+        canceled = true;
+    }
+
+    @Override
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    protected byte[] getFormDataBytes(Map<String, String> formData) throws UnsupportedEncodingException {
+        StringBuilder sb = new StringBuilder();
+        if (formData != null && formData.size() > 0) {
+            for (Map.Entry<String, String> kv : formData.entrySet()) {
+                sb.append("&");
+                sb.append(kv.getKey());
+                sb.append("=");
+                sb.append(kv.getValue());
+            }
+            sb.deleteCharAt(0);
+        }
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
+    }
+}

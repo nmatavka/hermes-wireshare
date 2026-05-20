@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.limewire"
+		module="common"
+		revision="working@pandora.local"
+
+		conf="default"
+		confs="default, master, compile, provided, runtime, system, sources, javadoc, optional"
+		date="20260407073031"/>
+	<dependencies>
+		<module organisation="none" name="aopalliance">
+			<revision name="" status="release" pubdate="20260407073031" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default, runtime(*)" position="3">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/aopalliance/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="common" conf="default, compile, runtime, master" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="aopalliance" type="jar" ext="jar" status="no" details="" size="4467" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/aopalliance.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/aopalliance.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="guice">
+			<revision name="2.0-snapshot20090814" status="release" pubdate="20260407073031" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default, runtime(*)" position="2">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/guice/ivy-2.0-snapshot20090814.xml" searched="true"/>
+				<caller organisation="org.limewire" name="common" conf="default, compile, runtime, master" rev="2.0-snapshot20090814" rev-constraint-default="2.0-snapshot20090814" rev-constraint-dynamic="2.0-snapshot20090814" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="guice" type="jar" ext="jar" status="no" details="" size="676793" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/guice-2.0-snapshot20090814.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/guice-2.0-snapshot20090814.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="icu4j">
+			<revision name="" status="release" pubdate="20260407073031" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default, runtime(*)" position="1">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/icu4j/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="common" conf="default, compile, runtime, master" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="icu4j" type="jar" ext="jar" status="no" details="" size="741440" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/icu4j.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/icu4j.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="commons-logging">
+			<revision name="" status="release" pubdate="20260407073031" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default, runtime(*)" position="0">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/commons-logging/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="common" conf="default, compile, runtime, master" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="commons-logging" type="jar" ext="jar" status="no" details="" size="59154" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+	</dependencies>
+</ivy-report>

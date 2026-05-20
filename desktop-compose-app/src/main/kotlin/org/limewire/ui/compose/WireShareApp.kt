@@ -1,6 +1,7 @@
 package org.limewire.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -137,9 +138,14 @@ import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
@@ -160,6 +166,7 @@ import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
@@ -216,6 +223,10 @@ import org.limewire.ui.compose.integration.externalFilesTransferData
 import org.limewire.ui.compose.integration.extractComposeDropPayload
 import org.limewire.ui.compose.integration.libraryFilesTransferData
 import org.limewire.ui.compose.integration.searchResultsTransferData
+import org.jetbrains.skia.Paint as SkiaPaint
+import org.jetbrains.skia.Rect as SkiaRect
+import org.jetbrains.skia.SamplingMode
+import org.jetbrains.skia.Image as SkiaImage
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.File
@@ -226,6 +237,8 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 import org.limewire.util.FileUtils
+
+private const val WIRESHARE_ICON_RESOURCE = "org/limewire/ui/compose/art/wireshare-icon.png"
 
 private data class DesktopDensity(
     val windowWidth: Dp,
@@ -1115,7 +1128,11 @@ private fun <C> DesktopScrollableTable(
 }
 
 @Composable
-fun WireShareDesktopApp(controller: ComposeAppController, exitApplication: () -> Unit) {
+internal fun WireShareDesktopApp(
+    controller: ComposeAppController,
+    exitApplication: () -> Unit,
+    startupSplash: StartupSplashHandle? = null
+) {
     val initialWindowPlacement = controller.initialWindowPlacementPreferences
     val windowState = rememberWindowState(
         width = initialWindowPlacement.width.dp,
@@ -1129,11 +1146,13 @@ fun WireShareDesktopApp(controller: ComposeAppController, exitApplication: () ->
     Window(
         onCloseRequest = { controller.handleWindowCloseRequest() },
         title = "WireShare",
-        state = windowState
+        state = windowState,
+        icon = rememberWireShareIconPainter()
     ) {
         controller.bindWindow(window)
         LaunchedEffect(Unit) {
             controller.markUiReady()
+            startupSplash?.close()
         }
 
         LaunchedEffect(restoreEpoch) {
@@ -1167,7 +1186,8 @@ fun FatalStartupErrorApp(
     Window(
         onCloseRequest = onQuit,
         title = report.title,
-        state = windowState
+        state = windowState,
+        icon = rememberWireShareIconPainter()
     ) {
         var showDetails by remember(report.id) { mutableStateOf(false) }
         var statusMessage by remember(report.id) { mutableStateOf<String?>(null) }
@@ -1289,7 +1309,8 @@ fun AlreadyRunningApp(
     Window(
         onCloseRequest = onQuit,
         title = "WireShare is already running",
-        state = windowState
+        state = windowState,
+        icon = rememberWireShareIconPainter()
     ) {
         WireShareTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
@@ -1486,46 +1507,26 @@ private fun FrameWindowScope.AppMenuBar(controller: ComposeAppController) {
 
 @Composable
 private fun Dialogs(controller: ComposeAppController) {
+    var aboutLineageDialogOpen by remember { mutableStateOf(false) }
+
     if (controller.aboutDialogOpen) {
-        AlertDialog(
-            onDismissRequest = { controller.aboutDialogOpen = false },
-            confirmButton = {
-                TextButton(onClick = { controller.aboutDialogOpen = false }) {
-                    Text("Close")
-                }
+        AboutWireShareDialog(
+            onShowLineage = {
+                controller.aboutDialogOpen = false
+                aboutLineageDialogOpen = true
             },
-            title = { Text("About WireShare") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("WireShare ${LimeWireUtils.getLimeWireVersion()}.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        MetricBadge("Platform", "Desktop")
-                        MetricBadge("Opens To", "My Files")
-                        MetricBadge("Searches", "Own tab")
-                        MetricBadge("Video", "Default player")
-                    }
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text("Runtime", fontWeight = FontWeight.SemiBold)
-                            Text("Java ${System.getProperty("java.version")}", style = MaterialTheme.typography.bodySmall)
-                            Text(
-                                "${System.getProperty("os.name")} ${System.getProperty("os.version")} • ${System.getProperty("os.arch")}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    Text(
-                        "WireShare opens to My Files, and each search gets its own tab.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            onDismiss = { controller.aboutDialogOpen = false }
+        )
+    }
+
+    if (aboutLineageDialogOpen) {
+        AboutLineageDialog(
+            onBack = {
+                aboutLineageDialogOpen = false
+                controller.aboutDialogOpen = true
+            },
+            onDismiss = {
+                aboutLineageDialogOpen = false
             }
         )
     }
@@ -1683,6 +1684,387 @@ private fun Dialogs(controller: ComposeAppController) {
         null -> Unit
     }
 }
+
+@Composable
+private fun AboutWireShareDialog(
+    onShowLineage: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ResponsiveDesktopDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                WireShareBrandIcon(modifier = Modifier.size(56.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("About WireShare", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "A Gnutella servent continuation rebuilt for Compose Desktop.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onShowLineage) {
+                Text("Lineage & credits")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        preset = DesktopDialogPreset.FORM,
+        preferredWidth = 660.dp,
+        preferredHeight = 420.dp,
+        scrollBody = false
+    ) {
+        Text(
+            "WireShare ${LimeWireUtils.getLimeWireVersion()}",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            "WireShare continues the LimeWire and LimeWire Pirate Edition lineage while moving the desktop client into the current Compose application. The goal is continuity without pretending the history started here.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        AboutRuntimeCard()
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Text(
+                "Credits for the LimeWire team, open-source contributors, Gnutella community, internationalization contributors, and continuation maintainers live behind the Lineage & credits button.",
+                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+@Composable
+private fun WireShareBrandIcon(modifier: Modifier = Modifier) {
+    Image(
+        painter = rememberWireShareIconPainter(),
+        contentDescription = "WireShare icon",
+        modifier = modifier,
+        contentScale = ContentScale.Fit
+    )
+}
+
+@Composable
+private fun rememberWireShareIconPainter(): Painter {
+    val image = remember { loadClasspathSkiaImage(WIRESHARE_ICON_RESOURCE) }
+    return remember(image) { SkiaImagePainter(image) }
+}
+
+private fun loadClasspathSkiaImage(resourcePath: String): SkiaImage {
+    val stream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
+        ?: error("Missing application image resource: $resourcePath")
+    return SkiaImage.makeFromEncoded(stream.use { it.readBytes() })
+}
+
+private class SkiaImagePainter(private val image: SkiaImage) : Painter() {
+    override val intrinsicSize: Size = Size(image.width.toFloat(), image.height.toFloat())
+
+    override fun DrawScope.onDraw() {
+        drawIntoCanvas { canvas ->
+            canvas.nativeCanvas.drawImageRect(
+                image,
+                SkiaRect.makeWH(image.width.toFloat(), image.height.toFloat()),
+                SkiaRect.makeWH(size.width, size.height),
+                SamplingMode.LINEAR,
+                SkiaPaint(),
+                true
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutRuntimeCard() {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f),
+        shape = RoundedCornerShape(18.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("Runtime", fontWeight = FontWeight.SemiBold)
+            Text("Java ${System.getProperty("java.version")}", style = MaterialTheme.typography.bodySmall)
+            Text(
+                "${System.getProperty("os.name")} ${System.getProperty("os.version")} • ${System.getProperty("os.arch")}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutLineageDialog(
+    onBack: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    ResponsiveDesktopDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.Forum, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Lineage & credits", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "The people and projects WireShare builds upon.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onBack) {
+                Text("Back to About")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        preset = DesktopDialogPreset.INSPECTOR,
+        preferredWidth = 900.dp,
+        preferredHeight = 700.dp
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.58f),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text("Continuity matters", fontWeight = FontWeight.SemiBold)
+                Text(
+                    "WireShare inherits a long line of engineering, testing, documentation, design, translation, and community work. This page keeps that credit visible without making the everyday About box unwieldy.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        aboutCreditSections().forEach { section ->
+            AboutCreditSectionCard(section)
+        }
+
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Text(
+                "Thanks also to the many internationalization contributors and later continuation maintainers, including Meta Pirate and the WireShare/Hermes contributors.",
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AboutCreditSectionCard(section: AboutCreditSection) {
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f))
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(section.title, fontWeight = FontWeight.SemiBold)
+            Text(
+                section.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                section.names.forEach { name ->
+                    AboutCreditName(name)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AboutCreditName(name: String) {
+    Surface(
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.68f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+    ) {
+        Text(
+            name,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+private data class AboutCreditSection(
+    val title: String,
+    val description: String,
+    val names: List<String>
+)
+
+private fun aboutCreditSections(): List<AboutCreditSection> = listOf(
+    AboutCreditSection(
+        title = "Final LimeWire team",
+        description = "Developers, testers, technical writers, designers, and project contributors whose work WireShare continues to build upon.",
+        names = listOf(
+            "Felix Berger",
+            "David Chen",
+            "Priyank Dhillon",
+            "Mike Everett",
+            "Karundeep Gill",
+            "Roger Kapsi",
+            "Greg Kellum",
+            "Marc London",
+            "Greg Maggioncalda",
+            "Aditya Malpani",
+            "Jorge Mancheno",
+            "Michael Rogers",
+            "Anthony Roscoe",
+            "Neha Sharma",
+            "Mike Sorvillo",
+            "Michael Tiraborrelli",
+            "Matt Turkel",
+            "Peter Vertenten",
+            "Ernie Yu"
+        )
+    ),
+    AboutCreditSection(
+        title = "Earlier LimeWire team",
+        description = "People who worked on LimeWire before its discontinuation and helped shape the codebase, product, and community.",
+        names = listOf(
+            "Mario Aquino",
+            "Aubrey Arago",
+            "Zlatin Balevsky",
+            "Zenzele Bell",
+            "Anthony Bow",
+            "Sam Berlin",
+            "Katie Catillaz",
+            "Wynne Chan",
+            "Susheel Daswani",
+            "Luck Dookchitra",
+            "Kevin Faaborg",
+            "Adam Fisk",
+            "Bobby Fonacier",
+            "Meghan Formel",
+            "Jay Jeyaratnam",
+            "Curtis Jones",
+            "Tim Julien",
+            "Tarun Kapoor",
+            "Mark Kornfilt",
+            "Akshay Kumar",
+            "Angel Leon",
+            "Nathan Lovejoy",
+            "Karl Magdsick",
+            "Yusuke Naito",
+            "Dave Nicponski",
+            "Christine Nicponski",
+            "Tim Olsen",
+            "Jeff Palm",
+            "Jason Pelzer",
+            "Steffen Pingel",
+            "Christopher Rohrs",
+            "Justin Schmidt",
+            "Varnali Shah",
+            "Arthur Shim",
+            "Anurag Singla",
+            "Francesca Slade",
+            "Robert Soule",
+            "Rachel Sterne",
+            "Sumeet Thadani",
+            "Ron Vogl",
+            "Peng Wang",
+            "Kurt Wasserman",
+            "E.J. Wolborsky"
+        )
+    ),
+    AboutCreditSection(
+        title = "Open-source contributors",
+        description = "Contributors who supplied code, fixes, research, testing, and ideas distributed through the LimeWire/WireShare lineage.",
+        names = listOf(
+            "Richie Bielak",
+            "Johanenes Blume",
+            "Jerry Charumilind",
+            "Marvin Chase",
+            "Robert Collins",
+            "Kenneth Corbin",
+            "Kyle Furlong",
+            "David Graff",
+            "Andy Hedges",
+            "Michael Hirsch",
+            "Panayiotis Karabassis",
+            "Marcin Koraszewski",
+            "Jens-Uwe Mager",
+            "Misagh Moayyed",
+            "Gordon Mohr",
+            "Chance Moore",
+            "Miguel Munoz",
+            "Rick T. Piazza",
+            "Eugene Romanenko",
+            "Gregorio Roper",
+            "William Rucklidge",
+            "Claudio Santini",
+            "Phil Schalm",
+            "Eric Seidel",
+            "Philippe Verdy",
+            "Cameron Walsh",
+            "Stephan Weber",
+            "Jason Winzenried",
+            "Tobias",
+            "deacon72",
+            "MaTZ",
+            "RickH",
+            "PNomolos",
+            "ultracross"
+        )
+    ),
+    AboutCreditSection(
+        title = "Gnutella community",
+        description = "Colleagues and adjacent projects whose work helped define and sustain the Gnutella network ecosystem.",
+        names = listOf(
+            "Vincent Falco - Free Peers, Inc.",
+            "Gordon Mohr - Bitzi, Inc.",
+            "John Marshall - Gnucleus",
+            "Jason Thomas - Swapper",
+            "Brander Lien - ToadNode",
+            "Angelo Sotira - gnutella.com",
+            "Marc Molinaro - gnutelliums.com",
+            "Simon Bellwood - gnutella.co.uk",
+            "Serguei Osokine",
+            "Justin Chapweske",
+            "Mike Green",
+            "Raphael Manfredi",
+            "Tor Klingberg",
+            "Mickael Prinkey",
+            "Sean Ediger",
+            "Kath Whittle"
+        )
+    )
+)
 
 @Composable
 private fun BlockingTorrentSelectionDialog(
@@ -7147,12 +7529,15 @@ private fun LibraryScreen(controller: ComposeAppController) {
                             horizontalArrangement = Arrangement.spacedBy(desktopDensity.chipGap),
                             verticalArrangement = Arrangement.spacedBy(desktopDensity.chipGap)
                         ) {
-                            FilterChip(
-                                selected = controller.libraryFiltersVisible,
-                                onClick = { controller.toggleLibraryFiltersVisible() },
-                                label = { Text("Filter") },
-                                modifier = Modifier.defaultMinSize(minHeight = desktopDensity.controlHeight)
-                            )
+                            if (controller.libraryFiltersVisible) {
+                                CompactFilledTonalButton(onClick = { controller.toggleLibraryFiltersVisible() }) {
+                                    Text("Filter")
+                                }
+                            } else {
+                                CompactOutlinedButton(onClick = { controller.toggleLibraryFiltersVisible() }) {
+                                    Text("Filter")
+                                }
+                            }
                             ColumnVisibilityMenu(
                                 entries = availableLibraryColumns.map { column ->
                                     ColumnToggleEntry(

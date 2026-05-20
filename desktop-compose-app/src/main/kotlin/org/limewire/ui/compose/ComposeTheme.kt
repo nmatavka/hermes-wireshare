@@ -25,6 +25,8 @@ fun WireShareTheme(
     val palette = when (appearance) {
         ComposeAppearance.SOLARIZED_LIGHT -> SOLARIZED_LIGHT_PALETTE
         ComposeAppearance.SOLARIZED_DARK -> SOLARIZED_DARK_PALETTE
+        ComposeAppearance.OKSOLAR_LIGHT -> OKSOLAR_LIGHT_PALETTE
+        ComposeAppearance.OKSOLAR_DARK -> OKSOLAR_DARK_PALETTE
         ComposeAppearance.SELENIZED_DARK -> SELENIZED_DARK_PALETTE
         ComposeAppearance.SELENIZED_BLACK -> SELENIZED_BLACK_PALETTE
         ComposeAppearance.SELENIZED_LIGHT -> SELENIZED_LIGHT_PALETTE
@@ -32,9 +34,11 @@ fun WireShareTheme(
     }
     val colorScheme = when (appearance) {
         ComposeAppearance.SOLARIZED_LIGHT,
+        ComposeAppearance.OKSOLAR_LIGHT,
         ComposeAppearance.SELENIZED_LIGHT,
         ComposeAppearance.SELENIZED_WHITE -> paletteToLightScheme(palette)
         ComposeAppearance.SOLARIZED_DARK,
+        ComposeAppearance.OKSOLAR_DARK,
         ComposeAppearance.SELENIZED_DARK,
         ComposeAppearance.SELENIZED_BLACK -> paletteToDarkScheme(palette)
     }
@@ -226,6 +230,40 @@ private val SOLARIZED_DARK_PALETTE = ThemePalette(
     cyan = Color(0xFF2AA198),
     orange = Color(0xFFCB4B16),
     violet = Color(0xFF6C71C4)
+)
+
+private val OKSOLAR_LIGHT_PALETTE = ThemePalette(
+    bg0 = Color(0xFFFBF7EF),
+    bg1 = Color(0xFFF1E9D2),
+    bg2 = Color(0xFF8FAAAB),
+    dim0 = Color(0xFF98A8A8),
+    fg0 = Color(0xFF657377),
+    fg1 = Color(0xFF5B7279),
+    red = Color(0xFFF23749),
+    green = Color(0xFF819500),
+    yellow = Color(0xFFAC8300),
+    blue = Color(0xFF2B90D8),
+    magenta = Color(0xFFDD459D),
+    cyan = Color(0xFF259D94),
+    orange = Color(0xFFD56500),
+    violet = Color(0xFF7D80D1)
+)
+
+private val OKSOLAR_DARK_PALETTE = ThemePalette(
+    bg0 = Color(0xFF002D38),
+    bg1 = Color(0xFF093946),
+    bg2 = Color(0xFF5B7279),
+    dim0 = Color(0xFF657377),
+    fg0 = Color(0xFF98A8A8),
+    fg1 = Color(0xFF8FAAAB),
+    red = Color(0xFFF23749),
+    green = Color(0xFF819500),
+    yellow = Color(0xFFAC8300),
+    blue = Color(0xFF2B90D8),
+    magenta = Color(0xFFDD459D),
+    cyan = Color(0xFF259D94),
+    orange = Color(0xFFD56500),
+    violet = Color(0xFF7D80D1)
 )
 
 private val SELENIZED_DARK_PALETTE = ThemePalette(

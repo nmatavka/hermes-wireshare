@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.limewire"
+		module="integrated-ui"
+		revision="working@pandora.local"
+
+		conf="compile"
+		confs="default, master, compile, provided, runtime, system, sources, javadoc, optional"
+		date="20260407073035"/>
+	<dependencies>
+		<module organisation="org.limewire" name="mojito-ui">
+			<revision name="20260407073035" status="integration" pubdate="20260407073035" resolver="local" artresolver="local" downloaded="false" searched="true" default="false" conf="master(*), master" position="10">
+				<metadata-artifact status="no" details="" size="2787" time="0" searched="true" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito-ui/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito-ui/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="mojito-ui" type="jar" ext="jar" status="no" details="" size="66490" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito-ui/jars/mojito-ui.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito-ui/jars/mojito-ui.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="core-glue">
+			<revision name="20260407073035" status="integration" pubdate="20260407073035" resolver="local" artresolver="local" downloaded="false" searched="true" default="false" conf="master(*), master" position="9">
+				<metadata-artifact status="no" details="" size="6564" time="0" searched="true" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-glue/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-glue/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="core-glue" type="jar" ext="jar" status="no" details="" size="842535" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-glue/jars/core-glue.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-glue/jars/core-glue.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="swingui">
+			<revision name="20260407073034" status="integration" pubdate="20260407073034" resolver="local" artresolver="local" downloaded="false" searched="true" default="false" conf="master(*), master" position="8">
+				<metadata-artifact status="no" details="" size="6515" time="0" searched="true" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/swingui/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/swingui/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="swingui" type="jar" ext="jar" status="no" details="" size="6784582" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/swingui/jars/swingui.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/swingui/jars/swingui.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="MozillaInterfaces">
+			<revision name="1.9" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="21">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/MozillaInterfaces/ivy-1.9.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="1.9" rev-constraint-default="1.9" rev-constraint-dynamic="1.9" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="MozillaInterfaces" type="jar" ext="jar" status="no" details="" size="701033" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/MozillaInterfaces-1.9.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/MozillaInterfaces-1.9.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="mozswing">
+			<revision name="" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="22">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/mozswing/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="mozswing" type="jar" ext="jar" status="no" details="" size="328215" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/mozswing.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/mozswing.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="AppFramework">
+			<revision name="" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="19">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/AppFramework/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="AppFramework" type="jar" ext="jar" status="no" details="" size="318584" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/AppFramework.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/AppFramework.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="swingx">
+			<revision name="1.0" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="20">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/swingx/ivy-1.0.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="1.0" rev-constraint-default="1.0" rev-constraint-dynamic="1.0" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="swingx" type="jar" ext="jar" status="no" details="" size="1269047" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/swingx-1.0.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/swingx-1.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="compile/AppleJavaExtensions">
+			<revision name="" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="14">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/compile/AppleJavaExtensions/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="compile/AppleJavaExtensions" type="jar" ext="jar" status="no" details="" size="4189" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/compile/AppleJavaExtensions.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/compile/AppleJavaExtensions.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="gnutella-core">
+			<revision name="20260407073034" status="integration" pubdate="20260407073034" resolver="local" artresolver="local" downloaded="false" searched="true" default="false" conf="master(*), master" position="6">
+				<metadata-artifact status="no" details="" size="6222" time="0" searched="true" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/gnutella-core/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/gnutella-core/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="gnutella-core" type="jar" ext="jar" status="no" details="" size="4914812" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/gnutella-core/jars/gnutella-core.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/gnutella-core/jars/gnutella-core.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="jna">
+			<revision name="3.2.4" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="23">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/jna/ivy-3.2.4.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="3.2.4" rev-constraint-default="3.2.4" rev-constraint-dynamic="3.2.4" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="jna" type="jar" ext="jar" status="no" details="" size="944033" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/jna-3.2.4.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/jna-3.2.4.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="core-settings">
+			<revision name="20260407073033" status="integration" pubdate="20260407073033" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="12">
+				<metadata-artifact status="no" details="" size="2906" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/core-settings/ivy-20260407073033.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-settings/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-settings/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="core-settings" type="jar" ext="jar" status="no" details="" size="89361" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-settings/jars/core-settings.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-settings/jars/core-settings.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="mojito">
+			<revision name="20260407073033" status="integration" pubdate="20260407073033" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="7">
+				<metadata-artifact status="no" details="" size="3058" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/mojito/ivy-20260407073033.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="mojito" type="jar" ext="jar" status="no" details="" size="892123" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito/jars/mojito.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/mojito/jars/mojito.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="setting">
+			<revision name="20260407073033" status="integration" pubdate="20260407073033" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="11">
+				<metadata-artifact status="no" details="" size="2376" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/setting/ivy-20260407073033.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/setting/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/setting/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="setting" type="jar" ext="jar" status="no" details="" size="110314" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/setting/jars/setting.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/setting/jars/setting.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="core-api">
+			<revision name="20260407073033" status="integration" pubdate="20260407073033" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="4">
+				<metadata-artifact status="no" details="" size="3636" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/core-api/ivy-20260407073033.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-api/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-api/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="core-api" type="jar" ext="jar" status="no" details="" size="121081" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-api/jars/core-api.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/core-api/jars/core-api.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="friend">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="13">
+				<metadata-artifact status="no" details="" size="3225" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/friend/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/friend/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/friend/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="friend" type="jar" ext="jar" status="no" details="" size="204276" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/friend/jars/friend.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/friend/jars/friend.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="http">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="5">
+				<metadata-artifact status="no" details="" size="3292" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/http/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/http/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/http/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="http" type="jar" ext="jar" status="no" details="" size="171235" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/http/jars/http.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/http/jars/http.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="httpclient">
+			<revision name="4.1-alpha1-r821939" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="16">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/httpclient/ivy-4.1-alpha1-r821939.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="4.1-alpha1-r821939" rev-constraint-default="4.1-alpha1-r821939" rev-constraint-dynamic="4.1-alpha1-r821939" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="httpclient" type="jar" ext="jar" status="no" details="" size="308990" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/httpclient-4.1-alpha1-r821939.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/httpclient-4.1-alpha1-r821939.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="httpcore">
+			<revision name="4.1-alpha2-r821939" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="15">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/httpcore/ivy-4.1-alpha2-r821939.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="4.1-alpha2-r821939" rev-constraint-default="4.1-alpha2-r821939" rev-constraint-dynamic="4.1-alpha2-r821939" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="httpcore" type="jar" ext="jar" status="no" details="" size="178705" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/httpcore-4.1-alpha2-r821939.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/httpcore-4.1-alpha2-r821939.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="net">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="3">
+				<metadata-artifact status="no" details="" size="2637" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/net/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/net/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/net/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="net" type="jar" ext="jar" status="no" details="" size="161337" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/net/jars/net.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/net/jars/net.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="nio">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="2">
+				<metadata-artifact status="no" details="" size="2514" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/nio/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/nio/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/nio/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="nio" type="jar" ext="jar" status="no" details="" size="313135" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/nio/jars/nio.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/nio/jars/nio.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="io">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="1">
+				<metadata-artifact status="no" details="" size="2383" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/io/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/io/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/io/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="io" type="jar" ext="jar" status="no" details="" size="128948" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/io/jars/io.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/io/jars/io.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.limewire" name="common">
+			<revision name="20260407073032" status="integration" pubdate="20260407073032" resolver="local" artresolver="local" downloaded="false" searched="false" default="false" conf="master(*), master" position="0">
+				<metadata-artifact status="no" details="" size="2407" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/org.limewire/common/ivy-20260407073032.xml" searched="false" original-local-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml" origin-is-local="true" origin-location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/ivys/ivy.xml"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="common" type="jar" ext="jar" status="no" details="" size="540872" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/jars/common.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/local/org.limewire/common/jars/common.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="guice">
+			<revision name="2.0-snapshot20090814" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="18">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/guice/ivy-2.0-snapshot20090814.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="2.0-snapshot20090814" rev-constraint-default="2.0-snapshot20090814" rev-constraint-dynamic="2.0-snapshot20090814" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="guice" type="jar" ext="jar" status="no" details="" size="676793" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/guice-2.0-snapshot20090814.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/guice-2.0-snapshot20090814.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="none" name="commons-logging">
+			<revision name="" status="release" pubdate="20260407073035" resolver="cvslib" artresolver="cvslib" downloaded="false" searched="true" default="true" conf="master(*), default" position="17">
+				<metadata-artifact status="no" details="" size="0" time="0" location="/Users/nick/Documents/hermes-wireshare/main/.ivy2/repositoryCache/none/commons-logging/ivy-.xml" searched="true"/>
+				<caller organisation="org.limewire" name="integrated-ui" conf="compile" rev="" rev-constraint-default="" rev-constraint-dynamic="" callerrev="working@pandora.local"/>
+				<artifacts>
+					<artifact name="commons-logging" type="jar" ext="jar" status="no" details="" size="59154" time="0" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar">
+						<origin-location is-local="true" location="/Users/nick/Documents/hermes-wireshare/main/lib/jars/commons-logging.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+	</dependencies>
+</ivy-report>

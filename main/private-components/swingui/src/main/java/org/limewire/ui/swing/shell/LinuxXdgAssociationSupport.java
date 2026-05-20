@@ -26,7 +26,7 @@ final class LinuxXdgAssociationSupport {
     static final List<String> MAGNET_SCHEME_TYPES = Collections.singletonList("x-scheme-handler/magnet");
 
     private static final String DEFAULT_DESKTOP_ID = "hermes-wireshare.desktop";
-    private static final String FLATPAK_DESKTOP_ID = "org.team_hermes.WireShare.desktop";
+    private static final String FLATPAK_DESKTOP_ID = "org.teamhermes.WireShare.desktop";
 
     private LinuxXdgAssociationSupport() {
     }
@@ -190,7 +190,7 @@ final class LinuxXdgAssociationSupport {
     }
 
     private static String desktopIconName() {
-        return isFlatpakRuntime() ? "org.team_hermes.WireShare" : "hermes-wireshare";
+        return isFlatpakRuntime() ? "org.teamhermes.WireShare" : "hermes-wireshare";
     }
 
     private static boolean isFlatpakRuntime() {
